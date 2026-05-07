@@ -38,6 +38,45 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the lower landing sections use finished page sections and no proof-band mock block.
+    /// </summary>
+    [Fact]
+    public void HomeUsesFinishedServiceAndShopSections()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+
+        Assert.Contains("manufacturing-section", source);
+        Assert.Contains("service-stat-strip", source);
+        Assert.Contains("shop-section", source);
+        Assert.Contains("section-link", source);
+        Assert.DoesNotContain("proof-band", source);
+        Assert.DoesNotContain("Build. Test. Produce.", source);
+        Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
+    }
+
+    /// <summary>
+    /// Verifies the footer uses real company identity, contact, address, and social links.
+    /// </summary>
+    [Fact]
+    public void FooterUsesLogoAndManufacturingContactLinks()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+
+        Assert.Contains("footer-logo", source);
+        Assert.Contains("/images/logo.svg", source);
+        Assert.Contains("Production tooling, custom parts, and machine support", source);
+        Assert.Contains("36/1 Moo 3", source);
+        Assert.Contains("Khlong Khoi", source);
+        Assert.Contains("info@maliev.com", source);
+        Assert.Contains("page.line.me/maliev", source);
+        Assert.Contains("facebook.com/maliev.manufacturing", source);
+        Assert.Contains("youtube.com/%40maliev.manufacturing", source);
+        Assert.Contains("instagram.com/maliev.manufacturing", source);
+        Assert.DoesNotContain("<strong>MALIEV Co., Ltd.</strong>", source);
+        Assert.DoesNotContain("Nonthaburi, Thailand. Manufacturing services, machines, and production support.", source);
+    }
+
+    /// <summary>
     /// Verifies the quote page uses a mocked MudBlazor quote engine while the real engine is deferred.
     /// </summary>
     [Fact]

@@ -54,16 +54,41 @@
         @Body
     </main>
 
-    <footer class="site-footer">
-        <div>
-            <strong>MALIEV Co., Ltd.</strong>
-            <p>Nonthaburi, Thailand. Manufacturing services, machines, and production support.</p>
+    <footer class="site-footer" aria-label="MALIEV footer">
+        <div class="footer-brand">
+            <img class="footer-logo" src="/images/logo.svg" width="118" height="27" alt="MALIEV" />
+            <p>Production tooling, custom parts, and machine support for manufacturing teams.</p>
+            <address>
+                <span>MALIEV Co., Ltd.</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=36%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand" target="_blank" rel="noopener noreferrer">
+                    36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand
+                </a>
+            </address>
         </div>
-        <div class="footer-links">
+        <nav class="footer-column" aria-label="Footer company links">
+            <h2>Company</h2>
+            <NavLink href="/about">About</NavLink>
+            <NavLink href="/contact">Contact</NavLink>
+            <NavLink href="/services/3d-printing">Services</NavLink>
+            <NavLink href="/shop">Shop</NavLink>
+        </nav>
+        <nav class="footer-column" aria-label="Footer support links">
+            <h2>Support</h2>
             <NavLink href="/faq">FAQ</NavLink>
             <NavLink href="/shipping-returns">Shipping</NavLink>
             <NavLink href="/privacy">Privacy</NavLink>
             <NavLink href="/terms">Terms</NavLink>
+        </nav>
+        <div class="footer-column">
+            <h2>Connect</h2>
+            <a href="mailto:info@maliev.com">info@maliev.com</a>
+            <a href="tel:+66818030404">+66 81 803 0404</a>
+            <a href="https://page.line.me/maliev" target="_blank" rel="noopener noreferrer">LINE @@maliev</a>
+            <div class="footer-social" aria-label="Social media">
+                <a href="https://www.facebook.com/maliev.manufacturing" target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a href="https://www.youtube.com/%40maliev.manufacturing" target="_blank" rel="noopener noreferrer">YouTube</a>
+                <a href="https://www.instagram.com/maliev.manufacturing" target="_blank" rel="noopener noreferrer">Instagram</a>
+            </div>
         </div>
     </footer>
 </div>

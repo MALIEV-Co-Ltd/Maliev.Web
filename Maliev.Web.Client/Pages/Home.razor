@@ -42,29 +42,50 @@
     </div>
 </section>
 
-<section class="section split-section">
-    <div>
+<section class="section split-section manufacturing-section" aria-labelledby="manufacturing-services-title">
+    <div class="section-lede">
         <p class="eyebrow">Manufacturing services</p>
-        <h2>From prototype to low-volume production</h2>
+        <h2 id="manufacturing-services-title">From CAD files to production-ready parts</h2>
+        <p>Prototype, reverse engineer, machine, and validate parts with one manufacturing partner.</p>
+        <div class="service-stat-strip" aria-label="MALIEV manufacturing capabilities">
+            <span>
+                <strong>4</strong>
+                <small>production routes</small>
+            </span>
+            <span>
+                <strong>3D</strong>
+                <small>scan to CAD</small>
+            </span>
+            <span>
+                <strong>DFM</strong>
+                <small>quote review</small>
+            </span>
+        </div>
     </div>
     <div class="service-list">
         @foreach (var service in Services)
         {
             <a class="service-row" href="/services/@service.Slug">
-                <span>@service.Name.For(Preferences.Culture)</span>
-                <small>@service.Summary.For(Preferences.Culture)</small>
+                <span class="service-card-icon">
+                    <MudIcon Icon="@service.Icon" />
+                </span>
+                <span class="service-card-copy">
+                    <strong>@service.Name.For(Preferences.Culture)</strong>
+                    <small>@service.Summary.For(Preferences.Culture)</small>
+                </span>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowOutward" Class="service-card-arrow" />
             </a>
         }
     </div>
 </section>
 
-<section class="section">
+<section class="section shop-section">
     <div class="section-heading">
         <div>
             <p class="eyebrow">Shop MALIEV products</p>
             <h2>Machines, spares, tooling, and printed products</h2>
         </div>
-        <a href="/shop">View all</a>
+        <a class="section-link" href="/shop">View all</a>
     </div>
     @if (_products.Count > 0)
     {
@@ -84,23 +105,13 @@
     }
 </section>
 
-<section class="section proof-band">
-    <img src="https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png?v=1737116109&width=832" alt="MALIEV pneumatic injection molding machine" />
-    <div>
-        <p class="eyebrow">Build. Test. Produce.</p>
-        <h2>Customer-facing quoting and commerce in one path</h2>
-        <p>Upload custom parts for quotation, buy ready-to-ship items, and keep orders in one MALIEV customer workspace.</p>
-        <a class="button primary" href="/quote">Start with a file</a>
-    </div>
-</section>
-
 @code {
     private readonly List<ServiceLink> Services =
     [
-        new("3d-printing", new() { En = "3D Printing", Th = "พิมพ์สามมิติ" }, new() { En = "FDM and resin parts for prototypes and fixtures.", Th = "งาน FDM และเรซินสำหรับต้นแบบและฟิกซ์เจอร์" }),
-        new("cnc-machining", new() { En = "CNC Machining", Th = "CNC แมชชีนนิ่ง" }, new() { En = "Precision plastic and metal parts.", Th = "ชิ้นส่วนพลาสติกและโลหะความแม่นยำสูง" }),
-        new("3d-scanning", new() { En = "3D Scanning", Th = "สแกนสามมิติ" }, new() { En = "Reverse engineering and inspection capture.", Th = "สแกนเพื่อรีเวิร์สเอนจิเนียริ่งและตรวจสอบชิ้นงาน" }),
-        new("3d-design", new() { En = "3D Design", Th = "ออกแบบสามมิติ" }, new() { En = "CAD and design-for-manufacturing support.", Th = "ขึ้นแบบ CAD และปรับแบบเพื่อการผลิต" })
+        new("3d-printing", Icons.Material.Filled.ViewInAr, new() { En = "3D Printing", Th = "พิมพ์สามมิติ" }, new() { En = "FDM and resin parts for prototypes, fixtures, and end-use trials.", Th = "งาน FDM และเรซินสำหรับต้นแบบ ฟิกซ์เจอร์ และทดลองใช้งานจริง" }),
+        new("cnc-machining", Icons.Material.Filled.PrecisionManufacturing, new() { En = "CNC Machining", Th = "CNC แมชชีนนิ่ง" }, new() { En = "Precision plastic and metal parts with production-minded tolerances.", Th = "ชิ้นส่วนพลาสติกและโลหะความแม่นยำสูงพร้อมแนวคิดการผลิตจริง" }),
+        new("3d-scanning", Icons.Material.Filled.DocumentScanner, new() { En = "3D Scanning", Th = "สแกนสามมิติ" }, new() { En = "Reverse engineering and inspection capture for legacy or handmade parts.", Th = "สแกนเพื่อรีเวิร์สเอนจิเนียริ่งและตรวจสอบชิ้นงานเดิมหรือชิ้นงานทำมือ" }),
+        new("3d-design", Icons.Material.Filled.DesignServices, new() { En = "3D Design", Th = "ออกแบบสามมิติ" }, new() { En = "CAD and design-for-manufacturing support before the first quote.", Th = "ขึ้นแบบ CAD และปรับแบบเพื่อการผลิตก่อนเริ่มใบเสนอราคา" })
     ];
 
     private List<ProductSummaryDto> _products = [];
@@ -119,5 +130,5 @@
         }
     }
 
-    private sealed record ServiceLink(string Slug, LocalizedText Name, LocalizedText Summary);
+    private sealed record ServiceLink(string Slug, string Icon, LocalizedText Name, LocalizedText Summary);
 }
