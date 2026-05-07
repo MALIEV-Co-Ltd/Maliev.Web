@@ -247,6 +247,7 @@ img {
 
 .landing-quote-dropzone.mud-button-root {
   width: 100%;
+  min-width: 0;
   min-height: 96px;
   justify-content: stretch;
   padding: 0;
@@ -266,11 +267,14 @@ img {
 
 .landing-quote-dropzone .mud-button-label {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) max-content 20px;
+  grid-template-columns: 42px minmax(0, 1fr) max-content 42px;
   gap: 14px;
   align-items: center;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 16px;
+  overflow-wrap: anywhere;
 }
 
 .landing-quote-dropzone-icon {
@@ -1619,11 +1623,7 @@ html[lang="th-TH"] .page-hero h1 {
     display: none;
   }
 
-  .shop-section .section-heading {
+.shop-section .section-heading {
     grid-template-columns: 1fr;
-  }
-
-  .section-link {
-    justify-self: start;
   }
 }
