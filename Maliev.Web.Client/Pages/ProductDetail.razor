@@ -9,14 +9,17 @@
 {
     <section class="page-hero compact">
         <h1>Product not found</h1>
-        <p>The requested product handle is not in the migrated seed catalog.</p>
+        <p>@(_loadError ?? "The requested product handle is not available from the catalog backend.")</p>
     </section>
 }
 else
 {
     <section class="product-detail">
         <div class="product-detail-media">
-            <img src="@_product.ImageUrl" alt="@_product.Title.For(Preferences.Culture)" />
+            @if (!string.IsNullOrWhiteSpace(_product.ImageUrl))
+            {
+                <img src="@_product.ImageUrl" alt="@_product.Title.For(Preferences.Culture)" />
+            }
         </div>
         <div class="product-detail-copy">
             <p class="eyebrow">@_product.CollectionSlug</p>
@@ -37,11 +40,20 @@ else
     public string Handle { get; set; } = string.Empty;
 
     private ProductDetailDto? _product;
+    private string? _loadError;
 
     protected override async Task OnParametersSetAsync()
     {
         await Preferences.InitializeAsync();
-        _product = await Api.GetProductAsync(Handle);
+        try
+        {
+            _loadError = null;
+            _product = await Api.GetProductAsync(Handle);
+        }
+        catch (MalievApiException ex)
+        {
+            _loadError = ex.Message;
+        }
     }
 
     private static string Price(ProductSummaryDto product)

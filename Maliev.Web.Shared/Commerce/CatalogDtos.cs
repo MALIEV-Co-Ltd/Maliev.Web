@@ -121,6 +121,6 @@ public sealed class ShopifyImportPreviewDto
     /// <summary>Gets or sets migration notes.</summary>
     public List<string> Notes { get; set; } = [];
 
-    /// <summary>Gets or sets the seeded products visible before the Admin API import runs.</summary>
-    public List<ProductSummaryDto> SeededProducts { get; set; } = [];
+    /// <summary>Gets or sets products observed from the configured Shopify Admin API.</summary>
+    public List<ProductSummaryDto> ObservedProducts { get; set; } = [];
 }

@@ -7,6 +7,9 @@ namespace Maliev.Web.Shared.Quotes;
 /// </summary>
 public sealed class ServiceProcessDto
 {
+    /// <summary>Gets or sets the downstream manufacturing process identifier.</summary>
+    public Guid? Id { get; set; }
+
     /// <summary>Gets or sets the process code used by downstream pricing and geometry services.</summary>
     public string Code { get; set; } = string.Empty;
 
@@ -25,6 +28,9 @@ public sealed class ServiceProcessDto
 /// </summary>
 public sealed class MaterialOptionDto
 {
+    /// <summary>Gets or sets the downstream material identifier.</summary>
+    public Guid? Id { get; set; }
+
     /// <summary>Gets or sets the material code.</summary>
     public string Code { get; set; } = string.Empty;
 
@@ -73,11 +79,26 @@ public sealed class QuotePartDraftDto
     /// <summary>Gets or sets the temporary part id.</summary>
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    /// <summary>Gets or sets the completed UploadService file identifier.</summary>
+    public Guid? FileId { get; set; }
+
+    /// <summary>Gets or sets the UploadService upload session identifier.</summary>
+    public string? UploadId { get; set; }
+
+    /// <summary>Gets or sets the storage path assigned by UploadService.</summary>
+    public string? StoragePath { get; set; }
+
     /// <summary>Gets or sets the browser file identity.</summary>
     public QuoteFileDraftDto File { get; set; } = new();
 
+    /// <summary>Gets or sets the downstream manufacturing process identifier.</summary>
+    public Guid? ManufacturingProcessId { get; set; }
+
     /// <summary>Gets or sets the selected process code.</summary>
     public string ProcessCode { get; set; } = "FDM";
+
+    /// <summary>Gets or sets the downstream material identifier.</summary>
+    public Guid? MaterialId { get; set; }
 
     /// <summary>Gets or sets the selected material code.</summary>
     public string MaterialCode { get; set; } = "PLA";
@@ -85,8 +106,8 @@ public sealed class QuotePartDraftDto
     /// <summary>Gets or sets the requested quantity.</summary>
     public int Quantity { get; set; } = 1;
 
-    /// <summary>Gets or sets the estimated bounding-box volume in cubic centimeters.</summary>
-    public decimal EstimatedVolumeCc { get; set; } = 24m;
+    /// <summary>Gets or sets the analyzed model volume in cubic centimeters.</summary>
+    public decimal EstimatedVolumeCc { get; set; }
 
     /// <summary>Gets or sets whether the customer acknowledged DFM warnings.</summary>
     public bool DfmAcknowledged { get; set; }
@@ -97,6 +118,9 @@ public sealed class QuotePartDraftDto
 /// </summary>
 public sealed class QuoteEstimateRequest
 {
+    /// <summary>Gets or sets the authenticated customer id when the quote is attached to an account.</summary>
+    public Guid? CustomerId { get; set; }
+
     /// <summary>Gets or sets the requested currency code.</summary>
     public string CurrencyCode { get; set; } = "THB";
 
@@ -195,6 +219,27 @@ public sealed class WebUploadInitiationResponse
 
     /// <summary>Gets or sets the storage path assigned by the upload boundary.</summary>
     public string StoragePath { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Response returned after UploadService confirms a resumable upload.
+/// </summary>
+public sealed class WebUploadCompleteResponse
+{
+    /// <summary>Gets or sets the upload id.</summary>
+    public string UploadId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the parsed file id when UploadService uses a GUID upload id.</summary>
+    public Guid? FileId { get; set; }
+
+    /// <summary>Gets or sets the uploaded file name.</summary>
+    public string FileName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the storage path assigned by UploadService.</summary>
+    public string StoragePath { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the current UploadService status.</summary>
+    public string Status { get; set; } = string.Empty;
 }
 
 /// <summary>

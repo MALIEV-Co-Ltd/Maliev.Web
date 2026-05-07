@@ -10,13 +10,12 @@
     <link rel="preconnect" href="https://shop.maliev.com" />
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["Maliev.Web.Bff.styles.css"]" />
     <ImportMap />
     <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
 </head>
 
 <body>
-    <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+    <Maliev.Web.Client.Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
     <script src="@Assets["js/maliev-culture.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>

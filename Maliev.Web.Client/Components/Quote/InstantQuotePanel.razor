@@ -2,20 +2,32 @@
 @inject PreferenceService Preferences
 
 <section class="quote-panel" aria-label="Instant quote">
-    <div class="quote-tabs" role="tablist">
-        @foreach (var process in _reference.Processes)
-        {
-            <button class="@ProcessButtonClass(process.Code)" type="button" @onclick="() => SelectProcess(process.Code)">
-                <span>@process.Name.For(Preferences.Culture)</span>
-            </button>
-        }
-    </div>
+    @if (!string.IsNullOrWhiteSpace(_loadError))
+    {
+        <div class="quote-empty">@_loadError</div>
+    }
+    else
+    {
+        <div class="quote-tabs" role="tablist">
+            @foreach (var process in _reference.Processes)
+            {
+                <button class="@ProcessButtonClass(process.Code)" type="button" @onclick="() => SelectProcess(process.Code)">
+                    <span>@process.Name.For(Preferences.Culture)</span>
+                </button>
+            }
+        </div>
+    }
 
     <label class="upload-zone">
-        <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.obj,.3mf" />
+        <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.obj,.3mf" disabled="@(!_reference.Processes.Any())" />
         <span class="upload-title">Drop or choose 3D model files</span>
-        <span class="upload-meta">STL, STEP, STP, OBJ, 3MF. Files are matched by name and size.</span>
+        <span class="upload-meta">STL, STEP, STP, OBJ, 3MF. Upload sessions are matched by name and size.</span>
     </label>
+
+    @if (!string.IsNullOrWhiteSpace(_statusMessage))
+    {
+        <div class="quote-empty">@_statusMessage</div>
+    }
 
     @if (_parts.Count == 0)
     {
@@ -29,7 +41,7 @@
                 <article class="quote-part">
                     <div>
                         <strong>@part.File.Name</strong>
-                        <span>@FormatBytes(part.File.SizeBytes)</span>
+                        <span>@FormatBytes(part.File.SizeBytes) · @(string.IsNullOrWhiteSpace(part.UploadId) ? "upload pending" : "uploaded")</span>
                     </div>
                     <select @bind="part.MaterialCode" aria-label="Material">
                         @foreach (var material in _reference.Materials.Where(m => m.ProcessCode == part.ProcessCode))
@@ -48,9 +60,10 @@
 
         <div class="quote-actions">
             <select @bind="_leadTimeCode" aria-label="Lead time">
-                <option value="STANDARD">Standard</option>
-                <option value="RUSH">Rush</option>
-                <option value="ECONOMY">Economy</option>
+                @foreach (var leadTime in _reference.LeadTimeCodes)
+                {
+                    <option value="@leadTime">@leadTime</option>
+                }
             </select>
             <button type="button" class="button primary" @onclick="EstimateAsync" disabled="@_isEstimating">Estimate</button>
         </div>
@@ -87,6 +100,8 @@
     private readonly List<QuotePartDraftDto> _parts = [];
     private QuoteReferenceDataDto _reference = new();
     private QuoteEstimateResponse? _estimate;
+    private string? _loadError;
+    private string? _statusMessage;
     private string _selectedProcess = "FDM";
     private string _leadTimeCode = "STANDARD";
     private bool _isEstimating;
@@ -95,7 +110,16 @@
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
-        _reference = await Api.GetQuoteReferenceDataAsync();
+        try
+        {
+            _reference = await Api.GetQuoteReferenceDataAsync();
+            _selectedProcess = _reference.Processes.FirstOrDefault()?.Code ?? _selectedProcess;
+            _leadTimeCode = _reference.LeadTimeCodes.FirstOrDefault() ?? _leadTimeCode;
+        }
+        catch (MalievApiException ex)
+        {
+            _loadError = ex.Message;
+        }
     }
 
     private void SelectProcess(string code)
@@ -110,8 +134,11 @@
 
     private async Task HandleFilesAsync(InputFileChangeEventArgs args)
     {
+        _statusMessage = null;
         foreach (var file in args.GetMultipleFiles(20))
         {
+            var material = _reference.Materials.FirstOrDefault(m => m.ProcessCode == _selectedProcess);
+            var process = _reference.Processes.FirstOrDefault(p => p.Code == _selectedProcess);
             var part = new QuotePartDraftDto
             {
                 File = new QuoteFileDraftDto
@@ -121,18 +148,32 @@
                     ContentType = file.ContentType
                 },
                 ProcessCode = _selectedProcess,
-                MaterialCode = _reference.Materials.FirstOrDefault(m => m.ProcessCode == _selectedProcess)?.Code ?? "PLA",
-                EstimatedVolumeCc = EstimateVolumeFromFileSize(file.Size)
+                ManufacturingProcessId = process?.Id,
+                MaterialCode = material?.Code ?? string.Empty,
+                MaterialId = material?.Id
             };
             _parts.Add(part);
 
-            await Api.InitiateUploadAsync(new WebUploadInitiationRequest
+            try
             {
-                FileName = file.Name,
-                ContentType = file.ContentType,
-                FileSize = file.Size,
-                QuoteSessionId = _quoteSessionId
-            });
+                var session = await Api.InitiateUploadAsync(new WebUploadInitiationRequest
+                {
+                    FileName = file.Name,
+                    ContentType = file.ContentType,
+                    FileSize = file.Size,
+                    QuoteSessionId = _quoteSessionId
+                });
+                var upload = await Api.UploadFileAsync(file, session);
+                part.UploadId = upload.UploadId;
+                part.FileId = upload.FileId;
+                part.StoragePath = upload.StoragePath;
+                var status = await Api.GetAnalysisStatusAsync(upload.UploadId);
+                _statusMessage = status.Message;
+            }
+            catch (MalievApiException ex)
+            {
+                _statusMessage = ex.Message;
+            }
         }
     }
 
@@ -141,12 +182,17 @@
         _isEstimating = true;
         try
         {
+            _statusMessage = null;
             _estimate = await Api.EstimateQuoteAsync(new QuoteEstimateRequest
             {
                 Culture = Preferences.Culture,
                 LeadTimeCode = _leadTimeCode,
                 Parts = _parts
             });
+        }
+        catch (MalievApiException ex)
+        {
+            _statusMessage = ex.Message;
         }
         finally
         {
@@ -157,11 +203,6 @@
     private string ProcessButtonClass(string code)
     {
         return code == _selectedProcess ? "quote-tab active" : "quote-tab";
-    }
-
-    private static decimal EstimateVolumeFromFileSize(long size)
-    {
-        return Math.Clamp(Math.Round(size / 85000m, 2), 8m, 260m);
     }
 
     private static string FormatBytes(long bytes)

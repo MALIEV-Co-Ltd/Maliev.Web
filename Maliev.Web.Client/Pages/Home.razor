@@ -48,6 +48,10 @@
     {
         <ProductGrid Products="@_products.Take(4).ToList()" />
     }
+    else if (!string.IsNullOrWhiteSpace(_catalogError))
+    {
+        <p class="load-message">@_catalogError</p>
+    }
 </section>
 
 <section class="section proof-band">
@@ -70,11 +74,19 @@
     ];
 
     private List<ProductSummaryDto> _products = [];
+    private string? _catalogError;
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
-        _products = (await Api.GetProductsAsync()).ToList();
+        try
+        {
+            _products = (await Api.GetProductsAsync()).ToList();
+        }
+        catch (MalievApiException ex)
+        {
+            _catalogError = ex.Message;
+        }
     }
 
     private sealed record ServiceLink(string Slug, LocalizedText Name, LocalizedText Summary);

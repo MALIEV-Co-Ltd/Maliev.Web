@@ -28,16 +28,29 @@
         <button type="button" class="button primary" @onclick="CreateDraftAsync">Create checkout draft</button>
         @if (_checkout is not null)
         {
-            <p>Draft checkout @_checkout.CheckoutId created. Sign-in is required before payment.</p>
+            <p>Draft checkout @_checkout.CheckoutId created.</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <p class="load-message">@_error</p>
         }
     }
 </section>
 
 @code {
     private CheckoutDraftResponse? _checkout;
+    private string? _error;
 
     private async Task CreateDraftAsync()
     {
-        _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Items = ShoppingCart.Items.ToList() });
+        try
+        {
+            _error = null;
+            _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Items = ShoppingCart.Items.ToList() });
+        }
+        catch (MalievApiException ex)
+        {
+            _error = ex.Message;
+        }
     }
 }

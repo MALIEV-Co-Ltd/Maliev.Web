@@ -7,7 +7,7 @@
 <section class="page-hero compact">
     <p class="eyebrow">Storefront migration</p>
     <h1>Machines, spares, and printed products</h1>
-    <p>The current Shopify catalog is represented here through Web BFF seed data until the Admin API or CSV import becomes the authoritative source.</p>
+    <p>The customer store reads product, variant, media, and collection data from the configured catalog backend.</p>
 </section>
 
 <section class="section">
@@ -21,25 +21,48 @@
         }
     </div>
 
-    <ProductGrid Products="@_products" />
+    @if (!string.IsNullOrWhiteSpace(_loadError))
+    {
+        <p class="load-message">@_loadError</p>
+    }
+    else
+    {
+        <ProductGrid Products="@_products" />
+    }
 </section>
 
 @code {
     private IReadOnlyList<ProductCollectionDto> _collections = [];
     private IReadOnlyList<ProductSummaryDto> _products = [];
     private string? _selectedCollection;
+    private string? _loadError;
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
-        _collections = await Api.GetCollectionsAsync();
-        _products = await Api.GetProductsAsync();
+        try
+        {
+            _collections = await Api.GetCollectionsAsync();
+            _products = await Api.GetProductsAsync();
+        }
+        catch (MalievApiException ex)
+        {
+            _loadError = ex.Message;
+        }
     }
 
     private async Task SelectCollectionAsync(string? collection)
     {
         _selectedCollection = collection;
-        _products = await Api.GetProductsAsync(collection);
+        try
+        {
+            _products = await Api.GetProductsAsync(collection);
+            _loadError = null;
+        }
+        catch (MalievApiException ex)
+        {
+            _loadError = ex.Message;
+        }
     }
 
     private string CollectionClass(string? collection)

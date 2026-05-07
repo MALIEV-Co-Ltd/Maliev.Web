@@ -1,14 +1,19 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Commerce;
+using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Quotes;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Maliev.Web.Tests;
 
 /// <summary>
-/// Contract tests for customer-facing Web BFF endpoints.
+/// Contract tests for customer-facing Web BFF controllers.
 /// </summary>
 public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -20,14 +25,42 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     /// <param name="factory">The application factory.</param>
     public WebBffEndpointTests(WebApplicationFactory<Program> factory)
     {
-        _factory = factory.WithWebHostBuilder(builder => builder.UseEnvironment("Testing"));
+        _factory = factory.WithWebHostBuilder(builder => builder
+            .UseEnvironment("Testing")
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll<ICommerceCatalogService>();
+                services.RemoveAll<IManufacturingCatalogService>();
+                services.RemoveAll<IWebQuoteService>();
+                services.RemoveAll<ICheckoutDraftService>();
+                services.AddSingleton<ICommerceCatalogService, FakeCommerceCatalogService>();
+                services.AddSingleton<IManufacturingCatalogService, FakeManufacturingCatalogService>();
+                services.AddSingleton<IWebQuoteService, FakeWebQuoteService>();
+                services.AddSingleton<ICheckoutDraftService, FakeCheckoutDraftService>();
+            }));
     }
 
     /// <summary>
-    /// Verifies the Shopify import preview keeps the public product count contract.
+    /// Verifies the catalog controller is served by the configured catalog backend.
     /// </summary>
     [Fact]
-    public async Task GET_ShopifyImportPreview_ReturnsExpectedProductCount()
+    public async Task GET_CatalogProducts_ReturnsBackendProducts()
+    {
+        using var client = _factory.CreateClient();
+
+        var products = await client.GetFromJsonAsync<List<ProductSummaryDto>>("/web/v1/catalog/products");
+
+        Assert.NotNull(products);
+        var product = Assert.Single(products);
+        Assert.Equal("backend-product", product.Handle);
+        Assert.Equal(12000m, product.PriceThb);
+    }
+
+    /// <summary>
+    /// Verifies Shopify preview reports backend-observed products rather than seeded data.
+    /// </summary>
+    [Fact]
+    public async Task GET_ShopifyImportPreview_ReturnsObservedBackendProducts()
     {
         using var client = _factory.CreateClient();
 
@@ -35,15 +68,31 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         Assert.NotNull(preview);
         Assert.Equal("https://shop.maliev.com/collections/all", preview.SourceStorefrontUrl);
-        Assert.Equal(57, preview.ExpectedProductCount);
-        Assert.True(preview.SeededProducts.Count > 0);
+        Assert.Equal(1, preview.ExpectedProductCount);
+        Assert.Single(preview.ObservedProducts);
     }
 
     /// <summary>
-    /// Verifies quote estimates preserve explicit bulk-discount semantics.
+    /// Verifies reference data is routed through the manufacturing catalog service.
     /// </summary>
     [Fact]
-    public async Task POST_QuoteEstimate_BulkQuantity_ReturnsExplicitBulkDiscount()
+    public async Task GET_QuoteReferenceData_ReturnsBackendReferenceData()
+    {
+        using var client = _factory.CreateClient();
+
+        var reference = await client.GetFromJsonAsync<QuoteReferenceDataDto>("/web/v1/quote/reference-data");
+
+        Assert.NotNull(reference);
+        Assert.Equal("FDM", Assert.Single(reference.Processes).Code);
+        Assert.Equal("PLA", Assert.Single(reference.Materials).Code);
+        Assert.Equal("STANDARD", Assert.Single(reference.LeadTimeCodes));
+    }
+
+    /// <summary>
+    /// Verifies quote estimates preserve explicit bulk-discount fields returned by pricing.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteEstimate_RoutesThroughQuoteService()
     {
         using var client = _factory.CreateClient();
         var request = new QuoteEstimateRequest
@@ -57,7 +106,10 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                     MaterialCode = "PLA",
                     Quantity = 10,
                     EstimatedVolumeCc = 20,
-                    DfmAcknowledged = true
+                    DfmAcknowledged = true,
+                    FileId = Guid.NewGuid(),
+                    MaterialId = Guid.NewGuid(),
+                    ManufacturingProcessId = Guid.NewGuid()
                 }
             ]
         };
@@ -67,7 +119,141 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(estimate);
-        Assert.True(estimate.BulkDiscountTotal > 0);
-        Assert.Equal(estimate.Lines.Sum(line => line.Total) + estimate.TaxAmount, estimate.Total);
+        Assert.Equal("test-pricing", estimate.PricingSource);
+        Assert.Equal(150m, estimate.BulkDiscountTotal);
+    }
+
+    private sealed class FakeCommerceCatalogService : ICommerceCatalogService
+    {
+        public Task<IReadOnlyList<ProductCollectionDto>> GetCollectionsAsync(CancellationToken cancellationToken)
+        {
+            IReadOnlyList<ProductCollectionDto> collections =
+            [
+                new()
+                {
+                    Slug = "machines",
+                    Name = new LocalizedText { En = "Machines" },
+                    ExpectedProductCount = 1
+                }
+            ];
+            return Task.FromResult(collections);
+        }
+
+        public Task<IReadOnlyList<ProductSummaryDto>> GetProductsAsync(string? collectionSlug, CancellationToken cancellationToken)
+        {
+            IReadOnlyList<ProductSummaryDto> products =
+            [
+                new()
+                {
+                    Handle = "backend-product",
+                    Title = new LocalizedText { En = "Backend Product" },
+                    CollectionSlug = "machines",
+                    PriceThb = 12000m
+                }
+            ];
+            return Task.FromResult(products);
+        }
+
+        public Task<ProductDetailDto?> GetProductAsync(string handle, CancellationToken cancellationToken)
+        {
+            ProductDetailDto? product = handle == "backend-product"
+                ? new ProductDetailDto
+                {
+                    Handle = "backend-product",
+                    Title = new LocalizedText { En = "Backend Product" },
+                    CollectionSlug = "machines",
+                    PriceThb = 12000m
+                }
+                : null;
+            return Task.FromResult(product);
+        }
+
+        public Task<ShopifyImportPreviewDto> GetImportPreviewAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new ShopifyImportPreviewDto
+            {
+                SourceStorefrontUrl = "https://shop.maliev.com/collections/all",
+                ExpectedProductCount = 1,
+                ObservedProducts =
+                [
+                    new ProductSummaryDto
+                    {
+                        Handle = "backend-product",
+                        Title = new LocalizedText { En = "Backend Product" },
+                        CollectionSlug = "machines",
+                        PriceThb = 12000m
+                    }
+                ]
+            });
+        }
+    }
+
+    private sealed class FakeManufacturingCatalogService : IManufacturingCatalogService
+    {
+        public Task<QuoteReferenceDataDto> GetReferenceDataAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new QuoteReferenceDataDto
+            {
+                Processes =
+                [
+                    new ServiceProcessDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Code = "FDM",
+                        Name = new LocalizedText { En = "FDM" },
+                        SupportsInstantQuote = true
+                    }
+                ],
+                Materials =
+                [
+                    new MaterialOptionDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Code = "PLA",
+                        ProcessCode = "FDM",
+                        Name = new LocalizedText { En = "PLA" }
+                    }
+                ],
+                LeadTimeCodes = ["STANDARD"]
+            });
+        }
+    }
+
+    private sealed class FakeWebQuoteService : IWebQuoteService
+    {
+        public Task<QuoteEstimateResponse> EstimateAsync(QuoteEstimateRequest request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new QuoteEstimateResponse
+            {
+                Lines =
+                [
+                    new QuoteLineEstimateDto
+                    {
+                        PartId = request.Parts[0].Id,
+                        Name = request.Parts[0].File.Name,
+                        BaseUnitPrice = 100m,
+                        UnitPrice = 85m,
+                        BulkDiscountAmount = 150m,
+                        Total = 850m
+                    }
+                ],
+                Subtotal = 850m,
+                BulkDiscountTotal = 150m,
+                Total = 850m,
+                PricingSource = "test-pricing"
+            });
+        }
+    }
+
+    private sealed class FakeCheckoutDraftService : ICheckoutDraftService
+    {
+        public Task<CheckoutDraftResponse> CreateDraftAsync(CheckoutDraftRequest request, ClaimsPrincipal user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new CheckoutDraftResponse
+            {
+                CheckoutId = Guid.Parse("d49229e6-d57b-4f94-aa95-391ef3fb44af"),
+                RequiresSignIn = false
+            });
+        }
     }
 }

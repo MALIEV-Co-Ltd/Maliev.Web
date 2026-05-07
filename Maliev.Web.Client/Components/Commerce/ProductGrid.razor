@@ -6,7 +6,10 @@
     {
         <article class="product-card">
             <a href="/shop/@product.Handle" class="product-media">
-                <img src="@product.ImageUrl" alt="@product.Title.For(Preferences.Culture)" loading="lazy" />
+                @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                {
+                    <img src="@product.ImageUrl" alt="@product.Title.For(Preferences.Culture)" loading="lazy" />
+                }
             </a>
             <div class="product-body">
                 <a href="/shop/@product.Handle">
