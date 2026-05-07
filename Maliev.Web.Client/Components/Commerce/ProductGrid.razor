@@ -1,0 +1,76 @@
+@inject PreferenceService Preferences
+@inject CartState Cart
+
+<div class="product-grid">
+    @foreach (var product in Products)
+    {
+        <article class="product-card">
+            <a href="/shop/@product.Handle" class="product-media">
+                @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                {
+                    <img src="@product.ImageUrl" alt="@product.Title.For(Preferences.Culture)" loading="lazy" />
+                }
+            </a>
+            <div class="product-body">
+                <a href="/shop/@product.Handle">
+                    <h3>@product.Title.For(Preferences.Culture)</h3>
+                </a>
+                <p>@product.Summary.For(Preferences.Culture)</p>
+                <div class="product-meta">
+                    <strong>@Price(product)</strong>
+                    <span>@LeadTime(product)</span>
+                </div>
+                <div class="product-meta subtle">
+                    <span>@InventoryStatus(product.InventoryStatus)</span>
+                    @if (product.AvailableQuantity is not null)
+                    {
+                        <span>@Text($"{product.AvailableQuantity} available", $"มีสินค้า {product.AvailableQuantity}")</span>
+                    }
+                </div>
+                <button type="button" class="button secondary" @onclick="() => Cart.Add(product)" disabled="@(!CanBuy(product))">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
+            </div>
+        </article>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<ProductSummaryDto> Products { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cart.InitializeAsync();
+    }
+
+    private string Price(ProductSummaryDto product)
+    {
+        var prefix = product.PriceStartsAt ? Text("From ", "เริ่มต้น ") : string.Empty;
+        return product.PriceThb <= 0 ? Text("Request quote", "ขอใบเสนอราคา") : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"{prefix}฿{product.PriceThb:N2}");
+    }
+
+    private string LeadTime(ProductSummaryDto product)
+    {
+        return product.LeadTimeDays <= 0 ? Text("Made to order", "ผลิตตามสั่ง") : Text($"{product.LeadTimeDays} business days", $"{product.LeadTimeDays} วันทำการ");
+    }
+
+    private static bool CanBuy(ProductSummaryDto product)
+    {
+        return product.PriceThb > 0 && product.IsPublished && product.AvailableQuantity.GetValueOrDefault(1) > 0;
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private string InventoryStatus(string status)
+    {
+        return status switch
+        {
+            "Available" => Text("Available", "พร้อมจำหน่าย"),
+            "Low stock" => Text("Low stock", "สินค้าเหลือน้อย"),
+            "Made to order" => Text("Made to order", "ผลิตตามสั่ง"),
+            _ => status
+        };
+    }
+}

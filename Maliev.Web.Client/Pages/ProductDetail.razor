@@ -1,0 +1,145 @@
+@page "/shop/{Handle}"
+@inject MalievApiClient Api
+@inject PreferenceService Preferences
+@inject CartState Cart
+
+<PageTitle>@(_product?.Title.For(Preferences.Culture) ?? "Product") - MALIEV</PageTitle>
+
+@if (_product is null)
+{
+    <section class="page-hero compact">
+        <h1>Product not found</h1>
+        <p>@(_loadError ?? "This product is not available right now.")</p>
+        <a class="button secondary" href="/shop">@Text("Back to shop", "กลับไปหน้าร้าน")</a>
+    </section>
+}
+else
+{
+    <section class="product-detail">
+        <div class="product-detail-media">
+            @if (_selectedImage is not null)
+            {
+                <img src="@_selectedImage.Url" alt="@_selectedImage.Alt" />
+            }
+            @if (_product.Media.Count > 1)
+            {
+                <div class="media-strip">
+                    @foreach (var media in _product.Media)
+                    {
+                        <button type="button" class="@MediaButtonClass(media)" @onclick="() => _selectedImage = media">
+                            <img src="@media.Url" alt="" aria-hidden="true" />
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+        <div class="product-detail-copy">
+            <p class="eyebrow">@_product.CollectionSlug</p>
+            <h1>@_product.Title.For(Preferences.Culture)</h1>
+            <p>@_product.Body.For(Preferences.Culture)</p>
+            <div class="product-price">@Price(_product)</div>
+            @if (_product.Variants.Count > 0)
+            {
+                <label class="variant-select">
+                    <span>@Text("Variant", "ตัวเลือกสินค้า")</span>
+                    <select @bind="_selectedVariantSku">
+                        @foreach (var variant in _product.Variants)
+                        {
+                            <option value="@variant.Sku" disabled="@(!variant.Available)">
+                                @variant.Title.For(Preferences.Culture) · @Price(variant)
+                            </option>
+                        }
+                    </select>
+                </label>
+            }
+            <dl class="spec-list">
+                <div><dt>@Text("Lead time", "ระยะเวลา")</dt><dd>@Text($"{_product.LeadTimeDays} days", $"{_product.LeadTimeDays} วัน")</dd></div>
+                <div><dt>@Text("Availability", "สถานะสินค้า")</dt><dd>@InventoryStatus(_product.InventoryStatus)</dd></div>
+                @if (_product.AvailableQuantity is not null)
+                {
+                    <div><dt>@Text("Quantity", "จำนวน")</dt><dd>@Text($"{_product.AvailableQuantity} available", $"มีสินค้า {_product.AvailableQuantity}")</dd></div>
+                }
+            </dl>
+            <div class="quote-actions">
+                <button type="button" class="button primary" @onclick="AddToCart" disabled="@(!CanBuy)">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
+                <a class="button secondary" href="/quote">@Text("Request custom part", "ขอผลิตชิ้นงานเฉพาะแบบ")</a>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string Handle { get; set; } = string.Empty;
+
+    private ProductDetailDto? _product;
+    private ProductMediaDto? _selectedImage;
+    private string _selectedVariantSku = string.Empty;
+    private string? _loadError;
+    private ProductVariantDto? SelectedVariant => _product?.Variants.FirstOrDefault(variant => variant.Sku == _selectedVariantSku) ?? _product?.Variants.FirstOrDefault();
+    private bool CanBuy => _product is not null &&
+        _product.PriceThb > 0 &&
+        _product.IsPublished &&
+        _product.AvailableQuantity.GetValueOrDefault(1) > 0 &&
+        (SelectedVariant?.Available ?? true);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Preferences.InitializeAsync();
+        await Cart.InitializeAsync();
+        try
+        {
+            _loadError = null;
+            _product = await Api.GetProductAsync(Handle);
+            _selectedImage = _product?.Media.FirstOrDefault() ??
+                (!string.IsNullOrWhiteSpace(_product?.ImageUrl) ? new ProductMediaDto { Url = _product.ImageUrl, Alt = _product.Title.For(Preferences.Culture) } : null);
+            _selectedVariantSku = _product?.Variants.FirstOrDefault(variant => variant.Available)?.Sku ??
+                _product?.Variants.FirstOrDefault()?.Sku ??
+                string.Empty;
+        }
+        catch (MalievApiException ex)
+        {
+            _loadError = ex.Message;
+        }
+    }
+
+    private void AddToCart()
+    {
+        if (_product is not null)
+        {
+            Cart.Add(_product, SelectedVariant);
+        }
+    }
+
+    private string MediaButtonClass(ProductMediaDto media)
+    {
+        return media.Url == _selectedImage?.Url ? "media-thumb active" : "media-thumb";
+    }
+
+    private string Price(ProductSummaryDto product)
+    {
+        var prefix = product.PriceStartsAt ? Text("From ", "เริ่มต้น ") : string.Empty;
+        return product.PriceThb <= 0 ? Text("Request quote", "ขอใบเสนอราคา") : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"{prefix}฿{product.PriceThb:N2}");
+    }
+
+    private string Price(ProductVariantDto variant)
+    {
+        return variant.PriceThb <= 0 ? Text("Request quote", "ขอใบเสนอราคา") : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"฿{variant.PriceThb:N2}");
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private string InventoryStatus(string status)
+    {
+        return status switch
+        {
+            "Available" => Text("Available", "พร้อมจำหน่าย"),
+            "Low stock" => Text("Low stock", "สินค้าเหลือน้อย"),
+            "Made to order" => Text("Made to order", "ผลิตตามสั่ง"),
+            _ => status
+        };
+    }
+}

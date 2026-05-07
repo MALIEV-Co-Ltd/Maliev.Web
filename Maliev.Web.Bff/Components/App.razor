@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="MALIEV customer website for instant manufacturing quotations, 3D printing, CNC machining, 3D scanning, design, and product ordering." />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="preconnect" href="https://shop.maliev.com" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+</head>
+
+<body>
+    <Maliev.Web.Client.Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+    <script src="@Assets["js/maliev-culture.js"]"></script>
+    <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

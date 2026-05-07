@@ -1,0 +1,133 @@
+@page "/about"
+@page "/contact"
+@page "/faq"
+@page "/shipping-returns"
+@page "/privacy"
+@page "/terms"
+@page "/account/quotes"
+@page "/account/orders"
+@page "/account/preferences"
+@inject NavigationManager Navigation
+
+<PageTitle>@Title - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">@Eyebrow</p>
+    <h1>@Title</h1>
+    <p>@Body</p>
+</section>
+
+<section class="section text-section">
+    <div class="content-stack">
+        @foreach (var item in Sections)
+        {
+            <article>
+                <h2>@item.Title</h2>
+                <p>@item.Body</p>
+            </article>
+        }
+        <div class="quote-actions">
+            <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+            <a class="button secondary" href="@SecondaryHref">@SecondaryAction</a>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
+
+    private string Eyebrow => Path switch
+    {
+        "account/preferences" => "Account",
+        "account/quotes" => "Account",
+        "account/orders" => "Account",
+        _ => "MALIEV"
+    };
+
+    private string Title => Path switch
+    {
+        "contact" => "Contact",
+        "faq" => "FAQ",
+        "shipping-returns" => "Shipping and returns",
+        "privacy" => "Privacy",
+        "terms" => "Terms",
+        "account/quotes" => "Saved quotes",
+        "account/orders" => "Orders",
+        "account/preferences" => "Preferences",
+        _ => "About MALIEV"
+    };
+
+    private string Body => Path switch
+    {
+        "contact" => "Reach MALIEV for manufacturing services, machine support, product orders, and quotation help.",
+        "faq" => "Answers for ordering products, requesting custom parts, and preparing manufacturing files.",
+        "shipping-returns" => "How MALIEV prepares, ships, and supports product orders after delivery.",
+        "privacy" => "How MALIEV handles customer files, product orders, account preferences, and communication records.",
+        "terms" => "Commercial terms for website orders, custom manufacturing requests, and quotation acceptance.",
+        "account/preferences" => "Manage language and currency preferences for this customer workspace.",
+        "account/quotes" => "Review saved manufacturing quotes after sign-in is connected.",
+        "account/orders" => "Review order history after sign-in is connected.",
+        _ => "MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand."
+    };
+
+    private IReadOnlyList<ContentSection> Sections => Path switch
+    {
+        "contact" =>
+        [
+            new("Sales and quotations", "Send product questions, machine requirements, drawings, or 3D files. MALIEV will confirm the manufacturing route, lead time, and next commercial step."),
+            new("Machine and product support", "For machines, spare parts, and printed products, include the product name, order reference, photos, and the issue you want us to check.")
+        ],
+        "faq" =>
+        [
+            new("What files can I upload?", "The quote workspace accepts common 3D model files such as STL, STEP, STP, OBJ, and 3MF. Drawings and notes can be added when we review the request."),
+            new("Can I buy products without a quote?", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote page."),
+            new("Can I request Thai or English documents?", "Yes. Keep your preferred language in account preferences and MALIEV will use it for customer-facing communication where available.")
+        ],
+        "shipping-returns" =>
+        [
+            new("Shipping", "Shipping options depend on item size, destination, and whether the order includes machines, spare parts, or custom-made products."),
+            new("Returns and support", "For ready-made products, contact MALIEV with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.")
+        ],
+        "privacy" =>
+        [
+            new("Customer files", "Uploaded models, drawings, and product communications are used to prepare quotations, manufacture orders, and provide support."),
+            new("Preferences", "Language and currency preferences may be stored in the browser and later attached to your account after sign-in."),
+            new("Commerce records", "Cart, checkout, and order information is used to process purchases, delivery, and after-sales support.")
+        ],
+        "terms" =>
+        [
+            new("Product orders", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or product configuration needs clarification."),
+            new("Custom manufacturing", "Custom part pricing is based on the submitted files, material, process, quantity, and accepted quotation. Changes to files or requirements may require a new quote.")
+        ],
+        "account/preferences" =>
+        [
+            new("Language and currency", "Anonymous preferences are stored on this device. Signed-in preferences can be restored across devices after account integration."),
+            new("Customer workspace", "Saved quotes, orders, and preferences will live here after account sign-in is connected.")
+        ],
+        "account/quotes" =>
+        [
+            new("Saved quotes", "Signed-in customers will be able to return to quote drafts, accepted quotations, and manufacturing history from this page."),
+            new("Current workflow", "For now, start or continue quote work from the instant quote page.")
+        ],
+        "account/orders" =>
+        [
+            new("Order history", "Signed-in customers will be able to review open orders, delivery status, and supporting documents here."),
+            new("Current workflow", "For now, use checkout and direct MALIEV communication for active orders.")
+        ],
+        _ =>
+        [
+            new("What we make", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products."),
+            new("How we work", "Customers can buy published products directly or upload files for a manufacturing quote when the work is custom.")
+        ]
+    };
+
+    private string PrimaryAction => "Start quote";
+
+    private string PrimaryHref => "/quote";
+
+    private string SecondaryAction => Path == "account/preferences" ? "Shop products" : "Shop products";
+
+    private string SecondaryHref => "/shop";
+
+    private sealed record ContentSection(string Title, string Body);
+}

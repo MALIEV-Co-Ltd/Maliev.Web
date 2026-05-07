@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Maliev.Web.Bff/Maliev.Web.Bff.csproj" />
+  <Project Path="Maliev.Web.Client/Maliev.Web.Client.csproj" />
+  <Project Path="Maliev.Web.Shared/Maliev.Web.Shared.csproj" />
+  <Project Path="Maliev.Web.Tests/Maliev.Web.Tests.csproj" />
+</Solution>

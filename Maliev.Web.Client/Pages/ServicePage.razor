@@ -1,0 +1,92 @@
+@page "/services/{Slug}"
+
+<PageTitle>@Title - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">Manufacturing services</p>
+    <h1>@Title</h1>
+    <p>@Summary</p>
+    <a class="button primary" href="/quote">Start quote</a>
+</section>
+
+<section class="section proof-band service-proof">
+    <img src="@ImageUrl" alt="@Title" />
+    <div>
+        <p class="eyebrow">@ServiceLabel</p>
+        <h2>@ProofTitle</h2>
+        <p>@ProofText</p>
+    </div>
+</section>
+
+<section class="section service-detail-grid">
+    @foreach (var item in Workflow)
+    {
+        <article class="workflow-step">
+            <span>@item.Step</span>
+            <h2>@item.Title</h2>
+            <p>@item.Text</p>
+        </article>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private string Title => Slug switch
+    {
+        "cnc-machining" => "CNC Machining",
+        "3d-scanning" => "3D Scanning",
+        "3d-design" => "3D Design",
+        _ => "3D Printing"
+    };
+
+    private string ServiceLabel => Slug switch
+    {
+        "cnc-machining" => "Precision machining",
+        "3d-scanning" => "Reverse engineering",
+        "3d-design" => "Design support",
+        _ => "Rapid prototyping"
+    };
+
+    private string Summary => Slug switch
+    {
+        "cnc-machining" => "Upload machinable geometry, choose material and tolerance expectations, and route precision parts into quotation.",
+        "3d-scanning" => "Book marker-based or object scanning for reverse engineering, inspection, and documentation.",
+        "3d-design" => "Turn sketches, broken samples, or rough ideas into manufacturable CAD models.",
+        _ => "Choose FDM or resin, material, finish, quantity, and lead time from an instant quote workspace."
+    };
+
+    private string ImageUrl => Slug switch
+    {
+        "cnc-machining" => "https://shop.maliev.com/cdn/shop/files/Screenshot_2025-10-03_223753.png?v=1759505883&width=1200",
+        "3d-scanning" => "https://shop.maliev.com/cdn/shop/files/spare-part.png?v=1756281837&width=1200",
+        "3d-design" => "https://shop.maliev.com/cdn/shop/files/colors.81.png?v=1740109006&width=1200",
+        _ => "https://shop.maliev.com/cdn/shop/files/colors.61.png?v=1740108788&width=1200"
+    };
+
+    private string ProofTitle => Slug switch
+    {
+        "cnc-machining" => "From prototype blocks to production-ready machined parts",
+        "3d-scanning" => "Capture real parts for repair, inspection, and redesign",
+        "3d-design" => "Turn incomplete ideas into manufacturable CAD",
+        _ => "Fast printed parts without losing manufacturing discipline"
+    };
+
+    private string ProofText => Slug switch
+    {
+        "cnc-machining" => "MALIEV reviews geometry, material, tolerance, and quantity before confirming the production route.",
+        "3d-scanning" => "Scanning work can support reverse engineering, comparison, documentation, and follow-on design changes.",
+        "3d-design" => "Design support focuses on practical manufacturing choices, not only attractive renders.",
+        _ => "Use printing for prototypes, fixtures, fit checks, jigs, and low-volume usable products."
+    };
+
+    private IReadOnlyList<WorkflowItem> Workflow =>
+    [
+        new("01", "Upload or brief", "Start with model files, drawings, photos, or a short manufacturing brief."),
+        new("02", "Review manufacturing fit", "MALIEV checks process, material, finish, tolerance, and quantity before quoting."),
+        new("03", "Quote and produce", "Approved requirements become a formal quotation and production order.")
+    ];
+
+    private sealed record WorkflowItem(string Step, string Title, string Text);
+}
