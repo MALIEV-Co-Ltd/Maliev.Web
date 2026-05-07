@@ -6,16 +6,20 @@ namespace Maliev.Web.Tests;
 public sealed class HeroLayoutSourceTests
 {
     /// <summary>
-    /// Verifies the home hero keeps the quote panel below the heading and reserves the side rail for the gizmo.
+    /// Verifies the home hero uses the right-side GLB landing model and leaves quoting to the quote page.
     /// </summary>
     [Fact]
-    public void HomeHeroPlacesQuotePanelBelowHeadingAndUsesGizmo()
+    public void HomeHeroUsesRightSideGlbLandingModel()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
 
-        Assert.Contains("<ManufacturingGizmo />", source);
-        AssertQuotePanelFollowsHeading(source);
-        Assert.DoesNotContain("<div class=\"hero-workspace\">\r\n        <InstantQuotePanel />", source);
+        Assert.Contains("landing-hero", source);
+        Assert.Contains("landing-hero-visual", source);
+        Assert.Contains("ModelUrl=\"/models/hero-3d.glb\"", source);
+        Assert.Contains("EnableHoverMotion=\"true\"", source);
+        Assert.Contains("UsePlasticMaterial=\"true\"", source);
+        Assert.DoesNotContain("<InstantQuotePanel />", source);
+        Assert.DoesNotContain("hero-workspace gizmo-workspace", source);
     }
 
     /// <summary>
@@ -27,6 +31,8 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
+        Assert.DoesNotContain("ModelUrl=", source);
+        Assert.DoesNotContain("EnableHoverMotion=\"true\"", source);
         AssertQuotePanelFollowsHeading(source);
         Assert.DoesNotContain("contract-panel", source);
     }
@@ -44,6 +50,23 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("setHardwareScalingLevel", source);
         Assert.Contains("ResizeObserver", source);
         Assert.Contains("powerPreference: \"low-power\"", source);
+    }
+
+    /// <summary>
+    /// Verifies the landing 3D runtime has a dedicated model scene path instead of stretching the compact quote gizmo.
+    /// </summary>
+    [Fact]
+    public void ManufacturingGizmoSupportsHoverDrivenPlasticLandingModel()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("babylonjs-loaders@9.6.0", source);
+        Assert.Contains("createLandingHeroScene", source);
+        Assert.Contains("configureLandingHeroCamera", source);
+        Assert.Contains("addHoverMotion", source);
+        Assert.Contains("allowNativeContextMenu", source);
+        Assert.Contains("restoreNativeCanvasBehavior", source);
+        Assert.Contains("applyInjectionMoldedPlasticMaterial", source);
     }
 
     private static void AssertQuotePanelFollowsHeading(string source)

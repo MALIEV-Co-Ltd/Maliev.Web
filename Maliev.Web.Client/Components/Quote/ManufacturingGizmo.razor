@@ -1,7 +1,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="manufacturing-gizmo" aria-label="Interactive 3D manufacturing preview">
+<div class="@ContainerClass" aria-label="@AriaLabel">
     <canvas @ref="_canvas" class="manufacturing-gizmo-canvas" tabindex="0"></canvas>
     <div class="manufacturing-gizmo-fallback" aria-hidden="true">
         <span></span>
@@ -11,8 +11,26 @@
 </div>
 
 @code {
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "Interactive 3D manufacturing preview";
+
+    [Parameter]
+    public string? ModelUrl { get; set; }
+
+    [Parameter]
+    public bool EnableHoverMotion { get; set; }
+
+    [Parameter]
+    public bool UsePlasticMaterial { get; set; }
+
     private ElementReference _canvas;
     private IJSObjectReference? _module;
+    private string ContainerClass => string.IsNullOrWhiteSpace(Class)
+        ? "manufacturing-gizmo"
+        : $"manufacturing-gizmo {Class}";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -22,7 +40,12 @@
         }
 
         _module = await JS.InvokeAsync<IJSObjectReference>("import", "/js/manufacturing-gizmo.js");
-        await _module.InvokeVoidAsync("mountManufacturingGizmo", _canvas);
+        await _module.InvokeVoidAsync(
+            "mountManufacturingGizmo",
+            _canvas,
+            ModelUrl ?? string.Empty,
+            EnableHoverMotion,
+            UsePlasticMaterial);
     }
 
     public async ValueTask DisposeAsync()

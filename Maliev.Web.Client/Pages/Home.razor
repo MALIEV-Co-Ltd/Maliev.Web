@@ -5,21 +5,22 @@
 
 <PageTitle>MALIEV - Manufacturing quotes and shop</PageTitle>
 
-<section class="hero-band">
-    <div class="hero-copy">
-        <p class="eyebrow">3D printing · CNC · scanning · design · shop</p>
+<section class="landing-hero">
+    <div class="landing-hero-copy hero-copy">
+        <p class="eyebrow landing-hero-badge">3D printing · CNC · scanning · design · shop</p>
         <h1>@L["HeroTitle"]</h1>
         <p>@L["HeroSummary"]</p>
         <div class="hero-actions">
             <a class="button primary" href="/quote">@L["StartQuote"]</a>
             <a class="button secondary" href="/shop">@L["ShopProducts"]</a>
         </div>
-        <div class="hero-quote">
-            <InstantQuotePanel />
-        </div>
     </div>
-    <div class="hero-workspace gizmo-workspace">
-        <ManufacturingGizmo />
+    <div class="landing-hero-visual">
+        <ManufacturingGizmo Class="manufacturing-gizmo--landing"
+                            ModelUrl="/models/hero-3d.glb"
+                            EnableHoverMotion="true"
+                            UsePlasticMaterial="true"
+                            AriaLabel="MALIEV injection molded plastic part preview" />
     </div>
 </section>
 

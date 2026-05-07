@@ -1,8 +1,10 @@
 const babylonCdn = "https://cdn.jsdelivr.net/npm/babylonjs@9.6.0/babylon.min.js";
+const babylonLoadersCdn = "https://cdn.jsdelivr.net/npm/babylonjs-loaders@9.6.0/babylonjs.loaders.min.js";
 const instances = new WeakMap();
 let babylonRuntime;
+let babylonLoadersRuntime;
 
-export function mountManufacturingGizmo(canvas) {
+export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false) {
   if (!canvas || instances.has(canvas)) {
     return;
   }
@@ -11,6 +13,9 @@ export function mountManufacturingGizmo(canvas) {
   const state = {
     canvas,
     host,
+    modelUrl: typeof modelUrl === "string" ? modelUrl.trim() : "",
+    enableHoverMotion: Boolean(enableHoverMotion),
+    usePlasticMaterial: Boolean(usePlasticMaterial),
     scene: null,
     engine: null,
     disposed: false,
@@ -20,7 +25,11 @@ export function mountManufacturingGizmo(canvas) {
     observer: null,
     resizeObserver: null,
     resizeHandler: null,
-    visibilityHandler: null
+    visibilityHandler: null,
+    pointerMoveHandler: null,
+    pointerLeaveHandler: null,
+    contextMenuHandler: null,
+    cameraConfigurator: null
   };
 
   instances.set(canvas, state);
@@ -32,11 +41,15 @@ export function mountManufacturingGizmo(canvas) {
     }
 
     state.started = true;
-    loadBabylon()
+    loadBabylon(Boolean(state.modelUrl))
       .then(BABYLON => {
-        if (!state.disposed) {
-          createGizmoScene(state, BABYLON);
+        if (state.disposed) {
+          return undefined;
         }
+
+        return state.modelUrl
+          ? createLandingHeroScene(state, BABYLON)
+          : createGizmoScene(state, BABYLON);
       })
       .catch(() => {
         state.host?.classList.add("is-offline");
@@ -79,6 +92,18 @@ export function disposeManufacturingGizmo(canvas) {
     document.removeEventListener("visibilitychange", state.visibilityHandler);
   }
 
+  if (state.pointerMoveHandler) {
+    state.host?.removeEventListener("pointermove", state.pointerMoveHandler);
+  }
+
+  if (state.pointerLeaveHandler) {
+    state.host?.removeEventListener("pointerleave", state.pointerLeaveHandler);
+  }
+
+  if (state.contextMenuHandler) {
+    state.canvas.removeEventListener("contextmenu", state.contextMenuHandler, true);
+  }
+
   state.scene?.dispose();
   state.engine?.dispose();
   state.host?.classList.remove("is-loading", "is-ready", "is-offline");
@@ -86,7 +111,16 @@ export function disposeManufacturingGizmo(canvas) {
   instances.delete(canvas);
 }
 
-function loadBabylon() {
+function loadBabylon(includeLoaders) {
+  const core = loadBabylonCore();
+  if (!includeLoaders) {
+    return core;
+  }
+
+  return core.then(BABYLON => loadBabylonLoaders().then(() => BABYLON));
+}
+
+function loadBabylonCore() {
   if (window.BABYLON) {
     return Promise.resolve(window.BABYLON);
   }
@@ -106,8 +140,27 @@ function loadBabylon() {
   return babylonRuntime;
 }
 
-function createGizmoScene(state, BABYLON) {
-  const { canvas } = state;
+function loadBabylonLoaders() {
+  if (window.BABYLON?.GLTFFileLoader) {
+    return Promise.resolve();
+  }
+
+  if (!babylonLoadersRuntime) {
+    babylonLoadersRuntime = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = babylonLoadersCdn;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = () => resolve();
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  return babylonLoadersRuntime;
+}
+
+function createEngine(canvas, BABYLON) {
   const engine = new BABYLON.Engine(canvas, true, {
     antialias: true,
     stencil: false,
@@ -116,6 +169,12 @@ function createGizmoScene(state, BABYLON) {
   }, false);
 
   configureHardwareScaling(engine);
+  return engine;
+}
+
+function createGizmoScene(state, BABYLON) {
+  const { canvas } = state;
+  const engine = createEngine(canvas, BABYLON);
 
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = BABYLON.Color4.FromHexString("#ffffff00");
@@ -151,24 +210,246 @@ function createGizmoScene(state, BABYLON) {
     });
   }
 
+  configureSceneRuntime(state, engine, scene);
+  markReady(state);
+}
+
+async function createLandingHeroScene(state, BABYLON) {
+  const { canvas } = state;
+  allowNativeContextMenu(state);
+  const engine = createEngine(canvas, BABYLON);
+  restoreNativeCanvasBehavior(state);
+  const scene = new BABYLON.Scene(engine);
+  scene.clearColor = BABYLON.Color4.FromHexString("#ffffff00");
+  scene.skipPointerMovePicking = true;
+  scene.environmentIntensity = 0.42;
+
+  const camera = new BABYLON.ArcRotateCamera(
+    "landing-camera",
+    -Math.PI / 2.55,
+    Math.PI / 2.65,
+    5.15,
+    new BABYLON.Vector3(0, 0.08, 0),
+    scene);
+  camera.lowerRadiusLimit = camera.radius;
+  camera.upperRadiusLimit = camera.radius;
+  camera.panningSensibility = 0;
+  camera.inputs.clear();
+  configureLandingHeroCamera(camera, state.host, BABYLON);
+
+  const fill = new BABYLON.HemisphericLight("landing-fill", new BABYLON.Vector3(-0.5, 1, 0.2), scene);
+  fill.intensity = 1.25;
+
+  const key = new BABYLON.DirectionalLight("landing-key", new BABYLON.Vector3(-0.5, -0.75, -0.45), scene);
+  key.position = new BABYLON.Vector3(4.5, 6, 5);
+  key.intensity = 2.1;
+
+  const rim = new BABYLON.PointLight("landing-rim", new BABYLON.Vector3(-3.4, 2.1, -2.5), scene);
+  rim.intensity = 0.64;
+  rim.diffuse = BABYLON.Color3.FromHexString("#f6f6f6");
+
+  const root = new BABYLON.TransformNode("landing-model-root", scene);
+  const modelParts = splitModelUrl(state.modelUrl);
+  const result = await BABYLON.SceneLoader.ImportMeshAsync("", modelParts.rootUrl, modelParts.fileName, scene);
+
+  const topLevelMeshes = result.meshes.filter(mesh => !mesh.parent);
+  for (const mesh of topLevelMeshes) {
+    mesh.parent = root;
+  }
+
+  const renderMeshes = result.meshes.filter(mesh => mesh.getTotalVertices && mesh.getTotalVertices() > 0);
+  for (const mesh of renderMeshes) {
+    mesh.isPickable = false;
+  }
+
+  if (state.usePlasticMaterial) {
+    applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON);
+  }
+
+  frameImportedModel(renderMeshes, root, BABYLON);
+  createLandingSurface(scene, BABYLON);
+
+  const baseRotation = new BABYLON.Vector3(-0.05, -0.36, 0.02);
+  root.rotation.copyFrom(baseRotation);
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (state.enableHoverMotion && !reducedMotion) {
+    addHoverMotion(state, scene, camera, root, baseRotation, BABYLON);
+  }
+
+  configureSceneRuntime(state, engine, scene, () => configureLandingHeroCamera(camera, state.host, BABYLON));
+  markReady(state);
+}
+
+function configureLandingHeroCamera(camera, host, BABYLON) {
+  const width = host?.clientWidth ?? 780;
+  const height = host?.clientHeight ?? 520;
+  const compact = width < 560 || height < 360;
+  const wide = width > 920;
+
+  camera.fov = compact ? 0.64 : 0.5;
+  camera.radius = compact ? 6.15 : wide ? 6.05 : 5.75;
+  camera.lowerRadiusLimit = camera.radius;
+  camera.upperRadiusLimit = camera.radius;
+  camera.target = new BABYLON.Vector3(0, 0.05, 0);
+}
+
+function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
+  const host = state.host ?? state.canvas;
+  const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  const baseAlpha = camera.alpha;
+  const baseBeta = camera.beta;
+
+  state.pointerMoveHandler = event => {
+    const rect = host.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
+
+    pointer.targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    pointer.targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    pointer.targetX = Math.max(-1, Math.min(1, pointer.targetX));
+    pointer.targetY = Math.max(-1, Math.min(1, pointer.targetY));
+  };
+
+  state.pointerLeaveHandler = () => {
+    pointer.targetX = 0;
+    pointer.targetY = 0;
+  };
+
+  host.addEventListener("pointermove", state.pointerMoveHandler, { passive: true });
+  host.addEventListener("pointerleave", state.pointerLeaveHandler, { passive: true });
+
+  scene.onBeforeRenderObservable.add(() => {
+    const smoothing = Math.min(0.16, 0.065 * Math.max(1, state.engine.getDeltaTime() / 16.67));
+    pointer.x += (pointer.targetX - pointer.x) * smoothing;
+    pointer.y += (pointer.targetY - pointer.y) * smoothing;
+
+    root.rotation.x = baseRotation.x + pointer.y * 0.11;
+    root.rotation.y = baseRotation.y + pointer.x * 0.24;
+    root.rotation.z = baseRotation.z - pointer.x * 0.035;
+    camera.alpha = baseAlpha + pointer.x * 0.055;
+    camera.beta = clamp(baseBeta + pointer.y * 0.04, 0.72, 1.36);
+  });
+}
+
+function allowNativeContextMenu(state) {
+  state.contextMenuHandler = event => {
+    event.stopImmediatePropagation();
+  };
+
+  state.canvas.addEventListener("contextmenu", state.contextMenuHandler, true);
+}
+
+function restoreNativeCanvasBehavior(state) {
+  state.canvas.style.touchAction = "auto";
+  state.canvas.style.cursor = "default";
+}
+
+function splitModelUrl(modelUrl) {
+  const absolute = new URL(modelUrl, document.baseURI).href;
+  const slashIndex = absolute.lastIndexOf("/") + 1;
+  return {
+    rootUrl: absolute.substring(0, slashIndex),
+    fileName: absolute.substring(slashIndex)
+  };
+}
+
+function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
+  const plastic = new BABYLON.PBRMaterial("injection-molded-plastic", scene);
+  plastic.albedoColor = BABYLON.Color3.FromHexString("#171717");
+  plastic.reflectivityColor = BABYLON.Color3.FromHexString("#f5f5f5");
+  plastic.metallic = 0;
+  plastic.roughness = 0.37;
+  plastic.microSurface = 0.64;
+  plastic.clearCoat.isEnabled = true;
+  plastic.clearCoat.intensity = 0.22;
+  plastic.clearCoat.roughness = 0.44;
+
+  for (const mesh of meshes) {
+    mesh.material = plastic;
+  }
+}
+
+function frameImportedModel(meshes, root, BABYLON) {
+  const bounds = computeMeshBounds(meshes, BABYLON);
+  if (!bounds) {
+    return;
+  }
+
+  const size = bounds.max.subtract(bounds.min);
+  const maxDimension = Math.max(size.x, size.y, size.z) || 1;
+  const targetSize = 2.58;
+  const scale = targetSize / maxDimension;
+  root.scaling.setAll(scale);
+  root.position.copyFrom(bounds.center.scale(-scale));
+}
+
+function computeMeshBounds(meshes, BABYLON) {
+  const renderMeshes = meshes.filter(mesh => mesh.getBoundingInfo);
+  if (!renderMeshes.length) {
+    return null;
+  }
+
+  let min = new BABYLON.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+  let max = new BABYLON.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+
+  for (const mesh of renderMeshes) {
+    mesh.computeWorldMatrix(true);
+    const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
+    for (const vector of vectors) {
+      min = BABYLON.Vector3.Minimize(min, vector);
+      max = BABYLON.Vector3.Maximize(max, vector);
+    }
+  }
+
+  return {
+    min,
+    max,
+    center: min.add(max).scale(0.5)
+  };
+}
+
+function createLandingSurface(scene, BABYLON) {
+  const surface = BABYLON.MeshBuilder.CreateDisc("landing-contact-shadow", {
+    radius: 1.58,
+    tessellation: 96
+  }, scene);
+  surface.rotation.x = Math.PI / 2;
+  surface.position.y = -1.42;
+  surface.scaling.x = 1.7;
+
+  const material = new BABYLON.StandardMaterial("landing-contact-shadow-material", scene);
+  material.diffuseColor = BABYLON.Color3.FromHexString("#171717");
+  material.alpha = 0.055;
+  material.disableLighting = true;
+  surface.material = material;
+  surface.isPickable = false;
+}
+
+function configureSceneRuntime(state, engine, scene, cameraConfigurator) {
   state.engine = engine;
   state.scene = scene;
+  state.cameraConfigurator = cameraConfigurator ?? null;
   state.visibilityHandler = () => document.hidden ? stopRenderLoop(state) : startRenderLoop(state);
   document.addEventListener("visibilitychange", state.visibilityHandler);
 
   if ("ResizeObserver" in window) {
-    state.resizeObserver = new ResizeObserver(() => resizeEngine(engine));
-    state.resizeObserver.observe(state.host ?? canvas);
+    state.resizeObserver = new ResizeObserver(() => resizeScene(state));
+    state.resizeObserver.observe(state.host ?? state.canvas);
   }
 
-  state.resizeHandler = () => resizeEngine(engine);
+  state.resizeHandler = () => resizeScene(state);
   window.addEventListener("resize", state.resizeHandler, { passive: true });
 
-  resizeEngine(engine);
+  resizeScene(state);
+}
+
+function markReady(state) {
   state.host?.classList.remove("is-loading");
   state.host?.classList.add("is-ready");
-  canvas.dataset.ready = "true";
-  scene.render();
+  state.canvas.dataset.ready = "true";
+  state.scene.render();
   startRenderLoop(state);
 }
 
@@ -301,9 +582,14 @@ function configureHardwareScaling(engine) {
   engine.setHardwareScalingLevel(Math.max(1, deviceRatio / maxRatio));
 }
 
-function resizeEngine(engine) {
-  configureHardwareScaling(engine);
-  engine.resize();
+function resizeScene(state) {
+  if (!state.engine) {
+    return;
+  }
+
+  state.cameraConfigurator?.();
+  configureHardwareScaling(state.engine);
+  state.engine.resize();
 }
 
 function startRenderLoop(state) {
@@ -326,4 +612,8 @@ function stopRenderLoop(state) {
 
   state.engine.stopRenderLoop();
   state.looping = false;
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
