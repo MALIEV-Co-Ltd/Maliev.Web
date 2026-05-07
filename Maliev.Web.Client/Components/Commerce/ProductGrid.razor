@@ -1,0 +1,35 @@
+@inject PreferenceService Preferences
+@inject CartState Cart
+
+<div class="product-grid">
+    @foreach (var product in Products)
+    {
+        <article class="product-card">
+            <a href="/shop/@product.Handle" class="product-media">
+                <img src="@product.ImageUrl" alt="@product.Title.For(Preferences.Culture)" loading="lazy" />
+            </a>
+            <div class="product-body">
+                <a href="/shop/@product.Handle">
+                    <h3>@product.Title.For(Preferences.Culture)</h3>
+                </a>
+                <p>@product.Summary.For(Preferences.Culture)</p>
+                <div class="product-meta">
+                    <strong>@Price(product)</strong>
+                    <span>@product.LeadTimeDays d</span>
+                </div>
+                <button type="button" class="button secondary" @onclick="() => Cart.Add(product)">Add to cart</button>
+            </div>
+        </article>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<ProductSummaryDto> Products { get; set; } = [];
+
+    private static string Price(ProductSummaryDto product)
+    {
+        var prefix = product.PriceStartsAt ? "From " : string.Empty;
+        return product.PriceThb <= 0 ? "Request quote" : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"{prefix}฿{product.PriceThb:N2}");
+    }
+}

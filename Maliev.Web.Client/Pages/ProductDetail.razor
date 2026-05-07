@@ -1,0 +1,52 @@
+@page "/shop/{Handle}"
+@inject MalievApiClient Api
+@inject PreferenceService Preferences
+@inject CartState Cart
+
+<PageTitle>@(_product?.Title.For(Preferences.Culture) ?? "Product") - MALIEV</PageTitle>
+
+@if (_product is null)
+{
+    <section class="page-hero compact">
+        <h1>Product not found</h1>
+        <p>The requested product handle is not in the migrated seed catalog.</p>
+    </section>
+}
+else
+{
+    <section class="product-detail">
+        <div class="product-detail-media">
+            <img src="@_product.ImageUrl" alt="@_product.Title.For(Preferences.Culture)" />
+        </div>
+        <div class="product-detail-copy">
+            <p class="eyebrow">@_product.CollectionSlug</p>
+            <h1>@_product.Title.For(Preferences.Culture)</h1>
+            <p>@_product.Body.For(Preferences.Culture)</p>
+            <div class="product-price">@Price(_product)</div>
+            <dl class="spec-list">
+                <div><dt>Lead time</dt><dd>@_product.LeadTimeDays days</dd></div>
+                <div><dt>Source</dt><dd><a href="@_product.SourceUrl" target="_blank" rel="noreferrer">Shopify handle</a></dd></div>
+            </dl>
+            <button type="button" class="button primary" @onclick="() => Cart.Add(_product)">Add to cart</button>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string Handle { get; set; } = string.Empty;
+
+    private ProductDetailDto? _product;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Preferences.InitializeAsync();
+        _product = await Api.GetProductAsync(Handle);
+    }
+
+    private static string Price(ProductSummaryDto product)
+    {
+        var prefix = product.PriceStartsAt ? "From " : string.Empty;
+        return product.PriceThb <= 0 ? "Request quote" : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"{prefix}฿{product.PriceThb:N2}");
+    }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="HeroTitle" xml:space="preserve"><value>เริ่มใบเสนอราคาการผลิตจากไฟล์ของคุณ</value></data>
+  <data name="HeroSummary" xml:space="preserve"><value>อัปโหลดโมเดล เลือกกระบวนการ ตรวจสอบ DFM และดำเนินการต่อเป็นใบเสนอราคาหรือชำระเงินในพื้นที่ลูกค้าเดียวกัน</value></data>
+  <data name="StartQuote" xml:space="preserve"><value>เริ่มขอราคา</value></data>
+  <data name="ShopProducts" xml:space="preserve"><value>เลือกซื้อสินค้า</value></data>
+  <data name="InstantQuote" xml:space="preserve"><value>ใบเสนอราคาทันที</value></data>
+  <data name="Services" xml:space="preserve"><value>บริการ</value></data>
+  <data name="Shop" xml:space="preserve"><value>ร้านค้า</value></data>
+  <data name="Contact" xml:space="preserve"><value>ติดต่อ</value></data>
+  <data name="Language" xml:space="preserve"><value>ภาษา</value></data>
+  <data name="Account" xml:space="preserve"><value>บัญชี</value></data>
+</root>

@@ -1,0 +1,49 @@
+@page "/shop"
+@inject MalievApiClient Api
+@inject PreferenceService Preferences
+
+<PageTitle>Shop - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">Storefront migration</p>
+    <h1>Machines, spares, and printed products</h1>
+    <p>The current Shopify catalog is represented here through Web BFF seed data until the Admin API or CSV import becomes the authoritative source.</p>
+</section>
+
+<section class="section">
+    <div class="filters">
+        <button class="@CollectionClass(null)" type="button" @onclick="() => SelectCollectionAsync(null)">All</button>
+        @foreach (var collection in _collections)
+        {
+            <button class="@CollectionClass(collection.Slug)" type="button" @onclick="() => SelectCollectionAsync(collection.Slug)">
+                @collection.Name.For(Preferences.Culture)
+            </button>
+        }
+    </div>
+
+    <ProductGrid Products="@_products" />
+</section>
+
+@code {
+    private IReadOnlyList<ProductCollectionDto> _collections = [];
+    private IReadOnlyList<ProductSummaryDto> _products = [];
+    private string? _selectedCollection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        _collections = await Api.GetCollectionsAsync();
+        _products = await Api.GetProductsAsync();
+    }
+
+    private async Task SelectCollectionAsync(string? collection)
+    {
+        _selectedCollection = collection;
+        _products = await Api.GetProductsAsync(collection);
+    }
+
+    private string CollectionClass(string? collection)
+    {
+        return collection == _selectedCollection ? "filter-chip active" : "filter-chip";
+    }
+}

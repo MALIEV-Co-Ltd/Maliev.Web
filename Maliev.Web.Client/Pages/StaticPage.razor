@@ -1,0 +1,54 @@
+@page "/about"
+@page "/contact"
+@page "/faq"
+@page "/shipping-returns"
+@page "/privacy"
+@page "/terms"
+@page "/account/quotes"
+@page "/account/orders"
+@page "/account/preferences"
+@inject NavigationManager Navigation
+
+<PageTitle>@Title - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">MALIEV</p>
+    <h1>@Title</h1>
+    <p>@Body</p>
+</section>
+
+<section class="section text-section">
+    <p>@Detail</p>
+    <a class="button secondary" href="/quote">Start quote</a>
+</section>
+
+@code {
+    private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
+
+    private string Title => Path switch
+    {
+        "contact" => "Contact",
+        "faq" => "FAQ",
+        "shipping-returns" => "Shipping and returns",
+        "privacy" => "Privacy",
+        "terms" => "Terms",
+        "account/quotes" => "Saved quotes",
+        "account/orders" => "Orders",
+        "account/preferences" => "Preferences",
+        _ => "About MALIEV"
+    };
+
+    private string Body => Path switch
+    {
+        "contact" => "Reach MALIEV for manufacturing services, machine support, and quotation help.",
+        "account/preferences" => "Language and currency preferences persist locally now and will attach to customer accounts after authentication wiring.",
+        _ => "This page is part of the public customer website shell and is ready for CMS-backed content."
+    };
+
+    private string Detail => Path switch
+    {
+        "privacy" => "Customer files, quote drafts, and order data should remain behind the Web BFF and downstream service authorization boundaries.",
+        "terms" => "Formal commercial terms should be sourced from the quotation and order services when checkout is finalized.",
+        _ => "The implementation keeps public content pages routable while the commerce and quotation workflows are integrated."
+    };
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="HeroTitle" xml:space="preserve"><value>Manufacturing quotes that start with your file</value></data>
+  <data name="HeroSummary" xml:space="preserve"><value>Upload a model, choose a process, review DFM feedback, and continue into quotation or shop checkout from one customer workspace.</value></data>
+  <data name="StartQuote" xml:space="preserve"><value>Start quote</value></data>
+  <data name="ShopProducts" xml:space="preserve"><value>Shop products</value></data>
+  <data name="InstantQuote" xml:space="preserve"><value>Instant quotation</value></data>
+  <data name="Services" xml:space="preserve"><value>Services</value></data>
+  <data name="Shop" xml:space="preserve"><value>Shop</value></data>
+  <data name="Contact" xml:space="preserve"><value>Contact</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Account" xml:space="preserve"><value>Account</value></data>
+</root>

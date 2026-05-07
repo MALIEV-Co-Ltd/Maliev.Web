@@ -1,0 +1,43 @@
+@page "/cart"
+@inject CartState ShoppingCart
+@inject MalievApiClient Api
+
+<PageTitle>Cart - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">Checkout</p>
+    <h1>Cart</h1>
+    <p>Checkout draft is routed through the Web BFF so OrderService, PaymentService, DeliveryService, and CustomerService can own their boundaries.</p>
+</section>
+
+<section class="section cart-panel">
+    @if (ShoppingCart.Items.Count == 0)
+    {
+        <p>Your cart is empty.</p>
+        <a class="button primary" href="/shop">Shop products</a>
+    }
+    else
+    {
+        @foreach (var item in ShoppingCart.Items)
+        {
+            <div class="cart-line">
+                <span>@item.ProductHandle</span>
+                <strong>@item.Quantity</strong>
+            </div>
+        }
+        <button type="button" class="button primary" @onclick="CreateDraftAsync">Create checkout draft</button>
+        @if (_checkout is not null)
+        {
+            <p>Draft checkout @_checkout.CheckoutId created. Sign-in is required before payment.</p>
+        }
+    }
+</section>
+
+@code {
+    private CheckoutDraftResponse? _checkout;
+
+    private async Task CreateDraftAsync()
+    {
+        _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Items = ShoppingCart.Items.ToList() });
+    }
+}

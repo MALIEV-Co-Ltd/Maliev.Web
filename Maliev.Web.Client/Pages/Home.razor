@@ -1,0 +1,81 @@
+@page "/"
+@inject IStringLocalizer<SharedResources> L
+@inject MalievApiClient Api
+@inject PreferenceService Preferences
+
+<PageTitle>MALIEV - Manufacturing quotes and shop</PageTitle>
+
+<section class="hero-band">
+    <div class="hero-copy">
+        <p class="eyebrow">3D printing · CNC · scanning · design · shop</p>
+        <h1>@L["HeroTitle"]</h1>
+        <p>@L["HeroSummary"]</p>
+        <div class="hero-actions">
+            <a class="button primary" href="/quote">@L["StartQuote"]</a>
+            <a class="button secondary" href="/shop">@L["ShopProducts"]</a>
+        </div>
+    </div>
+    <div class="hero-workspace">
+        <InstantQuotePanel />
+    </div>
+</section>
+
+<section class="section split-section">
+    <div>
+        <p class="eyebrow">Manufacturing services</p>
+        <h2>From prototype to low-volume production</h2>
+    </div>
+    <div class="service-list">
+        @foreach (var service in Services)
+        {
+            <a class="service-row" href="/services/@service.Slug">
+                <span>@service.Name.For(Preferences.Culture)</span>
+                <small>@service.Summary.For(Preferences.Culture)</small>
+            </a>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Migrating from Shopify</p>
+            <h2>Machines, spares, and printed products</h2>
+        </div>
+        <a href="/shop">View all</a>
+    </div>
+    @if (_products.Count > 0)
+    {
+        <ProductGrid Products="@_products.Take(4).ToList()" />
+    }
+</section>
+
+<section class="section proof-band">
+    <img src="https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png?v=1737116109&width=832" alt="MALIEV pneumatic injection molding machine" />
+    <div>
+        <p class="eyebrow">Build. Test. Produce.</p>
+        <h2>Customer-facing quoting and commerce in one path</h2>
+        <p>The Web BFF owns the browser contract and keeps pricing, upload, DFM, project, quotation, payment, and order boundaries behind service clients.</p>
+        <a class="button primary" href="/quote">Start with a file</a>
+    </div>
+</section>
+
+@code {
+    private readonly List<ServiceLink> Services =
+    [
+        new("3d-printing", new() { En = "3D Printing", Th = "พิมพ์สามมิติ" }, new() { En = "FDM and resin parts for prototypes and fixtures.", Th = "งาน FDM และเรซินสำหรับต้นแบบและฟิกซ์เจอร์" }),
+        new("cnc-machining", new() { En = "CNC Machining", Th = "CNC แมชชีนนิ่ง" }, new() { En = "Precision plastic and metal parts.", Th = "ชิ้นส่วนพลาสติกและโลหะความแม่นยำสูง" }),
+        new("3d-scanning", new() { En = "3D Scanning", Th = "สแกนสามมิติ" }, new() { En = "Reverse engineering and inspection capture.", Th = "สแกนเพื่อรีเวิร์สเอนจิเนียริ่งและตรวจสอบชิ้นงาน" }),
+        new("3d-design", new() { En = "3D Design", Th = "ออกแบบสามมิติ" }, new() { En = "CAD and design-for-manufacturing support.", Th = "ขึ้นแบบ CAD และปรับแบบเพื่อการผลิต" })
+    ];
+
+    private List<ProductSummaryDto> _products = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        _products = (await Api.GetProductsAsync()).ToList();
+    }
+
+    private sealed record ServiceLink(string Slug, LocalizedText Name, LocalizedText Summary);
+}

@@ -1,0 +1,176 @@
+@inject MalievApiClient Api
+@inject PreferenceService Preferences
+
+<section class="quote-panel" aria-label="Instant quote">
+    <div class="quote-tabs" role="tablist">
+        @foreach (var process in _reference.Processes)
+        {
+            <button class="@ProcessButtonClass(process.Code)" type="button" @onclick="() => SelectProcess(process.Code)">
+                <span>@process.Name.For(Preferences.Culture)</span>
+            </button>
+        }
+    </div>
+
+    <label class="upload-zone">
+        <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.obj,.3mf" />
+        <span class="upload-title">Drop or choose 3D model files</span>
+        <span class="upload-meta">STL, STEP, STP, OBJ, 3MF. Files are matched by name and size.</span>
+    </label>
+
+    @if (_parts.Count == 0)
+    {
+        <div class="quote-empty">No file selected yet. Add a model to configure materials and pricing.</div>
+    }
+    else
+    {
+        <div class="quote-parts">
+            @foreach (var part in _parts)
+            {
+                <article class="quote-part">
+                    <div>
+                        <strong>@part.File.Name</strong>
+                        <span>@FormatBytes(part.File.SizeBytes)</span>
+                    </div>
+                    <select @bind="part.MaterialCode" aria-label="Material">
+                        @foreach (var material in _reference.Materials.Where(m => m.ProcessCode == part.ProcessCode))
+                        {
+                            <option value="@material.Code">@material.Name.For(Preferences.Culture)</option>
+                        }
+                    </select>
+                    <input type="number" min="1" max="999" @bind="part.Quantity" aria-label="Quantity" />
+                    <label class="ack">
+                        <input type="checkbox" @bind="part.DfmAcknowledged" />
+                        DFM checked
+                    </label>
+                </article>
+            }
+        </div>
+
+        <div class="quote-actions">
+            <select @bind="_leadTimeCode" aria-label="Lead time">
+                <option value="STANDARD">Standard</option>
+                <option value="RUSH">Rush</option>
+                <option value="ECONOMY">Economy</option>
+            </select>
+            <button type="button" class="button primary" @onclick="EstimateAsync" disabled="@_isEstimating">Estimate</button>
+        </div>
+    }
+
+    @if (_estimate is not null)
+    {
+        <div class="quote-total">
+            <div>
+                <span>Subtotal</span>
+                <strong>@FormatCurrency(_estimate.Subtotal)</strong>
+            </div>
+            <div>
+                <span>Bulk discount</span>
+                <strong>-@FormatCurrency(_estimate.BulkDiscountTotal)</strong>
+            </div>
+            <div>
+                <span>VAT estimate</span>
+                <strong>@FormatCurrency(_estimate.TaxAmount)</strong>
+            </div>
+            <div class="grand-total">
+                <span>Total</span>
+                <strong>@FormatCurrency(_estimate.Total)</strong>
+            </div>
+            @if (_estimate.RequiresManualReview)
+            {
+                <p class="quote-warning">Manual review required before issuing a formal quotation.</p>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private readonly List<QuotePartDraftDto> _parts = [];
+    private QuoteReferenceDataDto _reference = new();
+    private QuoteEstimateResponse? _estimate;
+    private string _selectedProcess = "FDM";
+    private string _leadTimeCode = "STANDARD";
+    private bool _isEstimating;
+    private readonly Guid _quoteSessionId = Guid.NewGuid();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        _reference = await Api.GetQuoteReferenceDataAsync();
+    }
+
+    private void SelectProcess(string code)
+    {
+        _selectedProcess = code;
+        foreach (var part in _parts)
+        {
+            part.ProcessCode = code;
+            part.MaterialCode = _reference.Materials.FirstOrDefault(m => m.ProcessCode == code)?.Code ?? part.MaterialCode;
+        }
+    }
+
+    private async Task HandleFilesAsync(InputFileChangeEventArgs args)
+    {
+        foreach (var file in args.GetMultipleFiles(20))
+        {
+            var part = new QuotePartDraftDto
+            {
+                File = new QuoteFileDraftDto
+                {
+                    Name = file.Name,
+                    SizeBytes = file.Size,
+                    ContentType = file.ContentType
+                },
+                ProcessCode = _selectedProcess,
+                MaterialCode = _reference.Materials.FirstOrDefault(m => m.ProcessCode == _selectedProcess)?.Code ?? "PLA",
+                EstimatedVolumeCc = EstimateVolumeFromFileSize(file.Size)
+            };
+            _parts.Add(part);
+
+            await Api.InitiateUploadAsync(new WebUploadInitiationRequest
+            {
+                FileName = file.Name,
+                ContentType = file.ContentType,
+                FileSize = file.Size,
+                QuoteSessionId = _quoteSessionId
+            });
+        }
+    }
+
+    private async Task EstimateAsync()
+    {
+        _isEstimating = true;
+        try
+        {
+            _estimate = await Api.EstimateQuoteAsync(new QuoteEstimateRequest
+            {
+                Culture = Preferences.Culture,
+                LeadTimeCode = _leadTimeCode,
+                Parts = _parts
+            });
+        }
+        finally
+        {
+            _isEstimating = false;
+        }
+    }
+
+    private string ProcessButtonClass(string code)
+    {
+        return code == _selectedProcess ? "quote-tab active" : "quote-tab";
+    }
+
+    private static decimal EstimateVolumeFromFileSize(long size)
+    {
+        return Math.Clamp(Math.Round(size / 85000m, 2), 8m, 260m);
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        return bytes < 1024 * 1024 ? $"{bytes / 1024m:N0} KB" : $"{bytes / 1024m / 1024m:N1} MB";
+    }
+
+    private static string FormatCurrency(decimal amount)
+    {
+        return string.Create(CultureInfo.GetCultureInfo("th-TH"), $"฿{amount:N2}");
+    }
+}

@@ -1,0 +1,51 @@
+@page "/services/{Slug}"
+
+<PageTitle>@Title - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <p class="eyebrow">Manufacturing services</p>
+    <h1>@Title</h1>
+    <p>@Summary</p>
+    <a class="button primary" href="/quote">Start quote</a>
+</section>
+
+<section class="section service-detail-grid">
+    @foreach (var item in Workflow)
+    {
+        <article class="workflow-step">
+            <span>@item.Step</span>
+            <h2>@item.Title</h2>
+            <p>@item.Text</p>
+        </article>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private string Title => Slug switch
+    {
+        "cnc-machining" => "CNC Machining",
+        "3d-scanning" => "3D Scanning",
+        "3d-design" => "3D Design",
+        _ => "3D Printing"
+    };
+
+    private string Summary => Slug switch
+    {
+        "cnc-machining" => "Upload machinable geometry, review DFM risks, and route precision parts into quotation.",
+        "3d-scanning" => "Book marker-based or object scanning for reverse engineering, inspection, and documentation.",
+        "3d-design" => "Turn sketches, broken samples, or rough ideas into manufacturable CAD models.",
+        _ => "Choose FDM or resin, material, finish, quantity, and lead time from an instant quote workspace."
+    };
+
+    private IReadOnlyList<WorkflowItem> Workflow =>
+    [
+        new("01", "Upload or brief", "Start with model files, drawings, photos, or a short manufacturing brief."),
+        new("02", "Analyze and configure", "DFM checks, process options, and materials stay customer-safe."),
+        new("03", "Quote and produce", "Confirmed prices become projects, quotations, orders, and delivery work.")
+    ];
+
+    private sealed record WorkflowItem(string Step, string Title, string Text);
+}
