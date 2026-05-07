@@ -23,18 +23,69 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the quote page uses the same direct upload-first hero composition.
+    /// Verifies the home hero routes quote entry through a MudBlazor dropzone CTA.
     /// </summary>
     [Fact]
-    public void QuoteHeroPlacesQuotePanelBelowHeadingAndUsesGizmo()
+    public void HomeHeroMergesStartQuoteIntoDropzone()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+
+        Assert.Contains("landing-quote-dropzone", source);
+        Assert.Contains("Href=\"/quote\"", source);
+        Assert.Contains("Icons.Material.Filled.CloudUpload", source);
+        Assert.DoesNotContain("<a class=\"button primary\" href=\"/quote\">@L[\"StartQuote\"]</a>", source);
+        Assert.DoesNotContain("quote-empty", source);
+    }
+
+    /// <summary>
+    /// Verifies the quote page uses a mocked MudBlazor quote engine while the real engine is deferred.
+    /// </summary>
+    [Fact]
+    public void QuoteHeroUsesMockQuoteEngineAndGizmo()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
+        Assert.Contains("quote-engine-mock", source);
+        Assert.Contains("quote-engine-dropzone", source);
+        Assert.Contains("MudButton", source);
+        Assert.Contains("Icons.Material.Filled.CloudUpload", source);
+        Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("ModelUrl=", source);
         Assert.DoesNotContain("EnableHoverMotion=\"true\"", source);
-        AssertQuotePanelFollowsHeading(source);
         Assert.DoesNotContain("contract-panel", source);
+    }
+
+    /// <summary>
+    /// Verifies the public layout uses MudBlazor icon navigation for cart and account.
+    /// </summary>
+    [Fact]
+    public void HeaderUsesMudIconButtonsForCartAndAccount()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+
+        Assert.Contains("MudIconButton", source);
+        Assert.Contains("MudBadge", source);
+        Assert.Contains("Icons.Material.Filled.ShoppingCart", source);
+        Assert.Contains("Icons.Material.Filled.AccountCircle", source);
+        Assert.DoesNotContain("class=\"icon-link\"", source);
+        Assert.DoesNotContain("<NavLink href=\"/cart\"", source);
+        Assert.DoesNotContain("<NavLink href=\"/account/preferences\"", source);
+    }
+
+    /// <summary>
+    /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
+    /// </summary>
+    [Fact]
+    public void LayoutAppliesMalievMudTheme()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+
+        Assert.Contains("<MudThemeProvider Theme=\"@_malievTheme\" />", source);
+        Assert.Contains("new MudTheme", source);
+        Assert.Contains("PaletteLight", source);
+        Assert.Contains("DefaultBorderRadius", source);
+        Assert.Contains("Typography", source);
     }
 
     /// <summary>
@@ -67,15 +118,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);
-    }
-
-    private static void AssertQuotePanelFollowsHeading(string source)
-    {
-        var headingIndex = source.IndexOf("<h1", StringComparison.Ordinal);
-        var quoteIndex = source.IndexOf("<InstantQuotePanel />", StringComparison.Ordinal);
-
-        Assert.True(headingIndex >= 0, "Hero heading was not found.");
-        Assert.True(quoteIndex > headingIndex, "InstantQuotePanel must render after the hero heading.");
     }
 
     private static string ReadRepoFile(params string[] pathSegments)

@@ -10,9 +10,27 @@
         <p class="eyebrow landing-hero-badge">3D printing · CNC · scanning · design · shop</p>
         <h1>@L["HeroTitle"]</h1>
         <p>@L["HeroSummary"]</p>
-        <div class="hero-actions">
-            <a class="button primary" href="/quote">@L["StartQuote"]</a>
-            <a class="button secondary" href="/shop">@L["ShopProducts"]</a>
+        <div class="landing-hero-actions">
+            <MudButton Href="/quote"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       Class="landing-quote-dropzone"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       IconClass="landing-quote-dropzone-icon"
+                       EndIcon="@Icons.Material.Filled.ArrowForward"
+                       aria-label="@L["StartQuote"]">
+                <span class="landing-quote-dropzone-copy">
+                    <strong>@L["QuoteDropzoneTitle"]</strong>
+                    <small>@L["QuoteDropzoneMeta"]</small>
+                </span>
+                <span class="landing-quote-dropzone-action">@L["StartQuote"]</span>
+            </MudButton>
+            <MudButton Href="/shop"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       Class="landing-shop-button">
+                @L["ShopProducts"]
+            </MudButton>
         </div>
     </div>
     <div class="landing-hero-visual">

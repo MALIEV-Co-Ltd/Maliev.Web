@@ -5,7 +5,7 @@
 @inject CartState Cart
 @inject NavigationManager Navigation
 
-<MudThemeProvider />
+<MudThemeProvider Theme="@_malievTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -25,8 +25,28 @@
                 <option value="en-US">EN</option>
                 <option value="th-TH">TH</option>
             </select>
-            <NavLink href="/cart" class="icon-link" title="@L["Cart"]">@L["Cart"] @Cart.Count</NavLink>
-            <NavLink href="/account/preferences" class="icon-link">@L["Account"]</NavLink>
+            <MudBadge Content="@Cart.Count"
+                      Color="Color.Info"
+                      Overlap="true"
+                      Bordered="false"
+                      Elevation="0"
+                      BadgeAriaLabel="@CartBadgeAriaLabel"
+                      Class="nav-icon-badge">
+                <MudIconButton Href="/cart"
+                               Icon="@Icons.Material.Filled.ShoppingCart"
+                               Variant="Variant.Text"
+                               Color="Color.Inherit"
+                               Size="Size.Medium"
+                               Class="nav-icon-button"
+                               aria-label="@L["Cart"]" />
+            </MudBadge>
+            <MudIconButton Href="/account/preferences"
+                           Icon="@Icons.Material.Filled.AccountCircle"
+                           Variant="Variant.Text"
+                           Color="Color.Inherit"
+                           Size="Size.Medium"
+                           Class="nav-icon-button"
+                           aria-label="@L["Account"]" />
         </div>
     </header>
 
@@ -55,7 +75,66 @@
 </div>
 
 @code {
+    private readonly MudTheme _malievTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#171717",
+            PrimaryContrastText = "#ffffff",
+            Secondary = "#ffffff",
+            SecondaryContrastText = "#171717",
+            Tertiary = "#de1d8d",
+            Info = "#0a72ef",
+            InfoContrastText = "#ffffff",
+            Error = "#ff5b4f",
+            ErrorContrastText = "#ffffff",
+            Dark = "#171717",
+            DarkContrastText = "#ffffff",
+            Surface = "#ffffff",
+            Background = "#ffffff",
+            BackgroundGray = "#fafafa",
+            TextPrimary = "#171717",
+            TextSecondary = "#4d4d4d",
+            LinesDefault = "#ebebeb",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#171717"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["Geist", "Noto Sans Thai", "Segoe UI", "system-ui", "sans-serif"],
+                FontSize = "1rem",
+                FontWeight = "400",
+                LineHeight = "1.5",
+                LetterSpacing = "0"
+            },
+            Button = new ButtonTypography
+            {
+                FontFamily = ["Geist", "Noto Sans Thai", "Segoe UI", "system-ui", "sans-serif"],
+                FontSize = ".875rem",
+                FontWeight = "500",
+                LineHeight = "1.43",
+                LetterSpacing = "0",
+                TextTransform = "none"
+            },
+            Caption = new CaptionTypography
+            {
+                FontFamily = ["Geist", "Noto Sans Thai", "Segoe UI", "system-ui", "sans-serif"],
+                FontSize = ".75rem",
+                FontWeight = "500",
+                LineHeight = "1.33",
+                LetterSpacing = "0"
+            }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "8px"
+        }
+    };
+
     private string _selectedCulture = SupportedCultures.DefaultCulture;
+    private string CartBadgeAriaLabel => $"{L["Cart"]}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
 
     protected override async Task OnInitializedAsync()
     {

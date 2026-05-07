@@ -7,6 +7,8 @@
   <data name="HeroTitle" xml:space="preserve"><value>เริ่มใบเสนอราคาการผลิตจากไฟล์ของคุณ</value></data>
   <data name="HeroSummary" xml:space="preserve"><value>อัปโหลดโมเดล เลือกกระบวนการ ตรวจสอบ DFM และดำเนินการต่อเป็นใบเสนอราคาหรือชำระเงินในพื้นที่ลูกค้าเดียวกัน</value></data>
   <data name="StartQuote" xml:space="preserve"><value>เริ่มขอราคา</value></data>
+  <data name="QuoteDropzoneTitle" xml:space="preserve"><value>ลากหรือเลือกไฟล์โมเดล 3D</value></data>
+  <data name="QuoteDropzoneMeta" xml:space="preserve"><value>STL, STEP, STP, OBJ, 3MF แล้วเปิดระบบขอราคา</value></data>
   <data name="ShopProducts" xml:space="preserve"><value>เลือกซื้อสินค้า</value></data>
   <data name="InstantQuote" xml:space="preserve"><value>ใบเสนอราคาทันที</value></data>
   <data name="Services" xml:space="preserve"><value>บริการ</value></data>
