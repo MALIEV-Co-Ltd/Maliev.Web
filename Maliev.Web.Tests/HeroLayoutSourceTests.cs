@@ -77,22 +77,19 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the quote page uses a mocked MudBlazor quote engine while the real engine is deferred.
+    /// Verifies the quote page sends custom manufacturing work to the dedicated quote engine.
     /// </summary>
     [Fact]
-    public void QuoteHeroUsesMockQuoteEngineAndGizmo()
+    public void QuotePageRoutesToDedicatedQuoteEngine()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
-        Assert.Contains("quote-engine-mock", source);
-        Assert.Contains("quote-engine-dropzone", source);
-        Assert.Contains("MudButton", source);
-        Assert.Contains("Icons.Material.Filled.CloudUpload", source);
+        Assert.Contains("https://quote.maliev.com", source);
+        Assert.Contains("http-equiv=\"refresh\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
-        Assert.DoesNotContain("ModelUrl=", source);
-        Assert.DoesNotContain("EnableHoverMotion=\"true\"", source);
-        Assert.DoesNotContain("contract-panel", source);
+        Assert.DoesNotContain("quote-engine-mock", source);
+        Assert.DoesNotContain("quote-engine-dropzone", source);
     }
 
     /// <summary>

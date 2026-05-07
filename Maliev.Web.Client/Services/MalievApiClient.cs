@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Forms;
 using Maliev.Web.Shared.Commerce;
+using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Quotes;
 
 namespace Maliev.Web.Client.Services;
@@ -71,6 +72,13 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         var response = await httpClient.PostAsJsonAsync("web/v1/checkout/draft", request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<CheckoutDraftResponse>(cancellationToken) ?? new CheckoutDraftResponse();
+    }
+
+    internal async Task<ContactMessageResponse> SubmitContactMessageAsync(ContactMessageRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/contact/messages", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<ContactMessageResponse>(cancellationToken) ?? new ContactMessageResponse(Guid.Empty, "Received");
     }
 
     private async Task<T?> GetJsonAsync<T>(string path, CancellationToken cancellationToken)

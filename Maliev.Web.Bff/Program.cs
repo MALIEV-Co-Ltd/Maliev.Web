@@ -26,6 +26,7 @@ builder.AddAuthenticatedServiceClient<IOrderServiceClient, OrderServiceClient>("
 builder.AddAuthenticatedServiceClient<IPaymentServiceClient, PaymentServiceClient>("PaymentService");
 builder.AddAuthenticatedServiceClient<IDeliveryServiceClient, DeliveryServiceClient>("DeliveryService");
 builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>("CustomerService");
+builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
 
 builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 {
@@ -45,6 +46,7 @@ builder.Services.AddScoped<IManufacturingCatalogService, ManufacturingCatalogSer
 builder.Services.AddScoped<IWebQuoteService, WebQuoteService>();
 builder.Services.AddScoped<IQuoteUploadService, QuoteUploadService>();
 builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
+builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 
 var app = builder.Build();
 

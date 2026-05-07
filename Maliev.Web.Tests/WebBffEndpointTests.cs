@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Commerce;
+using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Hosting;
@@ -33,10 +34,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 services.RemoveAll<IManufacturingCatalogService>();
                 services.RemoveAll<IWebQuoteService>();
                 services.RemoveAll<ICheckoutDraftService>();
+                services.RemoveAll<IContactMessageService>();
                 services.AddSingleton<ICommerceCatalogService, FakeCommerceCatalogService>();
                 services.AddSingleton<IManufacturingCatalogService, FakeManufacturingCatalogService>();
                 services.AddSingleton<IWebQuoteService, FakeWebQuoteService>();
                 services.AddSingleton<ICheckoutDraftService, FakeCheckoutDraftService>();
+                services.AddSingleton<IContactMessageService, FakeContactMessageService>();
             }));
     }
 
@@ -105,6 +108,44 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.NotNull(estimate);
         Assert.Equal("test-pricing", estimate.PricingSource);
         Assert.Equal(150m, estimate.BulkDiscountTotal);
+    }
+
+    /// <summary>
+    /// Verifies customer website contact messages are routed through the contact boundary.
+    /// </summary>
+    [Fact]
+    public async Task POST_ContactMessage_RoutesThroughContactBoundary()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/contact/messages", new ContactMessageRequest
+        {
+            FullName = "Website Customer",
+            Email = "customer@example.com",
+            Subject = "Manufacturing question",
+            Message = "Can MALIEV review this project?"
+        });
+        var contact = await response.Content.ReadFromJsonAsync<ContactMessageResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(contact);
+        Assert.Equal("Received", contact.Status);
+    }
+
+    /// <summary>
+    /// Verifies public SEO endpoints expose crawler metadata for customer pages.
+    /// </summary>
+    [Fact]
+    public async Task GET_SeoEndpoints_ReturnCrawlerMetadata()
+    {
+        using var client = _factory.CreateClient();
+
+        var robots = await client.GetStringAsync("/robots.txt");
+        var sitemap = await client.GetStringAsync("/sitemap.xml");
+
+        Assert.Contains("Sitemap: https://www.maliev.com/sitemap.xml", robots);
+        Assert.Contains("https://www.maliev.com/materials", sitemap);
+        Assert.Contains("https://www.maliev.com/blog", sitemap);
     }
 
     private sealed class FakeCommerceCatalogService : ICommerceCatalogService
@@ -218,6 +259,15 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 CheckoutId = Guid.Parse("d49229e6-d57b-4f94-aa95-391ef3fb44af"),
                 RequiresSignIn = false
             });
+        }
+    }
+
+    private sealed class FakeContactMessageService : IContactMessageService
+    {
+        public Task<ContactMessageResponse> SubmitAsync(ContactMessageRequest request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("customer@example.com", request.Email);
+            return Task.FromResult(new ContactMessageResponse(Guid.Parse("e9f63ee7-5711-4392-893a-5380b90f80e5"), "Received"));
         }
     }
 }

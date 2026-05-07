@@ -4,12 +4,25 @@
 @page "/shipping-returns"
 @page "/privacy"
 @page "/terms"
+@page "/materials"
+@page "/industries"
+@page "/case-studies"
+@page "/blog"
+@page "/blog/{Slug}"
 @page "/account/quotes"
 @page "/account/orders"
 @page "/account/preferences"
 @inject NavigationManager Navigation
+@inject MalievApiClient Api
 
 <PageTitle>@Title - MALIEV</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Description" />
+    <link rel="canonical" href="@CanonicalUrl" />
+    <meta property="og:title" content="@Title - MALIEV" />
+    <meta property="og:description" content="@Description" />
+    <meta property="og:url" content="@CanonicalUrl" />
+</HeadContent>
 
 <section class="page-hero compact">
     <p class="eyebrow">@Eyebrow</p>
@@ -26,6 +39,28 @@
                 <p>@item.Body</p>
             </article>
         }
+
+        @if (Path == "contact")
+        {
+            <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-grid">
+                    <label>Full name <InputText @bind-Value="_contact.FullName" /></label>
+                    <label>Email <InputText type="email" @bind-Value="_contact.Email" /></label>
+                    <label>Phone <InputText @bind-Value="_contact.PhoneNumber" /></label>
+                    <label>Company <InputText @bind-Value="_contact.Company" /></label>
+                    <label class="wide">Subject <InputText @bind-Value="_contact.Subject" /></label>
+                    <label class="wide">Message <InputTextArea @bind-Value="_contact.Message" /></label>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(_contactStatus))
+                {
+                    <p class="form-status">@_contactStatus</p>
+                }
+                <button class="button primary" type="submit" disabled="@_submittingContact">Send message</button>
+            </EditForm>
+        }
+
         <div class="quote-actions">
             <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
             <a class="button secondary" href="@SecondaryHref">@SecondaryAction</a>
@@ -34,13 +69,26 @@
 </section>
 
 @code {
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private readonly ContactMessageRequest _contact = new()
+    {
+        ContactType = "Website",
+        Subject = "Manufacturing inquiry"
+    };
+
+    private bool _submittingContact;
+    private string? _contactStatus;
+
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
+
+    private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
 
     private string Eyebrow => Path switch
     {
-        "account/preferences" => "Account",
-        "account/quotes" => "Account",
-        "account/orders" => "Account",
+        "account/preferences" or "account/quotes" or "account/orders" => "Account",
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) => "MALIEV Journal",
         _ => "MALIEV"
     };
 
@@ -51,42 +99,97 @@
         "shipping-returns" => "Shipping and returns",
         "privacy" => "Privacy",
         "terms" => "Terms",
+        "materials" => "Materials",
+        "industries" => "Industries",
+        "case-studies" => "Case studies",
+        "blog" => "MALIEV Journal",
         "account/quotes" => "Saved quotes",
         "account/orders" => "Orders",
         "account/preferences" => "Preferences",
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) => BlogPostTitle,
         _ => "About MALIEV"
+    };
+
+    private string BlogPostTitle => Slug switch
+    {
+        "design-for-manufacturing" => "Design for manufacturability before quotation",
+        "choosing-3d-printing-materials" => "Choosing 3D printing materials",
+        _ => "Manufacturing notes from MALIEV"
+    };
+
+    private string Description => Path switch
+    {
+        "materials" => "Customer guide to MALIEV manufacturing materials for 3D printing, CNC machining, and product development.",
+        "industries" => "How MALIEV supports manufacturers, designers, product builders, and maintenance teams.",
+        "case-studies" => "Representative MALIEV manufacturing projects and customer workflows.",
+        "blog" => "MALIEV articles about manufacturing, CAD preparation, materials, and custom part quoting.",
+        "contact" => "Contact MALIEV for product orders, custom manufacturing quotes, machine support, and service questions.",
+        _ => Body
     };
 
     private string Body => Path switch
     {
-        "contact" => "Reach MALIEV for manufacturing services, machine support, product orders, and quotation help.",
-        "faq" => "Answers for ordering products, requesting custom parts, and preparing manufacturing files.",
+        "contact" => "Send product questions, machine support issues, manufacturing requirements, drawings, or project context.",
+        "faq" => "Answers for product orders, custom parts, and preparing files for quotation.",
         "shipping-returns" => "How MALIEV prepares, ships, and supports product orders after delivery.",
         "privacy" => "How MALIEV handles customer files, product orders, account preferences, and communication records.",
-        "terms" => "Commercial terms for website orders, custom manufacturing requests, and quotation acceptance.",
-        "account/preferences" => "Manage language and currency preferences for this customer workspace.",
-        "account/quotes" => "Review saved manufacturing quotes after sign-in is connected.",
-        "account/orders" => "Review order history after sign-in is connected.",
+        "terms" => "Commercial terms for product orders, custom manufacturing requests, and quotation acceptance.",
+        "materials" => "Compare materials by process, usage, finishing expectations, and quoting readiness.",
+        "industries" => "MALIEV supports design, maintenance, education, factory automation, and product-development teams.",
+        "case-studies" => "Representative workflows for custom parts, fixtures, small-batch products, and machine support.",
+        "blog" => "Practical notes for preparing manufacturable parts and ordering from MALIEV.",
+        "account/preferences" => "Manage language and customer portal preferences in the quote engine.",
+        "account/quotes" => "Saved custom manufacturing quotes now live in the dedicated quote engine.",
+        "account/orders" => "Custom manufacturing orders now live in the dedicated quote engine.",
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) => "Manufacturing guidance for customers preparing custom parts and product work.",
         _ => "MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand."
     };
 
     private IReadOnlyList<ContentSection> Sections => Path switch
     {
+        "materials" =>
+        [
+            new("3D printing polymers", "PLA, PETG, engineering polymers, and resin options are selected by stiffness, appearance, heat exposure, and finishing requirements."),
+            new("CNC materials", "Aluminum and engineering plastics are quoted from machining stock after geometry, tolerance, surface, and quantity are reviewed."),
+            new("Material readiness", "For the fastest quote, include the process, material preference, quantity, tolerance notes, and real use case.")
+        ],
+        "industries" =>
+        [
+            new("Factories and maintenance teams", "Jigs, fixtures, replacement parts, guards, brackets, adapters, and troubleshooting support for production environments."),
+            new("Product teams", "Prototypes, pilot parts, presentation models, small batches, and engineering support before mass production."),
+            new("Education and makers", "Training hardware, models, machine accessories, and guided manufacturing support.")
+        ],
+        "case-studies" =>
+        [
+            new("Fixture turnaround", "A maintenance team uploads STEP files, confirms material and quantity, receives a quote, and tracks the manufacturing order through delivery."),
+            new("Prototype iteration", "A product team compares 3D printed material options, requests a formal quote, and attaches notes for engineering review."),
+            new("Machine support", "A customer sends machine photos and symptoms through the contact form so MALIEV can route the request to the right team.")
+        ],
+        "blog" =>
+        [
+            new("Design for manufacturability before quotation", "Prepare wall thickness, holes, threads, tolerances, and reference drawings before starting a custom quote."),
+            new("Choosing 3D printing materials", "Match prototype materials to strength, heat, finish, and lead-time expectations.")
+        ],
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) =>
+        [
+            new(BlogPostTitle, "Use the quote engine for custom manufacturing when geometry, material, process, and quantity determine the price. Use the shop for standard products."),
+            new("What to prepare", "Upload the CAD file, include target material, quantity, tolerance, finish, deadline, and any drawings that define critical features.")
+        ],
         "contact" =>
         [
-            new("Sales and quotations", "Send product questions, machine requirements, drawings, or 3D files. MALIEV will confirm the manufacturing route, lead time, and next commercial step."),
+            new("Sales and quotations", "Send product questions, machine requirements, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step."),
             new("Machine and product support", "For machines, spare parts, and printed products, include the product name, order reference, photos, and the issue you want us to check.")
         ],
         "faq" =>
         [
-            new("What files can I upload?", "The quote workspace accepts common 3D model files such as STL, STEP, STP, OBJ, and 3MF. Drawings and notes can be added when we review the request."),
-            new("Can I buy products without a quote?", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote page."),
+            new("Where do custom quotes happen?", "Custom manufacturing quotes now start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay in one manufacturing portal."),
+            new("Can I buy products without a quote?", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine."),
             new("Can I request Thai or English documents?", "Yes. Keep your preferred language in account preferences and MALIEV will use it for customer-facing communication where available.")
         ],
         "shipping-returns" =>
         [
-            new("Shipping", "Shipping options depend on item size, destination, and whether the order includes machines, spare parts, or custom-made products."),
-            new("Returns and support", "For ready-made products, contact MALIEV with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.")
+            new("Shipping", "Shipping options depend on item size, destination, and whether the order includes machines, spare parts, products, or custom-made parts."),
+            new("Returns and support", "Ready-made products are reviewed with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.")
         ],
         "privacy" =>
         [
@@ -97,37 +200,46 @@
         "terms" =>
         [
             new("Product orders", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or product configuration needs clarification."),
-            new("Custom manufacturing", "Custom part pricing is based on the submitted files, material, process, quantity, and accepted quotation. Changes to files or requirements may require a new quote.")
+            new("Custom manufacturing", "Custom part pricing is based on submitted files, material, process, quantity, and accepted quotation. Changes to files or requirements may require a new quote.")
         ],
-        "account/preferences" =>
+        "account/preferences" or "account/quotes" or "account/orders" =>
         [
-            new("Language and currency", "Anonymous preferences are stored on this device. Signed-in preferences can be restored across devices after account integration."),
-            new("Customer workspace", "Saved quotes, orders, and preferences will live here after account sign-in is connected.")
-        ],
-        "account/quotes" =>
-        [
-            new("Saved quotes", "Signed-in customers will be able to return to quote drafts, accepted quotations, and manufacturing history from this page."),
-            new("Current workflow", "For now, start or continue quote work from the instant quote page.")
-        ],
-        "account/orders" =>
-        [
-            new("Order history", "Signed-in customers will be able to review open orders, delivery status, and supporting documents here."),
-            new("Current workflow", "For now, use checkout and direct MALIEV communication for active orders.")
+            new("Dedicated quote portal", "Custom manufacturing account features now live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together."),
+            new("Product shop", "Product shopping remains on www.maliev.com and will keep a separate cart flow.")
         ],
         _ =>
         [
             new("What we make", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products."),
-            new("How we work", "Customers can buy published products directly or upload files for a manufacturing quote when the work is custom.")
+            new("How we work", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.")
         ]
     };
 
-    private string PrimaryAction => "Start quote";
+    private string PrimaryAction => Path.StartsWith("account/", StringComparison.Ordinal) ? "Open quote engine" : "Start custom quote";
 
-    private string PrimaryHref => "/quote";
+    private string PrimaryHref => "https://quote.maliev.com";
 
-    private string SecondaryAction => Path == "account/preferences" ? "Shop products" : "Shop products";
+    private string SecondaryAction => Path == "contact" ? "Shop products" : "Contact MALIEV";
 
-    private string SecondaryHref => "/shop";
+    private string SecondaryHref => Path == "contact" ? "/shop" : "/contact";
+
+    private async Task SubmitContactAsync()
+    {
+        _submittingContact = true;
+        _contactStatus = null;
+        try
+        {
+            var response = await Api.SubmitContactMessageAsync(_contact);
+            _contactStatus = $"Message received. Reference {response.MessageId}.";
+        }
+        catch (Exception ex)
+        {
+            _contactStatus = ex.Message;
+        }
+        finally
+        {
+            _submittingContact = false;
+        }
+    }
 
     private sealed record ContentSection(string Title, string Body);
 }
