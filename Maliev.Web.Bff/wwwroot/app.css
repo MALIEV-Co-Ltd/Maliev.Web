@@ -193,6 +193,16 @@ html[lang="th-TH"] .page-hero h1 {
   flex-wrap: wrap;
 }
 
+.hero-quote {
+  width: min(100%, 680px);
+  margin-top: 30px;
+}
+
+.quote-hero {
+  min-height: auto;
+  padding-top: clamp(44px, 7vh, 76px);
+}
+
 .hero-workspace,
 .quote-panel,
 .contract-panel,
@@ -211,6 +221,80 @@ html[lang="th-TH"] .page-hero h1 {
   background:
     linear-gradient(135deg, rgba(10, 114, 239, .08), rgba(255, 255, 255, 0) 42%),
     #fff;
+}
+
+.gizmo-workspace {
+  position: relative;
+  display: grid;
+  min-height: clamp(320px, 42vw, 560px);
+  overflow: hidden;
+  padding: 0;
+  background:
+    radial-gradient(circle at 68% 22%, rgba(199, 237, 255, .86), rgba(199, 237, 255, 0) 34%),
+    radial-gradient(circle at 30% 82%, rgba(10, 114, 239, .12), rgba(10, 114, 239, 0) 42%),
+    linear-gradient(180deg, #fff, #f8fbff);
+}
+
+.manufacturing-gizmo {
+  position: relative;
+  min-height: inherit;
+  aspect-ratio: 1.16;
+  overflow: hidden;
+}
+
+.manufacturing-gizmo-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  outline: none;
+}
+
+.manufacturing-gizmo-canvas:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -5px;
+}
+
+.manufacturing-gizmo-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .18s ease;
+}
+
+.manufacturing-gizmo.is-ready .manufacturing-gizmo-fallback {
+  opacity: 0;
+}
+
+.manufacturing-gizmo-fallback span {
+  position: absolute;
+  width: min(34%, 156px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(10, 114, 239, .2);
+  box-shadow: 0 18px 36px rgba(10, 31, 68, .09);
+}
+
+.manufacturing-gizmo-fallback span:nth-child(1) {
+  background: #c7edff;
+  transform: translate(-22%, -24%) skewX(-28deg) scaleY(.58);
+  transform-origin: bottom;
+}
+
+.manufacturing-gizmo-fallback span:nth-child(2) {
+  background: #0a72ef;
+  transform: translate(17%, 6%) skewY(-28deg) scaleX(.58);
+  transform-origin: left;
+}
+
+.manufacturing-gizmo-fallback span:nth-child(3) {
+  background: #f8fbff;
+  transform: translate(-20%, 13%) skewY(18deg) scaleX(.64);
+  transform-origin: right;
 }
 
 .quote-panel {
@@ -624,6 +708,10 @@ html[lang="th-TH"] .page-hero h1 {
   .quote-part {
     grid-template-columns: 1fr 1fr;
   }
+
+  .gizmo-workspace {
+    min-height: 340px;
+  }
 }
 
 @media (max-width: 620px) {
@@ -656,6 +744,14 @@ html[lang="th-TH"] .page-hero h1 {
 
   .upload-zone {
     padding: 20px 14px;
+  }
+
+  .hero-quote {
+    margin-top: 24px;
+  }
+
+  .gizmo-workspace {
+    min-height: 286px;
   }
 
   .product-grid,

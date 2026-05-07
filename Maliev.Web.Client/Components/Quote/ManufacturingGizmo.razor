@@ -1,0 +1,45 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="manufacturing-gizmo" aria-label="Interactive 3D manufacturing preview">
+    <canvas @ref="_canvas" class="manufacturing-gizmo-canvas" tabindex="0"></canvas>
+    <div class="manufacturing-gizmo-fallback" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+
+@code {
+    private ElementReference _canvas;
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "/js/manufacturing-gizmo.js");
+        await _module.InvokeVoidAsync("mountManufacturingGizmo", _canvas);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _module.InvokeVoidAsync("disposeManufacturingGizmo", _canvas);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+        await _module.DisposeAsync();
+    }
+}

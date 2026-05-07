@@ -2,22 +2,16 @@
 
 <PageTitle>Instant quotation - MALIEV</PageTitle>
 
-<section class="page-hero compact">
-    <p class="eyebrow">Instant quotation</p>
-    <h1>Upload, analyze, configure, quote</h1>
-    <p>Customer-safe ProjectNew workflow for anonymous drafts, resumable upload contracts, DFM acknowledgement, explicit bulk discounts, and draft quotation handoff.</p>
-</section>
-
-<section class="section quote-page-grid">
-    <InstantQuotePanel />
-    <aside class="contract-panel">
-        <h2>Backend contracts</h2>
-        <ul>
-            <li>UploadService: <code>upload/v&#123;version&#125;/uploads/resumable</code></li>
-            <li>GeometryService: DFM analysis and GLB-ready events</li>
-            <li>PricingService: <code>pricing/v&#123;version&#125;/calculate</code></li>
-            <li>ProjectService: project, parts, confirmed pricing, quotation generation</li>
-            <li>PdfService: quotation PDF storage through UploadService auth</li>
-        </ul>
-    </aside>
+<section class="hero-band quote-hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Instant quotation</p>
+        <h1>Upload, analyze, configure, quote</h1>
+        <p>Customer-safe ProjectNew workflow for anonymous drafts, resumable upload contracts, DFM acknowledgement, explicit bulk discounts, and draft quotation handoff.</p>
+        <div class="hero-quote">
+            <InstantQuotePanel />
+        </div>
+    </div>
+    <div class="hero-workspace gizmo-workspace">
+        <ManufacturingGizmo />
+    </div>
 </section>
