@@ -6,6 +6,9 @@ on:
       solution_file:
         required: true
         type: string
+    secrets:
+      gitops_pat:
+        required: true
 
 jobs:
   build-and-test:
@@ -15,7 +18,7 @@ jobs:
       packages: read
     env:
       NUGET_USERNAME: ${{ github.actor }}
-      NUGET_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      NUGET_PASSWORD: ${{ secrets.gitops_pat }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
