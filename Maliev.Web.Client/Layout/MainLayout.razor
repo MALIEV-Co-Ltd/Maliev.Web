@@ -26,7 +26,7 @@
                 <option value="en-US">EN</option>
                 <option value="th-TH">TH</option>
             </select>
-            <NavLink href="/cart" class="icon-link" title="Cart">Cart @Cart.Count</NavLink>
+            <NavLink href="/cart" class="icon-link" title="@L["Cart"]">@L["Cart"] @Cart.Count</NavLink>
             <NavLink href="/account/preferences" class="icon-link">@L["Account"]</NavLink>
         </div>
     </header>
@@ -61,6 +61,7 @@
     protected override async Task OnInitializedAsync()
     {
         Cart.Changed += StateHasChanged;
+        await Cart.InitializeAsync();
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
     }

@@ -10,7 +10,7 @@ namespace Maliev.Web.Bff.Controllers;
 /// Customer checkout API.
 /// </summary>
 [ApiController]
-[ApiVersion("1")]
+[ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/checkout")]
 public sealed class CheckoutController(ICheckoutDraftService checkoutDraftService) : ControllerBase
 {
@@ -26,25 +26,23 @@ public sealed class CheckoutController(ICheckoutDraftService checkoutDraftServic
         {
             return Ok(await checkoutDraftService.CreateDraftAsync(request, User, cancellationToken));
         }
-        catch (CheckoutRequiresSignInException ex)
+        catch (CheckoutRequiresSignInException)
         {
             return Unauthorized(new ProblemDetails
             {
                 Title = "Sign in required",
-                Detail = ex.Message,
+                Detail = "Sign in to continue checkout and save this order to your account.",
                 Status = StatusCodes.Status401Unauthorized
             });
         }
-        catch (BackendUnavailableException ex)
+        catch (BackendUnavailableException)
         {
-            var problem = new ProblemDetails
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new ProblemDetails
             {
-                Title = "Checkout backend unavailable",
-                Detail = ex.Message,
+                Title = "Checkout is temporarily unavailable",
+                Detail = "We could not prepare checkout right now. Please refresh the page or contact MALIEV.",
                 Status = StatusCodes.Status503ServiceUnavailable
-            };
-            problem.Extensions["backend"] = ex.BackendName;
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, problem);
+            });
         }
     }
 }

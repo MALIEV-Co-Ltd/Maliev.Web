@@ -13,6 +13,18 @@ public sealed class CartItemDto
 
     /// <summary>Gets or sets the requested quantity.</summary>
     public int Quantity { get; set; } = 1;
+
+    /// <summary>Gets or sets the product title captured for cart display.</summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the selected variant title captured for cart display.</summary>
+    public string VariantTitle { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the product image URL captured for cart display.</summary>
+    public string ImageUrl { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the unit price captured for cart display.</summary>
+    public decimal UnitPriceThb { get; set; }
 }
 
 /// <summary>

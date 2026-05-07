@@ -3,7 +3,7 @@ using Maliev.Web.Shared.Commerce;
 namespace Maliev.Web.Bff.Services;
 
 /// <summary>
-/// Provides customer-visible shop catalog data from the configured catalog backend.
+/// Provides customer-visible shop catalog data.
 /// </summary>
 public interface ICommerceCatalogService
 {
@@ -16,6 +16,4 @@ public interface ICommerceCatalogService
     /// <summary>Gets a product detail by canonical handle.</summary>
     Task<ProductDetailDto?> GetProductAsync(string handle, CancellationToken cancellationToken);
 
-    /// <summary>Gets Shopify import readiness using live Admin API data.</summary>
-    Task<ShopifyImportPreviewDto> GetImportPreviewAsync(CancellationToken cancellationToken);
 }

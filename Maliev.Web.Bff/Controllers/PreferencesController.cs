@@ -9,7 +9,7 @@ namespace Maliev.Web.Bff.Controllers;
 /// Customer preference API.
 /// </summary>
 [ApiController]
-[ApiVersion("1")]
+[ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/preferences")]
 [AllowAnonymous]
 public sealed class PreferencesController : ControllerBase

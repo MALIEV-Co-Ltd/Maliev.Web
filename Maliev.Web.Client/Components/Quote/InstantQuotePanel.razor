@@ -21,7 +21,7 @@
     <label class="upload-zone">
         <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.obj,.3mf" disabled="@(!_reference.Processes.Any())" />
         <span class="upload-title">Drop or choose 3D model files</span>
-        <span class="upload-meta">STL, STEP, STP, OBJ, 3MF. Upload sessions are matched by name and size.</span>
+        <span class="upload-meta">STL, STEP, STP, OBJ, 3MF. Large files can stay on this page while they upload.</span>
     </label>
 
     @if (!string.IsNullOrWhiteSpace(_statusMessage))
@@ -41,7 +41,7 @@
                 <article class="quote-part">
                     <div>
                         <strong>@part.File.Name</strong>
-                        <span>@FormatBytes(part.File.SizeBytes) · @(string.IsNullOrWhiteSpace(part.UploadId) ? "upload pending" : "uploaded")</span>
+                        <span>@FormatBytes(part.File.SizeBytes) · @(string.IsNullOrWhiteSpace(part.UploadId) ? "uploading" : "uploaded")</span>
                     </div>
                     <select @bind="part.MaterialCode" aria-label="Material">
                         @foreach (var material in _reference.Materials.Where(m => m.ProcessCode == part.ProcessCode))

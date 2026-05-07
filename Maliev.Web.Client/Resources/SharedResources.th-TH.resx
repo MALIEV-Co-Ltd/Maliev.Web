@@ -13,5 +13,6 @@
   <data name="Shop" xml:space="preserve"><value>ร้านค้า</value></data>
   <data name="Contact" xml:space="preserve"><value>ติดต่อ</value></data>
   <data name="Language" xml:space="preserve"><value>ภาษา</value></data>
+  <data name="Cart" xml:space="preserve"><value>ตะกร้า</value></data>
   <data name="Account" xml:space="preserve"><value>บัญชี</value></data>
 </root>

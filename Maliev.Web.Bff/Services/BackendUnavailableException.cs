@@ -22,7 +22,7 @@ internal sealed class QuoteNotReadyException : Exception
 internal sealed class CheckoutRequiresSignInException : Exception
 {
     internal CheckoutRequiresSignInException()
-        : base("Checkout requires a signed-in customer account before OrderService, PaymentService, DeliveryService, and CustomerService can create an owned checkout.")
+        : base("Sign in is required before checkout can continue.")
     {
     }
 }

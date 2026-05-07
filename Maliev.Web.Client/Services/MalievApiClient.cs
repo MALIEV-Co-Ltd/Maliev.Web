@@ -28,11 +28,6 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await GetJsonAsync<ProductDetailDto>($"web/v1/catalog/products/{Uri.EscapeDataString(handle)}", cancellationToken);
     }
 
-    internal async Task<ShopifyImportPreviewDto?> GetShopifyImportPreviewAsync(CancellationToken cancellationToken = default)
-    {
-        return await GetJsonAsync<ShopifyImportPreviewDto>("web/v1/shopify/import-preview", cancellationToken);
-    }
-
     internal async Task<QuoteReferenceDataDto> GetQuoteReferenceDataAsync(CancellationToken cancellationToken = default)
     {
         return await GetJsonAsync<QuoteReferenceDataDto>("web/v1/quote/reference-data", cancellationToken) ?? new QuoteReferenceDataDto();

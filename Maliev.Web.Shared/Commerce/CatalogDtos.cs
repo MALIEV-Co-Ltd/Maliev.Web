@@ -52,8 +52,17 @@ public class ProductSummaryDto
     /// <summary>Gets or sets the primary product image URL.</summary>
     public string ImageUrl { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the source Shopify URL used for migration redirects.</summary>
+    /// <summary>Gets or sets an optional external source URL for legacy redirects.</summary>
     public string SourceUrl { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets whether the product is visible in the customer storefront.</summary>
+    public bool IsPublished { get; set; } = true;
+
+    /// <summary>Gets or sets the available sellable quantity when inventory is tracked.</summary>
+    public int? AvailableQuantity { get; set; }
+
+    /// <summary>Gets or sets the customer-visible inventory status.</summary>
+    public string InventoryStatus { get; set; } = "Available";
 }
 
 /// <summary>
@@ -70,7 +79,7 @@ public sealed class ProductDetailDto : ProductSummaryDto
     /// <summary>Gets or sets product variants.</summary>
     public List<ProductVariantDto> Variants { get; set; } = [];
 
-    /// <summary>Gets or sets SEO keywords migrated from Shopify tags and product type.</summary>
+    /// <summary>Gets or sets SEO keywords for the product page.</summary>
     public List<string> SeoKeywords { get; set; } = [];
 }
 
@@ -102,25 +111,4 @@ public sealed class ProductVariantDto
 
     /// <summary>Gets or sets whether the variant can be sold.</summary>
     public bool Available { get; set; } = true;
-}
-
-/// <summary>
-/// A preview of Shopify catalog migration readiness.
-/// </summary>
-public sealed class ShopifyImportPreviewDto
-{
-    /// <summary>Gets or sets the source storefront URL.</summary>
-    public string SourceStorefrontUrl { get; set; } = string.Empty;
-
-    /// <summary>Gets or sets the expected product count from the storefront.</summary>
-    public int ExpectedProductCount { get; set; }
-
-    /// <summary>Gets or sets the highest observed product price.</summary>
-    public decimal HighestObservedPriceThb { get; set; }
-
-    /// <summary>Gets or sets migration notes.</summary>
-    public List<string> Notes { get; set; } = [];
-
-    /// <summary>Gets or sets products observed from the configured Shopify Admin API.</summary>
-    public List<ProductSummaryDto> ObservedProducts { get; set; } = [];
 }

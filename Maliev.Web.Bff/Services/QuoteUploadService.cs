@@ -47,7 +47,7 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
                 UploadId = uploadId,
                 Status = "NotFound",
                 IsTerminal = true,
-                Message = "UploadService has no file metadata for this upload id."
+                Message = "We could not find upload details for this file."
             };
         }
 
@@ -58,8 +58,8 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
             Status = completed ? "Uploaded" : upload.Status,
             IsTerminal = false,
             Message = completed
-                ? "File upload is complete. Geometry metrics will be surfaced when GeometryService publishes analysis events."
-                : "UploadService has not completed this upload yet."
+                ? "File upload is complete. Analysis results will appear when processing finishes."
+                : "This file is still uploading."
         };
     }
 

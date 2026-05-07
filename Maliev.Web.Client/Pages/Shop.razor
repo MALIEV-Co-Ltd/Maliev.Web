@@ -4,15 +4,33 @@
 
 <PageTitle>Shop - MALIEV</PageTitle>
 
-<section class="page-hero compact">
-    <p class="eyebrow">Storefront migration</p>
-    <h1>Machines, spares, and printed products</h1>
-    <p>The customer store reads product, variant, media, and collection data from the configured catalog backend.</p>
+<section class="page-hero compact shop-hero">
+    <div>
+        <p class="eyebrow">MALIEV shop</p>
+        <h1>@Text("Machines, spares, tooling, and printed products", "เครื่องจักร อะไหล่ ทูลลิ่ง และสินค้าพิมพ์สามมิติ")</h1>
+        <p>@Text("Buy production-ready items directly, or start with an instant quote when the part needs custom manufacturing.", "เลือกซื้อสินค้าพร้อมใช้งาน หรือเริ่มใบเสนอราคาทันทีเมื่องานต้องผลิตเฉพาะแบบ")</p>
+    </div>
+    @if (FeaturedProduct is not null)
+    {
+        <a class="shop-hero-card" href="/shop/@FeaturedProduct.Handle" aria-label="View @FeaturedProduct.Title.For(Preferences.Culture)">
+            <img src="@FeaturedProduct.ImageUrl" alt="@FeaturedProduct.Title.For(Preferences.Culture)" />
+            <span>@Text("Featured product", "สินค้าแนะนำ")</span>
+            <strong>@FeaturedProduct.Title.For(Preferences.Culture)</strong>
+            <small>@Price(FeaturedProduct) · @InventoryStatus(FeaturedProduct.InventoryStatus)</small>
+        </a>
+    }
 </section>
 
 <section class="section">
+    <div class="shop-toolbar">
+        <label>
+            <span>@Text("Search products", "ค้นหาสินค้า")</span>
+            <input type="search" @bind="_searchTerm" @bind:event="oninput" placeholder="@Text("Machine, spare, fixture...", "เครื่องจักร อะไหล่ ฟิกซ์เจอร์...")" />
+        </label>
+    </div>
+
     <div class="filters">
-        <button class="@CollectionClass(null)" type="button" @onclick="() => SelectCollectionAsync(null)">All</button>
+        <button class="@CollectionClass(null)" type="button" @onclick="() => SelectCollectionAsync(null)">@Text("All", "ทั้งหมด")</button>
         @foreach (var collection in _collections)
         {
             <button class="@CollectionClass(collection.Slug)" type="button" @onclick="() => SelectCollectionAsync(collection.Slug)">
@@ -27,7 +45,19 @@
     }
     else
     {
-        <ProductGrid Products="@_products" />
+        var visibleProducts = FilteredProducts.ToList();
+        @if (visibleProducts.Count == 0)
+        {
+            <div class="empty-state">
+                <h2>@Text("No products listed yet", "ยังไม่มีสินค้า")</h2>
+                <p>@Text("New items will appear here after they are published. For custom parts, upload a model and request a manufacturing quote.", "สินค้าจะปรากฏที่นี่เมื่อพร้อมจำหน่าย หากเป็นชิ้นงานเฉพาะแบบ ให้อัปโหลดโมเดลเพื่อขอใบเสนอราคา")</p>
+                <a class="button primary" href="/quote">@Text("Start quote", "เริ่มใบเสนอราคา")</a>
+            </div>
+        }
+        else
+        {
+            <ProductGrid Products="@visibleProducts" />
+        }
     }
 </section>
 
@@ -36,6 +66,18 @@
     private IReadOnlyList<ProductSummaryDto> _products = [];
     private string? _selectedCollection;
     private string? _loadError;
+    private string _searchTerm = string.Empty;
+    private ProductSummaryDto? FeaturedProduct => _products
+        .OrderByDescending(product => product.PriceThb)
+        .FirstOrDefault(product => !string.IsNullOrWhiteSpace(product.ImageUrl));
+
+    private IEnumerable<ProductSummaryDto> FilteredProducts =>
+        string.IsNullOrWhiteSpace(_searchTerm)
+            ? _products
+            : _products.Where(product =>
+                product.Title.For(Preferences.Culture).Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                product.Summary.For(Preferences.Culture).Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                product.CollectionSlug.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,5 +110,27 @@
     private string CollectionClass(string? collection)
     {
         return collection == _selectedCollection ? "filter-chip active" : "filter-chip";
+    }
+
+    private string Price(ProductSummaryDto product)
+    {
+        var prefix = product.PriceStartsAt ? Text("From ", "เริ่มต้น ") : string.Empty;
+        return product.PriceThb <= 0 ? Text("Request quote", "ขอใบเสนอราคา") : string.Create(CultureInfo.GetCultureInfo("th-TH"), $"{prefix}฿{product.PriceThb:N2}");
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private string InventoryStatus(string status)
+    {
+        return status switch
+        {
+            "Available" => Text("Available", "พร้อมจำหน่าย"),
+            "Low stock" => Text("Low stock", "สินค้าเหลือน้อย"),
+            "Made to order" => Text("Made to order", "ผลิตตามสั่ง"),
+            _ => status
+        };
     }
 }

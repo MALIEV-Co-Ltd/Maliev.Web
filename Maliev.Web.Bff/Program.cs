@@ -19,11 +19,6 @@ builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddHttpClient<IShopifyAdminCatalogClient, ShopifyAdminCatalogClient>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(60);
-});
-
 builder.AddAuthenticatedServiceClient<IMaterialServiceClient, MaterialServiceClient>("MaterialService");
 builder.AddAuthenticatedServiceClient<IPricingServiceClient, PricingServiceClient>("PricingService");
 builder.AddAuthenticatedServiceClient<IUploadServiceClient, UploadServiceClient>("UploadService");
@@ -45,7 +40,7 @@ builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 .AddServiceDiscovery()
 .AddHttpMessageHandler<ServiceAccountAuthenticationHandler>();
 
-builder.Services.AddScoped<ICommerceCatalogService, ShopifyCommerceCatalogService>();
+builder.Services.AddSingleton<ICommerceCatalogService, MockCommerceCatalogService>();
 builder.Services.AddScoped<IManufacturingCatalogService, ManufacturingCatalogService>();
 builder.Services.AddScoped<IWebQuoteService, WebQuoteService>();
 builder.Services.AddScoped<IQuoteUploadService, QuoteUploadService>();

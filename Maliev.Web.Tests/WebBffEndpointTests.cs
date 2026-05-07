@@ -41,10 +41,10 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
-    /// Verifies the catalog controller is served by the configured catalog backend.
+    /// Verifies the catalog controller returns products from the configured catalog source.
     /// </summary>
     [Fact]
-    public async Task GET_CatalogProducts_ReturnsBackendProducts()
+    public async Task GET_CatalogProducts_ReturnsCatalogProducts()
     {
         using var client = _factory.CreateClient();
 
@@ -52,24 +52,8 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         Assert.NotNull(products);
         var product = Assert.Single(products);
-        Assert.Equal("backend-product", product.Handle);
+        Assert.Equal("catalog-product", product.Handle);
         Assert.Equal(12000m, product.PriceThb);
-    }
-
-    /// <summary>
-    /// Verifies Shopify preview reports backend-observed products rather than seeded data.
-    /// </summary>
-    [Fact]
-    public async Task GET_ShopifyImportPreview_ReturnsObservedBackendProducts()
-    {
-        using var client = _factory.CreateClient();
-
-        var preview = await client.GetFromJsonAsync<ShopifyImportPreviewDto>("/web/v1/shopify/import-preview");
-
-        Assert.NotNull(preview);
-        Assert.Equal("https://shop.maliev.com/collections/all", preview.SourceStorefrontUrl);
-        Assert.Equal(1, preview.ExpectedProductCount);
-        Assert.Single(preview.ObservedProducts);
     }
 
     /// <summary>
@@ -125,6 +109,18 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
     private sealed class FakeCommerceCatalogService : ICommerceCatalogService
     {
+        private readonly List<ProductDetailDto> _products =
+        [
+            new()
+            {
+                Handle = "catalog-product",
+                Title = new LocalizedText { En = "Catalog Product" },
+                CollectionSlug = "machines",
+                PriceThb = 12000m,
+                IsPublished = true
+            }
+        ];
+
         public Task<IReadOnlyList<ProductCollectionDto>> GetCollectionsAsync(CancellationToken cancellationToken)
         {
             IReadOnlyList<ProductCollectionDto> collections =
@@ -141,51 +137,19 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         public Task<IReadOnlyList<ProductSummaryDto>> GetProductsAsync(string? collectionSlug, CancellationToken cancellationToken)
         {
-            IReadOnlyList<ProductSummaryDto> products =
-            [
-                new()
-                {
-                    Handle = "backend-product",
-                    Title = new LocalizedText { En = "Backend Product" },
-                    CollectionSlug = "machines",
-                    PriceThb = 12000m
-                }
-            ];
+            IReadOnlyList<ProductSummaryDto> products = _products
+                .Where(product => product.IsPublished)
+                .Cast<ProductSummaryDto>()
+                .ToList();
             return Task.FromResult(products);
         }
 
         public Task<ProductDetailDto?> GetProductAsync(string handle, CancellationToken cancellationToken)
         {
-            ProductDetailDto? product = handle == "backend-product"
-                ? new ProductDetailDto
-                {
-                    Handle = "backend-product",
-                    Title = new LocalizedText { En = "Backend Product" },
-                    CollectionSlug = "machines",
-                    PriceThb = 12000m
-                }
-                : null;
+            var product = _products.FirstOrDefault(product => product.Handle == handle && product.IsPublished);
             return Task.FromResult(product);
         }
 
-        public Task<ShopifyImportPreviewDto> GetImportPreviewAsync(CancellationToken cancellationToken)
-        {
-            return Task.FromResult(new ShopifyImportPreviewDto
-            {
-                SourceStorefrontUrl = "https://shop.maliev.com/collections/all",
-                ExpectedProductCount = 1,
-                ObservedProducts =
-                [
-                    new ProductSummaryDto
-                    {
-                        Handle = "backend-product",
-                        Title = new LocalizedText { En = "Backend Product" },
-                        CollectionSlug = "machines",
-                        PriceThb = 12000m
-                    }
-                ]
-            });
-        }
     }
 
     private sealed class FakeManufacturingCatalogService : IManufacturingCatalogService

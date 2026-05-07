@@ -1,56 +1,113 @@
 @page "/cart"
 @inject CartState ShoppingCart
 @inject MalievApiClient Api
+@inject PreferenceService Preferences
 
 <PageTitle>Cart - MALIEV</PageTitle>
 
 <section class="page-hero compact">
     <p class="eyebrow">Checkout</p>
-    <h1>Cart</h1>
-    <p>Checkout draft is routed through the Web BFF so OrderService, PaymentService, DeliveryService, and CustomerService can own their boundaries.</p>
+    <h1>@Text("Cart", "ตะกร้าสินค้า")</h1>
+    <p>@Text("Review items, quantities, and estimated total before signing in to complete checkout.", "ตรวจสอบสินค้า จำนวน และยอดรวมโดยประมาณก่อนเข้าสู่ระบบเพื่อดำเนินการชำระเงิน")</p>
 </section>
 
-<section class="section cart-panel">
+<section class="section cart-layout">
     @if (ShoppingCart.Items.Count == 0)
     {
-        <p>Your cart is empty.</p>
-        <a class="button primary" href="/shop">Shop products</a>
+        <div class="empty-state">
+            <h2>@Text("Your cart is empty", "ตะกร้ายังว่าง")</h2>
+            <p>@Text("Add machines, spare parts, or printed products to continue.", "เพิ่มเครื่องจักร อะไหล่ หรือสินค้าพิมพ์สามมิติเพื่อดำเนินการต่อ")</p>
+            <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
+        </div>
     }
     else
     {
-        @foreach (var item in ShoppingCart.Items)
-        {
-            <div class="cart-line">
-                <span>@item.ProductHandle</span>
-                <strong>@item.Quantity</strong>
+        <div class="cart-panel">
+            @foreach (var item in ShoppingCart.Items)
+            {
+                <article class="cart-line">
+                    @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="" aria-hidden="true" />
+                    }
+                    <div>
+                        <strong>@DisplayTitle(item)</strong>
+                        <span>@item.VariantTitle</span>
+                    </div>
+                    <input type="number" min="0" max="999" value="@item.Quantity" @onchange="args => UpdateQuantity(item, args.Value)" aria-label="@Text("Quantity", "จำนวน")" />
+                    <strong>@LineTotal(item)</strong>
+                    <button type="button" class="button secondary danger" @onclick="() => ShoppingCart.Remove(item)">@Text("Remove", "ลบ")</button>
+                </article>
+            }
+        </div>
+
+        <aside class="cart-panel cart-summary">
+            <h2>@Text("Order summary", "สรุปคำสั่งซื้อ")</h2>
+            <div class="quote-total">
+                <div><span>@Text("Subtotal", "ยอดสินค้า")</span><strong>@FormatCurrency(Subtotal)</strong></div>
+                <div><span>@Text("Shipping", "ค่าจัดส่ง")</span><strong>@Text("Calculated at checkout", "คำนวณในขั้นตอนชำระเงิน")</strong></div>
+                <div class="grand-total"><span>@Text("Estimated total", "ยอดรวมโดยประมาณ")</span><strong>@FormatCurrency(Subtotal)</strong></div>
             </div>
-        }
-        <button type="button" class="button primary" @onclick="CreateDraftAsync">Create checkout draft</button>
-        @if (_checkout is not null)
-        {
-            <p>Draft checkout @_checkout.CheckoutId created.</p>
-        }
-        @if (!string.IsNullOrWhiteSpace(_error))
-        {
-            <p class="load-message">@_error</p>
-        }
+            <button type="button" class="button primary" @onclick="CreateDraftAsync">@Text("Continue to checkout", "ดำเนินการชำระเงิน")</button>
+            @if (_checkout is not null)
+            {
+                <p class="success-message">@Text("Checkout is ready. Sign in to confirm delivery and payment.", "พร้อมดำเนินการชำระเงินแล้ว กรุณาเข้าสู่ระบบเพื่อยืนยันการจัดส่งและการชำระเงิน")</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
+        </aside>
     }
 </section>
 
 @code {
     private CheckoutDraftResponse? _checkout;
     private string? _error;
+    private decimal Subtotal => ShoppingCart.Items.Sum(item => item.UnitPriceThb * Math.Max(1, item.Quantity));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ShoppingCart.InitializeAsync();
+        await Preferences.InitializeAsync();
+    }
 
     private async Task CreateDraftAsync()
     {
         try
         {
             _error = null;
-            _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Items = ShoppingCart.Items.ToList() });
+            _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Culture = Preferences.Culture, Items = ShoppingCart.Items.ToList() });
         }
         catch (MalievApiException ex)
         {
             _error = ex.Message;
         }
+    }
+
+    private void UpdateQuantity(CartItemDto item, object? value)
+    {
+        var quantity = int.TryParse(value?.ToString(), out var parsed) ? parsed : item.Quantity;
+        ShoppingCart.UpdateQuantity(item, quantity);
+    }
+
+    private static string DisplayTitle(CartItemDto item)
+    {
+        return string.IsNullOrWhiteSpace(item.Title) ? item.ProductHandle : item.Title;
+    }
+
+    private static string LineTotal(CartItemDto item)
+    {
+        return FormatCurrency(item.UnitPriceThb * Math.Max(1, item.Quantity));
+    }
+
+    private static string FormatCurrency(decimal amount)
+    {
+        return string.Create(CultureInfo.GetCultureInfo("th-TH"), $"฿{amount:N2}");
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 }

@@ -13,5 +13,6 @@
   <data name="Shop" xml:space="preserve"><value>Shop</value></data>
   <data name="Contact" xml:space="preserve"><value>Contact</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Cart" xml:space="preserve"><value>Cart</value></data>
   <data name="Account" xml:space="preserve"><value>Account</value></data>
 </root>

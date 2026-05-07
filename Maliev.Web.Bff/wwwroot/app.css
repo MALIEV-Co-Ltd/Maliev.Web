@@ -458,6 +458,42 @@ html[lang="th-TH"] .page-hero h1 {
   border-bottom: 1px solid var(--line);
 }
 
+.page-hero.compact.shop-hero {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(320px, .55fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: end;
+  min-height: 420px;
+}
+
+.shop-hero-card {
+  display: grid;
+  gap: 10px;
+  padding: 10px 10px 16px;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 2px 2px rgba(0, 0, 0, .04), 0 18px 40px rgba(0, 0, 0, .06), #fafafa 0 0 0 1px inset;
+}
+
+.shop-hero-card img {
+  width: 100%;
+  aspect-ratio: 1.35;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.shop-hero-card span,
+.shop-hero-card small {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.shop-hero-card strong {
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
 .section-heading,
 .split-section,
 .proof-band,
@@ -643,6 +679,141 @@ html[lang="th-TH"] .page-hero h1 {
   max-width: 780px;
 }
 
+.product-meta.subtle {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) 84px minmax(96px, auto) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cart-line img {
+  width: 68px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--subtle);
+}
+
+.cart-line div {
+  display: grid;
+  gap: 4px;
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+  gap: clamp(24px, 5vw, 56px);
+  align-items: start;
+}
+
+.cart-summary {
+  position: sticky;
+  top: 88px;
+}
+
+.shop-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.shop-toolbar label,
+.variant-select {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.shop-toolbar input,
+.variant-select select,
+.cart-line input {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: #fff;
+}
+
+.empty-state {
+  display: grid;
+  gap: 16px;
+}
+
+.empty-state,
+.content-stack {
+  padding: 18px;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 2px 2px rgba(0, 0, 0, .04), #fafafa 0 0 0 1px inset;
+}
+
+.empty-state.compact {
+  max-width: 620px;
+}
+
+.shop-toolbar label span,
+.variant-select span {
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.success-message {
+  margin: 0;
+  color: var(--green);
+  font-size: .92rem;
+}
+
+.button.danger {
+  color: #b42318;
+}
+
+.media-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.media-thumb {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+}
+
+.media-thumb.active {
+  border-color: var(--blue);
+}
+
+.media-thumb img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.content-stack {
+  max-width: 860px;
+}
+
+.content-stack article {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
 .site-footer {
   display: flex;
   justify-content: space-between;
@@ -678,11 +849,13 @@ html[lang="th-TH"] .page-hero h1 {
   }
 
   .hero-band,
+  .page-hero.compact.shop-hero,
   .section-heading,
   .split-section,
   .proof-band,
   .product-detail,
-  .quote-page-grid {
+  .quote-page-grid,
+  .cart-layout {
     grid-template-columns: 1fr;
   }
 
@@ -707,6 +880,10 @@ html[lang="th-TH"] .page-hero h1 {
 
   .quote-part {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .cart-summary {
+    position: static;
   }
 
   .gizmo-workspace {
@@ -756,8 +933,14 @@ html[lang="th-TH"] .page-hero h1 {
 
   .product-grid,
   .service-detail-grid,
-  .quote-part {
+  .quote-part,
+  .cart-line {
     grid-template-columns: 1fr;
+  }
+
+  .shop-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .proof-band img,

@@ -10,12 +10,12 @@ namespace Maliev.Web.Bff.Controllers;
 /// Customer-facing product catalog API.
 /// </summary>
 [ApiController]
-[ApiVersion("1")]
+[ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/catalog")]
 [AllowAnonymous]
 public sealed class CatalogController(ICommerceCatalogService catalogService) : ControllerBase
 {
-    /// <summary>Gets product collections from the configured catalog backend.</summary>
+    /// <summary>Gets product collections from the catalog source.</summary>
     [HttpGet("collections")]
     [ProducesResponseType(typeof(IReadOnlyList<ProductCollectionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -31,7 +31,7 @@ public sealed class CatalogController(ICommerceCatalogService catalogService) : 
         }
     }
 
-    /// <summary>Gets product cards from the configured catalog backend.</summary>
+    /// <summary>Gets product cards from the catalog source.</summary>
     [HttpGet("products")]
     [ProducesResponseType(typeof(IReadOnlyList<ProductSummaryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -47,7 +47,7 @@ public sealed class CatalogController(ICommerceCatalogService catalogService) : 
         }
     }
 
-    /// <summary>Gets a product detail by canonical Shopify handle.</summary>
+    /// <summary>Gets a product detail by canonical handle.</summary>
     [HttpGet("products/{handle}")]
     [ProducesResponseType(typeof(ProductDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -65,15 +65,13 @@ public sealed class CatalogController(ICommerceCatalogService catalogService) : 
         }
     }
 
-    private ObjectResult BackendUnavailable(BackendUnavailableException ex)
+    private ObjectResult BackendUnavailable(BackendUnavailableException _)
     {
-        var problem = new ProblemDetails
+        return StatusCode(StatusCodes.Status503ServiceUnavailable, new ProblemDetails
         {
-            Title = "Catalog backend unavailable",
-            Detail = ex.Message,
+            Title = "Shop is temporarily unavailable",
+            Detail = "We could not load product listings right now. Please refresh the page or contact MALIEV.",
             Status = StatusCodes.Status503ServiceUnavailable
-        };
-        problem.Extensions["backend"] = ex.BackendName;
-        return StatusCode(StatusCodes.Status503ServiceUnavailable, problem);
+        });
     }
 }

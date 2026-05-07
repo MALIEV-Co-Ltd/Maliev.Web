@@ -10,7 +10,7 @@ namespace Maliev.Web.Bff.Controllers;
 /// Customer-facing instant quote API.
 /// </summary>
 [ApiController]
-[ApiVersion("1")]
+[ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/quote")]
 [AllowAnonymous]
 public sealed class QuoteController(
@@ -45,12 +45,12 @@ public sealed class QuoteController(
         {
             return Ok(await quoteService.EstimateAsync(request, cancellationToken));
         }
-        catch (QuoteNotReadyException ex)
+        catch (QuoteNotReadyException)
         {
             return Conflict(new ProblemDetails
             {
-                Title = "Quote analysis is not ready",
-                Detail = ex.Message,
+                Title = "Quote is not ready yet",
+                Detail = "We need a completed upload and manufacturing selections before calculating this quote.",
                 Status = StatusCodes.Status409Conflict
             });
         }
@@ -156,15 +156,13 @@ public sealed class QuoteController(
         }
     }
 
-    private ObjectResult BackendUnavailable(BackendUnavailableException ex)
+    private ObjectResult BackendUnavailable(BackendUnavailableException _)
     {
-        var problem = new ProblemDetails
+        return StatusCode(StatusCodes.Status503ServiceUnavailable, new ProblemDetails
         {
-            Title = "Quote backend unavailable",
-            Detail = ex.Message,
+            Title = "Instant quote is temporarily unavailable",
+            Detail = "We could not load quotation tools right now. Please refresh the page or contact MALIEV.",
             Status = StatusCodes.Status503ServiceUnavailable
-        };
-        problem.Extensions["backend"] = ex.BackendName;
-        return StatusCode(StatusCodes.Status503ServiceUnavailable, problem);
+        });
     }
 }
