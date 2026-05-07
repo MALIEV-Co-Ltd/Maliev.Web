@@ -26,6 +26,7 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     resizeObserver: null,
     resizeHandler: null,
     visibilityHandler: null,
+    pointerEnterHandler: null,
     pointerMoveHandler: null,
     pointerLeaveHandler: null,
     contextMenuHandler: null,
@@ -90,6 +91,10 @@ export function disposeManufacturingGizmo(canvas) {
 
   if (state.visibilityHandler) {
     document.removeEventListener("visibilitychange", state.visibilityHandler);
+  }
+
+  if (state.pointerEnterHandler) {
+    state.host?.removeEventListener("pointerenter", state.pointerEnterHandler);
   }
 
   if (state.pointerMoveHandler) {
@@ -296,9 +301,13 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
 
 function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
   const host = state.host ?? state.canvas;
-  const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  const pointer = { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0, targetStrength: 0 };
   const baseAlpha = camera.alpha;
   const baseBeta = camera.beta;
+
+  state.pointerEnterHandler = () => {
+    pointer.targetStrength = 1;
+  };
 
   state.pointerMoveHandler = event => {
     const rect = host.getBoundingClientRect();
@@ -306,6 +315,7 @@ function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
       return;
     }
 
+    pointer.targetStrength = 1;
     pointer.targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
     pointer.targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
     pointer.targetX = Math.max(-1, Math.min(1, pointer.targetX));
@@ -315,21 +325,29 @@ function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
   state.pointerLeaveHandler = () => {
     pointer.targetX = 0;
     pointer.targetY = 0;
+    pointer.targetStrength = 0;
   };
 
+  host.addEventListener("pointerenter", state.pointerEnterHandler, { passive: true });
   host.addEventListener("pointermove", state.pointerMoveHandler, { passive: true });
   host.addEventListener("pointerleave", state.pointerLeaveHandler, { passive: true });
 
   scene.onBeforeRenderObservable.add(() => {
-    const smoothing = Math.min(0.16, 0.065 * Math.max(1, state.engine.getDeltaTime() / 16.67));
-    pointer.x += (pointer.targetX - pointer.x) * smoothing;
-    pointer.y += (pointer.targetY - pointer.y) * smoothing;
+    const delta = Math.min(48, state.engine.getDeltaTime() || 16.67);
+    const pointerFollow = 1 - Math.pow(0.001, delta / 720);
+    const hoverFade = 1 - Math.pow(0.001, delta / 920);
+    pointer.x += (pointer.targetX - pointer.x) * pointerFollow;
+    pointer.y += (pointer.targetY - pointer.y) * pointerFollow;
+    pointer.strength += (pointer.targetStrength - pointer.strength) * hoverFade;
 
-    root.rotation.x = baseRotation.x + pointer.y * 0.11;
-    root.rotation.y = baseRotation.y + pointer.x * 0.24;
-    root.rotation.z = baseRotation.z - pointer.x * 0.035;
-    camera.alpha = baseAlpha + pointer.x * 0.055;
-    camera.beta = clamp(baseBeta + pointer.y * 0.04, 0.72, 1.36);
+    const hoverX = pointer.x * pointer.strength;
+    const hoverY = pointer.y * pointer.strength;
+
+    root.rotation.x = baseRotation.x + hoverY * 0.055;
+    root.rotation.y = baseRotation.y + hoverX * 0.12;
+    root.rotation.z = baseRotation.z - hoverX * 0.014;
+    camera.alpha = baseAlpha + hoverX * 0.026;
+    camera.beta = clamp(baseBeta + hoverY * 0.018, 0.72, 1.36);
   });
 }
 
@@ -578,8 +596,10 @@ function axisMaterial(scene, BABYLON, name, hex) {
 function configureHardwareScaling(engine) {
   const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
   const mobile = window.matchMedia("(max-width: 640px)").matches;
-  const maxRatio = mobile ? 1.15 : 1.5;
-  engine.setHardwareScalingLevel(Math.max(1, deviceRatio / maxRatio));
+  const maxRatio = mobile ? 1.35 : 2;
+  const minimumRatio = mobile ? 1.1 : 1.2;
+  const renderRatio = Math.min(maxRatio, Math.max(minimumRatio, deviceRatio));
+  engine.setHardwareScalingLevel(1 / renderRatio);
 }
 
 function resizeScene(state) {

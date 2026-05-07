@@ -137,7 +137,10 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("babylonjs@9.6.0", source);
         Assert.Contains("IntersectionObserver", source);
+        Assert.Contains("antialias: true", source);
+        Assert.Contains("renderRatio", source);
         Assert.Contains("setHardwareScalingLevel", source);
+        Assert.Contains("engine.setHardwareScalingLevel(1 / renderRatio)", source);
         Assert.Contains("ResizeObserver", source);
         Assert.Contains("powerPreference: \"low-power\"", source);
     }
@@ -157,6 +160,27 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);
+        Assert.Contains("pointerEnterHandler", source);
+        Assert.Contains("targetStrength", source);
+        Assert.Contains("pointerFollow", source);
+        Assert.Contains("hoverFade", source);
+        Assert.DoesNotContain("* 0.24", source);
+        Assert.DoesNotContain("* 0.11", source);
+    }
+
+    /// <summary>
+    /// Verifies the 3D canvas does not show a browser focus outline when clicked.
+    /// </summary>
+    [Fact]
+    public void ManufacturingGizmoCanvasDoesNotExposeFocusRing()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.DoesNotContain("tabindex", component);
+        Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
+        Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
+        Assert.Contains("box-shadow: none", styles);
     }
 
     private static string ReadRepoFile(params string[] pathSegments)

@@ -486,9 +486,10 @@ html[lang="th-TH"] .page-hero h1 {
   cursor: default;
 }
 
+.manufacturing-gizmo-canvas:focus,
 .manufacturing-gizmo-canvas:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: -5px;
+  outline: none;
+  box-shadow: none;
 }
 
 .manufacturing-gizmo-fallback {
