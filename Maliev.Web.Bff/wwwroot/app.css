@@ -55,8 +55,21 @@ html:lang(th),
 html:lang(th) body,
 [lang="th"] {
   --maliev-font-sans: var(--font-sans-th);
+  --font-mono: var(--font-sans-th);
   font-family: var(--maliev-font-sans);
   line-height: 1.7;
+}
+
+html:lang(th) .eyebrow,
+html:lang(th) .card-meta,
+html:lang(th) .metric-strip small,
+html:lang(th) .service-stat-strip small,
+html:lang(th) .stat-card small,
+html:lang(th) .dark-stat-grid small,
+html:lang(th) .footer-column h2 {
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-transform: none;
 }
 
 a {
@@ -126,7 +139,6 @@ main {
 .footer-social,
 .landing-hero-actions,
 .section-actions,
-.trust-grid,
 .metric-strip,
 .shop-toolbar,
 .product-options {
@@ -374,6 +386,15 @@ main {
   line-height: 1;
 }
 
+html:lang(th) .landing-hero h1,
+html:lang(th) .h-display,
+html:lang(th) .section-heading h2,
+html:lang(th) .section-lede h2,
+html:lang(th) .page-hero h1,
+html:lang(th) .h1 {
+  line-height: 1.14;
+}
+
 .section-heading h2,
 .section-lede h2,
 .page-hero h1,
@@ -501,18 +522,20 @@ main {
   align-items: stretch;
   gap: 12px;
   margin-top: 30px;
+  width: 100%;
 }
 
 .landing-quote-dropzone.mud-button-root,
 .quote-dropzone {
   display: grid;
   gap: 10px;
-  width: min(100%, 560px);
+  width: 100%;
   min-height: 112px;
   justify-content: stretch;
   padding: 18px;
   color: var(--ink);
   background: rgba(255, 255, 255, .96);
+  border: 1.5px dashed rgba(23, 23, 23, .18);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   text-align: left;
@@ -565,18 +588,9 @@ main {
   white-space: nowrap;
 }
 
-.landing-shop-button.mud-button-root {
-  min-width: 150px;
-  color: var(--ink);
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-border);
-  text-transform: none;
-}
-
 .landing-hero-visual {
   position: relative;
-  min-height: 560px;
+  min-height: 600px;
 }
 
 .manufacturing-gizmo {
@@ -590,8 +604,8 @@ main {
 }
 
 .manufacturing-gizmo--landing {
-  height: min(66vh, 620px);
-  min-height: 520px;
+  height: min(70vh, 680px);
+  min-height: 560px;
   box-shadow: none;
   background: radial-gradient(circle at 50% 72%, rgba(10, 114, 239, .12), transparent 30%), linear-gradient(180deg, #fff 0%, #f7f8fa 100%);
 }
@@ -671,26 +685,44 @@ main {
   text-transform: uppercase;
 }
 
-.trust-band {
+.quote-flow-band {
   background: var(--paper-2);
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
-  padding-top: 46px;
-  padding-bottom: 46px;
+  padding-top: 38px;
+  padding-bottom: 38px;
 }
 
-.trust-grid {
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 28px 44px;
-  color: var(--muted-2);
+.quote-flow-band .container {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+
+.quote-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
   font-family: var(--font-mono);
-  font-size: .8rem;
-  letter-spacing: .08em;
+}
+
+.quote-flow-grid span {
+  min-width: 0;
+  padding: 14px 16px;
+  color: var(--ink);
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-border);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-align: center;
 }
 
 .service-grid,
 .case-grid,
+.blog-grid,
 .product-grid,
 .material-grid,
 .service-detail-grid,
@@ -707,6 +739,7 @@ main {
 .service-card,
 .product-card,
 .case-card,
+.blog-card,
 .workflow-step,
 .cart-panel,
 .empty-state,
@@ -737,6 +770,7 @@ main {
 .service-card-media,
 .product-media,
 .case-card-media,
+.blog-card-media,
 .product-detail-media-main,
 .media {
   position: relative;
@@ -755,6 +789,7 @@ main {
 .service-card-media img,
 .product-media img,
 .case-card-media img,
+.blog-card-media img,
 .product-detail-media img,
 .media img {
   width: 100%;
@@ -764,7 +799,8 @@ main {
 
 .service-card-body,
 .product-body,
-.case-card-body {
+.case-card-body,
+.blog-card-body {
   display: grid;
   gap: 10px;
   padding: 20px;
@@ -775,7 +811,8 @@ main {
 }
 
 .service-card h3,
-.case-card h3 {
+.case-card h3,
+.blog-card h3 {
   margin: 0;
   font-size: 1.3rem;
   line-height: 1.2;
@@ -783,6 +820,7 @@ main {
 
 .service-card p,
 .case-card p,
+.blog-card p,
 .product-card p {
   margin: 0;
   color: var(--muted);
@@ -851,8 +889,22 @@ main {
   border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
 
+.dark-stat-grid div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dark-stat-grid strong {
+  display: block;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+
 .dark-stat-grid small {
   color: #8a8f98;
+  min-width: 0;
 }
 
 .process-grid {
@@ -880,13 +932,68 @@ main {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.case-card-media {
+.case-card-media,
+.blog-card-media {
   aspect-ratio: 4 / 3;
+}
+
+.case-card,
+.blog-card {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+}
+
+.blog-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.logo-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .24em;
+  align-items: baseline;
+}
+
+.logo-heading img {
+  width: 3.05em;
+  height: auto;
+  transform: translateY(.04em);
 }
 
 .final-cta {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
   align-items: center;
+}
+
+.final-dropzone {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 190px;
+  border-color: rgba(10, 114, 239, .45);
+  background: linear-gradient(180deg, #fff 0%, #f6fbff 100%);
+}
+
+.final-dropzone-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  color: #fff;
+  background: var(--ink);
+  border-radius: var(--radius);
+}
+
+.final-dropzone-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.final-dropzone .button {
+  grid-column: 2;
+  width: fit-content;
+  margin-top: 6px;
 }
 
 .contact-layout {
@@ -1383,12 +1490,12 @@ main {
   }
 
   .landing-hero-visual {
-    min-height: 420px;
+    min-height: 480px;
   }
 
   .manufacturing-gizmo--landing {
-    height: 480px;
-    min-height: 420px;
+    height: 520px;
+    min-height: 480px;
   }
 
   .service-grid,
@@ -1461,6 +1568,7 @@ main {
 
   .service-grid,
   .case-grid,
+  .blog-grid,
   .product-grid,
   .material-grid,
   .service-detail-grid {
@@ -1571,11 +1679,6 @@ main {
     text-align: center;
   }
 
-  .landing-shop-button.mud-button-root {
-    min-width: 0;
-    width: 100%;
-  }
-
   .landing-hero-visual {
     min-height: 320px;
   }
@@ -1586,13 +1689,22 @@ main {
     min-height: 320px;
   }
 
-  .metric-strip,
-  .trust-grid {
+  .metric-strip {
     justify-content: flex-start;
+  }
+
+  .quote-flow-band .container {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .quote-flow-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .service-grid,
   .case-grid,
+  .blog-grid,
   .product-grid,
   .material-grid,
   .service-detail-grid,
@@ -1601,6 +1713,14 @@ main {
   .service-stat-strip,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .final-dropzone {
+    grid-template-columns: 1fr;
+  }
+
+  .final-dropzone .button {
+    grid-column: 1;
   }
 
   .feature-band,

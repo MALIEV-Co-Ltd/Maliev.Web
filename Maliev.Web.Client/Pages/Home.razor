@@ -1,23 +1,22 @@
 @page "/"
 @inject IStringLocalizer<SharedResources> L
-@inject MalievApiClient Api
 @inject PreferenceService Preferences
 
 <PageTitle>MALIEV - Rapid manufacturing and workshop-made products</PageTitle>
 <HeadContent>
-    <meta name="description" content="@Text("Upload CAD files for rapid manufacturing quotes, explore MALIEV services, and shop workshop-made machines, spares, tooling, and 3D printed products.", "อัปโหลดไฟล์ CAD เพื่อขอใบเสนอราคางานผลิตรวดเร็ว สำรวจบริการ MALIEV และเลือกซื้อเครื่องจักร อะไหล่ ทูลลิ่ง และสินค้าพิมพ์สามมิติ")" />
+    <meta name="description" content="@Text("Upload CAD files for rapid manufacturing, review DFM feedback, see live part pricing, and order custom parts through MALIEV.", "อัปโหลดไฟล์ CAD สำหรับงานผลิตรวดเร็ว ตรวจ DFM ดูราคาชิ้นงานทันที และสั่งผลิตชิ้นงานเฉพาะกับ MALIEV")" />
     <link rel="canonical" href="https://www.maliev.com/" />
 </HeadContent>
 
 <section class="landing-hero" data-screen-label="Home hero">
     <div class="landing-hero-copy">
-        <p class="eyebrow landing-hero-badge">@Text("Rapid manufacturing · quote in minutes", "งานผลิตรวดเร็ว · ขอราคาในไม่กี่นาที")</p>
+        <p class="eyebrow landing-hero-badge">@Text("Rapid manufacturing · live part pricing", "งานผลิตรวดเร็ว · ดูราคาชิ้นงานทันที")</p>
         <h1>
             @Text("Parts in days,", "ชิ้นงานในไม่กี่วัน")
             <br />
             <span class="accent-blue">@Text("not quarters.", "ไม่ใช่หลายเดือน")</span>
         </h1>
-        <p>@Text("Upload CAD, choose a manufacturing path, review DFM feedback, and continue to the quote engine for configurable pricing and order tracking.", "อัปโหลด CAD เลือกเส้นทางผลิต ตรวจ DFM แล้วไปต่อที่ระบบขอราคาเพื่อปรับราคาและติดตามงานผลิต")</p>
+        <p>@Text("Upload CAD, review DFM feedback, adjust process, material, finish, and quantity, then continue straight into production ordering.", "อัปโหลด CAD ตรวจ DFM ปรับกระบวนการ วัสดุ ผิวงาน และจำนวน แล้วสั่งผลิตต่อได้ทันทีเมื่อพร้อม")</p>
         <div class="landing-hero-actions">
             <MudButton Href="@SiteContent.QuoteNewUrl"
                        Variant="Variant.Text"
@@ -33,18 +32,12 @@
                 </span>
                 <span class="landing-quote-dropzone-action">@L["StartQuote"]</span>
             </MudButton>
-            <MudButton Href="/shop"
-                       Variant="Variant.Text"
-                       Color="Color.Inherit"
-                       Class="landing-shop-button">
-                @L["ShopProducts"]
-            </MudButton>
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
             @foreach (var metric in SiteContent.HeroMetrics)
             {
                 <div>
-                    <strong>@metric.Value</strong>
+                    <strong>@metric.Value.For(Preferences.Culture)</strong>
                     <small>@metric.Label.For(Preferences.Culture)</small>
                 </div>
             }
@@ -59,15 +52,14 @@
     </div>
 </section>
 
-<section class="trust-band" aria-labelledby="trust-title">
+<section class="quote-flow-band" aria-labelledby="flow-title">
     <div class="container">
-        <p id="trust-title" class="eyebrow">@Text("Built for engineering and production teams", "สร้างมาเพื่อทีมวิศวกรรมและทีมผลิต")</p>
-        <div class="trust-grid" aria-label="Customer team types">
-            <span>FACTORY MAINTENANCE</span>
-            <span>PRODUCT R&D</span>
-            <span>EDUCATION</span>
-            <span>MACHINE BUILDERS</span>
-            <span>AUTOMATION</span>
+        <p id="flow-title" class="eyebrow">@Text("From file to order", "จากไฟล์สู่คำสั่งผลิต")</p>
+        <div class="quote-flow-grid" aria-label="@Text("Quote engine workflow", "ขั้นตอนระบบราคาชิ้นงาน")">
+            <span>@Text("Upload CAD", "อัปโหลด CAD")</span>
+            <span>@Text("DFM feedback", "ตรวจ DFM")</span>
+            <span>@Text("Live pricing", "ราคาอัปเดตทันที")</span>
+            <span>@Text("Order tracking", "ติดตามงานผลิต")</span>
         </div>
     </div>
 </section>
@@ -75,8 +67,8 @@
 <section class="section" aria-labelledby="services-title">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">@Text("What we make", "สิ่งที่เราผลิต")</p>
-            <h2 id="services-title">@Text("Seven services. One workshop.", "เจ็ดบริการ หนึ่งเวิร์กช็อป")</h2>
+            <p class="eyebrow">@Text("Manufacturing capabilities", "ความสามารถงานผลิต")</p>
+            <h2 id="services-title">@Text("One workflow for custom parts.", "ผลิตชิ้นงานเฉพาะในขั้นตอนเดียว")</h2>
         </div>
         <a class="section-link" href="/services">@Text("All capabilities", "ดูทุกความสามารถ")</a>
     </div>
@@ -115,7 +107,7 @@
         </h2>
         <p class="lede">@Text("Bench-top air-driven injection molding for small-batch thermoplastic parts, tooling trials, makers, and R&D teams.", "เครื่องฉีดพลาสติกตั้งโต๊ะขับเคลื่อนด้วยลม สำหรับชิ้นงานเทอร์โมพลาสติกจำนวนน้อย ทดลองแม่พิมพ์ เมกเกอร์ และทีม R&D")</p>
         <div class="dark-stat-grid">
-            <div><strong>50g</strong><small>@Text("shot capacity", "ความจุช็อต")</small></div>
+            <div><strong>50g</strong><small>@Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")</small></div>
             <div><strong>180°C</strong><small>@Text("max melt", "อุณหภูมิสูงสุด")</small></div>
             <div><strong>6 bar</strong><small>@Text("air supply", "แรงดันลม")</small></div>
             <div><strong>14d</strong><small>@Text("lead time", "ระยะเวลา")</small></div>
@@ -130,7 +122,7 @@
 <section class="section" aria-labelledby="process-title">
     <div class="section-lede">
         <p class="eyebrow">@Text("How it works", "ขั้นตอน")</p>
-        <h2 id="process-title">@Text("Quote to part without vendor handoffs.", "จากใบเสนอราคาสู่ชิ้นงานโดยไม่ต้องส่งต่อหลายที่")</h2>
+        <h2 id="process-title">@Text("Price, validate, and order without vendor handoffs.", "ดูราคา ตรวจความพร้อม และสั่งผลิตโดยไม่ต้องส่งต่อหลายที่")</h2>
     </div>
     <div class="process-grid">
         @foreach (var step in ProcessSteps)
@@ -148,7 +140,10 @@
     <div class="section-heading">
         <div>
             <p class="eyebrow">@Text("Recent work", "ผลงานล่าสุด")</p>
-            <h2 id="cases-title">@Text("What MALIEV has made lately.", "ตัวอย่างงานที่ MALIEV เพิ่งทำ")</h2>
+            <h2 id="cases-title" class="logo-heading">
+                <span>@Text("Recent work from", "ผลงานล่าสุดจาก")</span>
+                <img src="/images/logo.svg" alt="MALIEV" />
+            </h2>
         </div>
         <a class="section-link" href="/case-studies">@Text("All case studies", "ดูผลงานทั้งหมด")</a>
     </div>
@@ -156,6 +151,9 @@
         @foreach (var caseStudy in SiteContent.CaseStudies)
         {
             <a class="case-card" href="/case-studies/@caseStudy.Slug">
+                <div class="case-card-media">
+                    <img src="@caseStudy.ImageUrl" alt="@caseStudy.Title.For(Preferences.Culture)" loading="lazy" />
+                </div>
                 <div class="case-card-body">
                     <span class="card-meta">@caseStudy.Meta</span>
                     <h3>@caseStudy.Title.For(Preferences.Culture)</h3>
@@ -167,62 +165,62 @@
     </div>
 </section>
 
+<section class="section news-section" aria-labelledby="news-title">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">@Text("Journal and updates", "บทความและอัปเดต")</p>
+            <h2 id="news-title">@Text("Practical notes before you order parts.", "เรื่องที่ควรรู้ก่อนสั่งผลิตชิ้นงาน")</h2>
+        </div>
+        <a class="section-link" href="/blog">@Text("All posts", "บทความทั้งหมด")</a>
+    </div>
+    <div class="blog-grid">
+        @foreach (var post in SiteContent.BlogPosts)
+        {
+            <a class="blog-card" href="/blog/@post.Slug">
+                <div class="blog-card-media">
+                    <img src="@post.ImageUrl" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
+                </div>
+                <div class="blog-card-body">
+                    <span class="card-meta">@post.Category.For(Preferences.Culture)</span>
+                    <h3>@post.Title.For(Preferences.Culture)</h3>
+                    <p>@post.Summary.For(Preferences.Culture)</p>
+                    <span class="card-link">@Text("Read note", "อ่านบทความ")</span>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
 <section class="section final-cta" aria-labelledby="final-cta-title">
     <div>
         <p class="eyebrow">@Text("One file is enough to start", "เริ่มได้ด้วยไฟล์เดียว")</p>
         <h2 id="final-cta-title" class="h-display">@Text("Ready when your CAD is.", "พร้อมเมื่อไฟล์ CAD ของคุณพร้อม")</h2>
-        <p class="lede">@Text("Send geometry to the quote engine, then configure process, material, finish, quantity, tolerance, and delivery expectations.", "ส่ง Geometry เข้าระบบขอราคา แล้วเลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และความคาดหวังเรื่องจัดส่ง")</p>
+        <p class="lede">@Text("Send geometry to the quote engine, then configure process, material, finish, quantity, tolerance, and delivery expectations.", "ส่ง Geometry เข้าระบบราคา แล้วเลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และความคาดหวังเรื่องจัดส่ง")</p>
     </div>
-    <a class="quote-dropzone" href="@SiteContent.QuoteNewUrl">
-        <strong>@L["QuoteDropzoneTitle"]</strong>
-        <small>@L["QuoteDropzoneMeta"]</small>
+    <a class="quote-dropzone final-dropzone" href="@SiteContent.QuoteNewUrl">
+        <span class="final-dropzone-icon" aria-hidden="true">
+            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+        </span>
+        <span class="final-dropzone-copy">
+            <strong>@L["QuoteDropzoneTitle"]</strong>
+            <small>@L["QuoteDropzoneMeta"]</small>
+        </span>
         <span class="button primary">@L["StartQuote"]</span>
     </a>
 </section>
 
-@if (_products.Count > 0)
-{
-    <section class="section shop-section" aria-labelledby="shop-preview-title">
-        <div class="section-heading">
-            <div>
-                <p class="eyebrow">@Text("Shop MALIEV products", "ร้านค้า MALIEV")</p>
-                <h2 id="shop-preview-title">@Text("Machines, spares, tooling, and printed products.", "เครื่องจักร อะไหล่ ทูลลิ่ง และสินค้าพิมพ์สามมิติ")</h2>
-            </div>
-            <a class="section-link" href="/shop">@Text("View all", "ดูทั้งหมด")</a>
-        </div>
-        <ProductGrid Products="@_products.Take(4).ToList()" />
-    </section>
-}
-else if (!string.IsNullOrWhiteSpace(_catalogError))
-{
-    <section class="section shop-section">
-        <p class="load-message">@_catalogError</p>
-    </section>
-}
-
 @code {
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
     [
-        new("01", SiteContent.Text("Drop your file", "วางไฟล์ของคุณ"), SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the quote engine.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF จะถูกส่งต่อเข้าสู่ระบบขอราคา")),
-        new("02", SiteContent.Text("Configure online", "ตั้งค่าออนไลน์"), SiteContent.Text("Choose process, material, finish, quantity, and tolerance expectations.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน และ tolerance ที่ต้องการ")),
-        new("03", SiteContent.Text("We make it", "เราผลิตให้"), SiteContent.Text("MALIEV routes the work through the right in-house or approved production path.", "MALIEV จัดเส้นทางงานผ่านเวิร์กช็อปหรือเส้นทางผลิตที่เหมาะสม")),
-        new("04", SiteContent.Text("Inspect and ship", "ตรวจและจัดส่ง"), SiteContent.Text("Inspection and shipment details stay connected to the customer workspace.", "รายละเอียดการตรวจและจัดส่งอยู่ในพื้นที่ลูกค้าเดียวกัน"))
+        new("01", SiteContent.Text("Upload your file", "อัปโหลดไฟล์"), SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
+        new("02", SiteContent.Text("Review DFM", "ตรวจ DFM"), SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
+        new("03", SiteContent.Text("Adjust price", "ปรับราคา"), SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
+        new("04", SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"), SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
     ];
-
-    private List<ProductSummaryDto> _products = [];
-    private string? _catalogError;
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
-        try
-        {
-            _products = (await Api.GetProductsAsync()).ToList();
-        }
-        catch (MalievApiException ex)
-        {
-            _catalogError = ex.Message;
-        }
     }
 
     private string Text(string en, string th)

@@ -30,6 +30,7 @@ public sealed class SeoController : ControllerBase
         "/blog",
         "/blog/design-for-manufacturing",
         "/blog/choosing-3d-printing-materials",
+        "/blog/instant-part-pricing",
         "/shop",
         "/cart",
         "/contact",

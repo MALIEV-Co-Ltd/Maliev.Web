@@ -292,8 +292,8 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
   const compact = width < 560 || height < 360;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.64 : 0.5;
-  camera.radius = compact ? 6.15 : wide ? 6.05 : 5.75;
+  camera.fov = compact ? 0.66 : 0.54;
+  camera.radius = compact ? 7.15 : wide ? 7.05 : 6.65;
   camera.lowerRadiusLimit = camera.radius;
   camera.upperRadiusLimit = camera.radius;
   camera.target = new BABYLON.Vector3(0, 0.05, 0);
@@ -397,7 +397,7 @@ function frameImportedModel(meshes, root, BABYLON) {
 
   const size = bounds.max.subtract(bounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.58;
+  const targetSize = 2.28;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));

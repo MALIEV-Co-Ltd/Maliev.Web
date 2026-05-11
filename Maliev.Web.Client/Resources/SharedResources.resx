@@ -6,9 +6,9 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="HeroTitle" xml:space="preserve"><value>Manufacturing quotes that start with your file</value></data>
   <data name="HeroSummary" xml:space="preserve"><value>Upload a model, choose a process, review DFM feedback, and continue into quotation or shop checkout from one customer workspace.</value></data>
-  <data name="StartQuote" xml:space="preserve"><value>Start quote</value></data>
-  <data name="QuoteDropzoneTitle" xml:space="preserve"><value>Drop or choose 3D model files</value></data>
-  <data name="QuoteDropzoneMeta" xml:space="preserve"><value>STL, STEP, STP, OBJ, 3MF. Opens the quote engine.</value></data>
+  <data name="StartQuote" xml:space="preserve"><value>Get part price</value></data>
+  <data name="QuoteDropzoneTitle" xml:space="preserve"><value>Upload CAD to price your part</value></data>
+  <data name="QuoteDropzoneMeta" xml:space="preserve"><value>STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.</value></data>
   <data name="ShopProducts" xml:space="preserve"><value>Shop products</value></data>
   <data name="InstantQuote" xml:space="preserve"><value>Instant quotation</value></data>
   <data name="Services" xml:space="preserve"><value>Services</value></data>

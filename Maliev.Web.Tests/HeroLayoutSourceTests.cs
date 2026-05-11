@@ -33,6 +33,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone", source);
         Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("Icons.Material.Filled.CloudUpload", source);
+        Assert.Contains("landing-quote-dropzone-action", source);
+        Assert.DoesNotContain("landing-shop-button", source);
         Assert.DoesNotContain("<a class=\"button primary\" href=\"/quote\">@L[\"StartQuote\"]</a>", source);
         Assert.DoesNotContain("quote-empty", source);
     }
@@ -41,14 +43,26 @@ public sealed class HeroLayoutSourceTests
     /// Verifies the lower landing sections use finished page sections and no proof-band mock block.
     /// </summary>
     [Fact]
-    public void HomeUsesFinishedServiceAndShopSections()
+    public void HomeUsesFinishedManufacturingAndNewsSections()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
 
         Assert.Contains("service-grid", source);
         Assert.Contains("feature-band", source);
         Assert.Contains("process-grid", source);
-        Assert.Contains("shop-section", source);
+        Assert.Contains("quote-flow-band", source);
+        Assert.Contains("blog-grid", source);
+        Assert.Contains("SiteContent.BlogPosts", source);
+        Assert.Contains("case-card-media", source);
+        Assert.Contains("logo-heading", source);
+        Assert.Contains("/images/logo.svg", source);
+        Assert.Contains("/images/home/service-3d-printing.png", content);
+        Assert.Contains("/images/home/case-fixture.png", content);
+        Assert.Contains("/images/home/blog-dfm.png", content);
+        Assert.DoesNotContain("shop-section", source);
+        Assert.DoesNotContain("trust-band", source);
+        Assert.DoesNotContain("trust-grid", source);
         Assert.Contains("section-link", source);
         Assert.DoesNotContain("proof-band", source);
         Assert.DoesNotContain("Build. Test. Produce.", source);
@@ -133,6 +147,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\">", app);
         Assert.Contains("Noto+Sans+Thai", app);
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
+        Assert.Contains("--font-mono: var(--font-sans-th)", styles);
         Assert.Contains("html:lang(th)", styles);
         Assert.Contains("document.documentElement.lang", cultureScript);
     }
@@ -191,6 +206,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/materials\"", source);
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
         Assert.Contains("@page \"/blog/{Slug}\"", source);
+        Assert.Contains("SiteContent.BlogPosts", source);
         Assert.Contains("@page \"/shipping-returns\"", source);
         Assert.Contains("SubmitContactMessageAsync", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
@@ -250,6 +266,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("addHoverMotion", source);
+        Assert.Contains("const targetSize = 2.28", source);
+        Assert.Contains("wide ? 7.05 : 6.65", source);
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);

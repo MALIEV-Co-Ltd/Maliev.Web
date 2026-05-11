@@ -8,7 +8,7 @@
     <div>
         <p class="eyebrow">MALIEV shop</p>
         <h1>@Text("Machines, spares, tooling, and printed products", "เครื่องจักร อะไหล่ ทูลลิ่ง และสินค้าพิมพ์สามมิติ")</h1>
-        <p>@Text("Buy production-ready items directly, or start with an instant quote when the part needs custom manufacturing.", "เลือกซื้อสินค้าพร้อมใช้งาน หรือเริ่มใบเสนอราคาทันทีเมื่องานต้องผลิตเฉพาะแบบ")</p>
+        <p>@Text("Buy production-ready items directly, or upload CAD to see live pricing when the part needs custom manufacturing.", "เลือกซื้อสินค้าพร้อมใช้งาน หรืออัปโหลด CAD เพื่อดูราคาทันทีเมื่องานต้องผลิตเฉพาะแบบ")</p>
     </div>
     @if (FeaturedProduct is not null)
     {
@@ -51,7 +51,7 @@
             <div class="empty-state">
                 <h2>@Text("No products listed yet", "ยังไม่มีสินค้า")</h2>
                 <p>@Text("New items will appear here after they are published. For custom parts, upload a model and request a manufacturing quote.", "สินค้าจะปรากฏที่นี่เมื่อพร้อมจำหน่าย หากเป็นชิ้นงานเฉพาะแบบ ให้อัปโหลดโมเดลเพื่อขอใบเสนอราคา")</p>
-                <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Start quote", "เริ่มใบเสนอราคา")</a>
+                <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             </div>
         }
         else

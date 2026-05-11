@@ -152,6 +152,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains("https://www.maliev.com/case-studies/fixture-turnaround", sitemap);
         Assert.Contains("https://www.maliev.com/blog", sitemap);
         Assert.Contains("https://www.maliev.com/blog/design-for-manufacturing", sitemap);
+        Assert.Contains("https://www.maliev.com/blog/instant-part-pricing", sitemap);
         Assert.Contains("https://www.maliev.com/cart", sitemap);
         Assert.Contains("https://www.maliev.com/quote", sitemap);
     }

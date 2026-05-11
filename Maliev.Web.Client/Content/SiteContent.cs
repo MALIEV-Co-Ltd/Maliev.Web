@@ -11,9 +11,9 @@ internal static class SiteContent
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
     [
-        new("48h", Text("typical first quote", "ใบเสนอราคาแรกโดยทั่วไป")),
-        new("7", Text("manufacturing routes", "เส้นทางการผลิต")),
-        new("±0.02mm", Text("inspection capable", "ความละเอียดการตรวจวัด"))
+        new(Text("Instant", "ทันที"), Text("live part pricing", "ดูราคาชิ้นงานได้ทันที")),
+        new(Text("DFM", "DFM"), Text("feedback before order", "ตรวจความเหมาะสมก่อนสั่งผลิต")),
+        new(Text("Order", "สั่งผลิต"), Text("continue when ready", "สั่งผลิตต่อได้ทันที"))
     ];
 
     internal static readonly IReadOnlyList<ServicePageContent> Services =
@@ -26,7 +26,7 @@ internal static class SiteContent
             Text("FDM, resin, nylon, and production-grade polymer parts for prototypes, fixtures, and low-volume manufacturing.", "งาน FDM เรซิน ไนลอน และโพลีเมอร์ระดับผลิตจริง สำหรับต้นแบบ ฟิกซ์เจอร์ และงานจำนวนน้อย"),
             Text("Fast printed parts without losing manufacturing discipline.", "ชิ้นงานพิมพ์รวดเร็ว พร้อมวินัยแบบงานผลิตจริง"),
             Text("Upload STL, STEP, OBJ, or 3MF files, choose material and quantity, then continue to the quote engine for DFM review.", "อัปโหลดไฟล์ STL, STEP, OBJ หรือ 3MF เลือกวัสดุและจำนวน แล้วไปต่อที่ระบบขอราคาเพื่อตรวจ DFM"),
-            "https://shop.maliev.com/cdn/shop/files/colors.61.png?v=1740108788&width=1200",
+            "/images/home/service-3d-printing.png",
             true,
             [Text("FDM · SLA · SLS · MJF", "FDM · SLA · SLS · MJF"), Text("Lead time from 24 hours", "เริ่มผลิตได้ภายใน 24 ชั่วโมง"), Text("PLA · PETG · PA12 · resin", "PLA · PETG · PA12 · เรซิน")]),
         new(
@@ -37,7 +37,7 @@ internal static class SiteContent
             Text("Plastic and metal machining for precision brackets, tooling, production aids, and end-use components.", "งานกัดพลาสติกและโลหะสำหรับขายึด ทูลลิ่ง อุปกรณ์ช่วยผลิต และชิ้นส่วนใช้งานจริง"),
             Text("Machined parts reviewed for tolerance, setup, and production fit.", "ชิ้นงานกัดที่ตรวจความคลาดเคลื่อน การจับงาน และความเหมาะสมก่อนผลิต"),
             Text("Send STEP files, drawings, quantity, material, surface, and tolerance notes for review.", "ส่งไฟล์ STEP แบบ Drawing จำนวน วัสดุ ผิวงาน และจุดควบคุมสำคัญเพื่อให้ทีมตรวจสอบ"),
-            "https://shop.maliev.com/cdn/shop/files/Screenshot_2025-10-03_223753.png?v=1759505883&width=1200",
+            "/images/home/service-cnc.png",
             false,
             [Text("3-axis and fixture work", "งาน 3 แกนและฟิกซ์เจอร์"), Text("Aluminum and engineering plastics", "อะลูมิเนียมและพลาสติกวิศวกรรม"), Text("Tolerance review before quote", "ตรวจ tolerance ก่อนเสนอราคา")]),
         new(
@@ -48,7 +48,7 @@ internal static class SiteContent
             Text("Reverse engineering and inspection capture for legacy parts, handmade parts, and production comparison.", "สแกนเพื่อรีเวิร์สเอนจิเนียริ่งและตรวจสอบชิ้นงานเดิม ชิ้นงานทำมือ และงานเทียบการผลิต"),
             Text("Real parts become measurable references.", "เปลี่ยนชิ้นงานจริงเป็นข้อมูลอ้างอิงที่วัดผลได้"),
             Text("Book scanning with photos, target dimensions, required output format, and the reason for capture.", "จองงานสแกนพร้อมรูป ขนาดอ้างอิง รูปแบบไฟล์ที่ต้องการ และเหตุผลการเก็บข้อมูล"),
-            "https://shop.maliev.com/cdn/shop/files/spare-part.png?v=1756281837&width=1200",
+            "/images/home/service-3d-scanning.png",
             false,
             [Text("Scan to CAD", "สแกนสู่ CAD"), Text("Inspection references", "ข้อมูลอ้างอิงตรวจสอบ"), Text("Repair and replacement parts", "งานซ่อมและชิ้นส่วนทดแทน")]),
         new(
@@ -59,7 +59,7 @@ internal static class SiteContent
             Text("CAD modeling, DFM support, enclosure design, mechanisms, and manufacturable product development.", "ขึ้นแบบ CAD ตรวจ DFM ออกแบบเคส กลไก และพัฒนาสินค้าให้ผลิตได้จริง"),
             Text("Ideas become manufacturable geometry.", "เปลี่ยนไอเดียให้เป็นไฟล์ผลิตได้จริง"),
             Text("Start from sketches, photos, broken samples, or rough dimensions when a finished CAD file does not exist yet.", "เริ่มจากสเก็ตช์ รูปถ่าย ตัวอย่างแตกหัก หรือขนาดคร่าวๆ เมื่อยังไม่มีไฟล์ CAD"),
-            "https://shop.maliev.com/cdn/shop/files/colors.81.png?v=1740109006&width=1200",
+            "/images/home/service-3d-design.png",
             false,
             [Text("CAD cleanup", "ปรับไฟล์ CAD"), Text("DFM design changes", "แก้แบบเพื่อผลิต"), Text("Prototype to production", "ต้นแบบสู่การผลิต")]),
         new(
@@ -70,7 +70,7 @@ internal static class SiteContent
             Text("Short-run urethane and silicone-like parts using rapid molds for prototypes and pilot batches.", "งานยูรีเทนและชิ้นงานคล้ายซิลิโคนจำนวนน้อยด้วยแม่พิมพ์เร็ว สำหรับต้นแบบและล็อตทดลอง"),
             Text("Bridge the gap between one prototype and production tooling.", "เชื่อมช่องว่างระหว่างต้นแบบหนึ่งชิ้นกับแม่พิมพ์ผลิตจริง"),
             Text("Use casting when you need multiple similar parts before committing to hard tooling.", "เลือกงานหล่อเมื่อต้องการหลายชิ้นใกล้เคียงกัน ก่อนลงทุนแม่พิมพ์จริง"),
-            "https://shop.maliev.com/cdn/shop/files/colors.51.png?v=1740108657&width=1200",
+            "/images/home/service-silicone-casting.png",
             false,
             [Text("10-200 parts", "10-200 ชิ้น"), Text("Soft and rigid materials", "วัสดุนิ่มและแข็ง"), Text("Rapid tooling path", "เส้นทางแม่พิมพ์เร็ว")]),
         new(
@@ -81,7 +81,7 @@ internal static class SiteContent
             Text("Combine printing, machining, scanning, design, and finishing to move from idea to usable prototype quickly.", "ผสมงานพิมพ์ กัด สแกน ออกแบบ และตกแต่ง เพื่อเปลี่ยนไอเดียเป็นต้นแบบใช้งานได้อย่างรวดเร็ว"),
             Text("One workshop path for iteration.", "เส้นทางเดียวในเวิร์กช็อปสำหรับการทดลองซ้ำ"),
             Text("Share the product goal, must-fit dimensions, test deadline, and target manufacturing route.", "แจ้งเป้าหมายสินค้า ขนาดสำคัญ Deadline ทดสอบ และเส้นทางผลิตที่คาดหวัง"),
-            "https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png?v=1737116109&width=1200",
+            "/images/home/service-rapid-prototyping.png",
             false,
             [Text("Design support", "ช่วยออกแบบ"), Text("Multi-process builds", "งานหลายกระบวนการ"), Text("Iteration planning", "วางแผนทดลองซ้ำ")]),
         new(
@@ -92,16 +92,23 @@ internal static class SiteContent
             Text("Scan-to-CAD comparison and measurement reports for parts that need evidence before acceptance.", "ตรวจเทียบสแกนกับ CAD และรายงานวัดผลสำหรับชิ้นงานที่ต้องมีหลักฐานก่อนรับงาน"),
             Text("Know what changed before deciding what to remake.", "รู้ความต่างก่อนตัดสินใจผลิตใหม่"),
             Text("Use inspection when tolerance, wear, fit, or supplier comparison matters.", "ใช้การตรวจเมื่อต้องควบคุม tolerance การสึก การประกอบ หรือเทียบ Supplier"),
-            "https://shop.maliev.com/cdn/shop/files/110302574540_001.jpg?v=1759504756&width=1200",
+            "/images/home/service-deviation-analysis.png",
             false,
             [Text("Scan comparison", "เทียบข้อมูลสแกน"), Text("Critical dimensions", "มิติสำคัญ"), Text("Report-ready findings", "ผลตรวจพร้อมรายงาน")])
     ];
 
     internal static readonly IReadOnlyList<CaseStudyContent> CaseStudies =
     [
-        new("fixture-turnaround", Text("Fixture turnaround", "ฟิกซ์เจอร์เร่งด่วน"), "3D printing · CNC", Text("A maintenance team moved from worn sample to replacement fixture in one production week.", "ทีมซ่อมบำรุงเปลี่ยนจากตัวอย่างสึกหรอเป็นฟิกซ์เจอร์ทดแทนภายในหนึ่งสัปดาห์การผลิต"), "48h quote"),
-        new("prototype-iteration", Text("Prototype iteration", "พัฒนาต้นแบบซ้ำ"), "CAD · resin · FDM", Text("A product team tested fit, finish, and assembly before locking a production route.", "ทีมสินค้าได้ทดสอบการประกอบ ผิวงาน และการใช้งานก่อนเลือกเส้นทางผลิตจริง"), "3 revisions"),
-        new("scan-to-cad-repair", Text("Scan-to-CAD repair", "ซ่อมด้วยสแกนสู่ CAD"), "3D scanning · design", Text("A legacy component was captured, rebuilt, checked, and routed into replacement production.", "ชิ้นส่วนเดิมถูกสแกน ขึ้นแบบ ตรวจสอบ และนำไปผลิตทดแทน"), "±0.05mm check")
+        new("fixture-turnaround", Text("Fixture turnaround", "ฟิกซ์เจอร์เร่งด่วน"), "3D printing · CNC", Text("A maintenance team moved from worn sample to replacement fixture in one production week.", "ทีมซ่อมบำรุงเปลี่ยนจากตัวอย่างสึกหรอเป็นฟิกซ์เจอร์ทดแทนภายในหนึ่งสัปดาห์การผลิต"), "DFM + order", "/images/home/case-fixture.png"),
+        new("prototype-iteration", Text("Prototype iteration", "พัฒนาต้นแบบซ้ำ"), "CAD · resin · FDM", Text("A product team tested fit, finish, and assembly before locking a production route.", "ทีมสินค้าได้ทดสอบการประกอบ ผิวงาน และการใช้งานก่อนเลือกเส้นทางผลิตจริง"), "3 revisions", "/images/home/case-prototype.png"),
+        new("scan-to-cad-repair", Text("Scan-to-CAD repair", "ซ่อมด้วยสแกนสู่ CAD"), "3D scanning · design", Text("A legacy component was captured, rebuilt, checked, and routed into replacement production.", "ชิ้นส่วนเดิมถูกสแกน ขึ้นแบบ ตรวจสอบ และนำไปผลิตทดแทน"), "±0.05mm check", "/images/home/case-scan-to-cad.png")
+    ];
+
+    internal static readonly IReadOnlyList<BlogPostContent> BlogPosts =
+    [
+        new("design-for-manufacturing", Text("Design for manufacturability before upload", "เตรียมแบบให้พร้อมผลิตก่อนอัปโหลด"), Text("Wall thickness, holes, threads, tolerances, and drawing notes that help the quote engine price the part cleanly.", "ความหนาผนัง รู เกลียว tolerance และหมายเหตุ Drawing ที่ช่วยให้ระบบประเมินราคาชิ้นงานได้ชัดเจน"), Text("DFM guide", "คู่มือ DFM"), "/images/home/blog-dfm.png"),
+        new("choosing-3d-printing-materials", Text("Choosing 3D printing materials", "เลือกวัสดุพิมพ์ 3 มิติ"), Text("Match strength, heat resistance, finish, and lead time before you order the part.", "เลือกวัสดุจากความแข็งแรง การทนร้อน ผิวงาน และระยะเวลาก่อนสั่งผลิต"), Text("Materials", "วัสดุ"), "/images/home/blog-materials.png"),
+        new("instant-part-pricing", Text("How instant part pricing works", "ระบบคำนวณราคาชิ้นงานทำงานอย่างไร"), Text("Upload CAD, review DFM feedback, adjust process and quantity, then continue to order when the price fits.", "อัปโหลด CAD ตรวจ DFM ปรับกระบวนการและจำนวน แล้วสั่งผลิตต่อเมื่อราคาเหมาะสม"), Text("Quote engine", "ระบบราคา"), "/images/home/blog-pricing.png")
     ];
 
     internal static LocalizedText Text(string en, string th)
@@ -115,7 +122,7 @@ internal static class SiteContent
     }
 }
 
-internal sealed record MetricItem(string Value, LocalizedText Label);
+internal sealed record MetricItem(LocalizedText Value, LocalizedText Label);
 
 internal sealed record ServicePageContent(
     string Slug,
@@ -129,4 +136,6 @@ internal sealed record ServicePageContent(
     bool Primary,
     IReadOnlyList<LocalizedText> Specs);
 
-internal sealed record CaseStudyContent(string Slug, LocalizedText Title, string Meta, LocalizedText Summary, string Stat);
+internal sealed record CaseStudyContent(string Slug, LocalizedText Title, string Meta, LocalizedText Summary, string Stat, string ImageUrl);
+
+internal sealed record BlogPostContent(string Slug, LocalizedText Title, LocalizedText Summary, LocalizedText Category, string ImageUrl);

@@ -70,11 +70,35 @@ else if (Path == "case-studies")
             @foreach (var caseStudy in SiteContent.CaseStudies)
             {
                 <a class="case-card" href="/case-studies/@caseStudy.Slug">
+                    <div class="case-card-media">
+                        <img src="@caseStudy.ImageUrl" alt="@caseStudy.Title.For(Preferences.Culture)" loading="lazy" />
+                    </div>
                     <div class="case-card-body">
                         <span class="card-meta">@caseStudy.Meta</span>
                         <h3>@caseStudy.Title.For(Preferences.Culture)</h3>
                         <p>@caseStudy.Summary.For(Preferences.Culture)</p>
                         <span class="card-link">@caseStudy.Stat</span>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}
+else if (Path == "blog")
+{
+    <section class="section">
+        <div class="blog-grid">
+            @foreach (var post in SiteContent.BlogPosts)
+            {
+                <a class="blog-card" href="/blog/@post.Slug">
+                    <div class="blog-card-media">
+                        <img src="@post.ImageUrl" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
+                    </div>
+                    <div class="blog-card-body">
+                        <span class="card-meta">@post.Category.For(Preferences.Culture)</span>
+                        <h3>@post.Title.For(Preferences.Culture)</h3>
+                        <p>@post.Summary.For(Preferences.Culture)</p>
+                        <span class="card-link">@Text("Read note", "อ่านบทความ")</span>
                     </div>
                 </a>
             }
@@ -185,12 +209,8 @@ else
         _ => Text("About MALIEV", "เกี่ยวกับ MALIEV")
     };
 
-    private string BlogPostTitle => Slug switch
-    {
-        "design-for-manufacturing" => Text("Design for manufacturability before quotation", "ออกแบบเพื่อผลิตก่อนขอราคา"),
-        "choosing-3d-printing-materials" => Text("Choosing 3D printing materials", "เลือกวัสดุพิมพ์ 3 มิติ"),
-        _ => Text("Manufacturing notes from MALIEV", "บันทึกงานผลิตจาก MALIEV")
-    };
+    private string BlogPostTitle => SiteContent.BlogPosts.FirstOrDefault(item => item.Slug == Slug)?.Title.For(Preferences.Culture)
+        ?? Text("Manufacturing notes from MALIEV", "บันทึกงานผลิตจาก MALIEV");
 
     private string CaseStudyTitle => SiteContent.CaseStudies.FirstOrDefault(item => item.Slug == Slug)?.Title.For(Preferences.Culture)
         ?? Text("MALIEV case study", "ผลงาน MALIEV");
@@ -208,9 +228,9 @@ else
         "industries" => Text("MALIEV supports factories, designers, product builders, educators, and maintenance teams.", "MALIEV สนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
         "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
         "blog" => Text("Practical notes for preparing manufacturable parts and ordering from MALIEV.", "บันทึกเชิงปฏิบัติสำหรับเตรียมชิ้นงานให้ผลิตได้และสั่งงานกับ MALIEV"),
-        "account/preferences" => Text("Manage language and customer portal preferences in the quote engine.", "จัดการภาษาและการตั้งค่าพอร์ทัลลูกค้าในระบบขอราคา"),
-        "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบขอราคาโดยเฉพาะ"),
-        "account/orders" => Text("Custom manufacturing orders now live in the dedicated quote engine.", "คำสั่งผลิตเฉพาะแบบอยู่ในระบบขอราคาโดยเฉพาะ"),
+        "account/preferences" => Text("Manage language and customer portal preferences in the quote engine.", "จัดการภาษาและการตั้งค่าพอร์ทัลลูกค้าในระบบราคา"),
+        "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
+        "account/orders" => Text("Custom manufacturing orders now live in the dedicated quote engine.", "คำสั่งผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("Manufacturing guidance for customers preparing custom parts and product work.", "คำแนะนำงานผลิตสำหรับลูกค้าที่เตรียมชิ้นงานเฉพาะและงานสินค้า"),
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("How MALIEV turns files, samples, and requirements into production-ready work.", "วิธีที่ MALIEV เปลี่ยนไฟล์ ตัวอย่าง และความต้องการให้เป็นงานพร้อมผลิต"),
         _ => Text("MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand.", "MALIEV ผลิตเครื่องมือ เครื่องจักร สินค้าพิมพ์สามมิติ และชิ้นงานเฉพาะจากนนทบุรี ประเทศไทย")
@@ -226,7 +246,7 @@ else
         ],
         var path when path == "case-studies" || path.StartsWith("case-studies/", StringComparison.Ordinal) =>
         [
-            Section("Fixture turnaround", "ฟิกซ์เจอร์เร่งด่วน", "A maintenance team uploaded sample geometry, confirmed material and quantity, received a quote, and tracked production through delivery.", "ทีมซ่อมบำรุงอัปโหลด Geometry ยืนยันวัสดุและจำนวน รับใบเสนอราคา และติดตามการผลิตจนส่งมอบ"),
+            Section("Fixture turnaround", "ฟิกซ์เจอร์เร่งด่วน", "A maintenance team uploaded sample geometry, confirmed material and quantity, received pricing, and tracked production through delivery.", "ทีมซ่อมบำรุงอัปโหลด Geometry ยืนยันวัสดุและจำนวน เห็นราคา และติดตามการผลิตจนส่งมอบ"),
             Section("Prototype iteration", "พัฒนาต้นแบบซ้ำ", "A product team compared printed material options, requested a formal quote, and attached notes for engineering review.", "ทีมสินค้าเปรียบเทียบวัสดุพิมพ์ ขอใบเสนอราคาอย่างเป็นทางการ และแนบหมายเหตุเพื่อให้วิศวกรตรวจ"),
             Section("Machine support", "สนับสนุนเครื่องจักร", "A customer sent machine photos and symptoms so MALIEV could route support to the right team.", "ลูกค้าส่งรูปเครื่องและอาการเพื่อให้ MALIEV ส่งต่อทีมที่เหมาะสม")
         ],
@@ -242,8 +262,8 @@ else
         ],
         "faq" =>
         [
-            Section("Where do custom quotes happen?", "งานเฉพาะแบบขอราคาที่ไหน", "Custom manufacturing quotes start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มที่ quote.maliev.com เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
-            Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่ขอราคาได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจากระบบขอราคา"),
+            Section("Where do custom quotes happen?", "งานเฉพาะแบบดูราคาที่ไหน", "Custom manufacturing quotes start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มที่ quote.maliev.com เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
+            Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่คำนวณราคาชิ้นงานได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจากระบบราคา"),
             Section("Can I request Thai or English documents?", "ขอเอกสารไทยหรืออังกฤษได้ไหม", "Yes. Keep your preferred language in the customer workspace and MALIEV will use it where available.", "ได้ ตั้งค่าภาษาที่ต้องการในพื้นที่ลูกค้า แล้ว MALIEV จะใช้ภาษานั้นเมื่อรองรับ")
         ],
         "shipping-returns" =>
@@ -264,13 +284,13 @@ else
         ],
         "account/preferences" or "account/quotes" or "account/orders" =>
         [
-            Section("Dedicated quote portal", "พอร์ทัลขอราคาโดยเฉพาะ", "Custom manufacturing account features live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ที่ quote.maliev.com เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
+            Section("Dedicated quote portal", "พอร์ทัลราคาชิ้นงานโดยเฉพาะ", "Custom manufacturing account features live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ที่ quote.maliev.com เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
             Section("Product shop", "ร้านค้าสินค้า", "Product shopping remains on www.maliev.com and keeps a separate cart flow.", "การซื้อสินค้ายังอยู่ที่ www.maliev.com และใช้ตะกร้าแยกต่างหาก")
         ],
         _ =>
         [
             Section("What we make", "สิ่งที่เราผลิต", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products.", "MALIEV รองรับงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ CAD เครื่องฉีดพลาสติกระบบลม อะไหล่ ฟิกซ์เจอร์ และสินค้าพิมพ์"),
-            Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ระบบขอราคาเมื่องานเป็นแบบเฉพาะ")
+            Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ระบบราคาชิ้นงานเมื่องานเป็นแบบเฉพาะ")
         ]
     };
 
@@ -286,8 +306,8 @@ else
     {
         "account/orders" => Text("Open order tracking", "เปิดหน้าติดตามคำสั่งซื้อ"),
         "account/preferences" => Text("Open profile", "เปิดโปรไฟล์"),
-        var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบขอราคา"),
-        _ => Text("Start custom quote", "เริ่มขอราคา")
+        var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบราคา"),
+        _ => Text("Get part price", "ดูราคาชิ้นงาน")
     };
 
     private string PrimaryHref => Path switch
