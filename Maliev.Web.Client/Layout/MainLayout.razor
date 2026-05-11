@@ -13,20 +13,21 @@
 <div class="site-shell">
     <header class="site-header">
         <NavLink href="/" class="brand" Match="NavLinkMatch.All" aria-label="MALIEV home">
-            <img class="brand-logo" src="/images/logo.svg" width="105" height="24" alt="" aria-hidden="true" />
+            <img class="brand-logo" src="/images/logo.svg" width="118" height="27" alt="MALIEV" />
         </NavLink>
-        <nav class="nav-links" aria-label="Primary">
-            <NavLink href="/services/3d-printing">@L["Services"]</NavLink>
-            <NavLink href="/materials">Materials</NavLink>
+        <nav class="nav-links" aria-label="Primary navigation">
+            <NavLink href="/services">@L["Services"]</NavLink>
+            <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
             <NavLink href="/shop">@L["Shop"]</NavLink>
-            <NavLink href="/blog">Blog</NavLink>
+            <NavLink href="/case-studies">@Text("Case studies", "ผลงาน")</NavLink>
+            <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
             <NavLink href="/contact">@L["Contact"]</NavLink>
         </nav>
         <div class="nav-actions">
-            <select class="language-select" aria-label="@L["Language"]" @bind="_selectedCulture" @bind:after="ChangeCultureAsync">
-                <option value="en-US">EN</option>
-                <option value="th-TH">TH</option>
-            </select>
+            <div class="language-toggle" role="group" aria-label="@L["Language"]">
+                <button type="button" class="@LanguageButtonClass(SupportedCultures.DefaultCulture)" @onclick="() => ChangeCultureAsync(SupportedCultures.DefaultCulture)">EN</button>
+                <button type="button" class="@LanguageButtonClass(SupportedCultures.ThaiCulture)" @onclick="() => ChangeCultureAsync(SupportedCultures.ThaiCulture)">TH</button>
+            </div>
             <MudBadge Content="@Cart.Count"
                       Color="Color.Info"
                       Overlap="true"
@@ -42,14 +43,32 @@
                                Class="nav-icon-button"
                                aria-label="@L["Cart"]" />
             </MudBadge>
-            <MudIconButton Href="https://quote.maliev.com/profile"
+            <MudIconButton Href="@SiteContent.QuoteProfileUrl"
                            Icon="@Icons.Material.Filled.AccountCircle"
                            Variant="Variant.Text"
                            Color="Color.Inherit"
                            Size="Size.Medium"
                            Class="nav-icon-button"
                            aria-label="@L["Account"]" />
+            <a class="nav-quote-link" href="@SiteContent.QuoteNewUrl">@L["StartQuote"]</a>
+            <button type="button"
+                    class="mobile-menu-button"
+                    aria-label="@Text("Open navigation", "เปิดเมนู")"
+                    aria-expanded="@_mobileNavOpen.ToString().ToLowerInvariant()"
+                    @onclick="ToggleMobileNav">
+                <span></span>
+                <span></span>
+            </button>
         </div>
+        <nav class="@MobileNavClass" aria-label="Mobile navigation">
+            <NavLink href="/services" @onclick="CloseMobileNav">@L["Services"]</NavLink>
+            <NavLink href="/materials" @onclick="CloseMobileNav">@Text("Materials", "วัสดุ")</NavLink>
+            <NavLink href="/shop" @onclick="CloseMobileNav">@L["Shop"]</NavLink>
+            <NavLink href="/case-studies" @onclick="CloseMobileNav">@Text("Case studies", "ผลงาน")</NavLink>
+            <NavLink href="/blog" @onclick="CloseMobileNav">@Text("Journal", "บทความ")</NavLink>
+            <NavLink href="/contact" @onclick="CloseMobileNav">@L["Contact"]</NavLink>
+            <a href="@SiteContent.QuoteNewUrl">@L["StartQuote"]</a>
+        </nav>
     </header>
 
     <main>
@@ -59,7 +78,7 @@
     <footer class="site-footer" aria-label="MALIEV footer">
         <div class="footer-brand">
             <img class="footer-logo" src="/images/logo.svg" width="118" height="27" alt="MALIEV" />
-            <p>Production tooling, custom parts, and machine support for manufacturing teams.</p>
+            <p>@Text("Rapid manufacturing, custom parts, workshop-made machines, and production support for engineering teams.", "งานผลิตรวดเร็ว ชิ้นงานเฉพาะแบบ เครื่องจักรที่เราผลิตเอง และการสนับสนุนงานผลิตสำหรับทีมวิศวกรรม")</p>
             <address>
                 <span>MALIEV Co., Ltd.</span>
                 <a href="https://www.google.com/maps/search/?api=1&query=36%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand" target="_blank" rel="noopener noreferrer">
@@ -68,20 +87,21 @@
             </address>
         </div>
         <nav class="footer-column" aria-label="Footer company links">
-            <h2>Company</h2>
-            <NavLink href="/about">About</NavLink>
-            <NavLink href="/contact">Contact</NavLink>
-            <NavLink href="/services/3d-printing">Services</NavLink>
-            <NavLink href="/materials">Materials</NavLink>
-            <NavLink href="/blog">Blog</NavLink>
-            <NavLink href="/shop">Shop</NavLink>
+            <h2>@Text("Company", "บริษัท")</h2>
+            <NavLink href="/about">@Text("About", "เกี่ยวกับเรา")</NavLink>
+            <NavLink href="/contact">@L["Contact"]</NavLink>
+            <NavLink href="/services">@L["Services"]</NavLink>
+            <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
+            <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
+            <NavLink href="/shop">@L["Shop"]</NavLink>
         </nav>
         <nav class="footer-column" aria-label="Footer support links">
-            <h2>Support</h2>
+            <h2>@Text("Support", "ช่วยเหลือ")</h2>
             <NavLink href="/faq">FAQ</NavLink>
-            <NavLink href="/shipping-returns">Shipping</NavLink>
-            <NavLink href="/privacy">Privacy</NavLink>
-            <NavLink href="/terms">Terms</NavLink>
+            <NavLink href="/shipping-returns">@Text("Shipping", "การจัดส่ง")</NavLink>
+            <a href="@SiteContent.QuoteOrdersUrl">@Text("Track orders", "ติดตามคำสั่งซื้อ")</a>
+            <NavLink href="/privacy">@Text("Privacy", "ความเป็นส่วนตัว")</NavLink>
+            <NavLink href="/terms">@Text("Terms", "เงื่อนไข")</NavLink>
         </nav>
         <div class="footer-column">
             <h2>Connect</h2>
@@ -163,7 +183,9 @@
     };
 
     private string _selectedCulture = SupportedCultures.DefaultCulture;
+    private bool _mobileNavOpen;
     private string CartBadgeAriaLabel => $"{L["Cart"]}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
+    private string MobileNavClass => _mobileNavOpen ? "mobile-nav open" : "mobile-nav";
 
     protected override async Task OnInitializedAsync()
     {
@@ -173,10 +195,31 @@
         _selectedCulture = Preferences.Culture;
     }
 
-    private async Task ChangeCultureAsync()
+    private async Task ChangeCultureAsync(string culture)
     {
+        _selectedCulture = culture;
         await Preferences.SetCultureAsync(_selectedCulture);
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private string LanguageButtonClass(string culture)
+    {
+        return _selectedCulture == culture ? "active" : string.Empty;
+    }
+
+    private void ToggleMobileNav()
+    {
+        _mobileNavOpen = !_mobileNavOpen;
+    }
+
+    private void CloseMobileNav()
+    {
+        _mobileNavOpen = false;
     }
 
     public void Dispose()

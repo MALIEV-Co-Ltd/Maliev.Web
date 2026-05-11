@@ -4,20 +4,30 @@
 <HeadContent>
     <meta name="description" content="Start a MALIEV custom manufacturing quote at quote.maliev.com for CAD upload, DFM review, deterministic pricing, and order tracking." />
     <link rel="canonical" href="https://www.maliev.com/quote" />
-    <meta http-equiv="refresh" content="0; url=https://quote.maliev.com" />
+    <meta http-equiv="refresh" content="0; url=@SiteContent.QuoteNewUrl" />
 </HeadContent>
 
 <section class="hero-band quote-hero">
     <div class="hero-copy">
         <p class="eyebrow">Custom manufacturing</p>
         <h1>Custom quotes now run in the dedicated quote engine.</h1>
-        <p>Upload CAD files, configure parts, review manufacturability, request a formal quote, and track custom manufacturing orders at quote.maliev.com.</p>
+        <p>@Text("Upload CAD files, configure parts, review manufacturability, request a formal quote, and track custom manufacturing orders at quote.maliev.com.", "อัปโหลดไฟล์ CAD ตั้งค่าชิ้นงาน ตรวจความเหมาะสมการผลิต ขอใบเสนอราคาอย่างเป็นทางการ และติดตามคำสั่งผลิตที่ quote.maliev.com")</p>
         <div class="quote-actions">
-            <a class="button primary" href="https://quote.maliev.com">Open quote engine</a>
-            <a class="button secondary" href="/services/3d-printing">Review services</a>
+            <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Open quote engine", "เปิดระบบขอราคา")</a>
+            <a class="button secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>
     <div class="hero-workspace gizmo-workspace">
         <ManufacturingGizmo />
     </div>
 </section>
+
+@code {
+    [Inject]
+    private PreferenceService Preferences { get; set; } = default!;
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

@@ -31,7 +31,7 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
 
         Assert.Contains("landing-quote-dropzone", source);
-        Assert.Contains("Href=\"/quote\"", source);
+        Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("Icons.Material.Filled.CloudUpload", source);
         Assert.DoesNotContain("<a class=\"button primary\" href=\"/quote\">@L[\"StartQuote\"]</a>", source);
         Assert.DoesNotContain("quote-empty", source);
@@ -45,8 +45,9 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
 
-        Assert.Contains("manufacturing-section", source);
-        Assert.Contains("service-stat-strip", source);
+        Assert.Contains("service-grid", source);
+        Assert.Contains("feature-band", source);
+        Assert.Contains("process-grid", source);
         Assert.Contains("shop-section", source);
         Assert.Contains("section-link", source);
         Assert.DoesNotContain("proof-band", source);
@@ -64,7 +65,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("footer-logo", source);
         Assert.Contains("/images/logo.svg", source);
-        Assert.Contains("Production tooling, custom parts, and machine support", source);
+        Assert.Contains("Rapid manufacturing, custom parts, workshop-made machines", source);
         Assert.Contains("36/1 Moo 3", source);
         Assert.Contains("Khlong Khoi", source);
         Assert.Contains("info@maliev.com", source);
@@ -85,7 +86,7 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
-        Assert.Contains("https://quote.maliev.com", source);
+        Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.Contains("http-equiv=\"refresh\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("quote-engine-mock", source);
@@ -104,6 +105,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("MudBadge", source);
         Assert.Contains("Icons.Material.Filled.ShoppingCart", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
+        Assert.Contains("SiteContent.QuoteProfileUrl", source);
+        Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.DoesNotContain("class=\"icon-link\"", source);
         Assert.DoesNotContain("<NavLink href=\"/cart\"", source);
         Assert.DoesNotContain("<NavLink href=\"/account/preferences\"", source);
@@ -122,6 +125,25 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("PaletteLight", source);
         Assert.Contains("DefaultBorderRadius", source);
         Assert.Contains("Typography", source);
+    }
+
+    /// <summary>
+    /// Verifies the public web app uses server-side Blazor interactivity.
+    /// </summary>
+    [Fact]
+    public void BffUsesInteractiveServerRenderMode()
+    {
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var clientProject = ReadRepoFile("Maliev.Web.Client", "Maliev.Web.Client.csproj");
+
+        Assert.Contains("AddInteractiveServerComponents", program);
+        Assert.Contains("AddInteractiveServerRenderMode", program);
+        Assert.Contains("@rendermode=\"InteractiveServer\"", app);
+        Assert.DoesNotContain("AddInteractiveWebAssemblyComponents", program);
+        Assert.DoesNotContain("AddInteractiveWebAssemblyRenderMode", program);
+        Assert.DoesNotContain("Microsoft.NET.Sdk.BlazorWebAssembly", clientProject);
+        Assert.DoesNotContain("Microsoft.AspNetCore.Components.WebAssembly", clientProject);
     }
 
     /// <summary>
