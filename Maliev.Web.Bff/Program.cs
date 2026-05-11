@@ -3,6 +3,7 @@ using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Components;
 using Maliev.Web.Bff.Services;
+using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
 using MudBlazor.Services;
 
@@ -17,7 +18,27 @@ builder.Services.AddMudServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveServerComponents();
+
+builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
+{
+    var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
+    if (httpContext is not null)
+    {
+        var request = httpContext.Request;
+        client.BaseAddress = new Uri($"{request.Scheme}://{request.Host}{request.PathBase}/");
+    }
+    else
+    {
+        client.BaseAddress = new Uri(builder.Configuration["PublicBaseUrl"] ?? "http://localhost/");
+    }
+
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("MalievAPI"));
+builder.Services.AddScoped<MalievApiClient>();
+builder.Services.AddScoped<PreferenceService>();
+builder.Services.AddScoped<CartState>();
 
 builder.AddAuthenticatedServiceClient<IMaterialServiceClient, MaterialServiceClient>("MaterialService");
 builder.AddAuthenticatedServiceClient<IPricingServiceClient, PricingServiceClient>("PricingService");
@@ -52,7 +73,6 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
 }
 else
 {
@@ -77,7 +97,7 @@ app.MapDefaultEndpoints("web");
 app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveWebAssemblyRenderMode()
+    .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(Maliev.Web.Client._Imports).Assembly);
 
 app.Run();

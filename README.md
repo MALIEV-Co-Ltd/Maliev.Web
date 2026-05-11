@@ -8,12 +8,12 @@ The customer-facing MALIEV website for manufacturing services, instant quotation
 
 ## Architecture
 
-`Maliev.Web` is a hosted Blazor WebAssembly application with a Web BFF.
+`Maliev.Web` is an interactive server-side Blazor customer website with a Web BFF.
 
 | Project | Purpose |
 | --- | --- |
-| `Maliev.Web.Bff` | Hosts the Blazor shell, public Web API endpoints, localization middleware, health endpoints, and future downstream service clients. |
-| `Maliev.Web.Client` | Customer UI for landing pages, instant quotation, shop, cart, account pages, and localization preference handling. |
+| `Maliev.Web.Bff` | Hosts the interactive server-side Blazor shell, public Web API endpoints, localization middleware, health endpoints, and downstream service clients. |
+| `Maliev.Web.Client` | Razor component library for customer UI: landing pages, quote-engine handoff, shop, cart, account links, and localization preference handling. |
 | `Maliev.Web.Shared` | DTO contracts shared by the Web BFF and Blazor client. |
 | `Maliev.Web.Tests` | Unit and component-level contract tests for quote, catalog, localization, and BFF endpoints. |
 

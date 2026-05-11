@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <ImportMap />
-    <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: true)" />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    <Maliev.Web.Client.Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: true)" />
+    <Maliev.Web.Client.Routes @rendermode="InteractiveServer" />
     <script src="@Assets["js/maliev-culture.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>

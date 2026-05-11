@@ -27,6 +27,7 @@ window.malievCulture = {
   setCulture: function (culture) {
     localStorage.setItem('maliev.culture', culture);
     document.cookie = `maliev.culture=${encodeURIComponent(culture)};path=/;max-age=31536000;samesite=lax`;
+    document.cookie = `.AspNetCore.Culture=${encodeURIComponent(`c=${culture}|uic=${culture}`)};path=/;max-age=31536000;samesite=lax`;
   },
   getCulture: function () {
     return localStorage.getItem('maliev.culture') || 'en-US';

@@ -1,5 +1,6 @@
 using Maliev.Web.Shared.Localization;
 using Microsoft.JSInterop;
+using System.Globalization;
 
 namespace Maliev.Web.Client.Services;
 
@@ -9,7 +10,19 @@ internal sealed class PreferenceService(IJSRuntime jsRuntime)
 
     internal async Task InitializeAsync()
     {
-        Culture = await jsRuntime.InvokeAsync<string>("malievCulture.resolveCulture", SupportedCultures.DefaultCulture);
+        try
+        {
+            Culture = await jsRuntime.InvokeAsync<string>("malievCulture.resolveCulture", SupportedCultures.DefaultCulture);
+        }
+        catch (InvalidOperationException)
+        {
+            Culture = CultureInfo.CurrentUICulture.Name;
+        }
+        catch (JSException)
+        {
+            Culture = CultureInfo.CurrentUICulture.Name;
+        }
+
         Culture = SupportedCultures.Apply(Culture);
     }
 
