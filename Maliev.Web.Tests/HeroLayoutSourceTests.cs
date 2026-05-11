@@ -57,9 +57,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("case-card-media", source);
         Assert.Contains("logo-heading", source);
         Assert.Contains("/images/logo.svg", source);
-        Assert.Contains("/images/home/service-3d-printing.png", content);
-        Assert.Contains("/images/home/case-fixture.png", content);
-        Assert.Contains("/images/home/blog-dfm.png", content);
+        Assert.Contains("https://images.unsplash.com/", content);
+        Assert.Contains("ThreeDimensionalPrinterImageUrl", content);
+        Assert.Contains("ThreeDimensionalScannerImageUrl", content);
+        Assert.Contains("InjectionMoldingLineImageUrl", content);
+        Assert.DoesNotContain("/images/home/", content);
         Assert.DoesNotContain("shop-section", source);
         Assert.DoesNotContain("trust-band", source);
         Assert.DoesNotContain("trust-grid", source);
@@ -146,6 +148,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("FontFamily = [\"var(--maliev-font-sans)\"]", source);
         Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\">", app);
         Assert.Contains("Noto+Sans+Thai", app);
+        Assert.Contains("--font-sans-en: Geist, \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: var(--font-sans-th)", styles);
         Assert.Contains("html:lang(th)", styles);
@@ -252,6 +255,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("engine.setHardwareScalingLevel(1 / renderRatio)", source);
         Assert.Contains("ResizeObserver", source);
         Assert.Contains("powerPreference: \"low-power\"", source);
+
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        Assert.Contains(".manufacturing-gizmo--landing", styles);
+        Assert.Contains("overflow: visible", styles);
     }
 
     /// <summary>
@@ -266,8 +273,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("addHoverMotion", source);
-        Assert.Contains("const targetSize = 2.28", source);
-        Assert.Contains("wide ? 7.05 : 6.65", source);
+        Assert.Contains("const targetSize = 2.2", source);
+        Assert.Contains("wide ? 6.8 : 6.55", source);
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);

@@ -1,6 +1,5 @@
 @inherits LayoutComponentBase
 @implements IDisposable
-@inject IStringLocalizer<SharedResources> L
 @inject PreferenceService Preferences
 @inject CartState Cart
 @inject NavigationManager Navigation
@@ -16,15 +15,15 @@
             <img class="brand-logo" src="/images/logo.svg" width="118" height="27" alt="MALIEV" />
         </NavLink>
         <nav class="nav-links" aria-label="Primary navigation">
-            <NavLink href="/services">@L["Services"]</NavLink>
+            <NavLink href="/services">@Text("Services", "บริการ")</NavLink>
             <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
-            <NavLink href="/shop">@L["Shop"]</NavLink>
+            <NavLink href="/shop">@Text("Shop", "ร้านค้า")</NavLink>
             <NavLink href="/case-studies">@Text("Case studies", "ผลงาน")</NavLink>
             <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
-            <NavLink href="/contact">@L["Contact"]</NavLink>
+            <NavLink href="/contact">@Text("Contact", "ติดต่อ")</NavLink>
         </nav>
         <div class="nav-actions">
-            <div class="language-toggle" role="group" aria-label="@L["Language"]">
+            <div class="language-toggle" role="group" aria-label="@Text("Language", "ภาษา")">
                 <button type="button" class="@LanguageButtonClass(SupportedCultures.DefaultCulture)" @onclick="() => ChangeCultureAsync(SupportedCultures.DefaultCulture)">EN</button>
                 <button type="button" class="@LanguageButtonClass(SupportedCultures.ThaiCulture)" @onclick="() => ChangeCultureAsync(SupportedCultures.ThaiCulture)">TH</button>
             </div>
@@ -41,7 +40,7 @@
                                Color="Color.Inherit"
                                Size="Size.Medium"
                                Class="nav-icon-button"
-                               aria-label="@L["Cart"]" />
+                               aria-label="@Text("Cart", "ตะกร้า")" />
             </MudBadge>
             <MudIconButton Href="@SiteContent.QuoteProfileUrl"
                            Icon="@Icons.Material.Filled.AccountCircle"
@@ -49,8 +48,8 @@
                            Color="Color.Inherit"
                            Size="Size.Medium"
                            Class="nav-icon-button"
-                           aria-label="@L["Account"]" />
-            <a class="nav-quote-link" href="@SiteContent.QuoteNewUrl">@L["StartQuote"]</a>
+                           aria-label="@Text("Account", "บัญชี")" />
+            <a class="nav-quote-link" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             <button type="button"
                     class="mobile-menu-button"
                     aria-label="@Text("Open navigation", "เปิดเมนู")"
@@ -61,13 +60,13 @@
             </button>
         </div>
         <nav class="@MobileNavClass" aria-label="Mobile navigation">
-            <NavLink href="/services" @onclick="CloseMobileNav">@L["Services"]</NavLink>
+            <NavLink href="/services" @onclick="CloseMobileNav">@Text("Services", "บริการ")</NavLink>
             <NavLink href="/materials" @onclick="CloseMobileNav">@Text("Materials", "วัสดุ")</NavLink>
-            <NavLink href="/shop" @onclick="CloseMobileNav">@L["Shop"]</NavLink>
+            <NavLink href="/shop" @onclick="CloseMobileNav">@Text("Shop", "ร้านค้า")</NavLink>
             <NavLink href="/case-studies" @onclick="CloseMobileNav">@Text("Case studies", "ผลงาน")</NavLink>
             <NavLink href="/blog" @onclick="CloseMobileNav">@Text("Journal", "บทความ")</NavLink>
-            <NavLink href="/contact" @onclick="CloseMobileNav">@L["Contact"]</NavLink>
-            <a href="@SiteContent.QuoteNewUrl">@L["StartQuote"]</a>
+            <NavLink href="/contact" @onclick="CloseMobileNav">@Text("Contact", "ติดต่อ")</NavLink>
+            <a href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
         </nav>
     </header>
 
@@ -89,11 +88,11 @@
         <nav class="footer-column" aria-label="Footer company links">
             <h2>@Text("Company", "บริษัท")</h2>
             <NavLink href="/about">@Text("About", "เกี่ยวกับเรา")</NavLink>
-            <NavLink href="/contact">@L["Contact"]</NavLink>
-            <NavLink href="/services">@L["Services"]</NavLink>
+            <NavLink href="/contact">@Text("Contact", "ติดต่อ")</NavLink>
+            <NavLink href="/services">@Text("Services", "บริการ")</NavLink>
             <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
             <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
-            <NavLink href="/shop">@L["Shop"]</NavLink>
+            <NavLink href="/shop">@Text("Shop", "ร้านค้า")</NavLink>
         </nav>
         <nav class="footer-column" aria-label="Footer support links">
             <h2>@Text("Support", "ช่วยเหลือ")</h2>
@@ -184,7 +183,7 @@
 
     private string _selectedCulture = SupportedCultures.DefaultCulture;
     private bool _mobileNavOpen;
-    private string CartBadgeAriaLabel => $"{L["Cart"]}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
+    private string CartBadgeAriaLabel => $"{Text("Cart", "ตะกร้า")}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
     private string MobileNavClass => _mobileNavOpen ? "mobile-nav open" : "mobile-nav";
 
     protected override async Task OnInitializedAsync()

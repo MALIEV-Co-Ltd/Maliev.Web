@@ -37,7 +37,7 @@ public static class SupportedCultures
     }
 
     /// <summary>
-    /// Applies a supported culture to the current thread defaults.
+    /// Applies a supported culture to the current execution context.
     /// </summary>
     /// <param name="cultureName">The culture to apply.</param>
     /// <returns>The normalized culture that was applied.</returns>
@@ -45,8 +45,8 @@ public static class SupportedCultures
     {
         var normalized = Normalize(cultureName);
         var culture = CultureInfo.GetCultureInfo(normalized);
-        CultureInfo.DefaultThreadCurrentCulture = culture;
-        CultureInfo.DefaultThreadCurrentUICulture = culture;
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
         return normalized;
     }
 }

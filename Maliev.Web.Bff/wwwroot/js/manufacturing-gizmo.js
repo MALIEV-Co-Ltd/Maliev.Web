@@ -292,8 +292,8 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
   const compact = width < 560 || height < 360;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.66 : 0.54;
-  camera.radius = compact ? 7.15 : wide ? 7.05 : 6.65;
+  camera.fov = compact ? 0.64 : 0.5;
+  camera.radius = compact ? 6.8 : wide ? 6.8 : 6.55;
   camera.lowerRadiusLimit = camera.radius;
   camera.upperRadiusLimit = camera.radius;
   camera.target = new BABYLON.Vector3(0, 0.05, 0);
@@ -397,7 +397,7 @@ function frameImportedModel(meshes, root, BABYLON) {
 
   const size = bounds.max.subtract(bounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.28;
+  const targetSize = 2.2;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));
@@ -430,16 +430,16 @@ function computeMeshBounds(meshes, BABYLON) {
 
 function createLandingSurface(scene, BABYLON) {
   const surface = BABYLON.MeshBuilder.CreateDisc("landing-contact-shadow", {
-    radius: 1.58,
+    radius: 0.92,
     tessellation: 96
   }, scene);
   surface.rotation.x = Math.PI / 2;
-  surface.position.y = -1.42;
-  surface.scaling.x = 1.7;
+  surface.position.y = -1.08;
+  surface.scaling.x = 1.35;
 
   const material = new BABYLON.StandardMaterial("landing-contact-shadow-material", scene);
   material.diffuseColor = BABYLON.Color3.FromHexString("#171717");
-  material.alpha = 0.055;
+  material.alpha = 0.035;
   material.disableLighting = true;
   surface.material = material;
   surface.isPickable = false;
