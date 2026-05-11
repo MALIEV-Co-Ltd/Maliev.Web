@@ -5,10 +5,12 @@ using Maliev.Web.Bff.Components;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseStaticWebAssets();
 builder.AddServiceDefaults();
 builder.AddDefaultApiVersioning();
 builder.AddIAMServiceClient("WebBff");
@@ -91,6 +93,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     app.UseHttpsRedirection();
 }
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapDefaultEndpoints("web");

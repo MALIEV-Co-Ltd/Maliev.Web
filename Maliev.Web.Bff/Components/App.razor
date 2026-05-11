@@ -7,13 +7,26 @@
 }
 
 <!DOCTYPE html>
-<html lang="@documentLanguage" data-culture="@currentCulture">
+<html lang="@documentLanguage" data-culture="@currentCulture" data-theme="light">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="MALIEV customer website for instant manufacturing quotations, 3D printing, CNC machining, 3D scanning, design, and product ordering." />
+    <meta name="color-scheme" content="light dark" />
     <base href="/" />
+    <script>
+        (() => {
+            const normalizeTheme = theme => theme && theme.toLowerCase() === 'dark' ? 'dark' : 'light';
+            const cookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('maliev.theme='));
+            const stored = localStorage.getItem('maliev.theme');
+            const theme = normalizeTheme(stored || (cookie ? decodeURIComponent(cookie.split('=')[1]) : 'light'));
+            document.documentElement.dataset.theme = theme;
+            document.documentElement.style.colorScheme = theme;
+        })();
+    </script>
     <ResourcePreloader />
     <link rel="preconnect" href="https://shop.maliev.com" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />

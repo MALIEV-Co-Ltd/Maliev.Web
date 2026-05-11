@@ -5,6 +5,12 @@ window.malievCulture = {
     document.documentElement.dataset.culture = normalized;
     return normalized;
   },
+  applyDocumentTheme: function (theme) {
+    const normalized = theme && theme.toLowerCase() === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = normalized;
+    document.documentElement.style.colorScheme = normalized;
+    return normalized;
+  },
   resolveCulture: function (fallback) {
     const stored = localStorage.getItem('maliev.culture');
     if (stored) {
@@ -36,8 +42,31 @@ window.malievCulture = {
     document.cookie = `maliev.culture=${encodeURIComponent(normalized)};path=/;max-age=31536000;samesite=lax`;
     document.cookie = `.AspNetCore.Culture=${encodeURIComponent(`c=${normalized}|uic=${normalized}`)};path=/;max-age=31536000;samesite=lax`;
   },
+  resolveTheme: function (fallback) {
+    const stored = localStorage.getItem('maliev.theme');
+    if (stored) {
+      return window.malievCulture.applyDocumentTheme(stored);
+    }
+
+    const cookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('maliev.theme='));
+    if (cookie) {
+      return window.malievCulture.applyDocumentTheme(decodeURIComponent(cookie.split('=')[1]));
+    }
+
+    return window.malievCulture.applyDocumentTheme(fallback || 'light');
+  },
+  setTheme: function (theme) {
+    const normalized = window.malievCulture.applyDocumentTheme(theme);
+    localStorage.setItem('maliev.theme', normalized);
+    document.cookie = `maliev.theme=${encodeURIComponent(normalized)};path=/;max-age=31536000;samesite=lax`;
+  },
   getCulture: function () {
     return localStorage.getItem('maliev.culture') || 'en-US';
+  },
+  getTheme: function () {
+    return localStorage.getItem('maliev.theme') || 'light';
   },
   saveDraft: function (key, value) {
     localStorage.setItem(key, value);

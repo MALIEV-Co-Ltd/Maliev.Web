@@ -68,6 +68,36 @@ public sealed class LocalizationTests
         Assert.Contains("@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", home);
     }
 
+    /// <summary>
+    /// Verifies the site theme preference is stored per browser and reflected on the document root.
+    /// </summary>
+    [Fact]
+    public void ThemePreference_UsesDocumentRootAndStableToggleLabels()
+    {
+        var service = ReadRepoFile("Maliev.Web.Client", "Services", "PreferenceService.cs");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-culture.js");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+
+        Assert.Contains("LightTheme = \"light\"", service);
+        Assert.Contains("DarkTheme = \"dark\"", service);
+        Assert.Contains("malievCulture.resolveTheme", service);
+        Assert.Contains("malievCulture.setTheme", service);
+        Assert.Contains("NormalizeTheme", service);
+        Assert.Contains("maliev.theme", script);
+        Assert.Contains("applyDocumentTheme", script);
+        Assert.Contains("document.documentElement.dataset.theme", script);
+        Assert.Contains("document.documentElement.style.colorScheme", script);
+        Assert.Contains("data-theme=\"light\"", app);
+        Assert.Contains("maliev.theme", app);
+        Assert.Contains("theme-toggle-button", layout);
+        Assert.Contains("OnClick=\"ToggleThemeAsync\"", layout);
+        Assert.Contains("Icons.Material.Filled.LightMode", layout);
+        Assert.Contains("Icons.Material.Filled.DarkMode", layout);
+        Assert.Contains("Switch to dark theme", layout);
+        Assert.Contains("Switch to light theme", layout);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();

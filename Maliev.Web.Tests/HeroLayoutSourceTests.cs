@@ -143,19 +143,25 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var cultureScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-culture.js");
 
-        Assert.Contains("<MudThemeProvider Theme=\"@_malievTheme\" />", source);
+        Assert.Contains("<MudThemeProvider Theme=\"@_malievTheme\" IsDarkMode=\"@IsDarkMode\" />", source);
         Assert.Contains("new MudTheme", source);
         Assert.Contains("PaletteLight", source);
+        Assert.Contains("PaletteDark", source);
         Assert.Contains("DefaultBorderRadius", source);
         Assert.Contains("Typography", source);
         Assert.Contains("FontFamily = [\"var(--maliev-font-sans)\"]", source);
-        Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\">", app);
+        Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\" data-theme=\"light\">", app);
+        Assert.Contains("<meta name=\"color-scheme\" content=\"light dark\" />", app);
+        Assert.Contains("maliev.theme", app);
         Assert.Contains("Noto+Sans+Thai", app);
         Assert.Contains("--font-sans-en: Geist, \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: var(--font-sans-th)", styles);
         Assert.Contains("html:lang(th)", styles);
+        Assert.Contains("html[data-theme=\"dark\"]", styles);
+        Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
         Assert.Contains("document.documentElement.lang", cultureScript);
+        Assert.Contains("document.documentElement.dataset.theme", cultureScript);
     }
 
     /// <summary>
@@ -170,6 +176,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("AddInteractiveServerComponents", program);
         Assert.Contains("AddInteractiveServerRenderMode", program);
+        Assert.Contains("UseStaticWebAssets", program);
+        Assert.Contains("app.UseStaticFiles();", program);
         Assert.Contains("@rendermode=\"InteractiveServer\"", app);
         Assert.DoesNotContain("AddInteractiveWebAssemblyComponents", program);
         Assert.DoesNotContain("AddInteractiveWebAssemblyRenderMode", program);
