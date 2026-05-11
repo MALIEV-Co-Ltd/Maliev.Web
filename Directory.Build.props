@@ -8,9 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.7" />
-    <PackageReference Update="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.7" />
-    <PackageReference Update="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.7" />
     <PackageReference Update="Microsoft.AspNetCore.SignalR.Client" Version="10.0.7" />
     <PackageReference Update="Microsoft.Extensions.Http" Version="10.0.7" />
     <PackageReference Update="Microsoft.Extensions.Localization" Version="10.0.7" />

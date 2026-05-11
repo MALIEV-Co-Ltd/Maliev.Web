@@ -1,0 +1,58 @@
+@page "/services"
+@inject PreferenceService Preferences
+
+<PageTitle>@Text("Services", "บริการ") - MALIEV</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Text("Explore MALIEV rapid manufacturing services across 3D printing, CNC machining, 3D scanning, design, silicone casting, prototyping, and deviation analysis.", "สำรวจบริการผลิตรวดเร็วของ MALIEV ทั้งงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ หล่อซิลิโคน สร้างต้นแบบ และวิเคราะห์ความคลาดเคลื่อน")" />
+    <link rel="canonical" href="https://www.maliev.com/services" />
+</HeadContent>
+
+<section class="page-hero compact">
+    <p class="eyebrow">@Text("Capabilities", "ความสามารถ")</p>
+    <h1>@Text("Seven manufacturing services under one MALIEV workflow.", "เจ็ดบริการผลิตภายใต้เวิร์กโฟลว์ MALIEV เดียว")</h1>
+    <p>@Text("Choose the right process, or start with a CAD upload and let MALIEV review manufacturability before quotation.", "เลือกกระบวนการที่เหมาะสม หรือเริ่มจากอัปโหลด CAD แล้วให้ MALIEV ตรวจความเหมาะสมก่อนเสนอราคา")</p>
+    <div class="quote-actions">
+        <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Start custom quote", "เริ่มขอราคา")</a>
+        <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="service-grid">
+        @foreach (var service in SiteContent.Services)
+        {
+            <a class="@ServiceCardClass(service)" href="/services/@service.Slug">
+                <div class="service-card-media">
+                    <img src="@service.ImageUrl" alt="@service.Title.For(Preferences.Culture)" loading="lazy" />
+                    @if (service.Primary)
+                    {
+                        <span class="chip">@Text("Most requested", "ยอดนิยม")</span>
+                    }
+                </div>
+                <div class="service-card-body">
+                    <span class="card-meta">@service.Number</span>
+                    <h3>@service.Title.For(Preferences.Culture)</h3>
+                    <p>@service.Summary.For(Preferences.Culture)</p>
+                    <span class="card-link">@Text("View service", "ดูบริการ")</span>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private static string ServiceCardClass(ServicePageContent service)
+    {
+        return service.Primary ? "service-card primary" : "service-card";
+    }
+}

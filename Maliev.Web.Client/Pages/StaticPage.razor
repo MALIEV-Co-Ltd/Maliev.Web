@@ -7,6 +7,7 @@
 @page "/materials"
 @page "/industries"
 @page "/case-studies"
+@page "/case-studies/{Slug}"
 @page "/blog"
 @page "/blog/{Slug}"
 @page "/account/quotes"
@@ -14,6 +15,7 @@
 @page "/account/preferences"
 @inject NavigationManager Navigation
 @inject MalievApiClient Api
+@inject PreferenceService Preferences
 
 <PageTitle>@Title - MALIEV</PageTitle>
 <HeadContent>
@@ -28,45 +30,116 @@
     <p class="eyebrow">@Eyebrow</p>
     <h1>@Title</h1>
     <p>@Body</p>
-</section>
-
-<section class="section text-section">
-    <div class="content-stack">
-        @foreach (var item in Sections)
-        {
-            <article>
-                <h2>@item.Title</h2>
-                <p>@item.Body</p>
-            </article>
-        }
-
-        @if (Path == "contact")
-        {
-            <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <div class="form-grid">
-                    <label>Full name <InputText @bind-Value="_contact.FullName" /></label>
-                    <label>Email <InputText type="email" @bind-Value="_contact.Email" /></label>
-                    <label>Phone <InputText @bind-Value="_contact.PhoneNumber" /></label>
-                    <label>Company <InputText @bind-Value="_contact.Company" /></label>
-                    <label class="wide">Subject <InputText @bind-Value="_contact.Subject" /></label>
-                    <label class="wide">Message <InputTextArea @bind-Value="_contact.Message" /></label>
-                </div>
-                @if (!string.IsNullOrWhiteSpace(_contactStatus))
-                {
-                    <p class="form-status">@_contactStatus</p>
-                }
-                <button class="button primary" type="submit" disabled="@_submittingContact">Send message</button>
-            </EditForm>
-        }
-
-        <div class="quote-actions">
-            <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
-            <a class="button secondary" href="@SecondaryHref">@SecondaryAction</a>
-        </div>
+    <div class="quote-actions">
+        <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+        <a class="button secondary" href="@SecondaryHref">@SecondaryAction</a>
     </div>
 </section>
+
+@if (Path == "materials")
+{
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">@Text("Material library", "ห้องสมุดวัสดุ")</p>
+                <h2>@Text("Choose by process, use case, and finishing expectation.", "เลือกจากกระบวนการ การใช้งาน และความคาดหวังเรื่องผิวงาน")</h2>
+            </div>
+        </div>
+        <div class="material-grid">
+            @foreach (var material in Materials)
+            {
+                <article class="material-card">
+                    <span class="card-meta">@material.Process</span>
+                    <h3>@material.Name</h3>
+                    <p>@material.Body.For(Preferences.Culture)</p>
+                    <div>
+                        @foreach (var tag in material.Tags)
+                        {
+                            <span class="chip">@tag.For(Preferences.Culture)</span>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+}
+else if (Path == "case-studies")
+{
+    <section class="section">
+        <div class="case-grid">
+            @foreach (var caseStudy in SiteContent.CaseStudies)
+            {
+                <a class="case-card" href="/case-studies/@caseStudy.Slug">
+                    <div class="case-card-body">
+                        <span class="card-meta">@caseStudy.Meta</span>
+                        <h3>@caseStudy.Title.For(Preferences.Culture)</h3>
+                        <p>@caseStudy.Summary.For(Preferences.Culture)</p>
+                        <span class="card-link">@caseStudy.Stat</span>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}
+else if (Path.StartsWith("case-studies/", StringComparison.Ordinal))
+{
+    <section class="section text-section">
+        <div class="content-stack">
+            @foreach (var item in Sections)
+            {
+                <article>
+                    <h2>@item.Title.For(Preferences.Culture)</h2>
+                    <p>@item.Body.For(Preferences.Culture)</p>
+                </article>
+            }
+        </div>
+    </section>
+}
+else if (Path == "contact")
+{
+    <section class="section contact-layout">
+        <div class="content-stack">
+            @foreach (var item in Sections)
+            {
+                <article>
+                    <h2>@item.Title.For(Preferences.Culture)</h2>
+                    <p>@item.Body.For(Preferences.Culture)</p>
+                </article>
+            }
+        </div>
+        <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-grid">
+                <label>@Text("Full name", "ชื่อ-นามสกุล") <InputText @bind-Value="_contact.FullName" /></label>
+                <label>@Text("Email", "อีเมล") <InputText type="email" @bind-Value="_contact.Email" /></label>
+                <label>@Text("Phone", "โทรศัพท์") <InputText @bind-Value="_contact.PhoneNumber" /></label>
+                <label>@Text("Company", "บริษัท") <InputText @bind-Value="_contact.Company" /></label>
+                <label class="wide">@Text("Subject", "หัวข้อ") <InputText @bind-Value="_contact.Subject" /></label>
+                <label class="wide">@Text("Message", "ข้อความ") <InputTextArea @bind-Value="_contact.Message" /></label>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(_contactStatus))
+            {
+                <p class="form-status">@_contactStatus</p>
+            }
+            <button class="button primary" type="submit" disabled="@_submittingContact">@Text("Send message", "ส่งข้อความ")</button>
+        </EditForm>
+    </section>
+}
+else
+{
+    <section class="section text-section">
+        <div class="content-stack">
+            @foreach (var item in Sections)
+            {
+                <article>
+                    <h2>@item.Title.For(Preferences.Culture)</h2>
+                    <p>@item.Body.For(Preferences.Culture)</p>
+                </article>
+            }
+        </div>
+    </section>
+}
 
 @code {
     [Parameter]
@@ -80,147 +153,156 @@
 
     private bool _submittingContact;
     private string? _contactStatus;
-
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
-
     private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
 
     private string Eyebrow => Path switch
     {
-        "account/preferences" or "account/quotes" or "account/orders" => "Account",
-        var path when path.StartsWith("blog/", StringComparison.Ordinal) => "MALIEV Journal",
+        "account/preferences" or "account/quotes" or "account/orders" => Text("Quote engine", "ระบบขอราคา"),
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("MALIEV Journal", "บทความ MALIEV"),
+        var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("Case study", "ผลงาน"),
+        "materials" => Text("Materials", "วัสดุ"),
+        "case-studies" => Text("Case studies", "ผลงาน"),
         _ => "MALIEV"
     };
 
     private string Title => Path switch
     {
-        "contact" => "Contact",
+        "contact" => Text("Contact", "ติดต่อ"),
         "faq" => "FAQ",
-        "shipping-returns" => "Shipping and returns",
-        "privacy" => "Privacy",
-        "terms" => "Terms",
-        "materials" => "Materials",
-        "industries" => "Industries",
-        "case-studies" => "Case studies",
-        "blog" => "MALIEV Journal",
-        "account/quotes" => "Saved quotes",
-        "account/orders" => "Orders",
-        "account/preferences" => "Preferences",
+        "shipping-returns" => Text("Shipping and returns", "การจัดส่งและการคืนสินค้า"),
+        "privacy" => Text("Privacy", "ความเป็นส่วนตัว"),
+        "terms" => Text("Terms", "เงื่อนไข"),
+        "materials" => Text("Materials", "วัสดุ"),
+        "industries" => Text("Industries", "อุตสาหกรรม"),
+        "case-studies" => Text("Case studies", "ผลงาน"),
+        "blog" => Text("MALIEV Journal", "บทความ MALIEV"),
+        "account/quotes" => Text("Saved quotes", "ใบเสนอราคาที่บันทึกไว้"),
+        "account/orders" => Text("Orders", "คำสั่งซื้อ"),
+        "account/preferences" => Text("Preferences", "การตั้งค่า"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => BlogPostTitle,
-        _ => "About MALIEV"
+        var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CaseStudyTitle,
+        _ => Text("About MALIEV", "เกี่ยวกับ MALIEV")
     };
 
     private string BlogPostTitle => Slug switch
     {
-        "design-for-manufacturing" => "Design for manufacturability before quotation",
-        "choosing-3d-printing-materials" => "Choosing 3D printing materials",
-        _ => "Manufacturing notes from MALIEV"
+        "design-for-manufacturing" => Text("Design for manufacturability before quotation", "ออกแบบเพื่อผลิตก่อนขอราคา"),
+        "choosing-3d-printing-materials" => Text("Choosing 3D printing materials", "เลือกวัสดุพิมพ์ 3 มิติ"),
+        _ => Text("Manufacturing notes from MALIEV", "บันทึกงานผลิตจาก MALIEV")
     };
 
-    private string Description => Path switch
-    {
-        "materials" => "Customer guide to MALIEV manufacturing materials for 3D printing, CNC machining, and product development.",
-        "industries" => "How MALIEV supports manufacturers, designers, product builders, and maintenance teams.",
-        "case-studies" => "Representative MALIEV manufacturing projects and customer workflows.",
-        "blog" => "MALIEV articles about manufacturing, CAD preparation, materials, and custom part quoting.",
-        "contact" => "Contact MALIEV for product orders, custom manufacturing quotes, machine support, and service questions.",
-        _ => Body
-    };
+    private string CaseStudyTitle => SiteContent.CaseStudies.FirstOrDefault(item => item.Slug == Slug)?.Title.For(Preferences.Culture)
+        ?? Text("MALIEV case study", "ผลงาน MALIEV");
+
+    private string Description => Body;
 
     private string Body => Path switch
     {
-        "contact" => "Send product questions, machine support issues, manufacturing requirements, drawings, or project context.",
-        "faq" => "Answers for product orders, custom parts, and preparing files for quotation.",
-        "shipping-returns" => "How MALIEV prepares, ships, and supports product orders after delivery.",
-        "privacy" => "How MALIEV handles customer files, product orders, account preferences, and communication records.",
-        "terms" => "Commercial terms for product orders, custom manufacturing requests, and quotation acceptance.",
-        "materials" => "Compare materials by process, usage, finishing expectations, and quoting readiness.",
-        "industries" => "MALIEV supports design, maintenance, education, factory automation, and product-development teams.",
-        "case-studies" => "Representative workflows for custom parts, fixtures, small-batch products, and machine support.",
-        "blog" => "Practical notes for preparing manufacturable parts and ordering from MALIEV.",
-        "account/preferences" => "Manage language and customer portal preferences in the quote engine.",
-        "account/quotes" => "Saved custom manufacturing quotes now live in the dedicated quote engine.",
-        "account/orders" => "Custom manufacturing orders now live in the dedicated quote engine.",
-        var path when path.StartsWith("blog/", StringComparison.Ordinal) => "Manufacturing guidance for customers preparing custom parts and product work.",
-        _ => "MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand."
+        "contact" => Text("Send product questions, machine support issues, drawings, 3D files, or manufacturing context.", "ส่งคำถามสินค้า ปัญหาเครื่องจักร Drawing ไฟล์ 3D หรือบริบทงานผลิต"),
+        "faq" => Text("Answers for product orders, custom parts, and preparing files for quotation.", "คำตอบสำหรับการสั่งซื้อสินค้า งานเฉพาะแบบ และการเตรียมไฟล์เพื่อขอราคา"),
+        "shipping-returns" => Text("How MALIEV prepares, ships, and supports product orders after delivery.", "วิธีที่ MALIEV เตรียม จัดส่ง และดูแลคำสั่งซื้อหลังส่งมอบ"),
+        "privacy" => Text("How MALIEV handles customer files, product orders, account preferences, and communication records.", "วิธีที่ MALIEV จัดการไฟล์ลูกค้า คำสั่งซื้อ การตั้งค่าบัญชี และประวัติการสื่อสาร"),
+        "terms" => Text("Commercial terms for product orders, custom manufacturing requests, and quotation acceptance.", "เงื่อนไขการค้าสำหรับคำสั่งซื้อสินค้า งานผลิตเฉพาะแบบ และการอนุมัติใบเสนอราคา"),
+        "materials" => Text("Compare materials by process, use case, finishing expectation, and quoting readiness.", "เปรียบเทียบวัสดุตามกระบวนการ การใช้งาน ผิวงาน และความพร้อมในการขอราคา"),
+        "industries" => Text("MALIEV supports factories, designers, product builders, educators, and maintenance teams.", "MALIEV สนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
+        "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
+        "blog" => Text("Practical notes for preparing manufacturable parts and ordering from MALIEV.", "บันทึกเชิงปฏิบัติสำหรับเตรียมชิ้นงานให้ผลิตได้และสั่งงานกับ MALIEV"),
+        "account/preferences" => Text("Manage language and customer portal preferences in the quote engine.", "จัดการภาษาและการตั้งค่าพอร์ทัลลูกค้าในระบบขอราคา"),
+        "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบขอราคาโดยเฉพาะ"),
+        "account/orders" => Text("Custom manufacturing orders now live in the dedicated quote engine.", "คำสั่งผลิตเฉพาะแบบอยู่ในระบบขอราคาโดยเฉพาะ"),
+        var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("Manufacturing guidance for customers preparing custom parts and product work.", "คำแนะนำงานผลิตสำหรับลูกค้าที่เตรียมชิ้นงานเฉพาะและงานสินค้า"),
+        var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("How MALIEV turns files, samples, and requirements into production-ready work.", "วิธีที่ MALIEV เปลี่ยนไฟล์ ตัวอย่าง และความต้องการให้เป็นงานพร้อมผลิต"),
+        _ => Text("MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand.", "MALIEV ผลิตเครื่องมือ เครื่องจักร สินค้าพิมพ์สามมิติ และชิ้นงานเฉพาะจากนนทบุรี ประเทศไทย")
     };
 
     private IReadOnlyList<ContentSection> Sections => Path switch
     {
-        "materials" =>
-        [
-            new("3D printing polymers", "PLA, PETG, engineering polymers, and resin options are selected by stiffness, appearance, heat exposure, and finishing requirements."),
-            new("CNC materials", "Aluminum and engineering plastics are quoted from machining stock after geometry, tolerance, surface, and quantity are reviewed."),
-            new("Material readiness", "For the fastest quote, include the process, material preference, quantity, tolerance notes, and real use case.")
-        ],
         "industries" =>
         [
-            new("Factories and maintenance teams", "Jigs, fixtures, replacement parts, guards, brackets, adapters, and troubleshooting support for production environments."),
-            new("Product teams", "Prototypes, pilot parts, presentation models, small batches, and engineering support before mass production."),
-            new("Education and makers", "Training hardware, models, machine accessories, and guided manufacturing support.")
+            Section("Factories and maintenance teams", "โรงงานและทีมซ่อมบำรุง", "Jigs, fixtures, replacement parts, guards, brackets, adapters, and troubleshooting support for production environments.", "จิ๊ก ฟิกซ์เจอร์ ชิ้นส่วนทดแทน การ์ด ขายึด อะแดปเตอร์ และการสนับสนุนการแก้ปัญหาในสภาพแวดล้อมการผลิต"),
+            Section("Product and R&D teams", "ทีมสินค้าและ R&D", "Prototypes, pilot parts, presentation models, small batches, and engineering support before mass production.", "ต้นแบบ ชิ้นงานทดลอง โมเดลนำเสนอ งานจำนวนน้อย และการสนับสนุนวิศวกรรมก่อนผลิตจำนวนมาก"),
+            Section("Education and makers", "การศึกษาและเมกเกอร์", "Training hardware, models, machine accessories, and guided manufacturing support.", "ฮาร์ดแวร์ฝึกอบรม โมเดล อุปกรณ์เสริมเครื่องจักร และการแนะนำงานผลิต")
         ],
-        "case-studies" =>
+        var path when path == "case-studies" || path.StartsWith("case-studies/", StringComparison.Ordinal) =>
         [
-            new("Fixture turnaround", "A maintenance team uploads STEP files, confirms material and quantity, receives a quote, and tracks the manufacturing order through delivery."),
-            new("Prototype iteration", "A product team compares 3D printed material options, requests a formal quote, and attaches notes for engineering review."),
-            new("Machine support", "A customer sends machine photos and symptoms through the contact form so MALIEV can route the request to the right team.")
+            Section("Fixture turnaround", "ฟิกซ์เจอร์เร่งด่วน", "A maintenance team uploaded sample geometry, confirmed material and quantity, received a quote, and tracked production through delivery.", "ทีมซ่อมบำรุงอัปโหลด Geometry ยืนยันวัสดุและจำนวน รับใบเสนอราคา และติดตามการผลิตจนส่งมอบ"),
+            Section("Prototype iteration", "พัฒนาต้นแบบซ้ำ", "A product team compared printed material options, requested a formal quote, and attached notes for engineering review.", "ทีมสินค้าเปรียบเทียบวัสดุพิมพ์ ขอใบเสนอราคาอย่างเป็นทางการ และแนบหมายเหตุเพื่อให้วิศวกรตรวจ"),
+            Section("Machine support", "สนับสนุนเครื่องจักร", "A customer sent machine photos and symptoms so MALIEV could route support to the right team.", "ลูกค้าส่งรูปเครื่องและอาการเพื่อให้ MALIEV ส่งต่อทีมที่เหมาะสม")
         ],
-        "blog" =>
+        var path when path == "blog" || path.StartsWith("blog/", StringComparison.Ordinal) =>
         [
-            new("Design for manufacturability before quotation", "Prepare wall thickness, holes, threads, tolerances, and reference drawings before starting a custom quote."),
-            new("Choosing 3D printing materials", "Match prototype materials to strength, heat, finish, and lead-time expectations.")
-        ],
-        var path when path.StartsWith("blog/", StringComparison.Ordinal) =>
-        [
-            new(BlogPostTitle, "Use the quote engine for custom manufacturing when geometry, material, process, and quantity determine the price. Use the shop for standard products."),
-            new("What to prepare", "Upload the CAD file, include target material, quantity, tolerance, finish, deadline, and any drawings that define critical features.")
+            Section("Design for manufacturability before quotation", "ออกแบบเพื่อผลิตก่อนขอราคา", "Prepare wall thickness, holes, threads, tolerances, and reference drawings before starting a custom quote.", "เตรียมความหนาผนัง รู เกลียว tolerance และ Drawing อ้างอิงก่อนเริ่มขอราคา"),
+            Section("Choosing 3D printing materials", "เลือกวัสดุพิมพ์ 3 มิติ", "Match prototype materials to strength, heat, finish, and lead-time expectations.", "จับคู่วัสดุต้นแบบกับความแข็งแรง ความร้อน ผิวงาน และระยะเวลาที่ต้องการ")
         ],
         "contact" =>
         [
-            new("Sales and quotations", "Send product questions, machine requirements, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step."),
-            new("Machine and product support", "For machines, spare parts, and printed products, include the product name, order reference, photos, and the issue you want us to check.")
+            Section("Sales and quotations", "ฝ่ายขายและใบเสนอราคา", "Send product questions, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ MALIEV จะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า"),
+            Section("Machine and product support", "สนับสนุนเครื่องจักรและสินค้า", "For machines, spare parts, and printed products, include the product name, order reference, photos, and the issue you want checked.", "สำหรับเครื่องจักร อะไหล่ และสินค้าพิมพ์ ระบุชื่อสินค้า เลขอ้างอิงคำสั่งซื้อ รูปถ่าย และปัญหาที่ต้องการให้ตรวจ")
         ],
         "faq" =>
         [
-            new("Where do custom quotes happen?", "Custom manufacturing quotes now start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay in one manufacturing portal."),
-            new("Can I buy products without a quote?", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine."),
-            new("Can I request Thai or English documents?", "Yes. Keep your preferred language in account preferences and MALIEV will use it for customer-facing communication where available.")
+            Section("Where do custom quotes happen?", "งานเฉพาะแบบขอราคาที่ไหน", "Custom manufacturing quotes start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มที่ quote.maliev.com เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
+            Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่ขอราคาได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจากระบบขอราคา"),
+            Section("Can I request Thai or English documents?", "ขอเอกสารไทยหรืออังกฤษได้ไหม", "Yes. Keep your preferred language in the customer workspace and MALIEV will use it where available.", "ได้ ตั้งค่าภาษาที่ต้องการในพื้นที่ลูกค้า แล้ว MALIEV จะใช้ภาษานั้นเมื่อรองรับ")
         ],
         "shipping-returns" =>
         [
-            new("Shipping", "Shipping options depend on item size, destination, and whether the order includes machines, spare parts, products, or custom-made parts."),
-            new("Returns and support", "Ready-made products are reviewed with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.")
+            Section("Shipping", "การจัดส่ง", "Shipping depends on item size, destination, and whether the order includes machines, spare parts, products, or custom-made parts.", "การจัดส่งขึ้นกับขนาดสินค้า ปลายทาง และประเภทคำสั่งซื้อ เช่น เครื่องจักร อะไหล่ สินค้า หรือชิ้นงานเฉพาะ"),
+            Section("Returns and support", "การคืนสินค้าและการดูแล", "Ready-made products are reviewed with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.", "สินค้าพร้อมขายตรวจจากรูปและเลขอ้างอิงคำสั่งซื้อ ส่วนชิ้นงานเฉพาะตรวจเทียบกับใบเสนอราคาและสเปกที่อนุมัติ")
         ],
         "privacy" =>
         [
-            new("Customer files", "Uploaded models, drawings, and product communications are used to prepare quotations, manufacture orders, and provide support."),
-            new("Preferences", "Language and currency preferences may be stored in the browser and later attached to your account after sign-in."),
-            new("Commerce records", "Cart, checkout, and order information is used to process purchases, delivery, and after-sales support.")
+            Section("Customer files", "ไฟล์ลูกค้า", "Uploaded models, drawings, and product communications are used to prepare quotations, manufacture orders, and provide support.", "โมเดล Drawing และการสื่อสารของลูกค้าใช้เพื่อเตรียมใบเสนอราคา ผลิตงาน และให้การสนับสนุน"),
+            Section("Preferences", "การตั้งค่า", "Language and currency preferences may be stored in the browser and later attached to your account after sign-in.", "ภาษาและสกุลเงินอาจถูกเก็บในเบราว์เซอร์และผูกกับบัญชีหลังเข้าสู่ระบบ"),
+            Section("Commerce records", "ข้อมูลการค้า", "Cart, checkout, and order information is used to process purchases, delivery, and after-sales support.", "ข้อมูลตะกร้า ชำระเงิน และคำสั่งซื้อใช้เพื่อดำเนินการซื้อ จัดส่ง และดูแลหลังการขาย")
         ],
         "terms" =>
         [
-            new("Product orders", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or product configuration needs clarification."),
-            new("Custom manufacturing", "Custom part pricing is based on submitted files, material, process, quantity, and accepted quotation. Changes to files or requirements may require a new quote.")
+            Section("Product orders", "คำสั่งซื้อสินค้า", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or configuration needs clarification.", "ราคา สถานะสินค้า และระยะเวลาจะยืนยันตอนชำระเงิน MALIEV อาจติดต่อหากต้องชี้แจงการจัดส่งหรือการตั้งค่า"),
+            Section("Custom manufacturing", "งานผลิตเฉพาะแบบ", "Custom part pricing is based on submitted files, material, process, quantity, and accepted quotation. Requirement changes may require a new quote.", "ราคาชิ้นงานเฉพาะขึ้นกับไฟล์ วัสดุ กระบวนการ จำนวน และใบเสนอราคาที่อนุมัติ หากเปลี่ยนความต้องการอาจต้องออกใบเสนอราคาใหม่")
         ],
         "account/preferences" or "account/quotes" or "account/orders" =>
         [
-            new("Dedicated quote portal", "Custom manufacturing account features now live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together."),
-            new("Product shop", "Product shopping remains on www.maliev.com and will keep a separate cart flow.")
+            Section("Dedicated quote portal", "พอร์ทัลขอราคาโดยเฉพาะ", "Custom manufacturing account features live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ที่ quote.maliev.com เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
+            Section("Product shop", "ร้านค้าสินค้า", "Product shopping remains on www.maliev.com and keeps a separate cart flow.", "การซื้อสินค้ายังอยู่ที่ www.maliev.com และใช้ตะกร้าแยกต่างหาก")
         ],
         _ =>
         [
-            new("What we make", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products."),
-            new("How we work", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.")
+            Section("What we make", "สิ่งที่เราผลิต", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products.", "MALIEV รองรับงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ CAD เครื่องฉีดพลาสติกระบบลม อะไหล่ ฟิกซ์เจอร์ และสินค้าพิมพ์"),
+            Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ระบบขอราคาเมื่องานเป็นแบบเฉพาะ")
         ]
     };
 
-    private string PrimaryAction => Path.StartsWith("account/", StringComparison.Ordinal) ? "Open quote engine" : "Start custom quote";
+    private IReadOnlyList<MaterialItem> Materials =>
+    [
+        new("PLA / PETG / ABS", "FDM", SiteContent.Text("Budget prototypes, fit checks, fixtures, and visual models.", "ต้นแบบราคาประหยัด ตรวจประกอบ ฟิกซ์เจอร์ และโมเดลดูรูปทรง"), [SiteContent.Text("Fast", "เร็ว"), SiteContent.Text("Affordable", "คุ้มค่า")]),
+        new("Engineering nylon", "MJF · SLS", SiteContent.Text("Functional parts, living hinges, brackets, housings, and low-volume production.", "ชิ้นงานใช้งานจริง บานพับ ขายึด เคส และผลิตจำนวนน้อย"), [SiteContent.Text("Durable", "ทนทาน"), SiteContent.Text("Functional", "ใช้งานจริง")]),
+        new("Resin", "SLA", SiteContent.Text("High-detail visual parts, smooth surfaces, masters, and presentation models.", "ชิ้นงานรายละเอียดสูง ผิวเรียบ Master และโมเดลนำเสนอ"), [SiteContent.Text("Fine detail", "รายละเอียดสูง"), SiteContent.Text("Smooth", "ผิวเรียบ")]),
+        new("Aluminum", "CNC", SiteContent.Text("Machined brackets, fixtures, plates, jigs, and end-use components.", "ขายึด ฟิกซ์เจอร์ แผ่นงาน จิ๊ก และชิ้นส่วนใช้งานจริงที่กัดขึ้นรูป"), [SiteContent.Text("Precise", "แม่นยำ"), SiteContent.Text("Metal", "โลหะ")])
+    ];
 
-    private string PrimaryHref => "https://quote.maliev.com";
+    private string PrimaryAction => Path switch
+    {
+        "account/orders" => Text("Open order tracking", "เปิดหน้าติดตามคำสั่งซื้อ"),
+        "account/preferences" => Text("Open profile", "เปิดโปรไฟล์"),
+        var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบขอราคา"),
+        _ => Text("Start custom quote", "เริ่มขอราคา")
+    };
 
-    private string SecondaryAction => Path == "contact" ? "Shop products" : "Contact MALIEV";
-
+    private string PrimaryHref => Path switch
+    {
+        "account/orders" => SiteContent.QuoteOrdersUrl,
+        "account/preferences" => SiteContent.QuoteProfileUrl,
+        _ => SiteContent.QuoteNewUrl
+    };
+    private string SecondaryAction => Path == "contact" ? Text("Shop products", "เลือกซื้อสินค้า") : Text("Contact MALIEV", "ติดต่อ MALIEV");
     private string SecondaryHref => Path == "contact" ? "/shop" : "/contact";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+    }
 
     private async Task SubmitContactAsync()
     {
@@ -229,7 +311,7 @@
         try
         {
             var response = await Api.SubmitContactMessageAsync(_contact);
-            _contactStatus = $"Message received. Reference {response.MessageId}.";
+            _contactStatus = Text($"Message received. Reference {response.MessageId}.", $"ได้รับข้อความแล้ว เลขอ้างอิง {response.MessageId}");
         }
         catch (Exception ex)
         {
@@ -241,5 +323,17 @@
         }
     }
 
-    private sealed record ContentSection(string Title, string Body);
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private static ContentSection Section(string titleEn, string titleTh, string bodyEn, string bodyTh)
+    {
+        return new ContentSection(SiteContent.Text(titleEn, titleTh), SiteContent.Text(bodyEn, bodyTh));
+    }
+
+    private sealed record ContentSection(LocalizedText Title, LocalizedText Body);
+
+    private sealed record MaterialItem(string Name, string Process, LocalizedText Body, IReadOnlyList<LocalizedText> Tags);
 }

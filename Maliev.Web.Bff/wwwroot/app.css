@@ -278,6 +278,10 @@ main {
   color: #a21616;
 }
 
+.accent-blue {
+  color: var(--blue);
+}
+
 .mobile-menu-button {
   display: none;
   position: relative;
@@ -494,16 +498,28 @@ main {
 
 .landing-quote-dropzone.mud-button-root,
 .quote-dropzone {
+  display: grid;
+  gap: 10px;
   width: min(100%, 560px);
   min-height: 112px;
   justify-content: stretch;
-  padding: 0;
+  padding: 18px;
   color: var(--ink);
   background: rgba(255, 255, 255, .96);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   text-align: left;
   text-transform: none;
+}
+
+.landing-quote-dropzone.mud-button-root {
+  display: inline-flex;
+  padding: 0;
+}
+
+.quote-dropzone .button {
+  width: fit-content;
+  margin-top: 8px;
 }
 
 .landing-quote-dropzone .mud-button-label {
@@ -864,6 +880,11 @@ main {
 .final-cta {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
   align-items: center;
+}
+
+.contact-layout {
+  grid-template-columns: minmax(0, .95fr) minmax(320px, 1.05fr);
+  align-items: start;
 }
 
 .split-section,

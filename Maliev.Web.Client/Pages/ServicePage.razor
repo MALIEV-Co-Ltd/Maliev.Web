@@ -1,92 +1,90 @@
 @page "/services/{Slug}"
+@inject PreferenceService Preferences
 
-<PageTitle>@Title - MALIEV</PageTitle>
+<PageTitle>@Service.SeoTitle - MALIEV</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Service.Summary.For(Preferences.Culture)" />
+    <link rel="canonical" href="@CanonicalUrl" />
+</HeadContent>
 
 <section class="page-hero compact">
-    <p class="eyebrow">Manufacturing services</p>
-    <h1>@Title</h1>
-    <p>@Summary</p>
-    <a class="button primary" href="/quote">Start quote</a>
-</section>
-
-<section class="section proof-band service-proof">
-    <img src="@ImageUrl" alt="@Title" />
-    <div>
-        <p class="eyebrow">@ServiceLabel</p>
-        <h2>@ProofTitle</h2>
-        <p>@ProofText</p>
+    <p class="eyebrow">@Text("Manufacturing services", "บริการผลิต")</p>
+    <h1>@Service.Title.For(Preferences.Culture)</h1>
+    <p>@Service.Summary.For(Preferences.Culture)</p>
+    <div class="quote-actions">
+        <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Start quote", "เริ่มขอราคา")</a>
+        <a class="button secondary" href="/services">@Text("All services", "บริการทั้งหมด")</a>
     </div>
 </section>
 
-<section class="section service-detail-grid">
-    @foreach (var item in Workflow)
-    {
-        <article class="workflow-step">
-            <span>@item.Step</span>
-            <h2>@item.Title</h2>
-            <p>@item.Text</p>
-        </article>
-    }
+<section class="section feature-band">
+    <div class="feature-media">
+        <img src="@Service.ImageUrl" alt="@Service.Title.For(Preferences.Culture)" loading="lazy" />
+    </div>
+    <div>
+        <p class="eyebrow">@Service.Number / @Text("Capability", "ความสามารถ")</p>
+        <h2 class="h-display">@Service.ProofTitle.For(Preferences.Culture)</h2>
+        <p class="lede">@Service.ProofText.For(Preferences.Culture)</p>
+    </div>
+</section>
+
+<section class="section" aria-labelledby="service-specs-title">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">@Text("Service profile", "ข้อมูลบริการ")</p>
+            <h2 id="service-specs-title">@Text("What to prepare before quotation.", "สิ่งที่ควรเตรียมก่อนขอราคา")</h2>
+        </div>
+        <a class="section-link" href="@SiteContent.QuoteNewUrl">@Text("Upload files", "อัปโหลดไฟล์")</a>
+    </div>
+    <div class="service-detail-grid">
+        @for (var index = 0; index < Service.Specs.Count; index++)
+        {
+            <article class="workflow-step">
+                <span>@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
+                <h2>@Service.Specs[index].For(Preferences.Culture)</h2>
+                <p>@SpecHelp(index)</p>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="section final-cta">
+    <div>
+        <p class="eyebrow">@Text("Next step", "ขั้นตอนถัดไป")</p>
+        <h2 class="h-display">@Text("Send the real requirement, not a vague request.", "ส่งความต้องการจริง ไม่ใช่คำขอกว้างๆ")</h2>
+        <p class="lede">@Text("The fastest path is a file plus material, quantity, tolerance, finish, deadline, and the reason the part matters.", "เส้นทางที่เร็วที่สุดคือไฟล์พร้อมวัสดุ จำนวน tolerance ผิวงาน กำหนดเวลา และเหตุผลที่ชิ้นงานนี้สำคัญ")</p>
+    </div>
+    <a class="quote-dropzone" href="@SiteContent.QuoteNewUrl">
+        <strong>@Text("Open the quote engine", "เปิดระบบขอราคา")</strong>
+        <small>@Text("CAD upload, configuration, and order tracking continue at quote.maliev.com.", "อัปโหลด CAD ตั้งค่า และติดตามงานต่อที่ quote.maliev.com")</small>
+        <span class="button primary">@Text("Start quote", "เริ่มขอราคา")</span>
+    </a>
 </section>
 
 @code {
     [Parameter]
     public string Slug { get; set; } = string.Empty;
 
-    private string Title => Slug switch
+    private ServicePageContent Service => SiteContent.GetService(Slug);
+    private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
+
+    protected override async Task OnInitializedAsync()
     {
-        "cnc-machining" => "CNC Machining",
-        "3d-scanning" => "3D Scanning",
-        "3d-design" => "3D Design",
-        _ => "3D Printing"
-    };
+        await Preferences.InitializeAsync();
+    }
 
-    private string ServiceLabel => Slug switch
+    private string Text(string en, string th)
     {
-        "cnc-machining" => "Precision machining",
-        "3d-scanning" => "Reverse engineering",
-        "3d-design" => "Design support",
-        _ => "Rapid prototyping"
-    };
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
 
-    private string Summary => Slug switch
+    private string SpecHelp(int index)
     {
-        "cnc-machining" => "Upload machinable geometry, choose material and tolerance expectations, and route precision parts into quotation.",
-        "3d-scanning" => "Book marker-based or object scanning for reverse engineering, inspection, and documentation.",
-        "3d-design" => "Turn sketches, broken samples, or rough ideas into manufacturable CAD models.",
-        _ => "Choose FDM or resin, material, finish, quantity, and lead time from an instant quote workspace."
-    };
-
-    private string ImageUrl => Slug switch
-    {
-        "cnc-machining" => "https://shop.maliev.com/cdn/shop/files/Screenshot_2025-10-03_223753.png?v=1759505883&width=1200",
-        "3d-scanning" => "https://shop.maliev.com/cdn/shop/files/spare-part.png?v=1756281837&width=1200",
-        "3d-design" => "https://shop.maliev.com/cdn/shop/files/colors.81.png?v=1740109006&width=1200",
-        _ => "https://shop.maliev.com/cdn/shop/files/colors.61.png?v=1740108788&width=1200"
-    };
-
-    private string ProofTitle => Slug switch
-    {
-        "cnc-machining" => "From prototype blocks to production-ready machined parts",
-        "3d-scanning" => "Capture real parts for repair, inspection, and redesign",
-        "3d-design" => "Turn incomplete ideas into manufacturable CAD",
-        _ => "Fast printed parts without losing manufacturing discipline"
-    };
-
-    private string ProofText => Slug switch
-    {
-        "cnc-machining" => "MALIEV reviews geometry, material, tolerance, and quantity before confirming the production route.",
-        "3d-scanning" => "Scanning work can support reverse engineering, comparison, documentation, and follow-on design changes.",
-        "3d-design" => "Design support focuses on practical manufacturing choices, not only attractive renders.",
-        _ => "Use printing for prototypes, fixtures, fit checks, jigs, and low-volume usable products."
-    };
-
-    private IReadOnlyList<WorkflowItem> Workflow =>
-    [
-        new("01", "Upload or brief", "Start with model files, drawings, photos, or a short manufacturing brief."),
-        new("02", "Review manufacturing fit", "MALIEV checks process, material, finish, tolerance, and quantity before quoting."),
-        new("03", "Quote and produce", "Approved requirements become a formal quotation and production order.")
-    ];
-
-    private sealed record WorkflowItem(string Step, string Title, string Text);
+        return index switch
+        {
+            0 => Text("Use this to choose the best process before spending time on drawings.", "ใช้ข้อมูลนี้เพื่อเลือกกระบวนการก่อนเสียเวลาทำแบบละเอียด"),
+            1 => Text("Lead time depends on file readiness, production load, and review clarity.", "ระยะเวลาขึ้นกับความพร้อมของไฟล์ งานในคิว และความชัดเจนของข้อมูล"),
+            _ => Text("Send the detail with your quote request so MALIEV can price the work correctly.", "แนบรายละเอียดนี้ในคำขอราคาเพื่อให้ MALIEV ประเมินงานได้ถูกต้อง")
+        };
+    }
 }

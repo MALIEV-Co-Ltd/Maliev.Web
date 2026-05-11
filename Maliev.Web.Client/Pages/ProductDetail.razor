@@ -62,7 +62,7 @@ else
             </dl>
             <div class="quote-actions">
                 <button type="button" class="button primary" @onclick="AddToCart" disabled="@(!CanBuy)">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
-                <a class="button secondary" href="/quote">@Text("Request custom part", "ขอผลิตชิ้นงานเฉพาะแบบ")</a>
+                <a class="button secondary" href="@SiteContent.QuoteNewUrl">@Text("Request custom part", "ขอผลิตชิ้นงานเฉพาะแบบ")</a>
             </div>
         </div>
     </section>

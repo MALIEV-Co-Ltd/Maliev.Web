@@ -144,6 +144,67 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("AddInteractiveWebAssemblyRenderMode", program);
         Assert.DoesNotContain("Microsoft.NET.Sdk.BlazorWebAssembly", clientProject);
         Assert.DoesNotContain("Microsoft.AspNetCore.Components.WebAssembly", clientProject);
+
+        var centralPackages = ReadRepoFile("Directory.Build.props");
+        Assert.DoesNotContain("Microsoft.AspNetCore.Components.WebAssembly", centralPackages);
+    }
+
+    /// <summary>
+    /// Verifies all designed service slugs are implemented as real Blazor routes.
+    /// </summary>
+    [Fact]
+    public void ServicesUseRealRoutesAndQuoteEngineLinks()
+    {
+        var services = ReadRepoFile("Maliev.Web.Client", "Pages", "Services.razor");
+        var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+
+        Assert.Contains("@page \"/services\"", services);
+        Assert.Contains("@page \"/services/{Slug}\"", servicePage);
+        Assert.Contains("SiteContent.QuoteNewUrl", services);
+        Assert.Contains("SiteContent.QuoteNewUrl", servicePage);
+        Assert.Contains("\"silicone-casting\"", content);
+        Assert.Contains("\"rapid-prototyping\"", content);
+        Assert.Contains("\"deviation-analysis\"", content);
+        Assert.DoesNotContain("window.location.hash", services);
+        Assert.DoesNotContain("window.location.hash", servicePage);
+    }
+
+    /// <summary>
+    /// Verifies static customer pages are real routes and keep contact wired through the BFF.
+    /// </summary>
+    [Fact]
+    public void StaticPagesCoverCustomerRoutesAndContactBoundary()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+
+        Assert.Contains("@page \"/materials\"", source);
+        Assert.Contains("@page \"/case-studies/{Slug}\"", source);
+        Assert.Contains("@page \"/blog/{Slug}\"", source);
+        Assert.Contains("@page \"/shipping-returns\"", source);
+        Assert.Contains("SubmitContactMessageAsync", source);
+        Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("SiteContent.QuoteProfileUrl", source);
+        Assert.Contains("SiteContent.QuoteOrdersUrl", source);
+        Assert.DoesNotContain("href=\"/quote\"", source);
+    }
+
+    /// <summary>
+    /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
+    /// </summary>
+    [Fact]
+    public void CommerceQuoteCtasUseDedicatedQuoteEngine()
+    {
+        var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
+        var product = ReadRepoFile("Maliev.Web.Client", "Pages", "ProductDetail.razor");
+        var error = ReadRepoFile("Maliev.Web.Client", "Pages", "Error.razor");
+
+        Assert.Contains("SiteContent.QuoteNewUrl", shop);
+        Assert.Contains("SiteContent.QuoteNewUrl", product);
+        Assert.Contains("SiteContent.QuoteNewUrl", error);
+        Assert.DoesNotContain("href=\"/quote\"", shop);
+        Assert.DoesNotContain("href=\"/quote\"", product);
+        Assert.DoesNotContain("href=\"/quote\"", error);
     }
 
     /// <summary>

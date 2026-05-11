@@ -144,8 +144,16 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         var sitemap = await client.GetStringAsync("/sitemap.xml");
 
         Assert.Contains("Sitemap: https://www.maliev.com/sitemap.xml", robots);
+        Assert.Contains("https://www.maliev.com/services", sitemap);
+        Assert.Contains("https://www.maliev.com/services/silicone-casting", sitemap);
+        Assert.Contains("https://www.maliev.com/services/rapid-prototyping", sitemap);
+        Assert.Contains("https://www.maliev.com/services/deviation-analysis", sitemap);
         Assert.Contains("https://www.maliev.com/materials", sitemap);
+        Assert.Contains("https://www.maliev.com/case-studies/fixture-turnaround", sitemap);
         Assert.Contains("https://www.maliev.com/blog", sitemap);
+        Assert.Contains("https://www.maliev.com/blog/design-for-manufacturing", sitemap);
+        Assert.Contains("https://www.maliev.com/cart", sitemap);
+        Assert.Contains("https://www.maliev.com/quote", sitemap);
     }
 
     private sealed class FakeCommerceCatalogService : ICommerceCatalogService

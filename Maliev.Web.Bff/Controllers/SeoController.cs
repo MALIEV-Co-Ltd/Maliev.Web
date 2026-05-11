@@ -13,20 +13,31 @@ public sealed class SeoController : ControllerBase
     private static readonly string[] PublicRoutes =
     [
         "/",
+        "/services",
         "/services/3d-printing",
         "/services/cnc-machining",
         "/services/3d-scanning",
         "/services/3d-design",
+        "/services/silicone-casting",
+        "/services/rapid-prototyping",
+        "/services/deviation-analysis",
         "/materials",
         "/industries",
         "/case-studies",
+        "/case-studies/fixture-turnaround",
+        "/case-studies/prototype-iteration",
+        "/case-studies/scan-to-cad-repair",
         "/blog",
+        "/blog/design-for-manufacturing",
+        "/blog/choosing-3d-printing-materials",
         "/shop",
+        "/cart",
         "/contact",
         "/faq",
         "/shipping-returns",
         "/privacy",
-        "/terms"
+        "/terms",
+        "/quote"
     ];
 
     /// <summary>
