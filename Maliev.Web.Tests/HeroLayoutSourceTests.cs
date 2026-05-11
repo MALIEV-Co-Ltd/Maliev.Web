@@ -196,10 +196,13 @@ public sealed class HeroLayoutSourceTests
     [Fact]
     public void CommerceQuoteCtasUseDedicatedQuoteEngine()
     {
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
         var product = ReadRepoFile("Maliev.Web.Client", "Pages", "ProductDetail.razor");
         var error = ReadRepoFile("Maliev.Web.Client", "Pages", "Error.razor");
 
+        Assert.Contains("https://quote.maliev.com/projects/new", content);
+        Assert.DoesNotContain("https://quote.maliev.com/quotes/new", content);
         Assert.Contains("SiteContent.QuoteNewUrl", shop);
         Assert.Contains("SiteContent.QuoteNewUrl", product);
         Assert.Contains("SiteContent.QuoteNewUrl", error);
