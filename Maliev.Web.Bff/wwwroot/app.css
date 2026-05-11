@@ -1326,9 +1326,13 @@ main {
   gap: 12px;
 }
 
-:focus-visible {
+:where(a, button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
+}
+
+[tabindex="-1"]:focus {
+  outline: none;
 }
 
 @media (min-width: 1600px) {

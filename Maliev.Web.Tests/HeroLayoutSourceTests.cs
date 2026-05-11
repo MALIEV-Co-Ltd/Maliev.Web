@@ -88,6 +88,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<ManufacturingGizmo />", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.Contains("http-equiv=\"refresh\"", source);
+        Assert.Contains("content=\"5; url=@SiteContent.QuoteNewUrl\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("quote-engine-mock", source);
         Assert.DoesNotContain("quote-engine-dropzone", source);
@@ -261,6 +262,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
         Assert.Contains("box-shadow: none", styles);
+        Assert.Contains("[tabindex=\"-1\"]:focus", styles);
     }
 
     private static string ReadRepoFile(params string[] pathSegments)
