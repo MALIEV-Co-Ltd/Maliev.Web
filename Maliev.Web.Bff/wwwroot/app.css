@@ -810,6 +810,8 @@ html:lang(th) .h1 {
 
 .service-card-body {
   flex: 1;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  align-content: start;
 }
 
 .service-card h3,

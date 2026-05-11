@@ -47,6 +47,7 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("service-grid", source);
         Assert.Contains("feature-band", source);
@@ -69,6 +70,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("proof-band", source);
         Assert.DoesNotContain("Build. Test. Produce.", source);
         Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
+        Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
+        Assert.Contains("align-content: start", styles);
     }
 
     /// <summary>
