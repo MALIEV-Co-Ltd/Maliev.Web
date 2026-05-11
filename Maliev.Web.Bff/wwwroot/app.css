@@ -20,9 +20,13 @@
   --shadow-card: rgba(0, 0, 0, .08) 0 0 0 1px, rgba(0, 0, 0, .04) 0 2px 2px, rgba(0, 0, 0, .04) 0 8px 8px -8px, #fafafa 0 0 0 1px inset;
   --shadow-dark-card: rgba(255, 255, 255, .14) 0 0 0 1px, rgba(0, 0, 0, .20) 0 18px 40px -28px;
   --container: 1240px;
+  --font-sans-en: Geist, "Segoe UI", system-ui, sans-serif;
+  --font-sans-th: "Noto Sans Thai", "Leelawadee UI", Tahoma, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --maliev-font-sans: var(--font-sans-en);
   color: var(--ink);
   background: var(--paper);
-  font-family: Geist, "Noto Sans Thai", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--maliev-font-sans);
   font-feature-settings: "liga";
   letter-spacing: 0;
 }
@@ -47,8 +51,11 @@ body {
 }
 
 body:lang(th),
+html:lang(th),
+html:lang(th) body,
 [lang="th"] {
-  font-family: "Noto Sans Thai", Geist, "Segoe UI", system-ui, sans-serif;
+  --maliev-font-sans: var(--font-sans-th);
+  font-family: var(--maliev-font-sans);
   line-height: 1.7;
 }
 
@@ -400,7 +407,7 @@ main {
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: .72rem;
   font-weight: 500;
   letter-spacing: .08em;
@@ -658,7 +665,7 @@ main {
 .service-stat-strip small,
 .stat-card small {
   color: var(--muted);
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: .68rem;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -677,7 +684,7 @@ main {
   flex-wrap: wrap;
   gap: 28px 44px;
   color: var(--muted-2);
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: .8rem;
   letter-spacing: .08em;
 }
@@ -1133,7 +1140,7 @@ main {
 .spec-list dt,
 .spec-key {
   color: var(--muted);
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: .76rem;
 }
 
@@ -1310,7 +1317,7 @@ main {
 
 .footer-column h2 {
   color: #c7cad1;
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: .72rem;
   font-weight: 600;
   letter-spacing: .08em;

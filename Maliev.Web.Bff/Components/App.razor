@@ -1,5 +1,13 @@
+@using System.Globalization
+@using Maliev.Web.Shared.Localization
+
+@{
+    var currentCulture = SupportedCultures.Normalize(CultureInfo.CurrentUICulture.Name);
+    var documentLanguage = currentCulture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en";
+}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@documentLanguage" data-culture="@currentCulture">
 
 <head>
     <meta charset="utf-8" />
@@ -9,6 +17,9 @@
     <ResourcePreloader />
     <link rel="preconnect" href="https://shop.maliev.com" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600&display=swap" />
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <ImportMap />
