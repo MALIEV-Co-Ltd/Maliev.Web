@@ -108,6 +108,51 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the annotated home-section eyebrow labels are removed from the landing page.
+    /// </summary>
+    [Fact]
+    public void HomeRemovesAnnotatedSectionEyebrowLabels()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"Manufacturing capabilities\", \"ความสามารถงานผลิต\")</p>", source);
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"Workshop-made equipment\", \"เครื่องจักรที่ผลิตในเวิร์กช็อป\")</p>", source);
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"How it works\", \"ขั้นตอน\")</p>", source);
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"Recent work\", \"ผลงานล่าสุด\")</p>", source);
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"Journal and updates\", \"บทความและอัปเดต\")</p>", source);
+        Assert.DoesNotContain("<p class=\"eyebrow\">@Text(\"One file is enough to start\", \"เริ่มได้ด้วยไฟล์เดียว\")</p>", source);
+    }
+
+    /// <summary>
+    /// Verifies the home hero uses the ad-targeted localized copy catalog instead of one fixed headline.
+    /// </summary>
+    [Fact]
+    public void HomeHeroUsesAdTargetedLocalizedCopyRotation()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "HeroCopyCatalog.cs");
+
+        Assert.Contains("@inject NavigationManager Navigation", source);
+        Assert.Contains("HeroCopyCatalog.ResolveTargetKey(Navigation.Uri)", source);
+        Assert.Contains("HeroCopyCatalog.SelectRandom", source);
+        Assert.Contains("HeroCopyCatalog.GetVariant", source);
+        Assert.Contains("home.hero.copy", source);
+        Assert.Contains("@_heroCopy.HeadlineLead.For(Preferences.Culture)", source);
+        Assert.Contains("@_heroCopy.HeadlineAccent.For(Preferences.Culture)", source);
+        Assert.Contains("@_heroCopy.Body.For(Preferences.Culture)", source);
+        Assert.Contains("@_heroCopy.MetaDescription.For(Preferences.Culture)", source);
+        Assert.Contains("\"service\"", content);
+        Assert.Contains("\"utm_term\"", content);
+        Assert.Contains("\"keyword\"", content);
+        Assert.Contains("\"fdm-3d-printing\"", content);
+        Assert.Contains("\"aluminum-cnc-milling\"", content);
+        Assert.DoesNotContain("Parts in days,", source);
+        Assert.DoesNotContain("not quarters.", source);
+        Assert.DoesNotContain("ชิ้นงานในไม่กี่วัน", source);
+        Assert.DoesNotContain("ไม่ใช่หลายเดือน", source);
+    }
+
+    /// <summary>
     /// Verifies the footer uses real company identity, contact, address, and social links.
     /// </summary>
     [Fact]

@@ -1,21 +1,22 @@
 @page "/"
 @inherits PreferenceAwareComponentBase
 @inject PersistentComponentState ApplicationState
+@inject NavigationManager Navigation
 
 <PageTitle>MALIEV - Rapid manufacturing and workshop-made products</PageTitle>
 <HeadContent>
-    <meta name="description" content="@Text("Upload CAD files for rapid manufacturing, review DFM feedback, see live part pricing, and order custom parts through MALIEV.", "อัปโหลดไฟล์ CAD สำหรับงานผลิตรวดเร็ว ตรวจ DFM ดูราคาชิ้นงานทันที และสั่งผลิตชิ้นงานเฉพาะกับ MALIEV")" />
+    <meta name="description" content="@_heroCopy.MetaDescription.For(Preferences.Culture)" />
     <link rel="canonical" href="https://www.maliev.com/" />
 </HeadContent>
 
 <section class="landing-hero" data-screen-label="Home hero">
     <div class="landing-hero-copy">
         <h1>
-            @Text("Parts in days,", "ชิ้นงานในไม่กี่วัน")
+            @_heroCopy.HeadlineLead.For(Preferences.Culture)
             <br />
-            <span class="accent-blue">@Text("not quarters.", "ไม่ใช่หลายเดือน")</span>
+            <span class="accent-blue">@_heroCopy.HeadlineAccent.For(Preferences.Culture)</span>
         </h1>
-        <p>@Text("Upload CAD, review DFM feedback, adjust process, material, finish, and quantity, then continue straight into production ordering.", "อัปโหลด CAD ตรวจ DFM ปรับกระบวนการ วัสดุ ผิวงาน และจำนวน แล้วสั่งผลิตต่อได้ทันทีเมื่อพร้อม")</p>
+        <p>@_heroCopy.Body.For(Preferences.Culture)</p>
         <div class="landing-hero-actions">
             <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
                            Title="@QuoteDropzoneTitle"
@@ -45,7 +46,6 @@
 <section class="section home-services-section" aria-labelledby="services-title">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">@Text("Manufacturing capabilities", "ความสามารถงานผลิต")</p>
             <h2 id="services-title">@Text("One workflow for custom parts.", "ผลิตชิ้นงานเฉพาะในขั้นตอนเดียว")</h2>
         </div>
         <a class="section-link" href="/services">@Text("All capabilities", "ดูทุกความสามารถ")</a>
@@ -77,7 +77,6 @@
         <img src="https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png?v=1737116109&width=1200" alt="@Text("MALIEV pneumatic injection molding machine", "เครื่องฉีดพลาสติกระบบลม MALIEV")" loading="lazy" />
     </div>
     <div>
-        <p class="eyebrow">@Text("Workshop-made equipment", "เครื่องจักรที่ผลิตในเวิร์กช็อป")</p>
         <h2 id="imm-title" class="h-display">
             @Text("Pneumatic injection", "เครื่องฉีดพลาสติก")
             <br />
@@ -99,7 +98,6 @@
 
 <section class="section" aria-labelledby="process-title">
     <div class="section-lede">
-        <p class="eyebrow">@Text("How it works", "ขั้นตอน")</p>
         <h2 id="process-title">@Text("Price, validate, and order without vendor handoffs.", "ดูราคา ตรวจความพร้อม และสั่งผลิตโดยไม่ต้องส่งต่อหลายที่")</h2>
     </div>
     <div class="process-grid">
@@ -117,7 +115,6 @@
 <section class="section" aria-labelledby="cases-title">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">@Text("Recent work", "ผลงานล่าสุด")</p>
             <h2 id="cases-title" class="logo-heading">
                 <span>@Text("Recent work from", "ผลงานล่าสุดจาก")</span>
                 <img src="/images/logo.svg" alt="MALIEV" />
@@ -146,7 +143,6 @@
 <section class="section news-section" aria-labelledby="news-title">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">@Text("Journal and updates", "บทความและอัปเดต")</p>
             <h2 id="news-title">@Text("Practical notes before you order parts.", "เรื่องที่ควรรู้ก่อนสั่งผลิตชิ้นงาน")</h2>
         </div>
         <a class="section-link" href="/blog">@Text("All posts", "บทความทั้งหมด")</a>
@@ -171,7 +167,6 @@
 
 <section class="section final-cta" aria-labelledby="final-cta-title">
     <div>
-        <p class="eyebrow">@Text("One file is enough to start", "เริ่มได้ด้วยไฟล์เดียว")</p>
         <h2 id="final-cta-title" class="h-display">@Text("Ready when your CAD is.", "พร้อมเมื่อไฟล์ CAD ของคุณพร้อม")</h2>
         <p class="lede">@Text("Send geometry to the quote engine, then configure process, material, finish, quantity, tolerance, and delivery expectations.", "ส่ง Geometry เข้าระบบราคา แล้วเลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และความคาดหวังเรื่องจัดส่ง")</p>
     </div>
@@ -187,10 +182,14 @@
     private const string ServicesOrderStateKey = "home.services.order";
     private const string CaseStudiesOrderStateKey = "home.caseStudies.order";
     private const string BlogPostsOrderStateKey = "home.blogPosts.order";
+    private const string HeroCopyStateKey = "home.hero.copy";
     private PersistingComponentStateSubscription? _persistingSubscription;
     private IReadOnlyList<ServicePageContent> _services = SiteContent.Services;
     private IReadOnlyList<CaseStudyContent> _caseStudies = SiteContent.CaseStudies;
     private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts;
+    private HeroCopy _heroCopy = HeroCopyCatalog.Default;
+    private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
+    private int _heroVariantIndex;
 
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
     [
@@ -203,6 +202,7 @@
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+        InitializeHeroCopy();
         InitializeRandomizedHomeContent();
         _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistRandomizedHomeContent);
     }
@@ -240,6 +240,24 @@
             : Shuffle(SiteContent.BlogPosts);
     }
 
+    private void InitializeHeroCopy()
+    {
+        var targetKey = HeroCopyCatalog.ResolveTargetKey(Navigation.Uri);
+        if (ApplicationState.TryTakeFromJson<HeroCopyState>(HeroCopyStateKey, out var persisted) &&
+            persisted is not null &&
+            string.Equals(persisted.TargetKey, targetKey, StringComparison.OrdinalIgnoreCase))
+        {
+            _heroTargetKey = persisted.TargetKey;
+            _heroVariantIndex = persisted.VariantIndex;
+            _heroCopy = HeroCopyCatalog.GetVariant(_heroTargetKey, _heroVariantIndex);
+            return;
+        }
+
+        _heroTargetKey = targetKey;
+        _heroCopy = HeroCopyCatalog.SelectRandom(_heroTargetKey);
+        _heroVariantIndex = _heroCopy.VariantIndex;
+    }
+
     private IReadOnlyList<ServicePageContent> RandomizeSupportingServices()
     {
         var primary = SiteContent.Services.Where(service => service.Primary);
@@ -249,6 +267,7 @@
 
     private Task PersistRandomizedHomeContent()
     {
+        ApplicationState.PersistAsJson(HeroCopyStateKey, new HeroCopyState(_heroTargetKey, _heroVariantIndex));
         ApplicationState.PersistAsJson(ServicesOrderStateKey, _services.Select(service => service.Slug).ToArray());
         ApplicationState.PersistAsJson(CaseStudiesOrderStateKey, _caseStudies.Select(caseStudy => caseStudy.Slug).ToArray());
         ApplicationState.PersistAsJson(BlogPostsOrderStateKey, _blogPosts.Select(post => post.Slug).ToArray());
@@ -286,4 +305,6 @@
     }
 
     private sealed record ProcessStep(string Number, LocalizedText Title, LocalizedText Body);
+
+    private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 }

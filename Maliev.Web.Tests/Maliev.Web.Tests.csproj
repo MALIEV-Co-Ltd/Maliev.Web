@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Maliev.Web.Bff\Maliev.Web.Bff.csproj" />
+    <ProjectReference Include="..\Maliev.Web.Client\Maliev.Web.Client.csproj" />
     <ProjectReference Include="..\Maliev.Web.Shared\Maliev.Web.Shared.csproj" />
   </ItemGroup>
 </Project>
