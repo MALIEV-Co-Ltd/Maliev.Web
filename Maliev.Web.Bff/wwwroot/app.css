@@ -1927,28 +1927,64 @@ html:lang(th) .h1 {
   display: block;
 }
 
-.auth-divider {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 12px;
-  align-items: center;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  text-transform: uppercase;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  height: 1px;
-  background: var(--rule);
-}
-
 .auth-form,
 .account-form {
   display: grid;
   gap: 14px;
+}
+
+.auth-email-panel {
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-2);
+}
+
+.auth-email-panel summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: .9rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.auth-email-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.auth-email-panel summary::after {
+  content: "+";
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  border-radius: 999px;
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .9rem;
+  line-height: 1;
+}
+
+.auth-email-panel[open] summary {
+  border-bottom: 1px solid var(--rule);
+}
+
+.auth-email-panel[open] summary::after {
+  content: "-";
+}
+
+.auth-email-panel .auth-form {
+  padding: 14px;
+  background: var(--paper);
 }
 
 .auth-form label,

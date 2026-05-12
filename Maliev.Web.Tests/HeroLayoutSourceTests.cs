@@ -562,6 +562,37 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies email auth remains available but is collapsed behind the preferred Google action by default.
+    /// </summary>
+    [Fact]
+    public void AuthPagesCollapseEmailFallbackByDefault()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
+        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signIn);
+        Assert.Contains("<summary>@Text(\"Use email instead\", \"ใช้อีเมลแทน\")</summary>", signIn);
+        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signIn);
+        Assert.True(signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signIn.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
+        Assert.DoesNotContain("<div class=\"auth-divider\"", signIn);
+
+        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signUp);
+        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signUp);
+        Assert.Contains("<summary>@Text(\"Create with email\", \"สร้างด้วยอีเมล\")</summary>", signUp);
+        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signUp);
+        Assert.True(signUp.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signUp.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
+        Assert.DoesNotContain("<div class=\"auth-divider\"", signUp);
+
+        Assert.Contains(".auth-email-panel", styles);
+        Assert.Contains(".auth-email-panel summary", styles);
+        Assert.Contains(".auth-email-panel summary::after", styles);
+        Assert.Contains(".auth-email-panel[open] summary", styles);
+        Assert.Contains(".auth-email-panel .auth-form", styles);
+    }
+
+    /// <summary>
     /// Verifies the mobile navigation opens as a viewport overlay instead of growing the sticky header.
     /// </summary>
     [Fact]
