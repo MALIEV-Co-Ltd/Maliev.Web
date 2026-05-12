@@ -55,6 +55,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("quote-flow-band", source);
         Assert.Contains("blog-grid", source);
         Assert.Contains("SiteContent.BlogPosts", source);
+        Assert.Contains("final-dropzone-arrow", source);
         Assert.Contains("case-card-media", source);
         Assert.Contains("logo-heading", source);
         Assert.Contains("/images/logo.svg", source);
@@ -70,8 +71,12 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("proof-band", source);
         Assert.DoesNotContain("Build. Test. Produce.", source);
         Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
+        Assert.DoesNotContain("<span class=\"button primary\">@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")</span>", source);
         Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
+        Assert.Contains(".final-dropzone-arrow", styles);
+        Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
+        Assert.Contains(".social-link", styles);
     }
 
     /// <summary>
@@ -90,8 +95,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("info@maliev.com", source);
         Assert.Contains("page.line.me/maliev", source);
         Assert.Contains("facebook.com/maliev.manufacturing", source);
-        Assert.Contains("youtube.com/%40maliev.manufacturing", source);
+        Assert.Contains("youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig", source);
         Assert.Contains("instagram.com/maliev.manufacturing", source);
+        Assert.Contains("class=\"social-link\"", source);
+        Assert.Contains("<svg viewBox=\"0 0 24 24\"", source);
+        Assert.Contains("aria-label=\"Facebook\"", source);
+        Assert.Contains("aria-label=\"YouTube\"", source);
+        Assert.Contains("aria-label=\"Instagram\"", source);
+        Assert.DoesNotContain(">Facebook</a>", source);
+        Assert.DoesNotContain(">YouTube</a>", source);
+        Assert.DoesNotContain(">Instagram</a>", source);
         Assert.DoesNotContain("<strong>MALIEV Co., Ltd.</strong>", source);
         Assert.DoesNotContain("Nonthaburi, Thailand. Manufacturing services, machines, and production support.", source);
     }
