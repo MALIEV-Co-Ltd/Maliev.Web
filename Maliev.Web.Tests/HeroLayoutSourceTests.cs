@@ -175,6 +175,25 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the home services grid highlights the same service category selected for ad-targeted hero copy.
+    /// </summary>
+    [Fact]
+    public void HomeServicesPromoteAdMatchedServiceCard()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "HeroCopyCatalog.cs");
+
+        Assert.Contains("HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey)", source);
+        Assert.Contains("HeroCopyCatalog.ResolveServiceSlug(_heroTargetKey)", source);
+        Assert.Contains("@if (IsPrimaryService(service))", source);
+        Assert.Contains("PromoteTargetedService", source);
+        Assert.Contains("StringComparison.OrdinalIgnoreCase", source);
+        Assert.Contains("internal static string ResolveServiceSlug(string? targetKey)", content);
+        Assert.DoesNotContain("return service.Primary ? \"service-card primary\" : \"service-card\";", source);
+        Assert.DoesNotContain("@if (service.Primary)", source);
+    }
+
+    /// <summary>
     /// Verifies the footer uses real company identity, contact, address, and social links.
     /// </summary>
     [Fact]

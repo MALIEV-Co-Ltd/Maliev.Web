@@ -25,7 +25,7 @@ Canonical pattern:
 https://www.maliev.com/?service=<ad-target>&utm_campaign=<campaign>&utm_term={keyword}
 ```
 
-The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign`. If no target is supplied, or the target is unknown, it falls back to `3d-printing`. The source of truth is `Maliev.Web.Client/Content/HeroCopyCatalog.cs`; tests live in `Maliev.Web.Tests/HeroCopyCatalogTests.cs`.
+The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign`. If no target is supplied, or the target is unknown, it falls back to `3d-printing`. The same resolved target also promotes the matching home-page service card, so ad-specific hero copy and the first highlighted capability stay aligned. The source of truth is `Maliev.Web.Client/Content/HeroCopyCatalog.cs`; tests live in `Maliev.Web.Tests/HeroCopyCatalogTests.cs`.
 
 | Ad target | Suggested final URL | Campaign intent |
 | --- | --- | --- |

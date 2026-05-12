@@ -56,7 +56,7 @@
             <a class="@ServiceCardClass(service)" href="/services/@service.Slug">
                 <div class="service-card-media">
                     <img src="@service.ImageUrl" alt="@service.Title.For(Preferences.Culture)" loading="lazy" />
-                    @if (service.Primary)
+                    @if (IsPrimaryService(service))
                     {
                         <span class="chip">@Text("Primary service", "บริการหลัก")</span>
                     }
@@ -189,6 +189,7 @@
     private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts;
     private HeroCopy _heroCopy = HeroCopyCatalog.Default;
     private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
+    private string _primaryServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
     private int _heroVariantIndex;
 
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
@@ -220,15 +221,20 @@
 
     private string QuoteDropzoneAction => Text("Get part price", "ดูราคาชิ้นงาน");
 
-    private static string ServiceCardClass(ServicePageContent service)
+    private string ServiceCardClass(ServicePageContent service)
     {
-        return service.Primary ? "service-card primary" : "service-card";
+        return IsPrimaryService(service) ? "service-card primary" : "service-card";
+    }
+
+    private bool IsPrimaryService(ServicePageContent service)
+    {
+        return string.Equals(service.Slug, _primaryServiceSlug, StringComparison.OrdinalIgnoreCase);
     }
 
     private void InitializeRandomizedHomeContent()
     {
         _services = ApplicationState.TryTakeFromJson<string[]>(ServicesOrderStateKey, out var serviceOrder) && serviceOrder is not null
-            ? OrderByPersistedKeys(SiteContent.Services, serviceOrder, service => service.Slug)
+            ? PromoteTargetedService(OrderByPersistedKeys(SiteContent.Services, serviceOrder, service => service.Slug))
             : RandomizeSupportingServices();
 
         _caseStudies = ApplicationState.TryTakeFromJson<string[]>(CaseStudiesOrderStateKey, out var caseStudyOrder) && caseStudyOrder is not null
@@ -247,22 +253,44 @@
             persisted is not null &&
             string.Equals(persisted.TargetKey, targetKey, StringComparison.OrdinalIgnoreCase))
         {
-            _heroTargetKey = persisted.TargetKey;
+            ApplyHeroTarget(persisted.TargetKey);
             _heroVariantIndex = persisted.VariantIndex;
             _heroCopy = HeroCopyCatalog.GetVariant(_heroTargetKey, _heroVariantIndex);
             return;
         }
 
-        _heroTargetKey = targetKey;
+        ApplyHeroTarget(targetKey);
         _heroCopy = HeroCopyCatalog.SelectRandom(_heroTargetKey);
         _heroVariantIndex = _heroCopy.VariantIndex;
     }
 
+    private void ApplyHeroTarget(string targetKey)
+    {
+        _heroTargetKey = targetKey;
+        _primaryServiceSlug = HeroCopyCatalog.ResolveServiceSlug(_heroTargetKey);
+    }
+
     private IReadOnlyList<ServicePageContent> RandomizeSupportingServices()
     {
-        var primary = SiteContent.Services.Where(service => service.Primary);
-        var supporting = Shuffle(SiteContent.Services.Where(service => !service.Primary));
-        return [.. primary, .. supporting];
+        return PromoteTargetedService(Shuffle(SiteContent.Services));
+    }
+
+    private IReadOnlyList<ServicePageContent> PromoteTargetedService(IReadOnlyList<ServicePageContent> services)
+    {
+        var selected = services.FirstOrDefault(IsPrimaryService)
+            ?? services.FirstOrDefault(service => service.Primary)
+            ?? services.FirstOrDefault();
+
+        if (selected is null)
+        {
+            return services;
+        }
+
+        return
+        [
+            selected,
+            .. services.Where(service => !string.Equals(service.Slug, selected.Slug, StringComparison.OrdinalIgnoreCase))
+        ];
     }
 
     private Task PersistRandomizedHomeContent()

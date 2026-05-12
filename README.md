@@ -48,7 +48,7 @@ The local site runs from the BFF launch profile at `https://localhost:7236` or `
 
 ## Google Ads Landing Routes
 
-The home page rotates Google Ads hero copy from `Maliev.Web.Client/Content/HeroCopyCatalog.cs`. Use `service` as the stable targeting query parameter for ad final URLs. The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign` so existing campaign tracking can still match hero copy by keyword.
+The home page rotates Google Ads hero copy from `Maliev.Web.Client/Content/HeroCopyCatalog.cs`. Use `service` as the stable targeting query parameter for ad final URLs. The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign` so existing campaign tracking can still match hero copy by keyword. The same resolved target promotes the matching service card in the home services grid, keeping the hero and first highlighted capability aligned.
 
 Canonical pattern:
 

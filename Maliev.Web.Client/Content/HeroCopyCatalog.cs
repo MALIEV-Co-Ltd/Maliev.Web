@@ -374,6 +374,11 @@ internal static class HeroCopyCatalog
         return variants[normalizedIndex];
     }
 
+    internal static string ResolveServiceSlug(string? targetKey)
+    {
+        return ResolveProfile(targetKey).ServiceSlug;
+    }
+
     internal static string ResolveTargetKey(string? url)
     {
         if (string.IsNullOrWhiteSpace(url))
