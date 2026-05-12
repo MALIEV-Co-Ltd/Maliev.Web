@@ -12,6 +12,15 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    var sharedSecretsPath = Path.Combine(builder.Environment.ContentRootPath, "..", "..", "Maliev.Aspire", "Maliev.Aspire.AppHost", "sharedsecrets.json");
+    if (File.Exists(sharedSecretsPath))
+    {
+        builder.Configuration.AddJsonFile(sharedSecretsPath, optional: true, reloadOnChange: true);
+    }
+}
+
 builder.WebHost.UseStaticWebAssets();
 builder.AddServiceDefaults();
 builder.AddDefaultApiVersioning();
@@ -51,7 +60,14 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         options.ClientId = googleClientId;
         options.ClientSecret = googleClientSecret;
         options.CallbackPath = "/auth/google/signin";
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
         options.SaveTokens = true;
+        options.Events.OnRedirectToAuthorizationEndpoint = context =>
+        {
+            context.Response.Redirect(context.RedirectUri + "&prompt=select_account");
+            return Task.CompletedTask;
+        };
     });
 }
 builder.Services.AddAuthorization();

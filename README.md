@@ -46,6 +46,31 @@ dotnet run --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
 
 The local site runs from the BFF launch profile at `https://localhost:7236` or `http://localhost:5026`.
 
+### Google Sign-In
+
+`Maliev.Web.Bff` follows the same local Google OAuth setup as `Maliev.Intranet.Bff`. In `Development`, the BFF loads `sharedsecrets.json` from `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`. The file is git-ignored and must provide:
+
+```json
+{
+  "Authentication": {
+    "Google": {
+      "ClientId": "<google-oauth-client-id>",
+      "ClientSecret": "<google-oauth-client-secret>"
+    }
+  }
+}
+```
+
+The Google OAuth client must allow these redirect URIs:
+
+```text
+http://localhost:5026/auth/google/signin
+https://localhost:7236/auth/google/signin
+https://www.maliev.com/auth/google/signin
+```
+
+When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the same values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`.
+
 ## Google Ads Landing Routes
 
 The home page rotates Google Ads hero copy from `Maliev.Web.Client/Content/HeroCopyCatalog.cs`. Use `service` as the stable targeting query parameter for ad final URLs. The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign` so existing campaign tracking can still match hero copy by keyword. The same resolved target promotes the matching service card in the home services grid, keeping the hero and first highlighted capability aligned.

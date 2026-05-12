@@ -459,6 +459,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("AddAuthentication", program);
         Assert.Contains("AddCookie", program);
         Assert.Contains("AddGoogle", program);
+        Assert.Contains("sharedsecrets.json", program);
+        Assert.Contains("Maliev.Aspire", program);
+        Assert.Contains("Maliev.Aspire.AppHost", program);
+        Assert.Contains("options.Scope.Add(\"profile\")", program);
+        Assert.Contains("options.Scope.Add(\"email\")", program);
+        Assert.Contains("prompt=select_account", program);
         Assert.Contains("AddCascadingAuthenticationState", program);
         Assert.Contains("UseAuthentication", program);
         Assert.Contains("UseAuthorization", program);
