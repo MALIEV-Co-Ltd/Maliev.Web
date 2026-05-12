@@ -45,3 +45,30 @@ dotnet run --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
 ```
 
 The local site runs from the BFF launch profile at `https://localhost:7236` or `http://localhost:5026`.
+
+## Google Ads Landing Routes
+
+The home page rotates Google Ads hero copy from `Maliev.Web.Client/Content/HeroCopyCatalog.cs`. Use `service` as the stable targeting query parameter for ad final URLs. The resolver also accepts `target`, `keyword`, `utm_term`, `utm_content`, and `utm_campaign` so existing campaign tracking can still match hero copy by keyword.
+
+Canonical pattern:
+
+```text
+https://www.maliev.com/?service=<ad-target>&utm_campaign=<campaign>&utm_term={keyword}
+```
+
+If no target is supplied, or the target is unknown, the page falls back to `3d-printing`. Each target has 50 localized English and Thai hero variants.
+
+| Ad target | Suggested final URL | Campaign intent |
+| --- | --- | --- |
+| `3d-printing` | `https://www.maliev.com/?service=3d-printing` | General 3D printing, prototype parts, additive manufacturing |
+| `fdm-3d-printing` | `https://www.maliev.com/?service=fdm-3d-printing` | FDM, PLA, ABS, PETG, nylon, functional printed parts |
+| `resin-3d-printing` | `https://www.maliev.com/?service=resin-3d-printing` | Resin, SLA, DLP, high-detail cosmetic prototypes |
+| `cnc-machining` | `https://www.maliev.com/?service=cnc-machining` | General CNC machining, milling, turning, machined prototypes |
+| `aluminum-cnc-milling` | `https://www.maliev.com/?service=aluminum-cnc-milling` | Aluminum CNC milling, machined aluminum parts, fixtures |
+| `3d-scanning` | `https://www.maliev.com/?service=3d-scanning` | 3D scanning, reverse engineering, inspection-ready scan data |
+| `3d-design` | `https://www.maliev.com/?service=3d-design` | 3D CAD design, DFM, product modeling, manufacturable design |
+| `silicone-casting` | `https://www.maliev.com/?service=silicone-casting` | Silicone casting, urethane casting, low-volume molded parts |
+| `rapid-prototyping` | `https://www.maliev.com/?service=rapid-prototyping` | Rapid prototyping, quick-turn engineering samples |
+| `deviation-analysis` | `https://www.maliev.com/?service=deviation-analysis` | Deviation analysis, scan-to-CAD comparison, dimensional reports |
+
+When adding a new ad target, update `HeroCopyCatalog`, `Maliev.Web.Tests/HeroCopyCatalogTests.cs`, this README table, and `AGENTS.md` together.
