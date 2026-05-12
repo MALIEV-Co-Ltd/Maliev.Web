@@ -104,10 +104,124 @@
                 <span class="material-comparison-count">@Text($"{FilteredMaterialComparisons.Count} materials shown", $"แสดง {FilteredMaterialComparisons.Count} วัสดุ")</span>
             </div>
 
+            <div class="material-compare-workbench">
+                <div class="material-compare-toolbar">
+                    <div>
+                        <span class="material-filter-label">@Text("Direct comparison", "เปรียบเทียบโดยตรง")</span>
+                        <strong>@CompareGuidance</strong>
+                    </div>
+                    @if (SelectedMaterialComparisons.Count > 0)
+                    {
+                        <button class="material-clear-selection" type="button" @onclick="ClearMaterialComparison">@Text("Clear", "ล้าง")</button>
+                    }
+                </div>
+
+                @if (SelectedMaterialComparisons.Count > 0)
+                {
+                    <div class="material-compare-matrix" style="@CompareMatrixStyle">
+                        <div class="material-compare-row material-compare-head">
+                            <span>@Text("Property", "คุณสมบัติ")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <strong>
+                                    @material.Name
+                                    <em>@material.Process.For(Preferences.Culture)</em>
+                                </strong>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Best fit", "เหมาะกับ")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.BestFor.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Mechanical", "เชิงกล")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Mechanical.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Heat", "ความร้อน")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Heat.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Chemical", "สารเคมี")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Chemical.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Finish", "ผิวงาน")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Finish.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Pros", "ข้อดี")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Pros.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-label">@Text("Watch", "ระวัง")</span>
+                            @foreach (var material in SelectedMaterialComparisons)
+                            {
+                                <span>@material.Cons.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="material-mobile-list" aria-label="@Text("Selectable material cards", "การ์ดวัสดุสำหรับเลือกเปรียบเทียบ")">
+                @foreach (var material in FilteredMaterialComparisons)
+                {
+                    <article class="@MaterialSelectionCardClass(material)">
+                        <div class="material-mobile-card-head">
+                            <div>
+                                <strong>@material.Name</strong>
+                                <span>@material.Family.For(Preferences.Culture)</span>
+                            </div>
+                            <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
+                                @MaterialSelectButtonText(material)
+                            </button>
+                        </div>
+                        <div class="material-mobile-card-meta">
+                            <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
+                            <span>@material.BestFor.For(Preferences.Culture)</span>
+                        </div>
+                        <dl class="material-mobile-specs">
+                            <div>
+                                <dt>@Text("Mechanical", "เชิงกล")</dt>
+                                <dd>@material.Mechanical.For(Preferences.Culture)</dd>
+                            </div>
+                            <div>
+                                <dt>@Text("Heat", "ความร้อน")</dt>
+                                <dd>@material.Heat.For(Preferences.Culture)</dd>
+                            </div>
+                            <div>
+                                <dt>@Text("Chemical", "สารเคมี")</dt>
+                                <dd>@material.Chemical.For(Preferences.Culture)</dd>
+                            </div>
+                        </dl>
+                    </article>
+                }
+            </div>
+
             <div class="material-table-shell" tabindex="0" aria-label="@Text("Scrollable material comparison table", "ตารางเปรียบเทียบวัสดุแบบเลื่อนแนวนอน")">
                 <table class="material-comparison-table">
                     <thead>
                         <tr>
+                            <th>@Text("Compare", "เปรียบเทียบ")</th>
                             <th>@Text("Material", "วัสดุ")</th>
                             <th>@Text("Process", "กระบวนการ")</th>
                             <th>@Text("Best fit", "เหมาะกับ")</th>
@@ -122,6 +236,11 @@
                         @foreach (var material in FilteredMaterialComparisons)
                         {
                             <tr>
+                                <td>
+                                    <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
+                                        @MaterialSelectButtonText(material)
+                                    </button>
+                                </td>
                                 <th scope="row">
                                     <strong>@material.Name</strong>
                                     <span>@material.Family.For(Preferences.Culture)</span>
@@ -261,6 +380,7 @@ else
     private bool _submittingContact;
     private string? _contactStatus;
     private const string AllMaterialsFilter = "all";
+    private readonly HashSet<string> _selectedMaterialNames = new(StringComparer.Ordinal);
     private string _materialProcessFilter = AllMaterialsFilter;
     private string _materialUseFilter = AllMaterialsFilter;
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
@@ -439,6 +559,65 @@ else
             .Where(material => (_materialProcessFilter == AllMaterialsFilter || material.ProcessKey == _materialProcessFilter)
                 && (_materialUseFilter == AllMaterialsFilter || material.UseKeys.Contains(_materialUseFilter)))
             .ToList();
+
+    private IReadOnlyList<MaterialComparisonItem> SelectedMaterialComparisons =>
+        MaterialComparisons
+            .Where(material => _selectedMaterialNames.Contains(material.Name))
+            .ToList();
+
+    private string CompareGuidance => SelectedMaterialComparisons.Count switch
+    {
+        0 => Text("Select 2-3 materials to compare side by side.", "เลือก 2-3 วัสดุเพื่อเปรียบเทียบแบบเทียบกันตรง ๆ"),
+        1 => Text("Select one or two more materials.", "เลือกเพิ่มอีกหนึ่งหรือสองวัสดุ"),
+        _ => Text($"{SelectedMaterialComparisons.Count} materials selected.", $"เลือกแล้ว {SelectedMaterialComparisons.Count} วัสดุ")
+    };
+
+    private string CompareMatrixStyle => $"--compare-columns: {Math.Max(SelectedMaterialComparisons.Count, 1)};";
+
+    private bool IsMaterialSelected(MaterialComparisonItem material)
+    {
+        return _selectedMaterialNames.Contains(material.Name);
+    }
+
+    private bool CanToggleMaterial(MaterialComparisonItem material)
+    {
+        return IsMaterialSelected(material) || _selectedMaterialNames.Count < 3;
+    }
+
+    private void ToggleMaterialComparison(MaterialComparisonItem material)
+    {
+        if (!_selectedMaterialNames.Add(material.Name))
+        {
+            _selectedMaterialNames.Remove(material.Name);
+        }
+    }
+
+    private void ClearMaterialComparison()
+    {
+        _selectedMaterialNames.Clear();
+    }
+
+    private string MaterialSelectButtonText(MaterialComparisonItem material)
+    {
+        if (IsMaterialSelected(material))
+        {
+            return Text("Selected", "เลือกแล้ว");
+        }
+
+        return _selectedMaterialNames.Count >= 3
+            ? Text("Max 3", "สูงสุด 3")
+            : Text("Compare", "เทียบ");
+    }
+
+    private string MaterialSelectButtonClass(MaterialComparisonItem material)
+    {
+        return IsMaterialSelected(material) ? "material-select-button selected" : "material-select-button";
+    }
+
+    private string MaterialSelectionCardClass(MaterialComparisonItem material)
+    {
+        return IsMaterialSelected(material) ? "material-mobile-card selected" : "material-mobile-card";
+    }
 
     private IReadOnlyList<MaterialComparisonItem> MaterialComparisons =>
     [

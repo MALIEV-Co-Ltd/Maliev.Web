@@ -267,7 +267,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-category-media", source);
         Assert.Contains("material-category-body", source);
         Assert.Contains("material-comparison-table", source);
+        Assert.Contains("material-mobile-list", source);
+        Assert.Contains("material-compare-workbench", source);
         Assert.Contains("FilteredMaterialComparisons", source);
+        Assert.Contains("SelectedMaterialComparisons", source);
+        Assert.Contains("ToggleMaterialComparison", source);
+        Assert.Contains("_selectedMaterialNames.Count < 3", source);
         Assert.Contains("MaterialProcessFilters", source);
         Assert.Contains("MaterialUseFilters", source);
         Assert.Contains("ImageUrl", source);
@@ -275,6 +280,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-category-media", styles);
         Assert.Contains(".material-category-body", styles);
         Assert.Contains(".material-comparison-table", styles);
+        Assert.Contains("@media (max-width: 1180px)", styles);
+        Assert.Contains("display: none;", styles);
+        Assert.Contains("display: grid;", styles);
+        Assert.Contains(".material-select-button", styles);
+        Assert.Contains(".material-compare-matrix", styles);
         Assert.Contains(".material-filter", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);
