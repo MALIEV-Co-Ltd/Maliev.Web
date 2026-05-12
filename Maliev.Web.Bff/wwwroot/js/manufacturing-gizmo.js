@@ -297,10 +297,11 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
   const width = host?.clientWidth ?? 780;
   const height = host?.clientHeight ?? 520;
   const compact = width < 560 || height < 360;
+  const balancedTablet = width >= 640 && width <= 920 && height >= 460;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.56 : 0.44;
-  camera.radius = compact ? 6.9 : wide ? 7.35 : 7.05;
+  camera.fov = compact ? 0.56 : balancedTablet ? 0.43 : 0.44;
+  camera.radius = compact ? 6.9 : balancedTablet ? 6.6 : wide ? 7.35 : 7.05;
   camera.lowerRadiusLimit = camera.radius;
   camera.upperRadiusLimit = camera.radius;
   camera.target = new BABYLON.Vector3(0, 0.02, 0);

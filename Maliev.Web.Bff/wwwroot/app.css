@@ -2049,20 +2049,6 @@ html:lang(th) .h1 {
     gap: 18px;
   }
 
-  .landing-hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
-  }
-
-  .landing-hero-visual {
-    min-height: 420px;
-  }
-
-  .manufacturing-gizmo--landing {
-    height: 480px;
-    min-height: 420px;
-  }
-
   .service-grid,
   .product-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2110,6 +2096,33 @@ html:lang(th) .h1 {
   .material-compare-head span,
   .material-compare-label {
     background: var(--paper-2);
+  }
+}
+
+@media (min-width: 961px) and (max-width: 1180px) {
+  .landing-hero {
+    grid-template-columns: minmax(0, .96fr) minmax(340px, .92fr);
+    gap: clamp(26px, 3vw, 40px);
+    min-height: calc(100svh - 66px);
+    padding-top: 48px;
+    padding-bottom: 64px;
+  }
+
+  .landing-hero-copy {
+    max-width: 560px;
+  }
+
+  .landing-hero h1 {
+    font-size: 3.85rem;
+  }
+
+  .landing-hero-visual {
+    min-height: 520px;
+  }
+
+  .manufacturing-gizmo--landing {
+    height: min(58vh, 560px);
+    min-height: 500px;
   }
 }
 
@@ -2190,6 +2203,46 @@ html:lang(th) .h1 {
 
   .site-footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 681px) and (max-width: 960px) {
+  .landing-hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 30px;
+    min-height: auto;
+    padding-top: 54px;
+    padding-bottom: 68px;
+    text-align: center;
+  }
+
+  .landing-hero-copy {
+    max-width: 760px;
+  }
+
+  .landing-hero-copy > p:not(.eyebrow),
+  .landing-hero-actions {
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  .landing-quote-dropzone.mud-button-root {
+    text-align: left;
+  }
+
+  .metric-strip {
+    justify-content: center;
+  }
+
+  .landing-hero-visual {
+    width: min(100%, 820px);
+    min-height: 500px;
+  }
+
+  .manufacturing-gizmo--landing {
+    height: min(52vh, 520px);
+    min-height: 460px;
   }
 }
 

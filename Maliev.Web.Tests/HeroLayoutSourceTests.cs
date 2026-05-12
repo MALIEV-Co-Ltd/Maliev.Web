@@ -374,6 +374,26 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the landing hero has dedicated tablet composition rules instead of using the narrow mobile stack.
+    /// </summary>
+    [Fact]
+    public void HomeHeroUsesBalancedTabletComposition()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var gizmo = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("@media (min-width: 961px) and (max-width: 1180px)", styles);
+        Assert.Contains("grid-template-columns: minmax(0, .96fr) minmax(340px, .92fr);", styles);
+        Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
+        Assert.Contains("text-align: center;", styles);
+        Assert.Contains("width: min(100%, 820px);", styles);
+        Assert.Contains("justify-content: center;", styles);
+        Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
+        Assert.Contains("balancedTablet ? 0.43 : 0.44", gizmo);
+        Assert.Contains("balancedTablet ? 6.6 : wide ? 7.35 : 7.05", gizmo);
+    }
+
+    /// <summary>
     /// Verifies the 3D canvas does not show a browser focus outline when clicked.
     /// </summary>
     [Fact]
