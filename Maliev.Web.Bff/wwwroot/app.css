@@ -40,7 +40,7 @@
   --quote-surface: rgba(255, 255, 255, .96);
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
-  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .11) 0%, rgba(10, 114, 239, .05) 36%, transparent 72%);
+  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
   --media-shell: #111419;
   --danger-surface: #a21616;
   --danger-text: #ffffff;
@@ -98,7 +98,7 @@ html[data-theme="dark"] {
   --quote-surface: rgba(21, 26, 33, .96);
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
-  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .24) 0%, rgba(91, 167, 255, .09) 38%, transparent 74%);
+  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .16) 0%, rgba(91, 167, 255, .06) 34%, transparent 66%);
   --media-shell: #090c10;
   --danger-surface: #8f1f1f;
   --danger-text: #ffffff;
@@ -508,20 +508,20 @@ html:lang(th) .h1 {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: var(--muted);
-  font-family: var(--font-mono);
+  font-family: var(--maliev-font-sans);
   font-size: .72rem;
-  font-weight: 500;
-  letter-spacing: .08em;
+  font-weight: 700;
+  letter-spacing: .04em;
   text-transform: uppercase;
 }
 
 .eyebrow::before {
   content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 24px;
+  height: 1px;
+  border-radius: 0;
   background: var(--blue);
 }
 
@@ -574,7 +574,6 @@ html:lang(th) .h1 {
   max-width: 680px;
 }
 
-.landing-hero-badge,
 .chip {
   display: inline-flex;
   width: fit-content;
@@ -588,6 +587,10 @@ html:lang(th) .h1 {
   font-size: .75rem;
   font-weight: 500;
   line-height: 1;
+}
+
+.landing-hero-badge {
+  color: var(--muted);
 }
 
 .landing-hero-copy h1 {
@@ -695,6 +698,7 @@ html:lang(th) .h1 {
 .landing-hero-visual {
   position: relative;
   min-height: 560px;
+  overflow: visible;
 }
 
 .manufacturing-gizmo {
@@ -719,10 +723,12 @@ html:lang(th) .h1 {
 .manufacturing-gizmo--landing::before {
   content: "";
   position: absolute;
-  inset: 18% 4% 6%;
+  inset: 22% 6% 8%;
   pointer-events: none;
   background: var(--landing-gizmo-surface);
   border-radius: 999px;
+  filter: blur(26px);
+  opacity: .72;
 }
 
 .manufacturing-gizmo-canvas {
@@ -806,41 +812,6 @@ html:lang(th) .h1 {
   font-size: .68rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-}
-
-.quote-flow-band {
-  background: var(--paper-2);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  padding-top: 38px;
-  padding-bottom: 38px;
-}
-
-.quote-flow-band .container {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 32px;
-  align-items: center;
-}
-
-.quote-flow-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  font-family: var(--font-mono);
-}
-
-.quote-flow-grid span {
-  min-width: 0;
-  padding: 14px 16px;
-  color: var(--ink);
-  background: var(--control-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-border);
-  font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .02em;
-  text-align: center;
 }
 
 .service-grid,
@@ -2335,15 +2306,6 @@ html:lang(th) .h1 {
 
   .metric-strip {
     justify-content: flex-start;
-  }
-
-  .quote-flow-band .container {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .quote-flow-grid {
-    grid-template-columns: 1fr 1fr;
   }
 
   .service-grid,

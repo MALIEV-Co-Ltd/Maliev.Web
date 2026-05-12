@@ -11,6 +11,25 @@ window.malievCulture = {
     document.documentElement.style.colorScheme = normalized;
     return normalized;
   },
+  preferredSystemTheme: function () {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  },
+  isThaiRegionSignal: function (language) {
+    if (!language) {
+      return false;
+    }
+
+    const normalized = language.toLowerCase();
+    if (normalized.startsWith('th')) {
+      return true;
+    }
+
+    try {
+      return new Intl.Locale(language).region === 'TH';
+    } catch {
+      return normalized.endsWith('-th');
+    }
+  },
   resolveCulture: function (fallback) {
     const stored = localStorage.getItem('maliev.culture');
     if (stored) {
@@ -25,7 +44,7 @@ window.malievCulture = {
     }
 
     const languages = navigator.languages || [navigator.language || fallback];
-    const browserCulture = languages.find((language) => language && language.toLowerCase().startsWith('th'));
+    const browserCulture = languages.find((language) => window.malievCulture.isThaiRegionSignal(language));
     if (browserCulture) {
       return window.malievCulture.applyDocumentCulture('th-TH');
     }
@@ -55,7 +74,7 @@ window.malievCulture = {
       return window.malievCulture.applyDocumentTheme(decodeURIComponent(cookie.split('=')[1]));
     }
 
-    return window.malievCulture.applyDocumentTheme(fallback || 'light');
+    return window.malievCulture.applyDocumentTheme(fallback || window.malievCulture.preferredSystemTheme());
   },
   setTheme: function (theme) {
     const normalized = window.malievCulture.applyDocumentTheme(theme);
@@ -66,7 +85,7 @@ window.malievCulture = {
     return localStorage.getItem('maliev.culture') || 'en-US';
   },
   getTheme: function () {
-    return localStorage.getItem('maliev.theme') || 'light';
+    return localStorage.getItem('maliev.theme') || window.malievCulture.preferredSystemTheme();
   },
   saveDraft: function (key, value) {
     localStorage.setItem(key, value);

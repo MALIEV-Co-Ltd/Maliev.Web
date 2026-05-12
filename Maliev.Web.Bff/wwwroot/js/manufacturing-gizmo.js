@@ -273,11 +273,9 @@ async function createLandingHeroScene(state, BABYLON) {
     : null;
 
   frameImportedModel(renderMeshes, root, BABYLON);
-  const surfaceMaterial = createLandingSurface(scene, BABYLON);
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
-    surfaceMaterial,
     { fill, key, rim },
     BABYLON);
   state.themeApplicator();
@@ -301,11 +299,11 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
   const compact = width < 560 || height < 360;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.62 : 0.48;
-  camera.radius = compact ? 6.05 : wide ? 6.35 : 6.15;
+  camera.fov = compact ? 0.56 : 0.44;
+  camera.radius = compact ? 6.9 : wide ? 7.35 : 7.05;
   camera.lowerRadiusLimit = camera.radius;
   camera.upperRadiusLimit = camera.radius;
-  camera.target = new BABYLON.Vector3(0, 0.05, 0);
+  camera.target = new BABYLON.Vector3(0, 0.02, 0);
 }
 
 function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
@@ -406,7 +404,7 @@ function frameImportedModel(meshes, root, BABYLON) {
 
   const size = bounds.max.subtract(bounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.65;
+  const targetSize = 2.28;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));
@@ -437,23 +435,6 @@ function computeMeshBounds(meshes, BABYLON) {
   };
 }
 
-function createLandingSurface(scene, BABYLON) {
-  const surface = BABYLON.MeshBuilder.CreateDisc("landing-contact-shadow", {
-    radius: 0.92,
-    tessellation: 96
-  }, scene);
-  surface.rotation.x = Math.PI / 2;
-  surface.position.y = -1.08;
-  surface.scaling.x = 1.35;
-
-  const material = new BABYLON.StandardMaterial("landing-contact-shadow-material", scene);
-  material.disableLighting = true;
-  surface.material = material;
-  surface.isPickable = false;
-
-  return material;
-}
-
 function observeDocumentTheme(state) {
   if (!state.themeApplicator || !("MutationObserver" in window)) {
     return;
@@ -473,7 +454,7 @@ function observeDocumentTheme(state) {
   });
 }
 
-function applyLandingHeroTheme(scene, plasticMaterial, surfaceMaterial, lights, BABYLON) {
+function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
   scene.environmentIntensity = dark ? 0.34 : 0.42;
@@ -489,8 +470,6 @@ function applyLandingHeroTheme(scene, plasticMaterial, surfaceMaterial, lights, 
     plasticMaterial.clearCoat.intensity = dark ? 0.3 : 0.22;
   }
 
-  surfaceMaterial.diffuseColor = BABYLON.Color3.FromHexString(dark ? "#5ba7ff" : "#171717");
-  surfaceMaterial.alpha = dark ? 0.1 : 0.035;
 }
 
 function configureSceneRuntime(state, engine, scene, cameraConfigurator) {

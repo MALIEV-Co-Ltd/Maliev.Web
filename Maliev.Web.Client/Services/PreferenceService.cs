@@ -17,7 +17,7 @@ internal sealed class PreferenceService(IJSRuntime jsRuntime)
         try
         {
             Culture = await jsRuntime.InvokeAsync<string>("malievCulture.resolveCulture", SupportedCultures.DefaultCulture);
-            Theme = await jsRuntime.InvokeAsync<string>("malievCulture.resolveTheme", LightTheme);
+            Theme = await jsRuntime.InvokeAsync<string>("malievCulture.resolveTheme", (string?)null);
         }
         catch (InvalidOperationException)
         {

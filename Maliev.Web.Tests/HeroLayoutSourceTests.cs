@@ -60,9 +60,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("service-grid", source);
         Assert.Contains("feature-band", source);
         Assert.Contains("process-grid", source);
-        Assert.Contains("quote-flow-band", source);
+        Assert.DoesNotContain("quote-flow-band", source);
         Assert.Contains("blog-grid", source);
         Assert.Contains("SiteContent.BlogPosts", source);
+        Assert.Contains("PersistentComponentState", source);
+        Assert.Contains("RandomizeSupportingServices", source);
+        Assert.Contains("Shuffle(SiteContent.CaseStudies)", source);
+        Assert.Contains("Shuffle(SiteContent.BlogPosts)", source);
+        Assert.Contains("RandomNumberGenerator.GetInt32", source);
         Assert.Contains("case-card-media", source);
         Assert.Contains("logo-heading", source);
         Assert.Contains("/images/logo.svg", source);
@@ -350,8 +355,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("addHoverMotion", source);
-        Assert.Contains("const targetSize = 2.65", source);
-        Assert.Contains("wide ? 6.35 : 6.15", source);
+        Assert.Contains("const targetSize = 2.28", source);
+        Assert.Contains("wide ? 7.35 : 7.05", source);
+        Assert.DoesNotContain("createLandingSurface", source);
+        Assert.DoesNotContain("landing-contact-shadow", source);
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);

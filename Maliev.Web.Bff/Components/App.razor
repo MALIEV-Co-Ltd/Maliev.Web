@@ -18,11 +18,12 @@
     <script>
         (() => {
             const normalizeTheme = theme => theme && theme.toLowerCase() === 'dark' ? 'dark' : 'light';
+            const systemTheme = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const cookie = document.cookie
                 .split('; ')
                 .find(row => row.startsWith('maliev.theme='));
             const stored = localStorage.getItem('maliev.theme');
-            const theme = normalizeTheme(stored || (cookie ? decodeURIComponent(cookie.split('=')[1]) : 'light'));
+            const theme = normalizeTheme(stored || (cookie ? decodeURIComponent(cookie.split('=')[1]) : systemTheme()));
             document.documentElement.dataset.theme = theme;
             document.documentElement.style.colorScheme = theme;
         })();

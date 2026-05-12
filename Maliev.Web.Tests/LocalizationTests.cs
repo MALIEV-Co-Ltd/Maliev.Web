@@ -85,9 +85,11 @@ public sealed class LocalizationTests
         Assert.Contains("malievCulture.setTheme", service);
         Assert.Contains("NormalizeTheme", service);
         Assert.Contains("maliev.theme", script);
+        Assert.Contains("preferredSystemTheme", script);
         Assert.Contains("applyDocumentTheme", script);
         Assert.Contains("document.documentElement.dataset.theme", script);
         Assert.Contains("document.documentElement.style.colorScheme", script);
+        Assert.Contains("prefers-color-scheme: dark", app);
         Assert.Contains("data-theme=\"light\"", app);
         Assert.Contains("maliev.theme", app);
         Assert.Contains("theme-toggle-button", layout);
