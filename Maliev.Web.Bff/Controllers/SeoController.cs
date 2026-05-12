@@ -32,11 +32,13 @@ public sealed class SeoController : ControllerBase
         "/blog/choosing-3d-printing-materials",
         "/blog/instant-part-pricing",
         "/shop",
-        "/cart",
         "/contact",
         "/faq",
         "/shipping-returns",
         "/privacy",
+        "/cookie-policy",
+        "/refund-policy",
+        "/warranty-policy",
         "/terms",
         "/quote"
     ];
@@ -47,7 +49,7 @@ public sealed class SeoController : ControllerBase
     [HttpGet("/robots.txt")]
     public ContentResult Robots()
     {
-        return Content("User-agent: *\nAllow: /\nSitemap: https://www.maliev.com/sitemap.xml\n", "text/plain");
+        return Content("User-agent: *\nAllow: /\nDisallow: /account\nDisallow: /cart\nDisallow: /checkout\nDisallow: /web/\nSitemap: https://www.maliev.com/sitemap.xml\n", "text/plain");
     }
 
     /// <summary>

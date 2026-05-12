@@ -72,3 +72,16 @@ If no target is supplied, or the target is unknown, the page falls back to `3d-p
 | `deviation-analysis` | `https://www.maliev.com/?service=deviation-analysis` | Deviation analysis, scan-to-CAD comparison, dimensional reports |
 
 When adding a new ad target, update `HeroCopyCatalog`, `Maliev.Web.Tests/HeroCopyCatalogTests.cs`, this README table, and `AGENTS.md` together.
+
+## Public Policy Routes
+
+Policy pages are rendered by `Maliev.Web.Client/Pages/StaticPage.razor` and listed in the generated sitemap from `Maliev.Web.Bff/Controllers/SeoController.cs`.
+
+| Route | Purpose |
+| --- | --- |
+| `/terms` | Terms of service for website use, product orders, quote acceptance, CAD uploads, payments, delivery, and liability. |
+| `/privacy` | Privacy policy for personal data, CAD files, orders, support records, sharing, retention, and data subject rights. |
+| `/cookie-policy` | Cookie policy for essential, preference, analytics, security, and advertising cookies. |
+| `/shipping-returns` | Shipping, delivery inspection, return eligibility, and delivery issue handling. |
+| `/refund-policy` | Refund, cancellation, credit, rework, and replacement eligibility. |
+| `/warranty-policy` | Warranty coverage, workmanship review, exclusions, support process, and available remedies. |

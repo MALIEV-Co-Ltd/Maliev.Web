@@ -4,6 +4,9 @@
 @page "/shipping-returns"
 @page "/privacy"
 @page "/terms"
+@page "/cookie-policy"
+@page "/refund-policy"
+@page "/warranty-policy"
 @page "/materials"
 @page "/industries"
 @page "/case-studies"
@@ -311,6 +314,15 @@ else if (Path.StartsWith("case-studies/", StringComparison.Ordinal))
                 <article>
                     <h2>@item.Title.For(Preferences.Culture)</h2>
                     <p>@item.Body.For(Preferences.Culture)</p>
+                    @if (item.Items.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var point in item.Items)
+                            {
+                                <li>@point.For(Preferences.Culture)</li>
+                            }
+                        </ul>
+                    }
                 </article>
             }
         </div>
@@ -325,6 +337,15 @@ else if (Path == "contact")
                 <article>
                     <h2>@item.Title.For(Preferences.Culture)</h2>
                     <p>@item.Body.For(Preferences.Culture)</p>
+                    @if (item.Items.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var point in item.Items)
+                            {
+                                <li>@point.For(Preferences.Culture)</li>
+                            }
+                        </ul>
+                    }
                 </article>
             }
         </div>
@@ -356,6 +377,15 @@ else
                 <article>
                     <h2>@item.Title.For(Preferences.Culture)</h2>
                     <p>@item.Body.For(Preferences.Culture)</p>
+                    @if (item.Items.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var point in item.Items)
+                            {
+                                <li>@point.For(Preferences.Culture)</li>
+                            }
+                        </ul>
+                    }
                 </article>
             }
         </div>
@@ -385,9 +415,12 @@ else
     {
         "contact" => Text("Contact", "ติดต่อ"),
         "faq" => "FAQ",
-        "shipping-returns" => Text("Shipping and returns", "การจัดส่งและการคืนสินค้า"),
-        "privacy" => Text("Privacy", "ความเป็นส่วนตัว"),
-        "terms" => Text("Terms", "เงื่อนไข"),
+        "shipping-returns" => Text("Shipping and returns policy", "นโยบายการจัดส่งและคืนสินค้า"),
+        "privacy" => Text("Privacy policy", "นโยบายความเป็นส่วนตัว"),
+        "terms" => Text("Terms of service", "ข้อกำหนดการให้บริการ"),
+        "cookie-policy" => Text("Cookie policy", "นโยบายคุกกี้"),
+        "refund-policy" => Text("Refund policy", "นโยบายการคืนเงิน"),
+        "warranty-policy" => Text("Warranty and support policy", "นโยบายการรับประกันและการสนับสนุน"),
         "materials" => Text("Materials", "วัสดุ"),
         "industries" => Text("Industries", "อุตสาหกรรม"),
         "case-studies" => Text("Case studies", "ผลงาน"),
@@ -410,9 +443,12 @@ else
     {
         "contact" => Text("Send product questions, machine support issues, drawings, 3D files, or manufacturing context.", "ส่งคำถามสินค้า ปัญหาเครื่องจักร Drawing ไฟล์ 3D หรือบริบทงานผลิต"),
         "faq" => Text("Answers for product orders, custom parts, and preparing files for quotation.", "คำตอบสำหรับการสั่งซื้อสินค้า งานเฉพาะแบบ และการเตรียมไฟล์เพื่อขอราคา"),
-        "shipping-returns" => Text("How MALIEV prepares, ships, and supports product orders after delivery.", "วิธีที่ MALIEV เตรียม จัดส่ง และดูแลคำสั่งซื้อหลังส่งมอบ"),
-        "privacy" => Text("How MALIEV handles customer files, product orders, account preferences, and communication records.", "วิธีที่ MALIEV จัดการไฟล์ลูกค้า คำสั่งซื้อ การตั้งค่าบัญชี และประวัติการสื่อสาร"),
-        "terms" => Text("Commercial terms for product orders, custom manufacturing requests, and quotation acceptance.", "เงื่อนไขการค้าสำหรับคำสั่งซื้อสินค้า งานผลิตเฉพาะแบบ และการอนุมัติใบเสนอราคา"),
+        "shipping-returns" => Text("How MALIEV packs, ships, inspects, and handles product returns or delivery issues.", "วิธีที่ MALIEV แพ็ก จัดส่ง ตรวจรับ และดูแลการคืนสินค้าหรือปัญหาการส่งมอบ"),
+        "privacy" => Text("How MALIEV collects, uses, protects, and shares personal data, CAD files, orders, and support records.", "วิธีที่ MALIEV เก็บ ใช้ ปกป้อง และเปิดเผยข้อมูลส่วนบุคคล ไฟล์ CAD คำสั่งซื้อ และประวัติการสนับสนุน"),
+        "terms" => Text("The service terms for MALIEV product orders, custom manufacturing quotes, CAD uploads, payments, and delivery.", "ข้อกำหนดการใช้บริการสำหรับคำสั่งซื้อสินค้า ใบเสนอราคางานผลิตเฉพาะ อัปโหลด CAD การชำระเงิน และการส่งมอบ"),
+        "cookie-policy" => Text("How MALIEV uses essential, preference, analytics, security, and advertising cookies on the website.", "วิธีที่ MALIEV ใช้คุกกี้ที่จำเป็น การตั้งค่า วิเคราะห์ ความปลอดภัย และโฆษณาบนเว็บไซต์"),
+        "refund-policy" => Text("When refunds, cancellations, credits, rework, or replacements apply to product orders and custom manufacturing.", "กรณีที่การคืนเงิน การยกเลิก เครดิต การแก้งาน หรือการเปลี่ยนสินค้าใช้กับคำสั่งซื้อและงานผลิตเฉพาะ"),
+        "warranty-policy" => Text("Warranty, workmanship review, support, and exclusions for MALIEV products, machines, spare parts, and custom-made parts.", "การรับประกัน การตรวจงานผลิต การสนับสนุน และข้อยกเว้นสำหรับสินค้า เครื่องจักร อะไหล่ และชิ้นงานเฉพาะของ MALIEV"),
         "materials" => Text("Compare materials by process, use case, finishing expectation, and quoting readiness.", "เปรียบเทียบวัสดุตามกระบวนการ การใช้งาน ผิวงาน และความพร้อมในการขอราคา"),
         "industries" => Text("MALIEV supports factories, designers, product builders, educators, and maintenance teams.", "MALIEV สนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
         "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
@@ -455,19 +491,226 @@ else
         ],
         "shipping-returns" =>
         [
-            Section("Shipping", "การจัดส่ง", "Shipping depends on item size, destination, and whether the order includes machines, spare parts, products, or custom-made parts.", "การจัดส่งขึ้นกับขนาดสินค้า ปลายทาง และประเภทคำสั่งซื้อ เช่น เครื่องจักร อะไหล่ สินค้า หรือชิ้นงานเฉพาะ"),
-            Section("Returns and support", "การคืนสินค้าและการดูแล", "Ready-made products are reviewed with photos and the order reference. Custom manufactured parts are reviewed against the accepted quotation and specification.", "สินค้าพร้อมขายตรวจจากรูปและเลขอ้างอิงคำสั่งซื้อ ส่วนชิ้นงานเฉพาะตรวจเทียบกับใบเสนอราคาและสเปกที่อนุมัติ")
+            Section(
+                "Scope and last update",
+                "ขอบเขตและวันที่ปรับปรุง",
+                "Updated May 12, 2026. This policy applies to MALIEV product orders, machines, spare parts, printed products, and custom manufacturing shipments unless a signed quotation or written agreement says otherwise.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายนี้ใช้กับคำสั่งซื้อสินค้า เครื่องจักร อะไหล่ สินค้าพิมพ์ และการจัดส่งงานผลิตเฉพาะของ MALIEV เว้นแต่ใบเสนอราคาที่ลงนามหรือข้อตกลงเป็นลายลักษณ์อักษรระบุไว้ต่างออกไป",
+                ("Custom manufactured parts are checked against the accepted quote, drawings, files, material, process, tolerance notes, and written scope.", "ชิ้นงานผลิตเฉพาะตรวจเทียบกับใบเสนอราคาที่อนุมัติ Drawing ไฟล์ วัสดุ กระบวนการ หมายเหตุ tolerance และขอบเขตงานเป็นลายลักษณ์อักษร"),
+                ("Ready-made shop products are checked against the published product page, invoice, and delivery record.", "สินค้าพร้อมขายตรวจเทียบกับหน้าสินค้า ใบแจ้งหนี้ และบันทึกการจัดส่ง")),
+            Section(
+                "Shipping and delivery",
+                "การจัดส่งและการส่งมอบ",
+                "Shipping method, fee, packaging, insurance, and lead time depend on size, weight, destination, product type, and whether installation or special handling is required.",
+                "วิธีจัดส่ง ค่าขนส่ง การแพ็ก ประกันขนส่ง และระยะเวลาขึ้นกับขนาด น้ำหนัก ปลายทาง ประเภทสินค้า และความจำเป็นด้านติดตั้งหรือการจัดการพิเศษ",
+                ("Delivery dates are estimates unless MALIEV confirms a fixed delivery commitment in writing.", "วันที่ส่งมอบเป็นประมาณการ เว้นแต่ MALIEV ยืนยันกำหนดส่งแบบตายตัวเป็นลายลักษณ์อักษร"),
+                ("Customers must provide a reachable contact, correct address, tax details when needed, and safe receiving conditions for bulky or machine shipments.", "ลูกค้าต้องให้ข้อมูลติดต่อที่ติดต่อได้ ที่อยู่ถูกต้อง ข้อมูลภาษีเมื่อจำเป็น และพื้นที่รับสินค้าที่ปลอดภัยสำหรับสินค้าขนาดใหญ่หรือเครื่องจักร"),
+                ("For international or special shipments, duties, import paperwork, site access, and customs delays are handled according to the quote or the carrier terms.", "สำหรับการจัดส่งระหว่างประเทศหรือกรณีพิเศษ ภาษีนำเข้า เอกสารนำเข้า การเข้าพื้นที่ และความล่าช้าศุลกากรเป็นไปตามใบเสนอราคาหรือเงื่อนไขผู้ขนส่ง")),
+            Section(
+                "Inspection after receipt",
+                "การตรวจรับหลังได้รับสินค้า",
+                "Inspect the package, product, and custom parts promptly after delivery. Keep packaging, photos, videos, and delivery records if anything is damaged, incomplete, or different from the accepted scope.",
+                "โปรดตรวจกล่อง สินค้า และชิ้นงานเฉพาะทันทีหลังได้รับสินค้า เก็บบรรจุภัณฑ์ รูป วิดีโอ และหลักฐานจัดส่งหากสินค้าเสียหาย ไม่ครบ หรือแตกต่างจากขอบเขตที่อนุมัติ",
+                ("Report visible shipping damage, wrong items, missing items, or serious quality issues within 7 days after receipt where practical.", "แจ้งความเสียหายจากขนส่ง สินค้าผิด รายการไม่ครบ หรือปัญหาคุณภาพสำคัญภายใน 7 วันหลังรับสินค้าเมื่อทำได้"),
+                ("Include the order number, photos, videos, package condition, product condition, and a short description of the issue.", "แนบเลขคำสั่งซื้อ รูป วิดีโอ สภาพกล่อง สภาพสินค้า และคำอธิบายปัญหาโดยย่อ")),
+            Section(
+                "Returns",
+                "การคืนสินค้า",
+                "Ready-made products may be returned when MALIEV approves the case and the item is unused, complete, safely packed, and in resalable condition unless the issue is a defect or wrong delivery.",
+                "สินค้าพร้อมขายสามารถคืนได้เมื่อ MALIEV อนุมัติและสินค้ายังไม่ผ่านการใช้งาน อุปกรณ์ครบ แพ็กปลอดภัย และอยู่ในสภาพขายต่อได้ เว้นแต่เป็นกรณีสินค้าเสียหรือส่งผิด",
+                ("Custom manufactured parts, machined parts, printed parts, modified machines, made-to-order accessories, and opened consumables are not returnable for change of mind.", "ชิ้นงานผลิตเฉพาะ งานกัด งานพิมพ์ เครื่องจักรที่ปรับแต่ง อุปกรณ์สั่งทำ และวัสดุสิ้นเปลืองที่เปิดใช้แล้ว ไม่รับคืนด้วยเหตุเปลี่ยนใจ"),
+                ("If MALIEV confirms a defect, wrong shipment, or nonconformance, the remedy may be rework, replacement, credit, refund, or another commercially reasonable solution.", "หาก MALIEV ยืนยันว่ามีข้อบกพร่อง ส่งผิด หรือไม่ตรงตามสเปก การแก้ไขอาจเป็นการแก้งาน เปลี่ยนสินค้า เครดิต คืนเงิน หรือวิธีที่เหมาะสมทางการค้า"),
+                ("Return shipping responsibility depends on the approved case, quote, carrier fault, product condition, and applicable law.", "ความรับผิดชอบค่าขนส่งคืนขึ้นกับกรณีที่อนุมัติ ใบเสนอราคา ความผิดของผู้ขนส่ง สภาพสินค้า และกฎหมายที่ใช้บังคับ"))
         ],
         "privacy" =>
         [
-            Section("Customer files", "ไฟล์ลูกค้า", "Uploaded models, drawings, and product communications are used to prepare quotations, manufacture orders, and provide support.", "โมเดล Drawing และการสื่อสารของลูกค้าใช้เพื่อเตรียมใบเสนอราคา ผลิตงาน และให้การสนับสนุน"),
-            Section("Preferences", "การตั้งค่า", "Language and currency preferences may be stored in the browser and later attached to your account after sign-in.", "ภาษาและสกุลเงินอาจถูกเก็บในเบราว์เซอร์และผูกกับบัญชีหลังเข้าสู่ระบบ"),
-            Section("Commerce records", "ข้อมูลการค้า", "Cart, checkout, and order information is used to process purchases, delivery, and after-sales support.", "ข้อมูลตะกร้า ชำระเงิน และคำสั่งซื้อใช้เพื่อดำเนินการซื้อ จัดส่ง และดูแลหลังการขาย")
+            Section(
+                "Scope and last update",
+                "ขอบเขตและวันที่ปรับปรุง",
+                "Updated May 12, 2026. This privacy policy explains how MALIEV Co., Ltd. collects, uses, discloses, stores, and protects personal data for website visitors, customers, quotation users, product buyers, and support contacts.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายความเป็นส่วนตัวนี้อธิบายวิธีที่บริษัท มาลีฟ จำกัด เก็บ ใช้ เปิดเผย จัดเก็บ และปกป้องข้อมูลส่วนบุคคลของผู้เยี่ยมชมเว็บไซต์ ลูกค้า ผู้ใช้ระบบราคา ผู้ซื้อสินค้า และผู้ติดต่อฝ่ายสนับสนุน",
+                ("Controller contact: MALIEV Co., Ltd., 36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand.", "ผู้ควบคุมข้อมูล: บริษัท มาลีฟ จำกัด 36/1 หมู่ 3 ตำบลคลองข่อย อำเภอปากเกร็ด จังหวัดนนทบุรี 11120 ประเทศไทย"),
+                ("Email: info@maliev.com. Phone: +66 81 803 0404.", "อีเมล: info@maliev.com โทรศัพท์: +66 81 803 0404")),
+            Section(
+                "Personal data we collect",
+                "ข้อมูลส่วนบุคคลที่เราเก็บ",
+                "We collect only what is reasonably needed to run the website, prepare quotations, manufacture work, sell products, deliver orders, support customers, keep records, and protect our systems.",
+                "เราเก็บข้อมูลเท่าที่จำเป็นอย่างสมเหตุสมผลเพื่อให้เว็บไซต์ทำงาน จัดทำใบเสนอราคา ผลิตงาน ขายสินค้า จัดส่ง ดูแลลูกค้า เก็บบันทึก และปกป้องระบบ",
+                ("Identity and contact data such as name, company, email, phone, billing address, shipping address, tax information, and account identifiers.", "ข้อมูลระบุตัวตนและติดต่อ เช่น ชื่อ บริษัท อีเมล โทรศัพท์ ที่อยู่ใบกำกับภาษี ที่อยู่จัดส่ง ข้อมูลภาษี และตัวระบุบัญชี"),
+                ("Commercial data such as cart activity, quotation requests, accepted quotes, invoices, orders, payments, delivery records, support cases, and communication history.", "ข้อมูลการค้า เช่น กิจกรรมตะกร้า คำขอราคา ใบเสนอราคาที่อนุมัติ ใบแจ้งหนี้ คำสั่งซื้อ การชำระเงิน บันทึกจัดส่ง เคสสนับสนุน และประวัติการสื่อสาร"),
+                ("Technical and project data such as CAD files, drawings, photos, samples, specifications, measurements, tolerances, materials, quantities, DFM notes, and manufacturing instructions.", "ข้อมูลทางเทคนิคและโปรเจกต์ เช่น ไฟล์ CAD Drawing รูป ตัวอย่าง สเปก ขนาด tolerance วัสดุ จำนวน หมายเหตุ DFM และคำสั่งผลิต"),
+                ("Device and usage data such as IP address, browser, language, theme, cookie identifiers, security logs, page visits, referring ads, and diagnostic records.", "ข้อมูลอุปกรณ์และการใช้งาน เช่น IP address เบราว์เซอร์ ภาษา ธีม ตัวระบุคุกกี้ บันทึกความปลอดภัย หน้าที่เข้าชม โฆษณาที่อ้างอิง และบันทึกวิเคราะห์ปัญหา")),
+            Section(
+                "Why we use data",
+                "วัตถุประสงค์การใช้ข้อมูล",
+                "We process personal data for legitimate business purposes, contract performance, legal compliance, consent-based marketing where required, security, and customer support.",
+                "เราประมวลผลข้อมูลส่วนบุคคลเพื่อประโยชน์ทางธุรกิจโดยชอบ การปฏิบัติตามสัญญา การปฏิบัติตามกฎหมาย การตลาดตามความยินยอมเมื่อจำเป็น ความปลอดภัย และการสนับสนุนลูกค้า",
+                ("Prepare and improve quotations, DFM checks, manufacturability reviews, material selection, lead-time planning, and production support.", "จัดทำและปรับปรุงใบเสนอราคา ตรวจ DFM ตรวจความพร้อมผลิต เลือกวัสดุ วางแผนระยะเวลา และสนับสนุนการผลิต"),
+                ("Fulfil product orders, payments, delivery, tax documentation, warranties, returns, refunds, and after-sales service.", "ดำเนินคำสั่งซื้อ การชำระเงิน การจัดส่ง เอกสารภาษี การรับประกัน การคืนสินค้า การคืนเงิน และบริการหลังการขาย"),
+                ("Operate accounts, preferences, carts, customer communication, fraud prevention, security monitoring, and system diagnostics.", "ดูแลบัญชี การตั้งค่า ตะกร้า การสื่อสารลูกค้า ป้องกันการทุจริต ตรวจสอบความปลอดภัย และวิเคราะห์ระบบ"),
+                ("Measure website performance, search and advertising relevance, content quality, and customer experience when permitted.", "วัดประสิทธิภาพเว็บไซต์ ความเกี่ยวข้องของการค้นหาและโฆษณา คุณภาพเนื้อหา และประสบการณ์ลูกค้าเมื่อได้รับอนุญาต")),
+            Section(
+                "Sharing and transfers",
+                "การเปิดเผยและการโอนข้อมูล",
+                "We share personal data only when needed for the purposes above, with appropriate confidentiality, security, and access controls.",
+                "เราเปิดเผยข้อมูลส่วนบุคคลเท่าที่จำเป็นสำหรับวัตถุประสงค์ข้างต้น พร้อมมาตรการรักษาความลับ ความปลอดภัย และการควบคุมสิทธิ์เข้าถึงที่เหมาะสม",
+                ("Recipients may include cloud hosting, file storage, payment, delivery, accounting, analytics, advertising, support, manufacturing partners, professional advisers, and authorities when required by law.", "ผู้รับข้อมูลอาจรวมถึงผู้ให้บริการคลาวด์ ที่เก็บไฟล์ การชำระเงิน ขนส่ง บัญชี วิเคราะห์ โฆษณา สนับสนุน พันธมิตรการผลิต ที่ปรึกษาวิชาชีพ และหน่วยงานรัฐเมื่อกฎหมายกำหนด"),
+                ("Some providers may process data outside Thailand. Where required, MALIEV uses contractual, technical, and organizational safeguards for cross-border transfer.", "ผู้ให้บริการบางรายอาจประมวลผลข้อมูลนอกประเทศไทย เมื่อจำเป็น MALIEV ใช้มาตรการสัญญา เทคนิค และองค์กรเพื่อคุ้มครองการโอนข้อมูลข้ามประเทศ"),
+                ("We do not sell CAD files, drawings, or customer personal data.", "เราไม่ขายไฟล์ CAD Drawing หรือข้อมูลส่วนบุคคลของลูกค้า")),
+            Section(
+                "Retention and security",
+                "ระยะเวลาจัดเก็บและความปลอดภัย",
+                "We keep personal data for as long as needed for quotation, production, product support, legal, tax, accounting, warranty, dispute, security, and business record purposes, then delete, archive, or anonymize it when appropriate.",
+                "เราเก็บข้อมูลส่วนบุคคลเท่าที่จำเป็นสำหรับการขอราคา การผลิต การสนับสนุนสินค้า กฎหมาย ภาษี บัญชี การรับประกัน ข้อพิพาท ความปลอดภัย และบันทึกธุรกิจ จากนั้นลบ เก็บถาวร หรือทำให้ไม่ระบุตัวตนเมื่อเหมาะสม",
+                ("Security controls include access limits, account protection, system monitoring, encrypted transport where supported, backups, and file-handling procedures.", "มาตรการความปลอดภัยรวมถึงการจำกัดสิทธิ์ การปกป้องบัญชี การตรวจสอบระบบ การส่งข้อมูลแบบเข้ารหัสเมื่อรองรับ การสำรองข้อมูล และขั้นตอนจัดการไฟล์"),
+                ("Customer files may be retained when needed to reproduce orders, support warranties, resolve disputes, comply with accounting records, or preserve manufacturing context.", "ไฟล์ลูกค้าอาจถูกเก็บเมื่อจำเป็นต่อการผลิตซ้ำ การรับประกัน การแก้ข้อพิพาท การปฏิบัติตามบัญชี หรือการรักษาบริบทงานผลิต")),
+            Section(
+                "Data subject rights",
+                "สิทธิของเจ้าของข้อมูล",
+                "Subject to the conditions and exceptions under applicable law, you may request access, copy, portability, correction, deletion, restriction, objection, consent withdrawal, or information about how your data is used.",
+                "ภายใต้เงื่อนไขและข้อยกเว้นตามกฎหมายที่ใช้บังคับ ท่านอาจขอเข้าถึง ขอสำเนา โอนย้าย แก้ไข ลบ ระงับการใช้ คัดค้าน ถอนความยินยอม หรือขอข้อมูลเกี่ยวกับการใช้ข้อมูลของท่านได้",
+                ("Send requests to info@maliev.com with enough information for identity verification and request handling.", "ส่งคำขอมาที่ info@maliev.com พร้อมข้อมูลที่เพียงพอต่อการยืนยันตัวตนและดำเนินการตามคำขอ"),
+                ("You may also contact the Office of the Personal Data Protection Committee if you believe your rights under Thai personal data protection law have been affected.", "ท่านอาจติดต่อสำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล หากเห็นว่าสิทธิตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลของไทยได้รับผลกระทบ"))
         ],
         "terms" =>
         [
-            Section("Product orders", "คำสั่งซื้อสินค้า", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or configuration needs clarification.", "ราคา สถานะสินค้า และระยะเวลาจะยืนยันตอนชำระเงิน MALIEV อาจติดต่อหากต้องชี้แจงการจัดส่งหรือการตั้งค่า"),
-            Section("Custom manufacturing", "งานผลิตเฉพาะแบบ", "Custom part pricing is based on submitted files, material, process, quantity, and accepted quotation. Requirement changes may require a new quote.", "ราคาชิ้นงานเฉพาะขึ้นกับไฟล์ วัสดุ กระบวนการ จำนวน และใบเสนอราคาที่อนุมัติ หากเปลี่ยนความต้องการอาจต้องออกใบเสนอราคาใหม่")
+            Section(
+                "Acceptance and last update",
+                "การยอมรับและวันที่ปรับปรุง",
+                "Updated May 12, 2026. By using the MALIEV website, buying products, submitting files, requesting quotes, accepting quotations, or placing orders, you agree to these terms and any written quotation or order document that applies.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 เมื่อใช้เว็บไซต์ MALIEV ซื้อสินค้า ส่งไฟล์ ขอราคา อนุมัติใบเสนอราคา หรือสั่งงาน ท่านยอมรับข้อกำหนดนี้และเอกสารใบเสนอราคาหรือคำสั่งซื้อที่เกี่ยวข้อง",
+                ("If a signed quotation, purchase order, invoice, or written agreement conflicts with these general terms, the more specific written document controls for that order.", "หากใบเสนอราคาที่ลงนาม ใบสั่งซื้อ ใบแจ้งหนี้ หรือข้อตกลงเป็นลายลักษณ์อักษรขัดกับข้อกำหนดทั่วไปนี้ เอกสารเฉพาะของคำสั่งซื้อนั้นมีผลเหนือกว่า")),
+            Section(
+                "Website, account, and product shop",
+                "เว็บไซต์ บัญชี และร้านค้าสินค้า",
+                "You are responsible for accurate account, company, billing, shipping, tax, and contact information. MALIEV may suspend access, cancel orders, or request verification when information is incomplete, suspicious, unlawful, or commercially impractical.",
+                "ท่านรับผิดชอบความถูกต้องของข้อมูลบัญชี บริษัท ใบกำกับภาษี ที่อยู่จัดส่ง ภาษี และการติดต่อ MALIEV อาจระงับการเข้าถึง ยกเลิกคำสั่งซื้อ หรือขอตรวจสอบเมื่อข้อมูลไม่ครบ น่าสงสัย ผิดกฎหมาย หรือไม่เหมาะสมทางการค้า",
+                ("Published product prices, availability, specifications, images, promotions, and lead times may change until checkout or written order acceptance.", "ราคา สถานะสินค้า สเปก รูป โปรโมชัน และระยะเวลาที่เผยแพร่อาจเปลี่ยนได้จนกว่าจะชำระเงินหรือได้รับการยอมรับคำสั่งซื้อเป็นลายลักษณ์อักษร"),
+                ("MALIEV may correct obvious errors, reject abusive orders, and contact you when configuration, shipping, or installation details need confirmation.", "MALIEV อาจแก้ไขข้อผิดพลาดที่เห็นชัด ปฏิเสธคำสั่งซื้อที่ไม่เหมาะสม และติดต่อเมื่อรายละเอียดการตั้งค่า การจัดส่ง หรือการติดตั้งต้องยืนยัน")),
+            Section(
+                "Custom manufacturing quotes",
+                "ใบเสนอราคางานผลิตเฉพาะ",
+                "Custom manufacturing pricing depends on uploaded files, drawings, selected process, material, finish, tolerance, quantity, lead time, support notes, and DFM review. Changes may require a new quote, revised price, or revised schedule.",
+                "ราคางานผลิตเฉพาะขึ้นกับไฟล์ที่อัปโหลด Drawing กระบวนการ วัสดุ ผิวงาน tolerance จำนวน ระยะเวลา หมายเหตุสนับสนุน และการตรวจ DFM การเปลี่ยนแปลงอาจต้องออกใบเสนอราคาใหม่ ปรับราคา หรือปรับกำหนดการ",
+                ("You are responsible for submitting files and specifications that are complete, lawful, safe, and fit for the intended use.", "ท่านรับผิดชอบการส่งไฟล์และสเปกที่ครบถ้วน ถูกกฎหมาย ปลอดภัย และเหมาะกับการใช้งานที่ตั้งใจ"),
+                ("MALIEV may recommend DFM changes, material substitutions, finishing changes, feature changes, or tolerance clarifications before production.", "MALIEV อาจแนะนำการปรับ DFM เปลี่ยนวัสดุ เปลี่ยนผิวงาน ปรับฟีเจอร์ หรือชี้แจง tolerance ก่อนผลิต"),
+                ("Production starts only after the required commercial approval, payment condition, technical confirmation, and file readiness are satisfied.", "การผลิตเริ่มเมื่อได้รับอนุมัติทางการค้า เงื่อนไขชำระเงิน การยืนยันทางเทคนิค และความพร้อมของไฟล์ตามที่กำหนด")),
+            Section(
+                "Customer files and intellectual property",
+                "ไฟล์ลูกค้าและทรัพย์สินทางปัญญา",
+                "You keep ownership of CAD files, drawings, images, specifications, and intellectual property you provide. You grant MALIEV a limited right to use them to quote, review, manufacture, deliver, support, document, and improve the requested work.",
+                "ท่านยังคงเป็นเจ้าของไฟล์ CAD Drawing รูป สเปก และทรัพย์สินทางปัญญาที่ให้มา ท่านอนุญาตให้ MALIEV ใช้ข้อมูลดังกล่าวเท่าที่จำเป็นเพื่อเสนอราคา ตรวจสอบ ผลิต ส่งมอบ สนับสนุน จัดทำเอกสาร และปรับปรุงงานที่ร้องขอ",
+                ("Do not submit files or request work that infringes third-party rights, violates law, creates unsafe regulated items, or is intended for unlawful use.", "ห้ามส่งไฟล์หรือสั่งงานที่ละเมิดสิทธิบุคคลอื่น ผิดกฎหมาย สร้างสิ่งของควบคุมที่ไม่ปลอดภัย หรือมีวัตถุประสงค์ผิดกฎหมาย"),
+                ("MALIEV may refuse or stop work involving weapons, illegal parts, unsafe designs, counterfeit goods, prohibited materials, or unclear ownership.", "MALIEV อาจปฏิเสธหรือหยุดงานที่เกี่ยวกับอาวุธ ชิ้นส่วนผิดกฎหมาย แบบไม่ปลอดภัย สินค้าลอกเลียนแบบ วัสดุต้องห้าม หรือกรรมสิทธิ์ไม่ชัดเจน")),
+            Section(
+                "Payment, delivery, and acceptance",
+                "การชำระเงิน การส่งมอบ และการตรวจรับ",
+                "Payment timing, taxes, shipping, deposits, balance payment, credit terms, and delivery conditions are stated in checkout, quotation, invoice, or written confirmation.",
+                "กำหนดชำระ ภาษี ค่าขนส่ง เงินมัดจำ ชำระส่วนที่เหลือ เครดิตเทอม และเงื่อนไขส่งมอบเป็นไปตามหน้าชำระเงิน ใบเสนอราคา ใบแจ้งหนี้ หรือการยืนยันเป็นลายลักษณ์อักษร",
+                ("Orders may be delayed if payment, technical confirmation, shipping information, site readiness, or customer approval is late.", "คำสั่งซื้ออาจล่าช้าหากการชำระเงิน การยืนยันเทคนิค ข้อมูลจัดส่ง ความพร้อมหน้างาน หรือการอนุมัติจากลูกค้าล่าช้า"),
+                ("Inspect products and custom parts after delivery and report issues with evidence promptly.", "โปรดตรวจสินค้าและชิ้นงานเฉพาะหลังส่งมอบ และแจ้งปัญหาพร้อมหลักฐานโดยเร็ว"),
+                ("Cancellations, refunds, returns, warranty, and support are handled under the relevant policy pages and the accepted order documents.", "การยกเลิก คืนเงิน คืนสินค้า รับประกัน และสนับสนุนเป็นไปตามหน้านโยบายที่เกี่ยวข้องและเอกสารคำสั่งซื้อที่อนุมัติ")),
+            Section(
+                "Liability and governing law",
+                "ความรับผิดและกฎหมายที่ใช้บังคับ",
+                "To the fullest extent permitted by law, MALIEV is not liable for indirect, incidental, special, consequential, loss-of-profit, loss-of-production, or loss-of-data damages arising from the website, products, or custom manufacturing.",
+                "เท่าที่กฎหมายอนุญาต MALIEV ไม่รับผิดในความเสียหายทางอ้อม โดยบังเอิญ พิเศษ ต่อเนื่อง การเสียกำไร การหยุดการผลิต หรือการสูญหายของข้อมูลที่เกิดจากเว็บไซต์ สินค้า หรืองานผลิตเฉพาะ",
+                ("MALIEV's aggregate liability for a specific order is limited to the amount paid to MALIEV for that order, except where applicable law requires otherwise.", "ความรับผิดรวมของ MALIEV สำหรับคำสั่งซื้อหนึ่งจำกัดไม่เกินจำนวนเงินที่ชำระให้ MALIEV สำหรับคำสั่งซื้อนั้น เว้นแต่กฎหมายที่ใช้บังคับกำหนดไว้ต่างออกไป"),
+                ("These terms are governed by the laws of Thailand.", "ข้อกำหนดนี้อยู่ภายใต้กฎหมายไทย"),
+                ("Force majeure events, carrier delays, supply shortages, platform outages, government actions, or events outside reasonable control may affect performance dates.", "เหตุสุดวิสัย ความล่าช้าของขนส่ง การขาดแคลนวัสดุ ระบบล่ม การกระทำของรัฐ หรือเหตุที่อยู่นอกเหนือการควบคุมอย่างสมเหตุสมผลอาจกระทบกำหนดการ"))
+        ],
+        "cookie-policy" =>
+        [
+            Section(
+                "Scope and last update",
+                "ขอบเขตและวันที่ปรับปรุง",
+                "Updated May 12, 2026. This cookie policy explains how MALIEV uses cookies and similar technologies on www.maliev.com and related customer website features.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายคุกกี้นี้อธิบายวิธีที่ MALIEV ใช้คุกกี้และเทคโนโลยีที่คล้ายกันบน www.maliev.com และฟีเจอร์เว็บไซต์ลูกค้าที่เกี่ยวข้อง"),
+            Section(
+                "Cookies we use",
+                "คุกกี้ที่เราใช้",
+                "Cookies help the site remember preferences, protect sessions, run shopping and account flows, measure performance, and improve ads or content relevance where permitted.",
+                "คุกกี้ช่วยให้เว็บไซต์จดจำการตั้งค่า ปกป้องเซสชัน ใช้งานร้านค้าและบัญชี วัดประสิทธิภาพ และปรับความเกี่ยวข้องของโฆษณาหรือเนื้อหาเมื่อได้รับอนุญาต",
+                ("Essential cookies keep core features working, including language, theme, cart, session, anti-forgery, security, and sign-in flows.", "คุกกี้จำเป็นทำให้ฟีเจอร์หลักทำงาน เช่น ภาษา ธีม ตะกร้า เซสชัน ป้องกันการปลอมแปลงคำขอ ความปลอดภัย และการเข้าสู่ระบบ"),
+                ("Preference cookies remember display choices such as language, theme, and local website settings.", "คุกกี้การตั้งค่าจดจำตัวเลือกการแสดงผล เช่น ภาษา ธีม และการตั้งค่าเว็บไซต์"),
+                ("Analytics cookies help understand page performance, content quality, errors, and customer journeys.", "คุกกี้วิเคราะห์ช่วยเข้าใจประสิทธิภาพหน้า คุณภาพเนื้อหา ข้อผิดพลาด และเส้นทางการใช้งานของลูกค้า"),
+                ("Advertising cookies may help connect ad keywords, campaigns, service categories, and landing-page performance.", "คุกกี้โฆษณาอาจช่วยเชื่อมคำค้น แคมเปญ หมวดบริการ และประสิทธิภาพหน้า Landing")),
+            Section(
+                "Third parties",
+                "บุคคลภายนอก",
+                "Some cookies or similar identifiers may be set by service providers that help with hosting, security, analytics, advertising, embedded media, support, payment, or communication.",
+                "คุกกี้หรือตัวระบุบางอย่างอาจถูกตั้งโดยผู้ให้บริการที่ช่วยด้านโฮสติ้ง ความปลอดภัย วิเคราะห์ โฆษณา สื่อฝังตัว การสนับสนุน การชำระเงิน หรือการสื่อสาร",
+                ("Third-party tools must be used according to their own privacy and cookie terms.", "เครื่องมือของบุคคลภายนอกต้องใช้งานตามนโยบายความเป็นส่วนตัวและคุกกี้ของผู้ให้บริการนั้น"),
+                ("When ad or analytics tags are used, campaign parameters may affect landing-page content and performance measurement.", "เมื่อใช้แท็กโฆษณาหรือวิเคราะห์ พารามิเตอร์แคมเปญอาจมีผลต่อเนื้อหา Landing page และการวัดผล")),
+            Section(
+                "Managing cookies",
+                "การจัดการคุกกี้",
+                "You can control cookies through browser settings and, where available, MALIEV cookie preferences. Blocking non-essential cookies may reduce personalization, analytics quality, and ad relevance.",
+                "ท่านควบคุมคุกกี้ได้ผ่านการตั้งค่าเบราว์เซอร์ และการตั้งค่าคุกกี้ของ MALIEV เมื่อมีให้ใช้งาน การบล็อกคุกกี้ที่ไม่จำเป็นอาจลดการปรับแต่งส่วนบุคคล คุณภาพการวิเคราะห์ และความเกี่ยวข้องของโฆษณา",
+                ("Blocking essential cookies can break cart, language, account, quote routing, or security features.", "การบล็อกคุกกี้จำเป็นอาจทำให้ตะกร้า ภาษา บัญชี การนำทางไปขอราคา หรือฟีเจอร์ความปลอดภัยทำงานผิดปกติ"),
+                ("Contact info@maliev.com for cookie or privacy questions.", "ติดต่อ info@maliev.com หากมีคำถามเรื่องคุกกี้หรือความเป็นส่วนตัว"))
+        ],
+        "refund-policy" =>
+        [
+            Section(
+                "Scope and last update",
+                "ขอบเขตและวันที่ปรับปรุง",
+                "Updated May 12, 2026. This policy explains when MALIEV may approve refunds, cancellations, credits, rework, or replacements for product orders and custom manufacturing.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายนี้อธิบายกรณีที่ MALIEV อาจอนุมัติการคืนเงิน การยกเลิก เครดิต การแก้งาน หรือการเปลี่ยนสินค้า สำหรับคำสั่งซื้อสินค้าและงานผลิตเฉพาะ"),
+            Section(
+                "Eligible refund cases",
+                "กรณีที่อาจคืนเงินได้",
+                "Refund eligibility depends on the order type, accepted quote, production status, product condition, evidence, and applicable law.",
+                "สิทธิการคืนเงินขึ้นกับประเภทคำสั่งซื้อ ใบเสนอราคาที่อนุมัติ สถานะการผลิต สภาพสินค้า หลักฐาน และกฎหมายที่ใช้บังคับ",
+                ("MALIEV cannot fulfil the order, a product is unavailable, or the parties agree to cancel before work starts.", "MALIEV ไม่สามารถดำเนินคำสั่งซื้อ สินค้าไม่มี หรือทั้งสองฝ่ายตกลงยกเลิกก่อนเริ่มงาน"),
+                ("A duplicate, incorrect, or unauthorized charge is confirmed.", "ยืนยันว่ามีการเรียกเก็บซ้ำ ผิดพลาด หรือไม่ได้รับอนุญาต"),
+                ("MALIEV approves a ready-made product return after inspection.", "MALIEV อนุมัติการคืนสินค้าพร้อมขายหลังตรวจสอบ"),
+                ("A delivered item is materially different from the approved order and MALIEV cannot reasonably repair, rework, replace, or correct it.", "สินค้าที่ส่งมอบแตกต่างอย่างมีนัยสำคัญจากคำสั่งซื้อที่อนุมัติ และ MALIEV ไม่สามารถซ่อม แก้งาน เปลี่ยน หรือแก้ไขได้อย่างสมเหตุสมผล")),
+            Section(
+                "Custom manufacturing cancellations",
+                "การยกเลิกงานผลิตเฉพาะ",
+                "Custom manufacturing orders are built for one customer and may become partly or fully non-refundable after technical review, material purchase, machine setup, tooling, production, finishing, or external supplier work begins.",
+                "งานผลิตเฉพาะทำขึ้นสำหรับลูกค้าแต่ละราย และอาจคืนเงินบางส่วนหรือคืนไม่ได้หลังเริ่มตรวจเทคนิค ซื้อวัสดุ ตั้งเครื่อง ทำ tooling ผลิต ทำผิว หรือเริ่มงานกับผู้ให้บริการภายนอก",
+                ("Before production starts, MALIEV may cancel and refund after deducting approved review, engineering, payment, procurement, or administrative costs where applicable.", "ก่อนเริ่มผลิต MALIEV อาจยกเลิกและคืนเงินหลังหักค่ารีวิว วิศวกรรม การชำระเงิน จัดซื้อ หรือค่าใช้จ่ายธุรการที่เกี่ยวข้อง"),
+                ("After production starts, available remedies usually focus on rework, replacement, credit, or partial refund based on the confirmed issue.", "หลังเริ่มผลิต วิธีแก้มักเน้นการแก้งาน เปลี่ยนสินค้า เครดิต หรือคืนเงินบางส่วนตามปัญหาที่ตรวจยืนยัน")),
+            Section(
+                "Refund process",
+                "ขั้นตอนคืนเงิน",
+                "To request a refund, contact MALIEV with the order number, reason, evidence, photos or videos, payment reference, and preferred contact details.",
+                "หากต้องการขอคืนเงิน โปรดติดต่อ MALIEV พร้อมเลขคำสั่งซื้อ เหตุผล หลักฐาน รูปหรือวิดีโอ หลักฐานการชำระเงิน และช่องทางติดต่อที่สะดวก",
+                ("MALIEV may inspect returned products or custom parts before approving the final remedy.", "MALIEV อาจตรวจสินค้าหรือชิ้นงานที่ส่งคืนก่อนอนุมัติวิธีแก้ไขสุดท้าย"),
+                ("Approved refunds are normally returned through the original payment method where possible, subject to bank or payment provider timing.", "การคืนเงินที่อนุมัติมักคืนผ่านช่องทางชำระเงินเดิมเมื่อทำได้ โดยขึ้นกับระยะเวลาของธนาคารหรือผู้ให้บริการชำระเงิน"),
+                ("Shipping, handling, payment, installation, engineering, or third-party costs may be non-refundable unless the issue is caused by MALIEV or applicable law requires otherwise.", "ค่าขนส่ง จัดการ ชำระเงิน ติดตั้ง วิศวกรรม หรือค่าใช้จ่ายบุคคลภายนอกอาจไม่คืน เว้นแต่ปัญหาเกิดจาก MALIEV หรือกฎหมายกำหนดไว้ต่างออกไป"))
+        ],
+        "warranty-policy" =>
+        [
+            Section(
+                "Scope and last update",
+                "ขอบเขตและวันที่ปรับปรุง",
+                "Updated May 12, 2026. This policy covers workmanship review, product support, warranty handling, and exclusions for MALIEV ready-made products, machines, spare parts, accessories, and custom manufactured parts.",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายนี้ครอบคลุมการตรวจงานผลิต การสนับสนุนสินค้า การรับประกัน และข้อยกเว้นสำหรับสินค้าพร้อมขาย เครื่องจักร อะไหล่ อุปกรณ์เสริม และชิ้นงานผลิตเฉพาะของ MALIEV"),
+            Section(
+                "Warranty coverage",
+                "ขอบเขตการรับประกัน",
+                "Warranty coverage and duration are defined by the quotation, product page, invoice, written warranty card, or written confirmation for the specific product or order.",
+                "ขอบเขตและระยะเวลารับประกันกำหนดโดยใบเสนอราคา หน้าสินค้า ใบแจ้งหนี้ ใบรับประกัน หรือการยืนยันเป็นลายลักษณ์อักษรของสินค้าและคำสั่งซื้อนั้น",
+                ("Ready-made products, machines, and spare parts are reviewed for defects in materials or workmanship under the applicable written warranty.", "สินค้าพร้อมขาย เครื่องจักร และอะไหล่ตรวจตามข้อบกพร่องด้านวัสดุหรือฝีมือผลิตภายใต้การรับประกันเป็นลายลักษณ์อักษรที่เกี่ยวข้อง"),
+                ("Custom manufactured parts are reviewed for conformance to the accepted quote, drawing, file, material, process, finish, tolerance note, and written scope at delivery.", "ชิ้นงานผลิตเฉพาะตรวจตามความสอดคล้องกับใบเสนอราคาที่อนุมัติ Drawing ไฟล์ วัสดุ กระบวนการ ผิวงาน หมายเหตุ tolerance และขอบเขตงานเป็นลายลักษณ์อักษร ณ วันส่งมอบ"),
+                ("If no written warranty period is stated, MALIEV will assess the support request case by case under applicable law and commercial reasonableness.", "หากไม่มีระยะเวลารับประกันเป็นลายลักษณ์อักษร MALIEV จะพิจารณาคำขอสนับสนุนเป็นรายกรณีตามกฎหมายที่ใช้บังคับและความเหมาะสมทางการค้า")),
+            Section(
+                "Exclusions",
+                "ข้อยกเว้น",
+                "Warranty and support do not cover issues caused by misuse, unauthorized modification, improper installation, wrong environment, poor maintenance, normal wear, consumables, customer design flaws, incomplete specifications, or use outside the accepted scope.",
+                "การรับประกันและสนับสนุนไม่ครอบคลุมปัญหาจากการใช้ผิดวิธี การดัดแปลงที่ไม่ได้รับอนุญาต การติดตั้งไม่ถูกต้อง สภาพแวดล้อมไม่เหมาะสม การบำรุงรักษาไม่เพียงพอ การสึกหรอตามปกติ วัสดุสิ้นเปลือง ข้อบกพร่องของแบบจากลูกค้า สเปกไม่ครบ หรือการใช้งานนอกขอบเขตที่อนุมัติ",
+                ("3D printed and machined parts may have process-specific layer marks, support marks, tooling marks, powder texture, color variation, or finish variation unless a specific finish standard is accepted.", "งานพิมพ์ 3 มิติและงานกัดอาจมีรอยเลเยอร์ รอยซัพพอร์ต รอยเครื่องมือ ผิวพาวเดอร์ สีต่างกัน หรือผิวต่างกันตามกระบวนการ เว้นแต่มีมาตรฐานผิวเฉพาะที่อนุมัติ"),
+                ("Customer-provided files, dimensions, fit assumptions, regulatory compliance, and end-use suitability remain the customer's responsibility unless MALIEV expressly accepts that scope in writing.", "ไฟล์ ขนาด สมมติฐานการประกอบ การปฏิบัติตามกฎระเบียบ และความเหมาะสมกับการใช้งานปลายทางที่ลูกค้าให้มาเป็นความรับผิดชอบของลูกค้า เว้นแต่ MALIEV รับขอบเขตนั้นเป็นลายลักษณ์อักษร")),
+            Section(
+                "Support process and remedies",
+                "ขั้นตอนสนับสนุนและวิธีแก้ไข",
+                "For support, stop using unsafe products, keep evidence, and contact MALIEV with the order number, product name, photos, videos, symptoms, operating conditions, and what changed before the issue appeared.",
+                "เมื่อต้องการสนับสนุน โปรดหยุดใช้สินค้าที่ไม่ปลอดภัย เก็บหลักฐาน และติดต่อ MALIEV พร้อมเลขคำสั่งซื้อ ชื่อสินค้า รูป วิดีโอ อาการ สภาพการใช้งาน และสิ่งที่เปลี่ยนก่อนเกิดปัญหา",
+                ("MALIEV may request inspection, remote troubleshooting, return of the product, test files, machine logs, or additional measurements.", "MALIEV อาจขอตรวจสินค้า ตรวจระยะไกล ส่งสินค้ากลับ ไฟล์ทดสอบ บันทึกเครื่อง หรือขนาดเพิ่มเติม"),
+                ("Available remedies may include guidance, repair, rework, replacement, spare parts, credit, refund, or another reasonable solution chosen according to the confirmed issue.", "วิธีแก้อาจรวมถึงคำแนะนำ ซ่อม แก้งาน เปลี่ยนสินค้า อะไหล่ เครดิต คืนเงิน หรือวิธีเหมาะสมอื่นตามปัญหาที่ตรวจยืนยัน"))
         ],
         "account/quotes" =>
         [
@@ -781,15 +1024,32 @@ else
     private string PrimaryAction => Path switch
     {
         var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบราคา"),
+        var path when IsPolicyPage(path) => Text("Contact MALIEV", "ติดต่อ MALIEV"),
         _ => Text("Get part price", "ดูราคาชิ้นงาน")
     };
 
     private string PrimaryHref => Path switch
     {
+        var path when IsPolicyPage(path) => "/contact",
         _ => SiteContent.QuoteNewUrl
     };
-    private string SecondaryAction => Path == "contact" ? Text("Shop products", "เลือกซื้อสินค้า") : Text("Contact MALIEV", "ติดต่อ MALIEV");
-    private string SecondaryHref => Path == "contact" ? "/shop" : "/contact";
+    private string SecondaryAction => Path switch
+    {
+        "contact" => Text("Shop products", "เลือกซื้อสินค้า"),
+        var path when IsPolicyPage(path) => "FAQ",
+        _ => Text("Contact MALIEV", "ติดต่อ MALIEV")
+    };
+    private string SecondaryHref => Path switch
+    {
+        "contact" => "/shop",
+        var path when IsPolicyPage(path) => "/faq",
+        _ => "/contact"
+    };
+
+    private static bool IsPolicyPage(string path)
+    {
+        return path is "shipping-returns" or "privacy" or "terms" or "cookie-policy" or "refund-policy" or "warranty-policy";
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -820,12 +1080,15 @@ else
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 
-    private static ContentSection Section(string titleEn, string titleTh, string bodyEn, string bodyTh)
+    private static ContentSection Section(string titleEn, string titleTh, string bodyEn, string bodyTh, params (string En, string Th)[] items)
     {
-        return new ContentSection(SiteContent.Text(titleEn, titleTh), SiteContent.Text(bodyEn, bodyTh));
+        return new ContentSection(
+            SiteContent.Text(titleEn, titleTh),
+            SiteContent.Text(bodyEn, bodyTh),
+            items.Select(item => SiteContent.Text(item.En, item.Th)).ToList());
     }
 
-    private sealed record ContentSection(LocalizedText Title, LocalizedText Body);
+    private sealed record ContentSection(LocalizedText Title, LocalizedText Body, IReadOnlyList<LocalizedText> Items);
 
     private sealed record MaterialCategory(LocalizedText Title, string Process, LocalizedText Body, string ImageUrl, LocalizedText ImageAlt, IReadOnlyList<LocalizedText> Highlights);
 

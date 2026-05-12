@@ -2090,6 +2090,16 @@ html:lang(th) .h1 {
   padding: 24px;
 }
 
+.content-stack ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: .98rem;
+  line-height: 1.7;
+}
+
 .contact-form {
   display: grid;
   gap: 18px;

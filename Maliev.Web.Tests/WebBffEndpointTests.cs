@@ -144,6 +144,8 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         var sitemap = await client.GetStringAsync("/sitemap.xml");
 
         Assert.Contains("Sitemap: https://www.maliev.com/sitemap.xml", robots);
+        Assert.Contains("Disallow: /account", robots);
+        Assert.Contains("Disallow: /cart", robots);
         Assert.Contains("https://www.maliev.com/services", sitemap);
         Assert.Contains("https://www.maliev.com/services/silicone-casting", sitemap);
         Assert.Contains("https://www.maliev.com/services/rapid-prototyping", sitemap);
@@ -153,8 +155,13 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains("https://www.maliev.com/blog", sitemap);
         Assert.Contains("https://www.maliev.com/blog/design-for-manufacturing", sitemap);
         Assert.Contains("https://www.maliev.com/blog/instant-part-pricing", sitemap);
-        Assert.Contains("https://www.maliev.com/cart", sitemap);
+        Assert.Contains("https://www.maliev.com/privacy", sitemap);
+        Assert.Contains("https://www.maliev.com/cookie-policy", sitemap);
+        Assert.Contains("https://www.maliev.com/refund-policy", sitemap);
+        Assert.Contains("https://www.maliev.com/warranty-policy", sitemap);
+        Assert.Contains("https://www.maliev.com/terms", sitemap);
         Assert.Contains("https://www.maliev.com/quote", sitemap);
+        Assert.DoesNotContain("https://www.maliev.com/cart", sitemap);
     }
 
     private sealed class FakeCommerceCatalogService : ICommerceCatalogService

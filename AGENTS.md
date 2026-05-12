@@ -13,6 +13,8 @@ Required crawlability work:
 - Do not include private account, checkout, cart, upload, quote draft, health, API, or internal BFF endpoints in sitemaps.
 - Add or update tests/build checks when sitemap or robots generation is code-driven.
 
+Current crawlable policy routes are `/terms`, `/privacy`, `/cookie-policy`, `/shipping-returns`, `/refund-policy`, and `/warranty-policy`. They are rendered by `Maliev.Web.Client/Pages/StaticPage.razor` and must stay in the generated sitemap in `Maliev.Web.Bff/Controllers/SeoController.cs`.
+
 ## Google Ads Landing Routes
 
 Do not rediscover the Google Ads route list manually. The ad landing page is the home route `/` with targeting supplied by query string. Use `service` as the stable ad final URL parameter.
