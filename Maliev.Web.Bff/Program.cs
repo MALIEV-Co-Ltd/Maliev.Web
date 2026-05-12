@@ -105,6 +105,7 @@ builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceCli
 builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
 builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
+builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService");
 
 builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 {
@@ -119,7 +120,7 @@ builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 .AddServiceDiscovery()
 .AddHttpMessageHandler<ServiceAccountAuthenticationHandler>();
 
-builder.Services.AddSingleton<ICommerceCatalogService, MockCommerceCatalogService>();
+builder.Services.AddScoped<ICommerceCatalogService, CommerceCatalogService>();
 builder.Services.AddScoped<IManufacturingCatalogService, ManufacturingCatalogService>();
 builder.Services.AddScoped<IWebQuoteService, WebQuoteService>();
 builder.Services.AddScoped<IQuoteUploadService, QuoteUploadService>();

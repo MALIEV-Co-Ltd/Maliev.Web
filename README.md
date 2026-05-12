@@ -35,6 +35,18 @@ The customer-facing MALIEV website for manufacturing services, instant quotation
 
 Public marketing, catalog, and anonymous draft quote endpoints are intentionally unauthenticated. Account, saved quotes, checkout finalization, orders, payments, customer file ownership, and persisted preferences must use customer identity through the BFF and downstream MALIEV service permissions before they become write operations.
 
+## Storefront Catalog Source
+
+`/shop` and the public `GET /web/v1/catalog/*` endpoints are backed by `Maliev.CommerceService`, not local static products. The BFF maps CommerceService published storefront endpoints into `Maliev.Web.Shared.Commerce` DTOs:
+
+| Web BFF endpoint | CommerceService endpoint |
+| --- | --- |
+| `GET /web/v1/catalog/collections` | `GET /commerce/v1/collections` |
+| `GET /web/v1/catalog/products?collection={handle}` | `GET /commerce/v1/products?page=1&pageSize=100&collection={handle}` |
+| `GET /web/v1/catalog/products/{handle}` | `GET /commerce/v1/products/{handle}` |
+
+CommerceService draft products are intentionally hidden from the customer shop until published.
+
 ## Development
 
 ```powershell

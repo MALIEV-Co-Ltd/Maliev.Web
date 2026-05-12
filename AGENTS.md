@@ -15,6 +15,15 @@ Required crawlability work:
 
 Current crawlable policy routes are `/terms`, `/privacy`, `/cookie-policy`, `/shipping-returns`, `/refund-policy`, and `/warranty-policy`. They are rendered by `Maliev.Web.Client/Pages/StaticPage.razor` and must stay in the generated sitemap in `Maliev.Web.Bff/Controllers/SeoController.cs`.
 
+## Storefront Catalog Source
+
+The `/shop` page and public `GET /web/v1/catalog/*` endpoints must use `Maliev.CommerceService` as the source of truth. Do not reintroduce a local static or mock product catalog for runtime behavior.
+
+- Web collections map from `GET /commerce/v1/collections`.
+- Web product cards map from `GET /commerce/v1/products?page=1&pageSize=100`, with optional `collection={handle}`.
+- Web product detail maps from `GET /commerce/v1/products/{handle}`.
+- Only CommerceService published products should render in the public customer shop; draft products stay hidden.
+
 ## Google Ads Landing Routes
 
 Do not rediscover the Google Ads route list manually. The ad landing page is the home route `/` with targeting supplied by query string. Use `service` as the stable ad final URL parameter.
