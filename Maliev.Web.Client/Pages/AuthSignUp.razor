@@ -17,7 +17,7 @@
 
         <div class="auth-divider"><span>@Text("or create with email", "หรือสร้างด้วยอีเมล")</span></div>
 
-        <form class="auth-form" method="post" action="/auth/sign-up">
+        <form class="auth-form" method="post" action="/auth/sign-up/email">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@SafeReturnUrl" />
             <div class="form-grid two">

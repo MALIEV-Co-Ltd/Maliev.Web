@@ -24,7 +24,7 @@
 
         <div class="auth-divider"><span>@Text("or email", "หรือใช้อีเมล")</span></div>
 
-        <form class="auth-form" method="post" action="/auth/sign-in">
+        <form class="auth-form" method="post" action="/auth/sign-in/email">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@SafeReturnUrl" />
             <label>

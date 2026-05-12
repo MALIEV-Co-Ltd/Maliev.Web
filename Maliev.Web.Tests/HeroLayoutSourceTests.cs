@@ -527,6 +527,41 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies browser auth forms post to dedicated action routes instead of colliding with Blazor page routes.
+    /// </summary>
+    [Fact]
+    public void AuthFormsPostToDedicatedActionRoutes()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
+        var forgotPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthForgotPassword.razor");
+        var resetPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthResetPassword.razor");
+        var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+        var signInLines = signIn.Split('\n', StringSplitOptions.TrimEntries);
+        var signUpLines = signUp.Split('\n', StringSplitOptions.TrimEntries);
+        var forgotPasswordLines = forgotPassword.Split('\n', StringSplitOptions.TrimEntries);
+        var resetPasswordLines = resetPassword.Split('\n', StringSplitOptions.TrimEntries);
+        var authControllerLines = authController.Split('\n', StringSplitOptions.TrimEntries);
+
+        Assert.Contains("action=\"/auth/sign-in/email\"", signIn);
+        Assert.Contains("action=\"/auth/sign-up/email\"", signUp);
+        Assert.Contains("action=\"/auth/forgot-password/request\"", forgotPassword);
+        Assert.Contains("action=\"/auth/reset-password/confirm\"", resetPassword);
+        Assert.Contains("[HttpPost(\"sign-in/email\")]", authController);
+        Assert.Contains("[HttpPost(\"sign-up/email\")]", authController);
+        Assert.Contains("[HttpPost(\"forgot-password/request\")]", authController);
+        Assert.Contains("[HttpPost(\"reset-password/confirm\")]", authController);
+        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/sign-in\">", signInLines);
+        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/sign-up\">", signUpLines);
+        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/forgot-password\">", forgotPasswordLines);
+        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/reset-password\">", resetPasswordLines);
+        Assert.DoesNotContain("[HttpPost(\"sign-in\")]", authControllerLines);
+        Assert.DoesNotContain("[HttpPost(\"sign-up\")]", authControllerLines);
+        Assert.DoesNotContain("[HttpPost(\"forgot-password\")]", authControllerLines);
+        Assert.DoesNotContain("[HttpPost(\"reset-password\")]", authControllerLines);
+    }
+
+    /// <summary>
     /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
     /// </summary>
     [Fact]

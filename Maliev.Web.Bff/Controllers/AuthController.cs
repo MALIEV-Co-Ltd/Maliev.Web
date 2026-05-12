@@ -95,7 +95,7 @@ public sealed class AuthController(
     /// <summary>
     /// Signs a customer in with email and password.
     /// </summary>
-    [HttpPost("sign-in")]
+    [HttpPost("sign-in/email")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SignIn([FromForm] SignInForm form, CancellationToken cancellationToken)
@@ -125,7 +125,7 @@ public sealed class AuthController(
     /// <summary>
     /// Registers a customer account and signs the customer in.
     /// </summary>
-    [HttpPost("sign-up")]
+    [HttpPost("sign-up/email")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SignUp([FromForm] SignUpForm form, CancellationToken cancellationToken)
@@ -157,7 +157,7 @@ public sealed class AuthController(
     /// <summary>
     /// Starts the password reset flow for a customer account.
     /// </summary>
-    [HttpPost("forgot-password")]
+    [HttpPost("forgot-password/request")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword([FromForm] ForgotPasswordForm form, CancellationToken cancellationToken)
@@ -174,7 +174,7 @@ public sealed class AuthController(
     /// <summary>
     /// Confirms a password reset token for a customer account.
     /// </summary>
-    [HttpPost("reset-password")]
+    [HttpPost("reset-password/confirm")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordForm form, CancellationToken cancellationToken)

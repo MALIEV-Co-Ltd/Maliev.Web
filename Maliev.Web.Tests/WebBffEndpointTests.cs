@@ -133,6 +133,26 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies customer auth form handlers are registered with MVC services required by antiforgery validation.
+    /// </summary>
+    [Theory]
+    [InlineData("/auth/sign-in/email")]
+    [InlineData("/auth/sign-up/email")]
+    [InlineData("/auth/forgot-password/request")]
+    [InlineData("/auth/reset-password/confirm")]
+    public async Task POST_AuthFormActionWithoutToken_DoesNotFailFromMissingMvcServices(string route)
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        using var response = await client.PostAsync(route, new FormUrlEncodedContent(new Dictionary<string, string>()));
+
+        Assert.NotEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+    }
+
+    /// <summary>
     /// Verifies public SEO endpoints expose crawler metadata for customer pages.
     /// </summary>
     [Fact]
