@@ -27,7 +27,7 @@ internal static class HeroCopyCatalog
             "3d-printing",
             "?service=fdm-3d-printing",
             Text("FDM 3D Printing", "งานพิมพ์ 3 มิติ FDM"),
-            ["fdm", "fdm 3d printing", "fdm 3d printing service", "รับพิมพ์ 3 มิติ fdm", "พิมพ์ fdm", "พิมพ์ 3d fdm"],
+            ["fdm", "fdm 3d printing", "fdm 3d printing service", "fdm near me", "รับพิมพ์ 3 มิติ fdm", "พิมพ์ fdm", "พิมพ์ 3d fdm"],
             [
                 Text("FDM 3D printed prototypes", "ต้นแบบพิมพ์ 3 มิติ FDM"),
                 Text("FDM parts for functional testing", "ชิ้นงาน FDM สำหรับทดสอบใช้งาน"),
@@ -44,22 +44,22 @@ internal static class HeroCopyCatalog
                 Text("priced before production", "พร้อมประเมินราคาก่อนผลิต"),
                 Text("with DFM checks included", "พร้อมตรวจ DFM ในขั้นตอนเดียว"),
                 Text("ready for fast iteration", "พร้อมปรับแบบและทดลองเร็ว"),
-                Text("ordered from one upload", "สั่งต่อได้จากการอัปโหลดครั้งเดียว"),
-                Text("matched to material and quantity", "เลือกวัสดุและจำนวนให้เหมาะกับงาน")
+                Text("ordered from one upload", "สั่งต่อจากไฟล์เดียว"),
+                Text("matched to material and quantity", "ตรงวัสดุและจำนวน")
             ],
             [
-                Text("Upload STL, STEP, OBJ, or 3MF and move from material choice to ordering in one MALIEV workflow.", "อัปโหลด STL, STEP, OBJ หรือ 3MF แล้วเลือกวัสดุและสั่งผลิตต่อได้ในระบบเดียวของ MALIEV"),
-                Text("Use FDM when you need affordable size, fast fit checks, and practical parts before committing to tooling.", "เลือก FDM เมื่อต้องการขนาดที่คุ้มค่า ตรวจฟิตเร็ว และชิ้นงานใช้งานจริงก่อนลงทุนทูลลิ่ง"),
-                Text("Send CAD for FDM review, compare material options, and continue when the price and lead time fit.", "ส่ง CAD เพื่อตรวจงาน FDM เปรียบเทียบวัสดุ แล้วไปต่อเมื่อราคาและระยะเวลาตรงเป้าหมาย"),
-                Text("MALIEV helps route FDM prototypes, fixtures, and low-volume parts into a production-ready quote path.", "MALIEV ช่วยพางาน FDM ทั้งต้นแบบ ฟิกซ์เจอร์ และชิ้นงานจำนวนน้อยเข้าสู่เส้นทางเสนอราคาที่พร้อมผลิต"),
-                Text("Keep design, DFM feedback, pricing, and order handoff in one customer flow.", "รวมการออกแบบ ผลตรวจ DFM ราคา และการส่งต่อคำสั่งผลิตไว้ในขั้นตอนเดียว")
+                Text("Upload CAD, pick FDM material, review DFM, and order without vendor handoffs.", "อัปโหลด CAD เลือกวัสดุ FDM ตรวจ DFM และสั่งผลิตในที่เดียว"),
+                Text("Choose FDM for fast fit checks, fixtures, and affordable functional parts.", "เลือก FDM สำหรับตรวจฟิต ฟิกซ์เจอร์ และชิ้นงานใช้งานจริง"),
+                Text("Send CAD for FDM review, compare materials, and see price and lead time fast.", "ส่ง CAD ตรวจงาน FDM เทียบวัสดุ เห็นราคาและเวลาเร็ว"),
+                Text("Route FDM prototypes, jigs, and low-volume parts into a production-ready quote.", "พางาน FDM ต้นแบบ จิ๊ก และล็อตเล็กเข้าสู่ใบเสนอราคาพร้อมผลิต"),
+                Text("Keep design, DFM, pricing, and order handoff in one focused flow.", "รวมออกแบบ DFM ราคา และสั่งผลิตในขั้นตอนเดียว")
             ]),
         Profile(
             "3d-printing",
             "3d-printing",
             "?service=3d-printing",
             Text("3D Printing", "งานพิมพ์ 3 มิติ"),
-            ["3d printing", "3d print", "additive manufacturing", "รับพิมพ์ 3 มิติ", "พิมพ์ 3d", "งานพิมพ์สามมิติ"],
+            ["3d printing", "3d print", "3d printing near me", "3d printing service near me", "additive manufacturing", "รับพิมพ์ 3 มิติ", "พิมพ์ 3d", "พิมพ์ 3d ใกล้ฉัน", "ร้าน 3d print ใกล้ฉัน", "งานพิมพ์สามมิติ"],
             [
                 Text("3D printed parts for prototypes", "ชิ้นงานพิมพ์ 3 มิติสำหรับต้นแบบ"),
                 Text("3D printing for low-volume runs", "งานพิมพ์ 3 มิติสำหรับผลิตจำนวนน้อย"),
@@ -75,16 +75,16 @@ internal static class HeroCopyCatalog
             [
                 Text("quoted with material choices", "เสนอราคาพร้อมตัวเลือกวัสดุ"),
                 Text("checked before you order", "ตรวจความพร้อมก่อนสั่งผลิต"),
-                Text("built for fit and function", "ผลิตเพื่อทดสอบการประกอบและการใช้งาน"),
-                Text("routed into production ordering", "ส่งต่อเข้าสู่การสั่งผลิตได้ทันที"),
-                Text("matched to finish and quantity", "จับคู่ผิวงานและจำนวนให้เหมาะสม")
+                Text("fit and function ready", "พร้อมทดสอบฟิตและใช้งาน"),
+                Text("ready to order", "พร้อมสั่งผลิต"),
+                Text("matched to your quantity", "ตรงจำนวนและผิวงาน")
             ],
             [
-                Text("Upload CAD once, compare printing routes, review DFM feedback, and continue to production ordering.", "อัปโหลด CAD ครั้งเดียว เปรียบเทียบเส้นทางพิมพ์ ตรวจ DFM และสั่งผลิตต่อได้"),
-                Text("Use MALIEV for prototypes, fixtures, product samples, and polymer parts that need manufacturing discipline.", "ใช้ MALIEV สำหรับต้นแบบ ฟิกซ์เจอร์ ตัวอย่างสินค้า และชิ้นงานโพลีเมอร์ที่ต้องมีวินัยแบบงานผลิต"),
-                Text("Choose process, material, finish, and quantity online before committing the order.", "เลือกกระบวนการ วัสดุ ผิวงาน และจำนวนออนไลน์ก่อนยืนยันคำสั่งผลิต"),
-                Text("Move from STL, STEP, OBJ, or 3MF upload to a practical quote path without vendor handoffs.", "เริ่มจาก STL, STEP, OBJ หรือ 3MF แล้วเข้าสู่เส้นทางเสนอราคาโดยไม่ต้องส่งต่อหลายที่"),
-                Text("Keep iteration fast while checking the details that affect print quality and cost.", "ทำรอบทดลองให้เร็ว พร้อมตรวจรายละเอียดที่กระทบคุณภาพและต้นทุนงานพิมพ์")
+                Text("Upload CAD once, compare print routes, review DFM, and move straight to order.", "อัปโหลด CAD ครั้งเดียว เทียบวิธีพิมพ์ ตรวจ DFM แล้วสั่งผลิตต่อ"),
+                Text("Use MALIEV for prototypes, fixtures, samples, and polymer parts built for real use.", "ใช้ MALIEV สำหรับต้นแบบ ฟิกซ์เจอร์ ตัวอย่าง และชิ้นงานโพลีเมอร์"),
+                Text("Choose process, material, finish, and quantity before you commit.", "เลือกกระบวนการ วัสดุ ผิวงาน และจำนวนก่อนตัดสินใจ"),
+                Text("Move from STL, STEP, OBJ, or 3MF to a clear quote without vendor handoffs.", "เริ่มจาก STL, STEP, OBJ หรือ 3MF แล้วได้ราคาโดยไม่ส่งต่อหลายที่"),
+                Text("Iterate faster while checking details that affect quality and cost.", "ทดลองเร็วขึ้น พร้อมตรวจปัจจัยที่กระทบคุณภาพและต้นทุน")
             ]),
         Profile(
             "resin-3d-printing",
@@ -106,24 +106,24 @@ internal static class HeroCopyCatalog
             ],
             [
                 Text("reviewed before print", "ตรวจแบบก่อนพิมพ์"),
-                Text("priced with finish expectations", "ประเมินราคาพร้อมเป้าหมายผิวงาน"),
-                Text("ready for product presentation", "พร้อมสำหรับนำเสนอสินค้า"),
-                Text("checked for wall and detail risk", "ตรวจความเสี่ยงผนังและรายละเอียด"),
-                Text("ordered from one quote flow", "สั่งต่อได้จากขั้นตอนเสนอราคาเดียว")
+                Text("priced by finish target", "คิดราคาตามผิวงาน"),
+                Text("presentation ready", "พร้อมนำเสนอสินค้า"),
+                Text("checked for detail risk", "ตรวจความเสี่ยงรายละเอียด"),
+                Text("ordered from one quote", "สั่งต่อจากใบเสนอราคา")
             ],
             [
-                Text("Upload CAD and route resin work through DFM, finish expectations, pricing, and order handoff.", "อัปโหลด CAD แล้วส่งงานเรซินผ่านการตรวจ DFM เป้าหมายผิวงาน ราคา และการสั่งผลิต"),
-                Text("Use resin printing when appearance, small features, and smooth prototype surfaces matter.", "เลือกพิมพ์เรซินเมื่อรูปลักษณ์ รายละเอียดเล็ก และผิวต้นแบบมีความสำคัญ"),
-                Text("MALIEV helps confirm printability, detail risk, and the right production path before you order.", "MALIEV ช่วยยืนยันความพร้อมพิมพ์ ความเสี่ยงรายละเอียด และเส้นทางผลิตก่อนสั่งงาน"),
-                Text("Compare resin with other 3D printing routes when strength, finish, and lead time need balance.", "เปรียบเทียบเรซินกับเส้นทางพิมพ์อื่นเมื่อจำเป็นต้องบาลานซ์ความแข็งแรง ผิวงาน และระยะเวลา"),
-                Text("Keep resin prototype quoting connected to CAD upload, review, and production ordering.", "เชื่อมงานเสนอราคาต้นแบบเรซินกับการอัปโหลด CAD การตรวจ และการสั่งผลิต")
+                Text("Upload CAD for resin DFM, finish expectations, pricing, and order handoff.", "อัปโหลด CAD ตรวจ DFM เรซิน ดูผิวงาน ราคา และสั่งผลิตต่อ"),
+                Text("Use resin 3D printing for smooth prototypes and fine product details.", "เลือกพิมพ์เรซินสำหรับต้นแบบผิวเนียนและรายละเอียดเล็ก"),
+                Text("Confirm printability, detail risk, and the right production path before order.", "ยืนยันความพร้อมพิมพ์ ความเสี่ยง และเส้นทางผลิตก่อนสั่งงาน"),
+                Text("Compare resin with other 3D print routes by strength, finish, and lead time.", "เทียบเรซินกับวิธีพิมพ์อื่นตามความแข็งแรง ผิวงาน และเวลา"),
+                Text("Keep resin quoting tied to CAD upload, review, and production ordering.", "เชื่อมราคาเรซินกับ CAD การตรวจ และการสั่งผลิต")
             ]),
         Profile(
             "aluminum-cnc-milling",
             "cnc-machining",
             "?service=aluminum-cnc-milling",
             Text("Aluminum CNC Milling", "งานกัด CNC อลูมิเนียม"),
-            ["aluminum cnc milling", "aluminium cnc milling", "cnc aluminum", "cnc aluminium", "กัดอลูมิเนียม cnc", "cnc อลูมิเนียม", "กัดอะลูมิเนียม"],
+            ["aluminum cnc milling", "aluminium cnc milling", "aluminum cnc near me", "cnc aluminum", "cnc aluminium", "กัดอลูมิเนียม cnc", "cnc อลูมิเนียม", "กัดอะลูมิเนียม", "กัดอลูมิเนียมใกล้ฉัน"],
             [
                 Text("Aluminum CNC milled parts", "ชิ้นงานกัด CNC อลูมิเนียม"),
                 Text("CNC aluminum brackets", "ขายึดอลูมิเนียม CNC"),
@@ -138,24 +138,24 @@ internal static class HeroCopyCatalog
             ],
             [
                 Text("reviewed for tolerance", "ตรวจ tolerance ก่อนผลิต"),
-                Text("quoted with setup feedback", "เสนอราคาพร้อมความเห็นเรื่องการจับงาน"),
-                Text("matched to surface finish", "จับคู่กับเป้าหมายผิวงาน"),
-                Text("ready for production review", "พร้อมตรวจความพร้อมก่อนผลิต"),
+                Text("quoted with setup notes", "พร้อมหมายเหตุการจับงาน"),
+                Text("matched to finish", "ตรงเป้าหมายผิวงาน"),
+                Text("ready for production", "พร้อมตรวจผลิต"),
                 Text("ordered from CAD and drawings", "สั่งต่อได้จาก CAD และ Drawing")
             ],
             [
-                Text("Send STEP files, drawings, material notes, and quantities for a CNC quote path built around aluminum.", "ส่งไฟล์ STEP, Drawing, หมายเหตุวัสดุ และจำนวน เพื่อขอราคา CNC ที่ออกแบบสำหรับงานอลูมิเนียม"),
-                Text("MALIEV reviews tolerance, setup, finish, and production fit before the job moves forward.", "MALIEV ตรวจ tolerance การจับงาน ผิวงาน และความเหมาะสมการผลิตก่อนเดินงานต่อ"),
-                Text("Use aluminum CNC milling for brackets, housings, plates, fixtures, and functional metal prototypes.", "ใช้การกัด CNC อลูมิเนียมสำหรับขายึด เคส เพลต ฟิกซ์เจอร์ และต้นแบบโลหะใช้งานจริง"),
-                Text("Keep machining questions, DFM review, price, and order handoff in one quote flow.", "รวมคำถามแมชชีนนิ่ง ตรวจ DFM ราคา และการส่งต่อคำสั่งผลิตไว้ในขั้นตอนเดียว"),
-                Text("Route ad traffic directly to aluminum-focused copy while still using the same MALIEV production workflow.", "พาทราฟฟิกโฆษณาเข้าสู่ข้อความเฉพาะงานอลูมิเนียม โดยยังใช้เส้นทางผลิตเดียวของ MALIEV")
+                Text("Send STEP, drawings, material notes, and quantities for aluminum CNC pricing.", "ส่ง STEP, Drawing, วัสดุ และจำนวน เพื่อขอราคา CNC อลูมิเนียม"),
+                Text("Review tolerance, setup, finish, and production fit before machining starts.", "ตรวจ tolerance การจับงาน ผิวงาน และความพร้อมก่อนกัดจริง"),
+                Text("Use aluminum CNC for brackets, housings, plates, fixtures, and metal prototypes.", "ใช้ CNC อลูมิเนียมสำหรับขายึด เคส เพลต ฟิกซ์เจอร์ และต้นแบบโลหะ"),
+                Text("Keep machining questions, DFM, price, and order handoff in one flow.", "รวมคำถาม CNC, DFM, ราคา และการสั่งผลิตในขั้นตอนเดียว"),
+                Text("Match ad traffic to aluminum CNC copy and the same MALIEV production flow.", "พาทราฟฟิกสู่ข้อความ CNC อลูมิเนียมและขั้นตอนผลิตเดียวกัน")
             ]),
         Profile(
             "cnc-machining",
             "cnc-machining",
             "?service=cnc-machining",
             Text("CNC Machining", "CNC แมชชีนนิ่ง"),
-            ["cnc machining", "cnc milling", "machining service", "cnc service", "งาน cnc", "รับกัด cnc", "แมชชีนนิ่ง"],
+            ["cnc", "cnc machining", "cnc milling", "cnc near me", "cnc shop near me", "machining service", "cnc service", "งาน cnc", "รับกัด cnc", "ร้าน cnc", "cnc ใกล้ฉัน", "ร้าน cnc ใกล้ฉัน", "โรงกลึง cnc", "แมชชีนนิ่ง"],
             [
                 Text("CNC machined parts from CAD", "ชิ้นงาน CNC จากไฟล์ CAD"),
                 Text("Machined plastic and metal parts", "ชิ้นงานกัดพลาสติกและโลหะ"),
@@ -170,17 +170,17 @@ internal static class HeroCopyCatalog
             ],
             [
                 Text("checked for setup risk", "ตรวจความเสี่ยงการจับงาน"),
-                Text("priced around tolerance needs", "ประเมินราคาตามความต้องการ tolerance"),
-                Text("matched to material and finish", "จับคู่วัสดุและผิวงาน"),
-                Text("ready for production handoff", "พร้อมส่งต่อเข้าผลิต"),
+                Text("priced by tolerance need", "คิดราคาตาม tolerance"),
+                Text("matched to material", "ตรงวัสดุและผิวงาน"),
+                Text("ready for production", "พร้อมส่งผลิต"),
                 Text("quoted from STEP and drawings", "เสนอราคาจาก STEP และ Drawing")
             ],
             [
-                Text("Send CAD, drawings, material, surface, tolerance, and quantity notes for CNC quote review.", "ส่ง CAD, Drawing, วัสดุ ผิวงาน tolerance และจำนวน เพื่อให้ทีมตรวจราคา CNC"),
-                Text("MALIEV helps catch manufacturability risks before machining starts.", "MALIEV ช่วยตรวจความเสี่ยงการผลิตก่อนเริ่มแมชชีนนิ่ง"),
-                Text("Use CNC machining for functional prototypes, fixtures, production aids, and end-use components.", "ใช้ CNC สำหรับต้นแบบใช้งานจริง ฟิกซ์เจอร์ อุปกรณ์ช่วยผลิต และชิ้นส่วนใช้งานจริง"),
-                Text("Keep process selection, review, pricing, and production ordering in one customer path.", "รวมการเลือกกระบวนการ การตรวจ ราคา และการสั่งผลิตในเส้นทางลูกค้าเดียว"),
-                Text("Match machining intent to the right material, tolerance, finish, and delivery expectation.", "จับคู่เป้าหมายแมชชีนนิ่งกับวัสดุ tolerance ผิวงาน และความคาดหวังการจัดส่ง")
+                Text("Send CAD, drawings, material, tolerance, finish, and quantity for CNC review.", "ส่ง CAD, Drawing, วัสดุ tolerance ผิวงาน และจำนวนเพื่อตรวจ CNC"),
+                Text("Catch setup and manufacturability risks before CNC machining starts.", "ตรวจความเสี่ยงการจับงานและผลิตก่อนเริ่ม CNC"),
+                Text("Use CNC for functional prototypes, fixtures, production aids, and end-use parts.", "ใช้ CNC สำหรับต้นแบบ ฟิกซ์เจอร์ อุปกรณ์ช่วยผลิต และชิ้นงานจริง"),
+                Text("Keep process choice, review, pricing, and production order in one path.", "รวมเลือกกระบวนการ ตรวจ ราคา และสั่งผลิตในเส้นทางเดียว"),
+                Text("Match CNC intent to material, tolerance, finish, and delivery expectation.", "จับคู่เป้าหมาย CNC กับวัสดุ tolerance ผิวงาน และกำหนดส่ง")
             ]),
         Profile(
             "3d-scanning",
@@ -208,11 +208,11 @@ internal static class HeroCopyCatalog
                 Text("routed into design or production", "ส่งต่อสู่งานออกแบบหรือผลิต")
             ],
             [
-                Text("Share photos, rough size, target output format, and why the part needs capture.", "ส่งรูป ขนาดคร่าวๆ รูปแบบไฟล์ที่ต้องการ และเหตุผลที่ต้องเก็บข้อมูลชิ้นงาน"),
-                Text("Use scanning when the part exists but the CAD file, drawing, or supplier history does not.", "ใช้การสแกนเมื่อมีชิ้นงานจริงแต่ไม่มี CAD, Drawing หรือประวัติ Supplier"),
-                Text("MALIEV connects scanning, CAD rebuilding, inspection, and manufacturing next steps.", "MALIEV เชื่อมการสแกน ขึ้นแบบ CAD ตรวจสอบ และขั้นตอนผลิตถัดไป"),
-                Text("Capture geometry before deciding whether to repair, remake, compare, or redesign.", "เก็บ Geometry ก่อนตัดสินใจซ่อม ผลิตใหม่ เทียบผล หรือออกแบบใหม่"),
-                Text("Turn physical samples into usable data for engineering and production review.", "เปลี่ยนตัวอย่างจริงเป็นข้อมูลที่ใช้ตรวจทางวิศวกรรมและการผลิตได้")
+                Text("Share photos, rough size, output format, and why the part needs capture.", "ส่งรูป ขนาดคร่าวๆ รูปแบบไฟล์ และเหตุผลที่ต้องสแกน"),
+                Text("Use scanning when the part exists but CAD, drawings, or supplier history do not.", "ใช้สแกนเมื่อมีชิ้นงานจริงแต่ไม่มี CAD, Drawing หรือประวัติ Supplier"),
+                Text("Connect 3D scanning, CAD rebuild, inspection, and manufacturing next steps.", "เชื่อมสแกน 3 มิติ ขึ้น CAD ตรวจสอบ และขั้นตอนผลิตถัดไป"),
+                Text("Capture geometry before you repair, remake, compare, or redesign.", "เก็บ Geometry ก่อนซ่อม ผลิตใหม่ เทียบผล หรือออกแบบใหม่"),
+                Text("Turn physical samples into usable data for engineering and production review.", "เปลี่ยนตัวอย่างจริงเป็นข้อมูลสำหรับวิศวกรรมและการผลิต")
             ]),
         Profile(
             "3d-design",
@@ -233,18 +233,18 @@ internal static class HeroCopyCatalog
                 Text("Prototype geometry for testing", "Geometry ต้นแบบสำหรับทดสอบ")
             ],
             [
-                Text("prepared for real manufacturing", "เตรียมพร้อมสำหรับงานผลิตจริง"),
+                Text("ready for manufacturing", "พร้อมผลิตจริง"),
                 Text("checked before upload", "ตรวจความพร้อมก่อนอัปโหลด"),
                 Text("routed into printing or CNC", "ส่งต่อสู่งานพิมพ์หรือ CNC"),
-                Text("refined around fit and assembly", "ปรับแบบตามการประกอบและฟิต"),
+                Text("refined for fit", "ปรับเพื่อการประกอบ"),
                 Text("ready for quote review", "พร้อมเข้าสู่การตรวจเสนอราคา")
             ],
             [
-                Text("Start with sketches, photos, dimensions, broken samples, or an unfinished CAD file.", "เริ่มจากสเก็ตช์ รูปถ่าย ขนาด ตัวอย่างแตกหัก หรือไฟล์ CAD ที่ยังไม่สมบูรณ์"),
-                Text("MALIEV connects design changes to the manufacturing process that will make the part.", "MALIEV เชื่อมการแก้แบบกับกระบวนการผลิตที่จะทำชิ้นงานจริง"),
-                Text("Use design support when an idea needs geometry, DFM review, and a quote-ready file.", "ใช้บริการออกแบบเมื่อไอเดียต้องการ Geometry ตรวจ DFM และไฟล์ที่พร้อมเสนอราคา"),
-                Text("Move from rough concept to manufacturable CAD without separating design from production planning.", "เดินจากคอนเซ็ปต์คร่าวๆ ไปสู่ CAD ที่ผลิตได้ โดยไม่แยกการออกแบบออกจากการวางแผนผลิต"),
-                Text("Improve fit, wall thickness, tolerance notes, and assembly intent before ordering.", "ปรับฟิต ความหนาผนัง หมายเหตุ tolerance และเป้าหมายการประกอบก่อนสั่งผลิต")
+                Text("Start from sketches, photos, dimensions, samples, or unfinished CAD.", "เริ่มจากสเก็ตช์ รูปถ่าย ขนาด ตัวอย่าง หรือไฟล์ CAD ที่ยังไม่จบ"),
+                Text("Connect design edits to the process that will make the part.", "เชื่อมการแก้แบบกับกระบวนการที่จะผลิตชิ้นงาน"),
+                Text("Use 3D design support when an idea needs geometry, DFM, and a quote-ready file.", "ใช้บริการออกแบบเมื่อไอเดียต้องการ Geometry, DFM และไฟล์พร้อมเสนอราคา"),
+                Text("Move from rough concept to manufacturable CAD without splitting the workflow.", "เปลี่ยนคอนเซ็ปต์เป็น CAD ที่ผลิตได้โดยไม่แยกขั้นตอน"),
+                Text("Improve fit, wall thickness, tolerance notes, and assembly intent before order.", "ปรับฟิต ผนัง tolerance และเป้าหมายประกอบก่อนสั่งผลิต")
             ]),
         Profile(
             "silicone-casting",
@@ -266,17 +266,17 @@ internal static class HeroCopyCatalog
             ],
             [
                 Text("planned before tooling spend", "วางแผนก่อนลงทุนทูลลิ่ง"),
-                Text("quoted around quantity and material", "ประเมินราคาตามจำนวนและวัสดุ"),
+                Text("priced by quantity", "คิดราคาตามจำนวน"),
                 Text("ready for pilot validation", "พร้อมทดสอบล็อตทดลอง"),
                 Text("bridged from prototype to batch", "เชื่อมจากต้นแบบสู่ล็อตผลิต"),
-                Text("reviewed for mold strategy", "ตรวจกลยุทธ์แม่พิมพ์ก่อนผลิต")
+                Text("reviewed for mold path", "ตรวจเส้นทางแม่พิมพ์")
             ],
             [
-                Text("Use casting when one prototype needs to become many similar test parts.", "ใช้งานหล่อเมื่อชิ้นต้นแบบหนึ่งชิ้นต้องกลายเป็นชิ้นทดสอบหลายชิ้นที่คล้ายกัน"),
-                Text("MALIEV reviews part geometry, material behavior, quantity, and the rapid tooling path.", "MALIEV ตรวจ Geometry วัสดุ จำนวน และเส้นทางแม่พิมพ์เร็ว"),
-                Text("Bridge the gap between a printed prototype and expensive production tooling.", "เชื่อมช่องว่างระหว่างต้นแบบพิมพ์ 3 มิติและแม่พิมพ์ผลิตจริงที่มีต้นทุนสูง"),
-                Text("Share CAD, target feel, quantity, and deadline so the right casting path can be priced.", "ส่ง CAD ความรู้สึกผิวหรือความแข็งที่ต้องการ จำนวน และกำหนดเวลา เพื่อประเมินเส้นทางหล่อที่เหมาะสม"),
-                Text("Keep casting decisions tied to DFM review, pricing, and production handoff.", "ผูกการตัดสินใจงานหล่อกับการตรวจ DFM ราคา และการส่งต่อผลิต")
+                Text("Use casting when one prototype needs to become many test parts.", "ใช้งานหล่อเมื่อต้นแบบหนึ่งชิ้นต้องกลายเป็นชิ้นทดสอบหลายชิ้น"),
+                Text("Review geometry, material behavior, quantity, and rapid tooling path.", "ตรวจ Geometry วัสดุ จำนวน และเส้นทางแม่พิมพ์เร็ว"),
+                Text("Bridge printed prototypes to low-volume parts before hard tooling.", "ต่อยอดต้นแบบพิมพ์สู่ล็อตเล็กก่อนลงทุนแม่พิมพ์จริง"),
+                Text("Share CAD, target feel, quantity, and deadline for the right casting quote.", "ส่ง CAD ผิวงาน จำนวน และกำหนดเวลาเพื่อประเมินงานหล่อ"),
+                Text("Keep casting decisions tied to DFM, pricing, and production handoff.", "เชื่อมงานหล่อกับ DFM ราคา และการส่งต่อผลิต")
             ]),
         Profile(
             "rapid-prototyping",
@@ -297,18 +297,18 @@ internal static class HeroCopyCatalog
                 Text("Prototype path before production", "เส้นทางต้นแบบก่อนผลิตจริง")
             ],
             [
-                Text("built around your deadline", "วางเส้นทางตามกำหนดเวลาของคุณ"),
+                Text("built around your deadline", "วางตามกำหนดเวลา"),
                 Text("routed through the right process", "เลือกกระบวนการที่เหมาะกับงาน"),
-                Text("checked before each iteration", "ตรวจความพร้อมก่อนทดลองแต่ละรอบ"),
+                Text("checked before each build", "ตรวจก่อนสร้างแต่ละรอบ"),
                 Text("priced before you commit", "เห็นราคาก่อนตัดสินใจ"),
                 Text("ready for the next build", "พร้อมไปต่อสู่รอบผลิตถัดไป")
             ],
             [
-                Text("Combine printing, CNC, scanning, design, and finishing around the test you need to run.", "ผสมงานพิมพ์ CNC สแกน ออกแบบ และตกแต่ง ตามการทดสอบที่คุณต้องทำ"),
-                Text("Share the product goal, must-fit dimensions, target route, and deadline.", "แจ้งเป้าหมายสินค้า ขนาดสำคัญ เส้นทางผลิตที่คาดหวัง และกำหนดเวลา"),
-                Text("MALIEV helps prototype teams move quickly without skipping manufacturability review.", "MALIEV ช่วยให้ทีมต้นแบบเดินเร็วโดยไม่ข้ามการตรวจความเหมาะสมการผลิต"),
-                Text("Use rapid prototyping when the next decision depends on a real part in hand.", "ใช้สร้างต้นแบบรวดเร็วเมื่อการตัดสินใจถัดไปต้องอาศัยชิ้นงานจริง"),
-                Text("Keep every build connected to quote, DFM, material, and production decisions.", "เชื่อมทุกรอบทดลองกับราคา DFM วัสดุ และการตัดสินใจผลิต")
+                Text("Combine printing, CNC, scanning, design, and finish around the test you need.", "รวมพิมพ์ CNC สแกน ออกแบบ และผิวงานตามการทดสอบที่ต้องการ"),
+                Text("Share the product goal, must-fit dimensions, process target, and deadline.", "แจ้งเป้าหมายสินค้า ขนาดสำคัญ กระบวนการ และกำหนดเวลา"),
+                Text("Move quickly without skipping manufacturability review.", "เดินงานเร็วโดยไม่ข้ามการตรวจความพร้อมผลิต"),
+                Text("Use rapid prototyping when the next decision needs a real part in hand.", "ใช้ต้นแบบรวดเร็วเมื่อการตัดสินใจต้องพึ่งชิ้นงานจริง"),
+                Text("Keep every build connected to quote, DFM, material, and production decisions.", "เชื่อมทุกรอบกับราคา DFM วัสดุ และการตัดสินใจผลิต")
             ]),
         Profile(
             "deviation-analysis",
@@ -333,14 +333,14 @@ internal static class HeroCopyCatalog
                 Text("reported against CAD", "รายงานเทียบกับ CAD"),
                 Text("ready for acceptance review", "พร้อมใช้ทบทวนก่อนรับงาน"),
                 Text("matched to critical dimensions", "จับคู่กับมิติสำคัญ"),
-                Text("connected to repair decisions", "เชื่อมกับการตัดสินใจซ่อมหรือแก้ไข")
+                Text("connected to repair", "เชื่อมกับการซ่อม")
             ],
             [
-                Text("Use inspection when tolerance, wear, supplier comparison, or fit evidence matters.", "ใช้การตรวจเมื่อ tolerance การสึก การเทียบ Supplier หรือหลักฐานการประกอบมีความสำคัญ"),
-                Text("MALIEV connects scan data, CAD comparison, measured findings, and the next production decision.", "MALIEV เชื่อมข้อมูลสแกน การเทียบ CAD ผลวัด และการตัดสินใจผลิตถัดไป"),
-                Text("Send the part context, CAD reference, critical dimensions, and the question the report must answer.", "ส่งบริบทชิ้นงาน ไฟล์ CAD อ้างอิง มิติสำคัญ และคำถามที่รายงานต้องตอบ"),
-                Text("Know what changed before choosing whether to repair, remake, or accept the part.", "รู้ว่าส่วนใดเปลี่ยนไปก่อนเลือกว่าจะซ่อม ผลิตใหม่ หรือรับชิ้นงาน"),
-                Text("Turn physical variation into a reviewable report for engineering and purchasing decisions.", "เปลี่ยนความต่างของชิ้นงานจริงเป็นรายงานที่ใช้ตัดสินใจทางวิศวกรรมและจัดซื้อได้")
+                Text("Use inspection when tolerance, wear, supplier comparison, or fit evidence matters.", "ใช้ตรวจเมื่อ tolerance การสึก การเทียบ Supplier หรือหลักฐานฟิตสำคัญ"),
+                Text("Connect scan data, CAD comparison, measured findings, and the next decision.", "เชื่อมข้อมูลสแกน เทียบ CAD ผลวัด และการตัดสินใจถัดไป"),
+                Text("Send part context, CAD reference, critical dimensions, and the key question.", "ส่งบริบทชิ้นงาน CAD อ้างอิง มิติสำคัญ และคำถามหลัก"),
+                Text("Know what changed before you repair, remake, or accept the part.", "รู้จุดเปลี่ยนก่อนซ่อม ผลิตใหม่ หรือรับชิ้นงาน"),
+                Text("Turn physical variation into a report engineering and purchasing can use.", "เปลี่ยนความต่างของชิ้นงานเป็นรายงานที่ทีมวิศวกรรมและจัดซื้อใช้ได้")
             ])
     ];
 
