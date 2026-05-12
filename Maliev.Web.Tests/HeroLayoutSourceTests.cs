@@ -290,7 +290,9 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("babylonjs@9.6.0", source);
         Assert.Contains("IntersectionObserver", source);
+        Assert.Contains("alpha: true", source);
         Assert.Contains("antialias: true", source);
+        Assert.Contains("premultipliedAlpha: false", source);
         Assert.Contains("renderRatio", source);
         Assert.Contains("setHardwareScalingLevel", source);
         Assert.Contains("engine.setHardwareScalingLevel(1 / renderRatio)", source);
@@ -300,6 +302,8 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
+        Assert.Contains(".manufacturing-gizmo--landing::before", styles);
+        Assert.Contains("background: transparent", styles);
     }
 
     /// <summary>
@@ -314,11 +318,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("addHoverMotion", source);
-        Assert.Contains("const targetSize = 2.2", source);
-        Assert.Contains("wide ? 6.8 : 6.55", source);
+        Assert.Contains("const targetSize = 2.65", source);
+        Assert.Contains("wide ? 6.35 : 6.15", source);
         Assert.Contains("allowNativeContextMenu", source);
         Assert.Contains("restoreNativeCanvasBehavior", source);
         Assert.Contains("applyInjectionMoldedPlasticMaterial", source);
+        Assert.Contains("applyLandingHeroTheme", source);
+        Assert.Contains("observeDocumentTheme", source);
+        Assert.Contains("MutationObserver", source);
         Assert.Contains("pointerEnterHandler", source);
         Assert.Contains("targetStrength", source);
         Assert.Contains("pointerFollow", source);

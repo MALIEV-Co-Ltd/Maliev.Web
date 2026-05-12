@@ -30,7 +30,9 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     pointerMoveHandler: null,
     pointerLeaveHandler: null,
     contextMenuHandler: null,
-    cameraConfigurator: null
+    cameraConfigurator: null,
+    themeObserver: null,
+    themeApplicator: null
   };
 
   instances.set(canvas, state);
@@ -109,6 +111,7 @@ export function disposeManufacturingGizmo(canvas) {
     state.canvas.removeEventListener("contextmenu", state.contextMenuHandler, true);
   }
 
+  state.themeObserver?.disconnect();
   state.scene?.dispose();
   state.engine?.dispose();
   state.host?.classList.remove("is-loading", "is-ready", "is-offline");
@@ -167,7 +170,9 @@ function loadBabylonLoaders() {
 
 function createEngine(canvas, BABYLON) {
   const engine = new BABYLON.Engine(canvas, true, {
+    alpha: true,
     antialias: true,
+    premultipliedAlpha: false,
     stencil: false,
     preserveDrawingBuffer: false,
     powerPreference: "low-power"
@@ -243,15 +248,11 @@ async function createLandingHeroScene(state, BABYLON) {
   configureLandingHeroCamera(camera, state.host, BABYLON);
 
   const fill = new BABYLON.HemisphericLight("landing-fill", new BABYLON.Vector3(-0.5, 1, 0.2), scene);
-  fill.intensity = 1.25;
 
   const key = new BABYLON.DirectionalLight("landing-key", new BABYLON.Vector3(-0.5, -0.75, -0.45), scene);
   key.position = new BABYLON.Vector3(4.5, 6, 5);
-  key.intensity = 2.1;
 
   const rim = new BABYLON.PointLight("landing-rim", new BABYLON.Vector3(-3.4, 2.1, -2.5), scene);
-  rim.intensity = 0.64;
-  rim.diffuse = BABYLON.Color3.FromHexString("#f6f6f6");
 
   const root = new BABYLON.TransformNode("landing-model-root", scene);
   const modelParts = splitModelUrl(state.modelUrl);
@@ -267,12 +268,20 @@ async function createLandingHeroScene(state, BABYLON) {
     mesh.isPickable = false;
   }
 
-  if (state.usePlasticMaterial) {
-    applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON);
-  }
+  const plasticMaterial = state.usePlasticMaterial
+    ? applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON)
+    : null;
 
   frameImportedModel(renderMeshes, root, BABYLON);
-  createLandingSurface(scene, BABYLON);
+  const surfaceMaterial = createLandingSurface(scene, BABYLON);
+  state.themeApplicator = () => applyLandingHeroTheme(
+    scene,
+    plasticMaterial,
+    surfaceMaterial,
+    { fill, key, rim },
+    BABYLON);
+  state.themeApplicator();
+  observeDocumentTheme(state);
 
   const baseRotation = new BABYLON.Vector3(-0.05, -0.36, 0.02);
   root.rotation.copyFrom(baseRotation);
@@ -292,8 +301,8 @@ function configureLandingHeroCamera(camera, host, BABYLON) {
   const compact = width < 560 || height < 360;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.64 : 0.5;
-  camera.radius = compact ? 6.8 : wide ? 6.8 : 6.55;
+  camera.fov = compact ? 0.62 : 0.48;
+  camera.radius = compact ? 6.05 : wide ? 6.35 : 6.15;
   camera.lowerRadiusLimit = camera.radius;
   camera.upperRadiusLimit = camera.radius;
   camera.target = new BABYLON.Vector3(0, 0.05, 0);
@@ -375,8 +384,6 @@ function splitModelUrl(modelUrl) {
 
 function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   const plastic = new BABYLON.PBRMaterial("injection-molded-plastic", scene);
-  plastic.albedoColor = BABYLON.Color3.FromHexString("#171717");
-  plastic.reflectivityColor = BABYLON.Color3.FromHexString("#f5f5f5");
   plastic.metallic = 0;
   plastic.roughness = 0.37;
   plastic.microSurface = 0.64;
@@ -387,6 +394,8 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   for (const mesh of meshes) {
     mesh.material = plastic;
   }
+
+  return plastic;
 }
 
 function frameImportedModel(meshes, root, BABYLON) {
@@ -397,7 +406,7 @@ function frameImportedModel(meshes, root, BABYLON) {
 
   const size = bounds.max.subtract(bounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.2;
+  const targetSize = 2.65;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));
@@ -438,11 +447,50 @@ function createLandingSurface(scene, BABYLON) {
   surface.scaling.x = 1.35;
 
   const material = new BABYLON.StandardMaterial("landing-contact-shadow-material", scene);
-  material.diffuseColor = BABYLON.Color3.FromHexString("#171717");
-  material.alpha = 0.035;
   material.disableLighting = true;
   surface.material = material;
   surface.isPickable = false;
+
+  return material;
+}
+
+function observeDocumentTheme(state) {
+  if (!state.themeApplicator || !("MutationObserver" in window)) {
+    return;
+  }
+
+  state.themeObserver = new MutationObserver(mutations => {
+    if (!mutations.some(mutation => mutation.attributeName === "data-theme")) {
+      return;
+    }
+
+    state.themeApplicator();
+    state.scene?.render();
+  });
+  state.themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
+}
+
+function applyLandingHeroTheme(scene, plasticMaterial, surfaceMaterial, lights, BABYLON) {
+  const dark = document.documentElement.dataset.theme === "dark";
+  scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
+  scene.environmentIntensity = dark ? 0.34 : 0.42;
+
+  lights.fill.intensity = dark ? 0.92 : 1.25;
+  lights.key.intensity = dark ? 1.78 : 2.1;
+  lights.rim.intensity = dark ? 1.18 : 0.64;
+  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#8fc3ff" : "#f6f6f6");
+
+  if (plasticMaterial) {
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#242a31" : "#171717");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#d7e5f5" : "#f5f5f5");
+    plasticMaterial.clearCoat.intensity = dark ? 0.3 : 0.22;
+  }
+
+  surfaceMaterial.diffuseColor = BABYLON.Color3.FromHexString(dark ? "#5ba7ff" : "#171717");
+  surfaceMaterial.alpha = dark ? 0.1 : 0.035;
 }
 
 function configureSceneRuntime(state, engine, scene, cameraConfigurator) {

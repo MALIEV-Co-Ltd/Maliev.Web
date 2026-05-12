@@ -40,7 +40,7 @@
   --quote-surface: rgba(255, 255, 255, .96);
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
-  --landing-gizmo-surface: radial-gradient(circle at 50% 72%, rgba(10, 114, 239, .12), transparent 30%), linear-gradient(180deg, #fff 0%, #f7f8fa 100%);
+  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .11) 0%, rgba(10, 114, 239, .05) 36%, transparent 72%);
   --final-dropzone-surface: linear-gradient(180deg, #fff 0%, #f6fbff 100%);
   --media-shell: #111419;
   --danger-surface: #a21616;
@@ -99,7 +99,7 @@ html[data-theme="dark"] {
   --quote-surface: rgba(21, 26, 33, .96);
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
-  --landing-gizmo-surface: radial-gradient(circle at 50% 72%, rgba(91, 167, 255, .18), transparent 30%), linear-gradient(180deg, #121821 0%, #0d1015 100%);
+  --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .24) 0%, rgba(91, 167, 255, .09) 38%, transparent 74%);
   --final-dropzone-surface: linear-gradient(180deg, #141b26 0%, #0e1b2d 100%);
   --media-shell: #090c10;
   --danger-surface: #8f1f1f;
@@ -726,14 +726,26 @@ html:lang(th) .h1 {
   overflow: visible;
   border-radius: 0;
   box-shadow: none;
+  background: transparent;
+}
+
+.manufacturing-gizmo--landing::before {
+  content: "";
+  position: absolute;
+  inset: 18% 4% 6%;
+  pointer-events: none;
   background: var(--landing-gizmo-surface);
+  border-radius: 999px;
 }
 
 .manufacturing-gizmo-canvas {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   min-height: inherit;
+  background: transparent;
   outline: none;
 }
 
