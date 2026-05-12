@@ -1,0 +1,97 @@
+@inject IJSRuntime JS
+@inject PreferenceService Preferences
+
+@if (_visible)
+{
+    <section class="cookie-consent" role="region" aria-label="@Text("Cookie consent", "การยินยอมคุกกี้")">
+        <div class="cookie-consent-copy">
+            <strong>@Text("Cookie choices", "ตัวเลือกคุกกี้")</strong>
+            <p>@Text("Essential cookies keep language, theme, cart, account, and security flows working. Optional analytics and ads cookies stay off unless you accept them.", "คุกกี้จำเป็นช่วยให้ภาษา ธีม ตะกร้า บัญชี และความปลอดภัยทำงานได้ คุกกี้วิเคราะห์และโฆษณาแบบไม่จำเป็นจะปิดไว้จนกว่าคุณจะยอมรับ")</p>
+            <a href="/cookie-policy">@Text("Cookie policy", "นโยบายคุกกี้")</a>
+        </div>
+        <div class="cookie-consent-actions">
+            <button class="button secondary" type="button" @onclick="AcceptEssentialAsync">@Text("Essential only", "ใช้เฉพาะจำเป็น")</button>
+            <button class="button primary" type="button" @onclick="AcceptOptionalAsync">@Text("Accept optional", "ยอมรับเพิ่มเติม")</button>
+        </div>
+    </section>
+}
+
+@code {
+    private const string EssentialConsent = "essential";
+    private const string OptionalConsent = "optional";
+    private bool _loaded;
+    private bool _visible;
+
+    /// <summary>
+    /// Opens the consent chooser from footer settings after the initial choice.
+    /// </summary>
+    public async Task ShowPreferencesAsync()
+    {
+        if (!_loaded)
+        {
+            await LoadConsentAsync();
+        }
+
+        _visible = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadConsentAsync();
+        }
+    }
+
+    private async Task LoadConsentAsync()
+    {
+        string? storedConsent = null;
+
+        try
+        {
+            storedConsent = await JS.InvokeAsync<string?>("malievConsent.get");
+        }
+        catch (InvalidOperationException)
+        {
+            storedConsent = EssentialConsent;
+        }
+        catch (JSException)
+        {
+            storedConsent = EssentialConsent;
+        }
+
+        _loaded = true;
+        _visible = string.IsNullOrWhiteSpace(storedConsent);
+        StateHasChanged();
+    }
+
+    private Task AcceptEssentialAsync()
+    {
+        return SetConsentAsync(EssentialConsent);
+    }
+
+    private Task AcceptOptionalAsync()
+    {
+        return SetConsentAsync(OptionalConsent);
+    }
+
+    private async Task SetConsentAsync(string consent)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("malievConsent.set", consent);
+        }
+        catch (JSException)
+        {
+            // Keep the site usable even if browser storage is unavailable.
+        }
+
+        _visible = false;
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

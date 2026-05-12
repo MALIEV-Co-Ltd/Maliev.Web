@@ -125,6 +125,40 @@ public sealed class LocalizationTests
         Assert.Contains("Switch to light theme", layout);
     }
 
+    /// <summary>
+    /// Verifies optional cookie consent requires explicit opt-in and can be reopened from the footer.
+    /// </summary>
+    [Fact]
+    public void CookieConsent_UsesExplicitOptionalOptInAndFooterSettings()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CookieConsentBanner.razor");
+        var consentScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-consent.js");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var policy = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+
+        Assert.Contains("Essential only", component);
+        Assert.Contains("Accept optional", component);
+        Assert.Contains("Optional analytics and ads cookies stay off unless you accept them.", component);
+        Assert.Contains("href=\"/cookie-policy\"", component);
+        Assert.Contains("malievConsent.get", component);
+        Assert.Contains("malievConsent.set", component);
+        Assert.DoesNotContain("Accept all", component);
+        Assert.DoesNotContain("Reject all", component);
+        Assert.Contains("maliev.cookieConsent.v1", consentScript);
+        Assert.Contains("OptionalConsent = 'optional'", consentScript);
+        Assert.Contains("hasOptional", consentScript);
+        Assert.Contains("CustomEvent('maliev:cookie-consent'", consentScript);
+        Assert.Contains("js/maliev-consent.js", app);
+        Assert.Contains("<CookieConsentBanner @ref=\"_cookieConsent\" />", layout);
+        Assert.Contains("OpenCookieSettingsAsync", layout);
+        Assert.Contains("Cookie settings", layout);
+        Assert.Contains(".cookie-consent", styles);
+        Assert.Contains(".footer-link-button", styles);
+        Assert.Contains("Cookie settings link in the MALIEV footer", policy);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();

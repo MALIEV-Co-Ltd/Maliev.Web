@@ -382,6 +382,60 @@ main {
   color: var(--danger-surface);
 }
 
+.cookie-consent {
+  position: fixed;
+  z-index: 1300;
+  left: 50%;
+  bottom: clamp(16px, 3vw, 32px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+  width: min(calc(100% - 32px), 920px);
+  padding: 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: rgba(0, 0, 0, .10) 0 18px 48px -24px, var(--shadow-card);
+  transform: translateX(-50%);
+}
+
+.cookie-consent-copy {
+  display: grid;
+  gap: 7px;
+}
+
+.cookie-consent-copy strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.cookie-consent-copy p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+  font-size: .93rem;
+  line-height: 1.55;
+}
+
+.cookie-consent-copy a {
+  width: fit-content;
+  color: var(--blue-ink);
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.cookie-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cookie-consent-actions .button {
+  white-space: nowrap;
+}
+
 .accent-blue {
   color: var(--blue);
 }
@@ -2215,6 +2269,25 @@ html:lang(th) .h1 {
   color: var(--inverse-text);
 }
 
+.footer-link-button {
+  width: fit-content;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--footer-muted);
+  background: transparent;
+  font: inherit;
+  font-size: .92rem;
+  line-height: 1.6;
+  text-align: left;
+  cursor: pointer;
+}
+
+.footer-link-button:hover,
+.footer-link-button:focus-visible {
+  color: var(--inverse-text);
+}
+
 .line-contact-link {
   display: inline-flex;
   align-items: center;
@@ -2792,6 +2865,19 @@ html:lang(th) .h1 {
     padding-top: 56px;
   }
 
+  .cookie-consent {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .cookie-consent-actions {
+    justify-content: stretch;
+  }
+
+  .cookie-consent-actions .button {
+    flex: 1 1 160px;
+  }
+
   .footer-brand,
   .footer-connect {
     grid-column: 1 / -1;
@@ -2854,5 +2940,14 @@ html:lang(th) .h1 {
   .material-category-media {
     min-height: 0;
     aspect-ratio: 4 / 2.5;
+  }
+
+  .cookie-consent {
+    width: min(calc(100% - 24px), 920px);
+    padding: 14px;
+  }
+
+  .cookie-consent-actions .button {
+    width: 100%;
   }
 }
