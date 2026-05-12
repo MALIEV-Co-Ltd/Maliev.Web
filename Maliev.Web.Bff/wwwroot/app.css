@@ -262,6 +262,11 @@ main {
   gap: 10px;
 }
 
+.quote-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .language-toggle {
   display: inline-flex;
   padding: 3px;

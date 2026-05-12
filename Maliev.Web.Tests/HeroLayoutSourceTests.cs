@@ -216,6 +216,19 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies shared page action rows keep visible spacing between adjacent buttons.
+    /// </summary>
+    [Fact]
+    public void QuoteActionRowsKeepButtonSpacing()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains(".quote-actions", styles);
+        Assert.Contains("gap: 10px;", styles);
+        Assert.Contains("flex-wrap: wrap;", styles);
+    }
+
+    /// <summary>
     /// Verifies the quote page sends custom manufacturing work to the dedicated quote engine.
     /// </summary>
     [Fact]
