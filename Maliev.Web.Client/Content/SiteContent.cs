@@ -21,7 +21,7 @@ internal static class SiteContent
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
     [
         new(Text("2018", "2018"), Text("founded in Thailand", "เริ่มต้นในประเทศไทย")),
-        new(Text("12k+", "12k+"), Text("parts produced", "ชิ้นงานที่ผลิตแล้ว")),
+        new(Text("12,000+", "12,000+"), Text("parts produced", "ชิ้นงานที่ผลิตแล้ว")),
         new(Text("850+", "850+"), Text("businesses served", "ธุรกิจที่ให้บริการ"))
     ];
 

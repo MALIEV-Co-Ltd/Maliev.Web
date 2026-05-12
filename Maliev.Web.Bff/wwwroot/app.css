@@ -437,6 +437,14 @@ main {
   padding-bottom: 72px;
 }
 
+.home-services-section {
+  padding-top: clamp(44px, 5vw, 72px);
+}
+
+.home-services-section .section-heading {
+  margin-bottom: 30px;
+}
+
 .section-heading,
 .section-split,
 .feature-band,
