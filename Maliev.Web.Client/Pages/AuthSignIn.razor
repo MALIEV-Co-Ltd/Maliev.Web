@@ -5,7 +5,10 @@
 
 <section class="auth-shell">
     <div class="auth-panel">
-        <h1>@Text("Sign in to MALIEV", "เข้าสู่ระบบ MALIEV")</h1>
+        <h1 class="auth-title">
+            <span>@Text("Sign in to", "เข้าสู่ระบบ")</span>
+            <img class="auth-title-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
+        </h1>
         <p>@Text("Use your customer account for shop checkout, addresses, preferences, and order history. Manufacturing projects continue in the quote engine.", "ใช้บัญชีลูกค้าสำหรับชำระเงินร้านค้า ที่อยู่ การตั้งค่า และประวัติคำสั่งซื้อ ส่วนโปรเจกต์งานผลิตยังอยู่ในระบบราคา")</p>
 
         @if (!string.IsNullOrWhiteSpace(Status))
@@ -17,10 +20,7 @@
             <div class="auth-error">@Error</div>
         }
 
-        <a class="auth-google" href="@GoogleHref">
-            <span class="auth-google-mark">G</span>
-            <span>@Text("Continue with Google", "ดำเนินการต่อด้วย Google")</span>
-        </a>
+        <AuthGoogleButton Href="@GoogleHref" Label="@Text("Continue with Google", "ดำเนินการต่อด้วย Google")" />
 
         <div class="auth-divider"><span>@Text("or email", "หรือใช้อีเมล")</span></div>
 

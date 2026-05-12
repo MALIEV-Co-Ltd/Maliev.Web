@@ -13,10 +13,7 @@
             <div class="auth-error">@Error</div>
         }
 
-        <a class="auth-google" href="@GoogleHref">
-            <span class="auth-google-mark">G</span>
-            <span>@Text("Continue with Google", "ดำเนินการต่อด้วย Google")</span>
-        </a>
+        <AuthGoogleButton Href="@GoogleHref" Label="@Text("Continue with Google", "ดำเนินการต่อด้วย Google")" />
 
         <div class="auth-divider"><span>@Text("or create with email", "หรือสร้างด้วยอีเมล")</span></div>
 

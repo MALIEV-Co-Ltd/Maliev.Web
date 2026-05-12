@@ -490,6 +490,37 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies customer auth pages use the MALIEV logo in the sign-in title and a Google-branded OAuth button.
+    /// </summary>
+    [Fact]
+    public void AuthPagesUseLogoTitleAndGoogleBrandedButton()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
+        var googleButton = ReadRepoFile("Maliev.Web.Client", "Components", "AuthGoogleButton.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+
+        Assert.Contains("auth-title-logo", signIn);
+        Assert.Contains("src=\"/images/logo.svg\"", signIn);
+        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
+        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signUp);
+        Assert.Contains("auth-google-icon", googleButton);
+        Assert.Contains("viewBox=\"0 0 18 18\"", googleButton);
+        Assert.Contains("#4285F4", googleButton);
+        Assert.Contains("#34A853", googleButton);
+        Assert.Contains("#FBBC05", googleButton);
+        Assert.Contains("#EA4335", googleButton);
+        Assert.Contains("border: 1px solid #747775;", styles);
+        Assert.Contains("font-family: Roboto, var(--maliev-font-sans);", styles);
+        Assert.Contains("family=Roboto:wght@500", app);
+        Assert.DoesNotContain("@Text(\"Sign in to MALIEV\", \"เข้าสู่ระบบ MALIEV\")", signIn);
+        Assert.DoesNotContain("auth-google-mark", signIn);
+        Assert.DoesNotContain("auth-google-mark", signUp);
+        Assert.DoesNotContain(".auth-google-mark", styles);
+    }
+
+    /// <summary>
     /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
     /// </summary>
     [Fact]
