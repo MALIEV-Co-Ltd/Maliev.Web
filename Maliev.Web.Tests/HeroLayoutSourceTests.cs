@@ -379,14 +379,23 @@ public sealed class HeroLayoutSourceTests
     [Fact]
     public void HomeHeroUsesBalancedTabletComposition()
     {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var gizmo = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
+        Assert.DoesNotContain("landing-hero-badge", source);
+        Assert.DoesNotContain("Rapid manufacturing / live part pricing", source);
+        Assert.Contains(".landing-hero-badge", styles);
+        Assert.Contains("display: none;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1180px)", styles);
         Assert.Contains("grid-template-columns: minmax(0, .96fr) minmax(340px, .92fr);", styles);
         Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
         Assert.Contains("text-align: center;", styles);
+        Assert.Contains("gap: 18px;", styles);
+        Assert.Contains("margin-top: 22px;", styles);
         Assert.Contains("width: min(100%, 820px);", styles);
+        Assert.Contains("min-height: 440px;", styles);
+        Assert.Contains("height: min(46vh, 470px);", styles);
         Assert.Contains("justify-content: center;", styles);
         Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
         Assert.Contains("balancedTablet ? 0.43 : 0.44", gizmo);

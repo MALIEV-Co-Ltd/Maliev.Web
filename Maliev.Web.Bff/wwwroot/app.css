@@ -590,12 +590,13 @@ html:lang(th) .h1 {
 }
 
 .landing-hero-badge {
+  display: none;
   color: var(--muted);
 }
 
 .landing-hero-copy h1 {
-  margin-top: 22px;
-  margin-bottom: 22px;
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .landing-hero-copy > p:not(.eyebrow) {
@@ -2210,10 +2211,10 @@ html:lang(th) .h1 {
   .landing-hero {
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
-    gap: 30px;
+    gap: 18px;
     min-height: auto;
-    padding-top: 54px;
-    padding-bottom: 68px;
+    padding-top: 42px;
+    padding-bottom: 52px;
     text-align: center;
   }
 
@@ -2233,16 +2234,17 @@ html:lang(th) .h1 {
 
   .metric-strip {
     justify-content: center;
+    margin-top: 22px;
   }
 
   .landing-hero-visual {
     width: min(100%, 820px);
-    min-height: 500px;
+    min-height: 440px;
   }
 
   .manufacturing-gizmo--landing {
-    height: min(52vh, 520px);
-    min-height: 460px;
+    height: min(46vh, 470px);
+    min-height: 440px;
   }
 }
 
