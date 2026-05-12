@@ -49,14 +49,19 @@
             @foreach (var material in Materials)
             {
                 <article class="material-card">
-                    <span class="card-meta">@material.Process</span>
-                    <h3>@material.Name</h3>
-                    <p>@material.Body.For(Preferences.Culture)</p>
-                    <div>
-                        @foreach (var tag in material.Tags)
-                        {
-                            <span class="chip">@tag.For(Preferences.Culture)</span>
-                        }
+                    <div class="material-card-media">
+                        <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                    </div>
+                    <div class="material-card-body">
+                        <span class="card-meta">@material.Process</span>
+                        <h3>@material.Name</h3>
+                        <p>@material.Body.For(Preferences.Culture)</p>
+                        <div class="material-card-tags">
+                            @foreach (var tag in material.Tags)
+                            {
+                                <span class="chip">@tag.For(Preferences.Culture)</span>
+                            }
+                        </div>
                     </div>
                 </article>
             }
@@ -296,10 +301,34 @@ else
 
     private IReadOnlyList<MaterialItem> Materials =>
     [
-        new("PLA / PETG / ABS", "FDM", SiteContent.Text("Budget prototypes, fit checks, fixtures, and visual models.", "ต้นแบบราคาประหยัด ตรวจประกอบ ฟิกซ์เจอร์ และโมเดลดูรูปทรง"), [SiteContent.Text("Fast", "เร็ว"), SiteContent.Text("Affordable", "คุ้มค่า")]),
-        new("Engineering nylon", "MJF · SLS", SiteContent.Text("Functional parts, living hinges, brackets, housings, and low-volume production.", "ชิ้นงานใช้งานจริง บานพับ ขายึด เคส และผลิตจำนวนน้อย"), [SiteContent.Text("Durable", "ทนทาน"), SiteContent.Text("Functional", "ใช้งานจริง")]),
-        new("Resin", "SLA", SiteContent.Text("High-detail visual parts, smooth surfaces, masters, and presentation models.", "ชิ้นงานรายละเอียดสูง ผิวเรียบ Master และโมเดลนำเสนอ"), [SiteContent.Text("Fine detail", "รายละเอียดสูง"), SiteContent.Text("Smooth", "ผิวเรียบ")]),
-        new("Aluminum", "CNC", SiteContent.Text("Machined brackets, fixtures, plates, jigs, and end-use components.", "ขายึด ฟิกซ์เจอร์ แผ่นงาน จิ๊ก และชิ้นส่วนใช้งานจริงที่กัดขึ้นรูป"), [SiteContent.Text("Precise", "แม่นยำ"), SiteContent.Text("Metal", "โลหะ")])
+        new(
+            "PLA / PETG / ABS",
+            "FDM",
+            SiteContent.Text("Budget prototypes, fit checks, fixtures, and visual models.", "ต้นแบบราคาประหยัด ตรวจประกอบ ฟิกซ์เจอร์ และโมเดลดูรูปทรง"),
+            "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80",
+            SiteContent.Text("Colorful 3D printing filament spools", "ม้วนเส้นพลาสติกสำหรับพิมพ์ 3 มิติ"),
+            [SiteContent.Text("Fast", "เร็ว"), SiteContent.Text("Affordable", "คุ้มค่า")]),
+        new(
+            "Engineering nylon",
+            "MJF · SLS",
+            SiteContent.Text("Functional parts, living hinges, brackets, housings, and low-volume production.", "ชิ้นงานใช้งานจริง บานพับ ขายึด เคส และผลิตจำนวนน้อย"),
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg",
+            SiteContent.Text("SLS printed nylon pulley shaft", "ชิ้นงานไนลอนที่ผลิตด้วย SLS"),
+            [SiteContent.Text("Durable", "ทนทาน"), SiteContent.Text("Functional", "ใช้งานจริง")]),
+        new(
+            "Resin",
+            "SLA",
+            SiteContent.Text("High-detail visual parts, smooth surfaces, masters, and presentation models.", "ชิ้นงานรายละเอียดสูง ผิวเรียบ Master และโมเดลนำเสนอ"),
+            "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900",
+            SiteContent.Text("Resin printer lifting a detailed part from the vat", "เครื่องพิมพ์เรซินยกชิ้นงานละเอียดออกจากถังเรซิน"),
+            [SiteContent.Text("Fine detail", "รายละเอียดสูง"), SiteContent.Text("Smooth", "ผิวเรียบ")]),
+        new(
+            "Aluminum",
+            "CNC",
+            SiteContent.Text("Machined brackets, fixtures, plates, jigs, and end-use components.", "ขายึด ฟิกซ์เจอร์ แผ่นงาน จิ๊ก และชิ้นส่วนใช้งานจริงที่กัดขึ้นรูป"),
+            "https://images.unsplash.com/photo-1740209475472-aa7d280f7452?auto=format&fit=crop&w=900&q=80",
+            SiteContent.Text("CNC milling an aluminum workpiece", "เครื่อง CNC กัดชิ้นงานอะลูมิเนียม"),
+            [SiteContent.Text("Precise", "แม่นยำ"), SiteContent.Text("Metal", "โลหะ")])
     ];
 
     private string PrimaryAction => Path switch
@@ -355,5 +384,5 @@ else
 
     private sealed record ContentSection(LocalizedText Title, LocalizedText Body);
 
-    private sealed record MaterialItem(string Name, string Process, LocalizedText Body, IReadOnlyList<LocalizedText> Tags);
+    private sealed record MaterialItem(string Name, string Process, LocalizedText Body, string ImageUrl, LocalizedText ImageAlt, IReadOnlyList<LocalizedText> Tags);
 }

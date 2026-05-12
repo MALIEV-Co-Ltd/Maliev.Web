@@ -253,6 +253,7 @@ public sealed class HeroLayoutSourceTests
     public void StaticPagesCoverCustomerRoutesAndContactBoundary()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("@page \"/materials\"", source);
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
@@ -263,6 +264,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.Contains("SiteContent.QuoteProfileUrl", source);
         Assert.Contains("SiteContent.QuoteOrdersUrl", source);
+        Assert.Contains("material-card-media", source);
+        Assert.Contains("material-card-body", source);
+        Assert.Contains("ImageUrl", source);
+        Assert.Contains("ImageAlt", source);
+        Assert.Contains(".material-card-media", styles);
+        Assert.Contains(".material-card-body", styles);
+        Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
+        Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);
     }
 

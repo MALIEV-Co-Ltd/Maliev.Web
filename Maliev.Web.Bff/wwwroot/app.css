@@ -859,6 +859,11 @@ html:lang(th) .h1 {
   grid-auto-rows: minmax(240px, auto);
 }
 
+.material-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
 .service-card,
 .product-card,
 .case-card,
@@ -883,6 +888,12 @@ html:lang(th) .h1 {
   color: var(--ink);
 }
 
+.material-card {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+}
+
 .service-card.primary {
   grid-row: span 2;
   color: var(--inverse-text);
@@ -894,6 +905,7 @@ html:lang(th) .h1 {
 .product-media,
 .case-card-media,
 .blog-card-media,
+.material-card-media,
 .product-detail-media-main,
 .media {
   position: relative;
@@ -909,10 +921,15 @@ html:lang(th) .h1 {
   aspect-ratio: 4 / 3.7;
 }
 
+.material-card-media {
+  aspect-ratio: 4 / 2.8;
+}
+
 .service-card-media img,
 .product-media img,
 .case-card-media img,
 .blog-card-media img,
+.material-card-media img,
 .product-detail-media img,
 .media img {
   width: 100%;
@@ -933,6 +950,35 @@ html:lang(th) .h1 {
   flex: 1;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   align-content: start;
+}
+
+.material-card-body {
+  display: grid;
+  gap: 9px;
+  padding: 18px;
+}
+
+.material-card h3,
+.material-card p {
+  margin: 0;
+}
+
+.material-card h3 {
+  font-size: 1.14rem;
+  font-weight: 650;
+  line-height: 1.22;
+}
+
+.material-card p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.material-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
 }
 
 .service-card h3,
@@ -1931,6 +1977,27 @@ html:lang(th) .h1 {
     grid-template-columns: 1fr;
   }
 
+  .material-grid {
+    gap: 14px;
+  }
+
+  .material-card {
+    display: grid;
+    grid-template-columns: 122px minmax(0, 1fr);
+    min-height: 142px;
+  }
+
+  .material-card-media {
+    min-height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .material-card-body {
+    align-content: center;
+    gap: 7px;
+    padding: 14px 16px;
+  }
+
   .feature-band,
   .site-footer {
     padding-left: 18px;
@@ -1997,5 +2064,14 @@ html:lang(th) .h1 {
   .landing-quote-dropzone-action {
     padding: 0 10px;
     font-size: .82rem;
+  }
+
+  .material-card {
+    grid-template-columns: 1fr;
+  }
+
+  .material-card-media {
+    min-height: 0;
+    aspect-ratio: 4 / 2.5;
   }
 }
