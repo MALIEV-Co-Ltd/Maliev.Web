@@ -2,7 +2,6 @@
 @implements IDisposable
 @inject PreferenceService Preferences
 @inject CartState Cart
-@inject NavigationManager Navigation
 
 <MudThemeProvider Theme="@_malievTheme" IsDarkMode="@IsDarkMode" />
 <MudPopoverProvider />
@@ -261,6 +260,7 @@
     protected override async Task OnInitializedAsync()
     {
         Cart.Changed += StateHasChanged;
+        Preferences.Changed += OnPreferencesChanged;
         await Cart.InitializeAsync();
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
@@ -269,15 +269,20 @@
 
     private async Task ChangeCultureAsync(string culture)
     {
-        _selectedCulture = culture;
-        await Preferences.SetCultureAsync(_selectedCulture);
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        await Preferences.SetCultureAsync(culture);
     }
 
     private async Task ToggleThemeAsync()
     {
-        _selectedTheme = IsDarkMode ? PreferenceService.LightTheme : PreferenceService.DarkTheme;
-        await Preferences.SetThemeAsync(_selectedTheme);
+        var nextTheme = IsDarkMode ? PreferenceService.LightTheme : PreferenceService.DarkTheme;
+        await Preferences.SetThemeAsync(nextTheme);
+    }
+
+    private void OnPreferencesChanged()
+    {
+        _selectedCulture = Preferences.Culture;
+        _selectedTheme = Preferences.Theme;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private string Text(string en, string th)
@@ -303,5 +308,6 @@
     public void Dispose()
     {
         Cart.Changed -= StateHasChanged;
+        Preferences.Changed -= OnPreferencesChanged;
     }
 }

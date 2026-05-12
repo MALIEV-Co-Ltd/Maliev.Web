@@ -13,9 +13,9 @@
 @page "/account/quotes"
 @page "/account/orders"
 @page "/account/preferences"
+@inherits PreferenceAwareComponentBase
 @inject NavigationManager Navigation
 @inject MalievApiClient Api
-@inject PreferenceService Preferences
 
 <PageTitle>@Title - MALIEV</PageTitle>
 <HeadContent>

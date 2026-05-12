@@ -1,6 +1,6 @@
 @page "/shop/{Handle}"
+@inherits PreferenceAwareComponentBase
 @inject MalievApiClient Api
-@inject PreferenceService Preferences
 @inject CartState Cart
 
 <PageTitle>@(_product?.Title.For(Preferences.Culture) ?? "Product") - MALIEV</PageTitle>

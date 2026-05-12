@@ -52,6 +52,31 @@ public sealed class LocalizationTests
     }
 
     /// <summary>
+    /// Verifies culture switching updates the interactive circuit without forcing a browser reload.
+    /// </summary>
+    [Fact]
+    public void LanguageSwitch_NotifiesInteractiveCircuitWithoutForcedReload()
+    {
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var service = ReadRepoFile("Maliev.Web.Client", "Services", "PreferenceService.cs");
+        var preferenceAwareBase = ReadRepoFile("Maliev.Web.Client", "Components", "PreferenceAwareComponentBase.cs");
+        var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+
+        Assert.Contains("internal event Action? Changed", service);
+        Assert.Contains("Changed?.Invoke()", service);
+        Assert.Contains("Preferences.Changed += OnPreferencesChanged", layout);
+        Assert.Contains("Preferences.Changed -= OnPreferencesChanged", layout);
+        Assert.Contains("private void OnPreferencesChanged()", layout);
+        Assert.Contains("InvokeAsync(StateHasChanged)", layout);
+        Assert.Contains("abstract class PreferenceAwareComponentBase", preferenceAwareBase);
+        Assert.Contains("Preferences.Changed += OnPreferencesChanged", preferenceAwareBase);
+        Assert.Contains("Preferences.Changed -= OnPreferencesChanged", preferenceAwareBase);
+        Assert.Contains("@inherits PreferenceAwareComponentBase", home);
+        Assert.DoesNotContain("forceLoad: true", layout);
+        Assert.DoesNotContain("Navigation.NavigateTo(Navigation.Uri", layout);
+    }
+
+    /// <summary>
     /// Verifies interactive landing labels use the same preference-backed bilingual text path as the rest of the page.
     /// </summary>
     [Fact]

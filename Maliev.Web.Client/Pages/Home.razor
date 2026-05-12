@@ -1,6 +1,5 @@
 @page "/"
-@implements IDisposable
-@inject PreferenceService Preferences
+@inherits PreferenceAwareComponentBase
 @inject PersistentComponentState ApplicationState
 
 <PageTitle>MALIEV - Rapid manufacturing and workshop-made products</PageTitle>
@@ -281,8 +280,9 @@
         return items;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
         _persistingSubscription?.Dispose();
     }
 

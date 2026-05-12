@@ -1,5 +1,5 @@
 @inject MalievApiClient Api
-@inject PreferenceService Preferences
+@inherits PreferenceAwareComponentBase
 
 <section class="quote-panel" aria-label="Instant quote">
     @if (!string.IsNullOrWhiteSpace(_loadError))

@@ -1,4 +1,5 @@
 @page "/quote"
+@inherits PreferenceAwareComponentBase
 
 <PageTitle>Custom manufacturing quote - MALIEV</PageTitle>
 <HeadContent>
@@ -23,9 +24,6 @@
 </section>
 
 @code {
-    [Inject]
-    private PreferenceService Preferences { get; set; } = default!;
-
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
