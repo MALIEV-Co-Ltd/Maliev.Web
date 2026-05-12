@@ -141,7 +141,6 @@ html:lang(th) body,
   line-height: 1.7;
 }
 
-html:lang(th) .eyebrow,
 html:lang(th) .card-meta,
 html:lang(th) .metric-strip small,
 html:lang(th) .service-stat-strip small,
@@ -517,26 +516,6 @@ html:lang(th) .h1 {
   margin: 0;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  font-family: var(--maliev-font-sans);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.eyebrow::before {
-  content: "";
-  width: 24px;
-  height: 1px;
-  border-radius: 0;
-  background: var(--blue);
-}
-
 .lede,
 .landing-hero p,
 .page-hero p,
@@ -611,7 +590,7 @@ html:lang(th) .h1 {
   margin-bottom: 20px;
 }
 
-.landing-hero-copy > p:not(.eyebrow) {
+.landing-hero-copy > p {
   max-width: 620px;
   margin: 0;
 }
@@ -2555,7 +2534,7 @@ html:lang(th) .h1 {
     max-width: 760px;
   }
 
-  .landing-hero-copy > p:not(.eyebrow),
+  .landing-hero-copy > p,
   .landing-hero-actions {
     max-width: 680px;
     margin-inline: auto;

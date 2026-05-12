@@ -25,7 +25,6 @@
 </HeadContent>
 
 <section class="page-hero compact">
-    <p class="eyebrow">@Eyebrow</p>
     <h1>@Title</h1>
     <p>@Body</p>
     <div class="quote-actions">
@@ -39,7 +38,6 @@
     <section class="section">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">@Text("Material library", "ห้องสมุดวัสดุ")</p>
                 <h2>@Text("Choose by process, use case, and finishing expectation.", "เลือกจากกระบวนการ การใช้งาน และความคาดหวังเรื่องผิวงาน")</h2>
             </div>
         </div>
@@ -69,7 +67,6 @@
     <section class="section material-comparison-section">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">@Text("Material comparison", "ตารางเปรียบเทียบวัสดุ")</p>
                 <h2>@Text("Compare strength, heat, chemistry, finish, and trade-offs before uploading CAD.", "เปรียบเทียบความแข็งแรง ความร้อน สารเคมี ผิวงาน และข้อแลกเปลี่ยนก่อนอัปโหลด CAD")</h2>
             </div>
             <p>@Text("Values are practical selection bands. Final material grade, orientation, finish, and test requirements are confirmed during quotation.", "ข้อมูลเป็นช่วงสำหรับเลือกวัสดุเบื้องต้น เกรด ทิศทางการผลิต ผิวงาน และข้อกำหนดการทดสอบจะยืนยันระหว่างขอราคา")</p>
@@ -383,16 +380,6 @@ else
     private string _materialUseFilter = AllMaterialsFilter;
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
     private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
-
-    private string Eyebrow => Path switch
-    {
-        "account/quotes" => Text("Quote engine", "ระบบขอราคา"),
-        var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("MALIEV Journal", "บทความ MALIEV"),
-        var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("Case study", "ผลงาน"),
-        "materials" => Text("Materials", "วัสดุ"),
-        "case-studies" => Text("Case studies", "ผลงาน"),
-        _ => "MALIEV"
-    };
 
     private string Title => Path switch
     {

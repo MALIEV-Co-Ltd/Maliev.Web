@@ -124,6 +124,28 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies no customer page renders the removed eyebrow label pattern.
+    /// </summary>
+    [Fact]
+    public void CustomerPagesDoNotRenderEyebrowLabels()
+    {
+        var root = FindRepoRoot();
+        var pagesRoot = Path.Combine(root, "Maliev.Web.Client", "Pages");
+        var pageFiles = Directory.EnumerateFiles(pagesRoot, "*.razor", SearchOption.AllDirectories);
+
+        foreach (var file in pageFiles)
+        {
+            var source = File.ReadAllText(file);
+            Assert.DoesNotContain("class=\"eyebrow\"", source);
+        }
+
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.DoesNotContain(".eyebrow", styles);
+        Assert.DoesNotContain(":not(.eyebrow)", styles);
+    }
+
+    /// <summary>
     /// Verifies the home hero uses the ad-targeted localized copy catalog instead of one fixed headline.
     /// </summary>
     [Fact]
