@@ -530,6 +530,25 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the Google OAuth button keeps the official light button treatment on dark pages.
+    /// </summary>
+    [Fact]
+    public void GoogleAuthButtonUsesGoogleLightTreatmentInDarkTheme()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("html[data-theme=\"dark\"] .auth-google", styles);
+        Assert.Contains("html[data-theme=\"dark\"] .auth-google:hover", styles);
+        Assert.Contains("html[data-theme=\"dark\"] .auth-google:focus-visible", styles);
+        Assert.Contains("background: #ffffff;", styles);
+        Assert.Contains("color: #1f1f1f;", styles);
+        Assert.Contains("border-color: #747775;", styles);
+        Assert.Contains("box-shadow: 0 1px 2px rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);", styles);
+        Assert.Contains("background: #f8fafd;", styles);
+        Assert.Contains("outline-color: #8ab4f8;", styles);
+    }
+
+    /// <summary>
     /// Verifies browser auth forms post to dedicated action routes instead of colliding with Blazor page routes.
     /// </summary>
     [Fact]
