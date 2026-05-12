@@ -72,24 +72,34 @@
     </div>
 </section>
 
-<section class="feature-band" aria-labelledby="imm-title">
-    <div class="feature-media">
+<section class="feature-band machine-feature" aria-labelledby="imm-title">
+    <div class="feature-media machine-feature-media">
         <img src="https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png?v=1737116109&width=1200" alt="@Text("MALIEV pneumatic injection molding machine", "เครื่องฉีดพลาสติกระบบลม MALIEV")" loading="lazy" />
+        <div class="machine-feature-label">
+            <span>@Text("Workshop-built", "ผลิตในเวิร์กช็อป")</span>
+            <strong>@Text("Pneumatic injection molding", "เครื่องฉีดพลาสติกระบบลม")</strong>
+        </div>
     </div>
-    <div>
+    <div class="machine-feature-copy">
+        <p class="machine-feature-kicker">@Text("Small-batch molding machine", "เครื่องสำหรับงานฉีดจำนวนน้อย")</p>
         <h2 id="imm-title" class="h-display">
             @Text("Pneumatic injection", "เครื่องฉีดพลาสติก")
             <br />
             <span class="accent-blue">@Text("molding machine.", "ระบบลม")</span>
         </h2>
         <p class="lede">@Text("Bench-top air-driven injection molding for small-batch thermoplastic parts, tooling trials, makers, and R&D teams.", "เครื่องฉีดพลาสติกตั้งโต๊ะขับเคลื่อนด้วยลม สำหรับชิ้นงานเทอร์โมพลาสติกจำนวนน้อย ทดลองแม่พิมพ์ เมกเกอร์ และทีม R&D")</p>
-        <div class="dark-stat-grid">
+        <div class="machine-stat-grid">
             <div><strong>50g</strong><small>@Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")</small></div>
             <div><strong>180°C</strong><small>@Text("max melt", "อุณหภูมิสูงสุด")</small></div>
             <div><strong>6 bar</strong><small>@Text("air supply", "แรงดันลม")</small></div>
             <div><strong>14d</strong><small>@Text("lead time", "ระยะเวลา")</small></div>
         </div>
-        <div class="quote-actions">
+        <div class="machine-feature-points" aria-label="@Text("Machine fit", "ความเหมาะสมของเครื่อง")">
+            <span>@Text("Thermoplastic trials", "ทดลองเทอร์โมพลาสติก")</span>
+            <span>@Text("Tooling validation", "ตรวจแม่พิมพ์")</span>
+            <span>@Text("Maker and R&D ready", "พร้อมสำหรับเมกเกอร์และ R&D")</span>
+        </div>
+        <div class="quote-actions machine-actions">
             <a class="button primary" href="/shop/pneumatic-injection-molding-machine">@Text("Configure and buy", "ตั้งค่าและสั่งซื้อ")</a>
             <a class="button secondary" href="/contact">@Text("Ask about tooling", "สอบถามทูลลิ่ง")</a>
         </div>
