@@ -105,7 +105,8 @@ builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceCli
 builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
 builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
-builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService");
+builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 
 builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 {

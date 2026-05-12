@@ -636,6 +636,18 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies public shop catalog calls fail fast when CommerceService is unavailable.
+    /// </summary>
+    [Fact]
+    public void CommerceCatalogClientUsesPublicPageTimeout()
+    {
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+
+        Assert.Contains("ICommerceServiceClient, CommerceServiceClient", program);
+        Assert.Contains(".ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));", program);
+    }
+
+    /// <summary>
     /// Verifies the 3D gizmo runtime is lazy and constrained for mobile devices.
     /// </summary>
     [Fact]
