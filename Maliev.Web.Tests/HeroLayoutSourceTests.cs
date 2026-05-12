@@ -509,6 +509,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("auth-title-logo", signIn);
         Assert.Contains("src=\"/images/logo.svg\"", signIn);
+        Assert.Contains("auth-title-logo", signUp);
+        Assert.Contains("src=\"/images/logo.svg\"", signUp);
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signUp);
         Assert.Contains("auth-google-icon", googleButton);
@@ -521,6 +523,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-family: Roboto, var(--maliev-font-sans);", styles);
         Assert.Contains("family=Roboto:wght@500", app);
         Assert.DoesNotContain("@Text(\"Sign in to MALIEV\", \"เข้าสู่ระบบ MALIEV\")", signIn);
+        Assert.DoesNotContain("@Text(\"Create your MALIEV account\", \"สร้างบัญชี MALIEV\")", signUp);
         Assert.DoesNotContain("auth-google-mark", signIn);
         Assert.DoesNotContain("auth-google-mark", signUp);
         Assert.DoesNotContain(".auth-google-mark", styles);
