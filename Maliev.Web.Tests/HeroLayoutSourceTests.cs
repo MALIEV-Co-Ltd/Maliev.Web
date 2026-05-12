@@ -562,6 +562,28 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the mobile navigation opens as a viewport overlay instead of growing the sticky header.
+    /// </summary>
+    [Fact]
+    public void MobileNavigationDoesNotGrowStickyHeader()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("--site-header-height: 66px;", styles);
+        Assert.Contains("--site-header-height: 60px;", styles);
+        Assert.Contains(".mobile-nav.open", styles);
+        Assert.Contains("position: fixed;", styles);
+        Assert.Contains("top: var(--site-header-height);", styles);
+        Assert.Contains("left: 0;", styles);
+        Assert.Contains("right: 0;", styles);
+        Assert.Contains("max-height: calc(100svh - var(--site-header-height));", styles);
+        Assert.Contains("overflow-y: auto;", styles);
+        Assert.Contains("background: var(--paper);", styles);
+        Assert.Contains("border-bottom: 1px solid var(--rule);", styles);
+        Assert.Contains("-webkit-overflow-scrolling: touch;", styles);
+    }
+
+    /// <summary>
     /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
     /// </summary>
     [Fact]

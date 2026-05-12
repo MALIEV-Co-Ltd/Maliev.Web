@@ -185,6 +185,7 @@ main {
 }
 
 .site-header {
+  --site-header-height: 66px;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -2756,9 +2757,21 @@ html:lang(th) .h1 {
 
   .mobile-nav.open {
     display: grid;
-    grid-column: 1 / -1;
+    position: fixed;
+    top: var(--site-header-height);
+    left: 0;
+    right: 0;
+    z-index: 49;
     gap: 12px;
-    padding: 10px 0 18px;
+    max-height: calc(100svh - var(--site-header-height));
+    padding: 10px 24px 18px;
+    overflow-y: auto;
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    box-shadow: var(--header-shadow), rgba(0, 0, 0, .10) 0 18px 36px -28px;
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-nav a {
@@ -2883,8 +2896,14 @@ html:lang(th) .h1 {
   }
 
   .site-header {
+    --site-header-height: 60px;
     min-height: 60px;
     gap: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .mobile-nav.open {
     padding-left: 16px;
     padding-right: 16px;
   }
