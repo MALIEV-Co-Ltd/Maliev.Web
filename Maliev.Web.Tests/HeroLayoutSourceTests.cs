@@ -29,15 +29,19 @@ public sealed class HeroLayoutSourceTests
     public void HomeHeroMergesStartQuoteIntoDropzone()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
 
-        Assert.Contains("landing-quote-dropzone", source);
+        Assert.Contains("<QuoteDropzone", source);
         Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
-        Assert.Contains("Icons.Material.Filled.CloudUpload", source);
-        Assert.Contains("Icons.Material.Filled.ArrowForward", source);
-        Assert.Contains("landing-quote-dropzone-icon", source);
-        Assert.Contains("landing-quote-dropzone-action", source);
-        Assert.DoesNotContain("StartIcon=", source);
-        Assert.DoesNotContain("EndIcon=", source);
+        Assert.Contains("Class=\"final-dropzone\"", source);
+        Assert.Contains("landing-quote-dropzone", dropzone);
+        Assert.Contains("Icons.Material.Filled.CloudUpload", dropzone);
+        Assert.Contains("Icons.Material.Filled.ArrowForward", dropzone);
+        Assert.Contains("landing-quote-dropzone-icon", dropzone);
+        Assert.Contains("landing-quote-dropzone-action", dropzone);
+        Assert.DoesNotContain("StartIcon=", dropzone);
+        Assert.DoesNotContain("EndIcon=", dropzone);
+        Assert.DoesNotContain("class=\"quote-dropzone final-dropzone\"", source);
         Assert.DoesNotContain("landing-shop-button", source);
         Assert.DoesNotContain("<a class=\"button primary\" href=\"/quote\">@L[\"StartQuote\"]</a>", source);
         Assert.DoesNotContain("quote-empty", source);
@@ -59,7 +63,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("quote-flow-band", source);
         Assert.Contains("blog-grid", source);
         Assert.Contains("SiteContent.BlogPosts", source);
-        Assert.Contains("final-dropzone-arrow", source);
         Assert.Contains("case-card-media", source);
         Assert.Contains("logo-heading", source);
         Assert.Contains("/images/logo.svg", source);
@@ -81,9 +84,13 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("Build. Test. Produce.", source);
         Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
         Assert.DoesNotContain("<span class=\"button primary\">@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")</span>", source);
+        Assert.DoesNotContain("final-dropzone-arrow", source);
+        Assert.DoesNotContain(".final-dropzone-arrow", styles);
+        Assert.DoesNotContain(".final-dropzone-icon", styles);
+        Assert.DoesNotContain(".final-dropzone-copy", styles);
         Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
-        Assert.Contains(".final-dropzone-arrow", styles);
+        Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains(".social-link", styles);
     }

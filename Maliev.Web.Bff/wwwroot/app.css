@@ -41,7 +41,6 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .11) 0%, rgba(10, 114, 239, .05) 36%, transparent 72%);
-  --final-dropzone-surface: linear-gradient(180deg, #fff 0%, #f6fbff 100%);
   --media-shell: #111419;
   --danger-surface: #a21616;
   --danger-text: #ffffff;
@@ -100,7 +99,6 @@ html[data-theme="dark"] {
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .24) 0%, rgba(91, 167, 255, .09) 38%, transparent 74%);
-  --final-dropzone-surface: linear-gradient(180deg, #141b26 0%, #0e1b2d 100%);
   --media-shell: #090c10;
   --danger-surface: #8f1f1f;
   --danger-text: #ffffff;
@@ -609,8 +607,7 @@ html:lang(th) .h1 {
   width: 100%;
 }
 
-.landing-quote-dropzone.mud-button-root,
-.quote-dropzone {
+.landing-quote-dropzone.mud-button-root {
   display: grid;
   gap: 10px;
   width: 100%;
@@ -624,9 +621,6 @@ html:lang(th) .h1 {
   box-shadow: var(--shadow-card);
   text-align: left;
   text-transform: none;
-}
-
-.landing-quote-dropzone.mud-button-root {
   display: inline-flex;
   transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
   padding: 0;
@@ -636,11 +630,6 @@ html:lang(th) .h1 {
   border-color: var(--blue);
   box-shadow: var(--shadow-card), 0 0 0 4px color-mix(in srgb, var(--blue) 16%, transparent);
   transform: translateY(-1px);
-}
-
-.quote-dropzone .button {
-  width: fit-content;
-  margin-top: 8px;
 }
 
 .landing-quote-dropzone .mud-button-label {
@@ -673,14 +662,12 @@ html:lang(th) .h1 {
   min-width: 0;
 }
 
-.landing-quote-dropzone-copy strong,
-.quote-dropzone strong {
+.landing-quote-dropzone-copy strong {
   font-size: 1rem;
   font-weight: 600;
 }
 
-.landing-quote-dropzone-copy small,
-.quote-dropzone small {
+.landing-quote-dropzone-copy small {
   color: var(--muted);
   font-size: .82rem;
   line-height: 1.45;
@@ -1096,6 +1083,7 @@ html:lang(th) .h1 {
 .logo-heading img {
   width: 3.05em;
   height: auto;
+  filter: var(--logo-filter);
   transform: translateY(.04em);
 }
 
@@ -1105,46 +1093,7 @@ html:lang(th) .h1 {
 }
 
 .final-dropzone {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 18px;
-  min-height: 210px;
-  padding: 24px;
-  border-color: rgba(10, 114, 239, .45);
-  background: var(--final-dropzone-surface);
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-}
-
-.final-dropzone:hover {
-  border-color: var(--blue);
-  box-shadow: var(--shadow-card), 0 0 0 4px rgba(10, 114, 239, .10);
-  transform: translateY(-1px);
-}
-
-.final-dropzone-icon {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  color: var(--inverse-text);
-  background: var(--inverse-surface);
-  border-radius: var(--radius);
-}
-
-.final-dropzone-copy {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.final-dropzone-arrow {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  color: var(--blue-on);
-  background: var(--blue);
-  border-radius: var(--radius);
+  align-self: stretch;
 }
 
 .contact-layout {
@@ -1980,25 +1929,6 @@ html:lang(th) .h1 {
   .service-stat-strip,
   .form-grid {
     grid-template-columns: 1fr;
-  }
-
-  .final-dropzone {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 26px 18px;
-    text-align: center;
-  }
-
-  .final-dropzone-copy {
-    justify-items: center;
-  }
-
-  .final-dropzone-copy small {
-    max-width: 34rem;
-  }
-
-  .final-dropzone-arrow {
-    margin-top: 4px;
   }
 
   .feature-band,

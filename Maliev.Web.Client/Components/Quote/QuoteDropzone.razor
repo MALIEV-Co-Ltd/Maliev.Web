@@ -1,0 +1,41 @@
+<MudButton Href="@Href"
+           Variant="Variant.Text"
+           Color="Color.Inherit"
+           Class="@ButtonClass"
+           aria-label="@AriaLabel">
+    <span class="landing-quote-dropzone-icon" aria-hidden="true">
+        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+    </span>
+    <span class="landing-quote-dropzone-copy">
+        <strong>@Title</strong>
+        <small>@Description</small>
+    </span>
+    <span class="landing-quote-dropzone-action">
+        <span>@ActionText</span>
+        <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+    </span>
+</MudButton>
+
+@code {
+    [Parameter]
+    public string Href { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Description { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ActionText { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    private string ButtonClass => string.IsNullOrWhiteSpace(Class)
+        ? "landing-quote-dropzone"
+        : $"landing-quote-dropzone {Class}";
+}

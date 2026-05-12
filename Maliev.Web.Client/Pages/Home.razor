@@ -17,23 +17,11 @@
         </h1>
         <p>@Text("Upload CAD, review DFM feedback, adjust process, material, finish, and quantity, then continue straight into production ordering.", "อัปโหลด CAD ตรวจ DFM ปรับกระบวนการ วัสดุ ผิวงาน และจำนวน แล้วสั่งผลิตต่อได้ทันทีเมื่อพร้อม")</p>
         <div class="landing-hero-actions">
-            <MudButton Href="@SiteContent.QuoteNewUrl"
-                       Variant="Variant.Text"
-                       Color="Color.Inherit"
-                       Class="landing-quote-dropzone"
-                       aria-label="@Text("Get part price", "ดูราคาชิ้นงาน")">
-                <span class="landing-quote-dropzone-icon" aria-hidden="true">
-                    <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
-                </span>
-                <span class="landing-quote-dropzone-copy">
-                    <strong>@Text("Upload CAD to price your part", "อัปโหลด CAD เพื่อดูราคาชิ้นงาน")</strong>
-                    <small>@Text("STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.", "รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้")</small>
-                </span>
-                <span class="landing-quote-dropzone-action">
-                    <span>@Text("Get part price", "ดูราคาชิ้นงาน")</span>
-                    <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
-                </span>
-            </MudButton>
+            <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
+                           Title="@QuoteDropzoneTitle"
+                           Description="@QuoteDropzoneDescription"
+                           ActionText="@QuoteDropzoneAction"
+                           AriaLabel="@QuoteDropzoneAction" />
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
             @foreach (var metric in SiteContent.HeroMetrics)
@@ -199,18 +187,12 @@
         <h2 id="final-cta-title" class="h-display">@Text("Ready when your CAD is.", "พร้อมเมื่อไฟล์ CAD ของคุณพร้อม")</h2>
         <p class="lede">@Text("Send geometry to the quote engine, then configure process, material, finish, quantity, tolerance, and delivery expectations.", "ส่ง Geometry เข้าระบบราคา แล้วเลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และความคาดหวังเรื่องจัดส่ง")</p>
     </div>
-    <a class="quote-dropzone final-dropzone" href="@SiteContent.QuoteNewUrl">
-        <span class="final-dropzone-icon" aria-hidden="true">
-            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
-        </span>
-        <span class="final-dropzone-copy">
-            <strong>@Text("Upload CAD to price your part", "อัปโหลด CAD เพื่อดูราคาชิ้นงาน")</strong>
-            <small>@Text("STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.", "รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้")</small>
-        </span>
-        <span class="final-dropzone-arrow" aria-hidden="true">
-            <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Medium" />
-        </span>
-    </a>
+    <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
+                   Class="final-dropzone"
+                   Title="@QuoteDropzoneTitle"
+                   Description="@QuoteDropzoneDescription"
+                   ActionText="@QuoteDropzoneAction"
+                   AriaLabel="@QuoteDropzoneAction" />
 </section>
 
 @code {
@@ -231,6 +213,14 @@
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
+
+    private string QuoteDropzoneTitle => Text("Upload CAD to price your part", "อัปโหลด CAD เพื่อดูราคาชิ้นงาน");
+
+    private string QuoteDropzoneDescription => Text(
+        "STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.",
+        "รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้");
+
+    private string QuoteDropzoneAction => Text("Get part price", "ดูราคาชิ้นงาน");
 
     private static string ServiceCardClass(ServicePageContent service)
     {
