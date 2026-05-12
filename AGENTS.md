@@ -1,5 +1,18 @@
 # Maliev.Web Agent Notes
 
+## Crawling And Sitemaps
+
+Any change that adds, removes, renames, or materially changes public marketing routes, ad landing URLs, localized pages, catalog pages, blog content, or other crawlable customer-facing content must create or update crawler files in the same commit.
+
+Required crawlability work:
+
+- Create or update `robots.txt` so crawlers can discover the current sitemap entry points.
+- Create or update sitemap files for public site URLs, including service landing routes used by Google Ads.
+- Keep sitemap URLs canonical and production-facing, using `https://www.maliev.com/` unless the deployment domain changes.
+- Include localized public routes when they have distinct crawlable URLs.
+- Do not include private account, checkout, cart, upload, quote draft, health, API, or internal BFF endpoints in sitemaps.
+- Add or update tests/build checks when sitemap or robots generation is code-driven.
+
 ## Google Ads Landing Routes
 
 Do not rediscover the Google Ads route list manually. The ad landing page is the home route `/` with targeting supplied by query string. Use `service` as the stable ad final URL parameter.
