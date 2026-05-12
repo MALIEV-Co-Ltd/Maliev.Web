@@ -1997,6 +1997,21 @@ html:lang(th) .h1 {
   font-size: .86rem;
 }
 
+.auth-field-help {
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.auth-form input:user-invalid {
+  border-color: var(--red);
+  box-shadow: color-mix(in srgb, var(--red) 32%, transparent) 0 0 0 1px;
+}
+
+.auth-form input:user-valid {
+  border-color: color-mix(in srgb, var(--line-green) 52%, var(--rule));
+}
+
 .auth-links,
 .account-form-actions,
 .address-actions {

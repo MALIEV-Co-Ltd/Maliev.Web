@@ -35,11 +35,13 @@
                 </div>
                 <label>
                     @Text("Email", "อีเมล")
-                    <input name="Email" type="email" autocomplete="email" required />
+                    <input name="Email" type="email" autocomplete="email" inputmode="email" placeholder="name@company.com" aria-describedby="sign-up-email-requirements" required />
+                    <small id="sign-up-email-requirements" class="auth-field-help">@Text("Use a full email address, for example name@company.com.", "ใช้อีเมลแบบเต็ม เช่น name@company.com")</small>
                 </label>
                 <label>
                     @Text("Password", "รหัสผ่าน")
-                    <input name="Password" type="password" autocomplete="new-password" minlength="12" required />
+                    <input name="Password" type="password" autocomplete="new-password" minlength="6" aria-describedby="sign-up-password-requirements" required />
+                    <small id="sign-up-password-requirements" class="auth-field-help">@Text("Password must be at least 6 characters.", "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร")</small>
                 </label>
                 <button class="button primary" type="submit">@Text("Create account", "สร้างบัญชี")</button>
             </form>

@@ -596,6 +596,42 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies email auth forms explain requirements and use browser-native live validation constraints.
+    /// </summary>
+    [Fact]
+    public void AuthEmailFormsExplainRequirementsAndUseLiveValidation()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
+        var resetPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthResetPassword.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("id=\"sign-in-email-requirements\"", signIn);
+        Assert.Contains("id=\"sign-in-password-requirements\"", signIn);
+        Assert.Contains("aria-describedby=\"sign-in-email-requirements\"", signIn);
+        Assert.Contains("aria-describedby=\"sign-in-password-requirements\"", signIn);
+        Assert.Contains("minlength=\"6\"", signIn);
+        Assert.Contains("@Text(\"Use a full email address, for example name@company.com.\", \"ใช้อีเมลแบบเต็ม เช่น name@company.com\")", signIn);
+        Assert.Contains("@Text(\"Password must be at least 6 characters.\", \"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร\")", signIn);
+
+        Assert.Contains("id=\"sign-up-email-requirements\"", signUp);
+        Assert.Contains("id=\"sign-up-password-requirements\"", signUp);
+        Assert.Contains("aria-describedby=\"sign-up-email-requirements\"", signUp);
+        Assert.Contains("aria-describedby=\"sign-up-password-requirements\"", signUp);
+        Assert.Contains("minlength=\"6\"", signUp);
+        Assert.DoesNotContain("minlength=\"12\"", signUp);
+
+        Assert.Contains("id=\"reset-password-requirements\"", resetPassword);
+        Assert.Contains("aria-describedby=\"reset-password-requirements\"", resetPassword);
+        Assert.Contains("minlength=\"6\"", resetPassword);
+        Assert.DoesNotContain("minlength=\"12\"", resetPassword);
+
+        Assert.Contains(".auth-field-help", styles);
+        Assert.Contains(".auth-form input:user-invalid", styles);
+        Assert.Contains(".auth-form input:user-valid", styles);
+    }
+
+    /// <summary>
     /// Verifies the mobile navigation opens as a viewport overlay instead of growing the sticky header.
     /// </summary>
     [Fact]
