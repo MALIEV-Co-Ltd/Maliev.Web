@@ -21,15 +21,18 @@
                        Variant="Variant.Text"
                        Color="Color.Inherit"
                        Class="landing-quote-dropzone"
-                       StartIcon="@Icons.Material.Filled.CloudUpload"
-                       IconClass="landing-quote-dropzone-icon"
-                       EndIcon="@Icons.Material.Filled.ArrowForward"
                        aria-label="@Text("Get part price", "ดูราคาชิ้นงาน")">
+                <span class="landing-quote-dropzone-icon" aria-hidden="true">
+                    <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+                </span>
                 <span class="landing-quote-dropzone-copy">
                     <strong>@Text("Upload CAD to price your part", "อัปโหลด CAD เพื่อดูราคาชิ้นงาน")</strong>
                     <small>@Text("STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.", "รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้")</small>
                 </span>
-                <span class="landing-quote-dropzone-action">@Text("Get part price", "ดูราคาชิ้นงาน")</span>
+                <span class="landing-quote-dropzone-action">
+                    <span>@Text("Get part price", "ดูราคาชิ้นงาน")</span>
+                    <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+                </span>
             </MudButton>
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">

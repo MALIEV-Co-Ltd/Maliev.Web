@@ -14,6 +14,8 @@
   --blue-soft: #ebf5ff;
   --blue-ink: #0068d6;
   --blue-on: #ffffff;
+  --line-green: #06c755;
+  --line-on: #ffffff;
   --pink: #de1d8d;
   --red: #ff5b4f;
   --radius: 8px;
@@ -626,7 +628,14 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone.mud-button-root {
   display: inline-flex;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
   padding: 0;
+}
+
+.landing-quote-dropzone.mud-button-root:hover {
+  border-color: var(--blue);
+  box-shadow: var(--shadow-card), 0 0 0 4px color-mix(in srgb, var(--blue) 16%, transparent);
+  transform: translateY(-1px);
 }
 
 .quote-dropzone .button {
@@ -637,10 +646,25 @@ html:lang(th) .h1 {
 .landing-quote-dropzone .mud-button-label {
   width: 100%;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   gap: 14px;
   align-items: center;
-  padding: 18px;
+  padding: 16px;
+}
+
+.landing-quote-dropzone-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-radius: var(--radius);
+  box-shadow: color-mix(in srgb, var(--blue) 14%, transparent) 0 0 0 1px inset;
+}
+
+.landing-quote-dropzone-icon .mud-icon-root {
+  font-size: 1.25rem;
 }
 
 .landing-quote-dropzone-copy {
@@ -663,11 +687,22 @@ html:lang(th) .h1 {
 }
 
 .landing-quote-dropzone-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
   color: var(--blue-on);
   background: var(--blue);
   border-radius: var(--radius);
-  padding: 10px 12px;
+  padding: 0 14px;
+  font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.landing-quote-dropzone-action .mud-icon-root {
+  font-size: 1rem;
 }
 
 .landing-hero-visual {
@@ -741,6 +776,7 @@ html:lang(th) .h1 {
 .metric-strip {
   flex-wrap: wrap;
   gap: 28px;
+  align-items: flex-start;
   margin-top: 32px;
 }
 
@@ -749,6 +785,10 @@ html:lang(th) .h1 {
 .stat-card {
   display: grid;
   gap: 6px;
+}
+
+.metric-strip div {
+  min-width: 118px;
 }
 
 .metric-strip strong,
@@ -1534,6 +1574,68 @@ html:lang(th) .h1 {
   color: var(--inverse-text);
 }
 
+.line-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 44px;
+  padding: 6px 12px 6px 6px;
+  background: rgba(255, 255, 255, .06);
+  border-radius: var(--radius);
+  box-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
+}
+
+.line-contact-link:hover {
+  color: var(--line-on);
+  background: var(--line-green);
+}
+
+.line-contact-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  color: var(--line-on);
+  background: var(--line-green);
+  border-radius: var(--radius);
+}
+
+.line-contact-link:hover .line-contact-icon {
+  color: var(--line-green);
+  background: var(--line-on);
+}
+
+.line-contact-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.line-contact-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.line-contact-copy strong {
+  color: var(--footer-text);
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.line-contact-copy small {
+  color: var(--footer-muted);
+  font-size: .78rem;
+}
+
+.line-contact-link:hover .line-contact-copy strong,
+.line-contact-link:hover .line-contact-copy small {
+  color: var(--line-on);
+}
+
 .footer-social {
   flex-wrap: wrap;
   gap: 10px;
@@ -1559,6 +1661,15 @@ html:lang(th) .h1 {
   width: 20px;
   height: 20px;
   fill: currentColor;
+}
+
+.footer-legal {
+  grid-column: 1 / -1;
+  padding-top: 20px;
+  color: var(--footer-muted);
+  border-top: 1px solid var(--inverse-rule);
+  font-size: .82rem;
+  line-height: 1.5;
 }
 
 .sr-only {
@@ -1804,16 +1915,23 @@ html:lang(th) .h1 {
   }
 
   .landing-quote-dropzone.mud-button-root {
-    min-height: 136px;
+    min-height: 124px;
   }
 
   .landing-quote-dropzone .mud-button-label {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .landing-quote-dropzone-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .landing-quote-dropzone-action {
-    grid-column: 1 / -1;
-    text-align: center;
+    min-height: 38px;
+    padding: 0 12px;
   }
 
   .landing-hero-visual {
@@ -1885,7 +2003,7 @@ html:lang(th) .h1 {
   }
 
   .footer-brand,
-  .footer-column:last-child {
+  .footer-connect {
     grid-column: 1 / -1;
   }
 
@@ -1912,7 +2030,7 @@ html:lang(th) .h1 {
   }
 
   .footer-brand,
-  .footer-column:last-child {
+  .footer-connect {
     grid-column: auto;
   }
 }
@@ -1932,5 +2050,10 @@ html:lang(th) .h1 {
 
   .language-toggle {
     display: none;
+  }
+
+  .landing-quote-dropzone-action {
+    padding: 0 10px;
+    font-size: .82rem;
   }
 }

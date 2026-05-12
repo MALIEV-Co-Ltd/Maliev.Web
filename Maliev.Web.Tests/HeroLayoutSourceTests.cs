@@ -33,7 +33,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone", source);
         Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("Icons.Material.Filled.CloudUpload", source);
+        Assert.Contains("Icons.Material.Filled.ArrowForward", source);
+        Assert.Contains("landing-quote-dropzone-icon", source);
         Assert.Contains("landing-quote-dropzone-action", source);
+        Assert.DoesNotContain("StartIcon=", source);
+        Assert.DoesNotContain("EndIcon=", source);
         Assert.DoesNotContain("landing-shop-button", source);
         Assert.DoesNotContain("<a class=\"button primary\" href=\"/quote\">@L[\"StartQuote\"]</a>", source);
         Assert.DoesNotContain("quote-empty", source);
@@ -63,6 +67,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ThreeDimensionalPrinterImageUrl", content);
         Assert.Contains("ThreeDimensionalScannerImageUrl", content);
         Assert.Contains("InjectionMoldingLineImageUrl", content);
+        Assert.Contains("founded in Thailand", content);
+        Assert.Contains("parts produced", content);
+        Assert.Contains("businesses served", content);
+        Assert.DoesNotContain("feedback before order", content);
+        Assert.DoesNotContain("continue when ready", content);
         Assert.DoesNotContain("/images/home/", content);
         Assert.DoesNotContain("shop-section", source);
         Assert.DoesNotContain("trust-band", source);
@@ -94,6 +103,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Khlong Khoi", source);
         Assert.Contains("info@maliev.com", source);
         Assert.Contains("page.line.me/maliev", source);
+        Assert.Contains("line-contact-link", source);
+        Assert.Contains("line-contact-icon", source);
+        Assert.Contains("Official Account @@maliev", source);
         Assert.Contains("facebook.com/maliev.manufacturing", source);
         Assert.Contains("youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig", source);
         Assert.Contains("instagram.com/maliev.manufacturing", source);
@@ -105,6 +117,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(">Facebook</a>", source);
         Assert.DoesNotContain(">YouTube</a>", source);
         Assert.DoesNotContain(">Instagram</a>", source);
+        Assert.DoesNotContain(">LINE @@maliev</a>", source);
+        Assert.Contains("FoundingYear = 2018", source);
+        Assert.Contains("DateTime.Today.Year", source);
+        Assert.Contains("All rights reserved", source);
+        Assert.Contains("footer-legal", source);
         Assert.DoesNotContain("<strong>MALIEV Co., Ltd.</strong>", source);
         Assert.DoesNotContain("Nonthaburi, Thailand. Manufacturing services, machines, and production support.", source);
     }

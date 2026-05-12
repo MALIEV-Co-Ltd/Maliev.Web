@@ -20,9 +20,9 @@ internal static class SiteContent
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
     [
-        new(Text("Instant", "ทันที"), Text("live part pricing", "ดูราคาชิ้นงานได้ทันที")),
-        new(Text("DFM", "DFM"), Text("feedback before order", "ตรวจความเหมาะสมก่อนสั่งผลิต")),
-        new(Text("Order", "สั่งผลิต"), Text("continue when ready", "สั่งผลิตต่อได้ทันที"))
+        new(Text("2018", "2018"), Text("founded in Thailand", "เริ่มต้นในประเทศไทย")),
+        new(Text("12k+", "12k+"), Text("parts produced", "ชิ้นงานที่ผลิตแล้ว")),
+        new(Text("850+", "850+"), Text("businesses served", "ธุรกิจที่ให้บริการ"))
     ];
 
     internal static readonly IReadOnlyList<ServicePageContent> Services =
