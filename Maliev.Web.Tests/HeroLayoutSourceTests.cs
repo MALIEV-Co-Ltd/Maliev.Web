@@ -229,6 +229,19 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies compact hero pages do not inherit oversized landing-section spacing before their content.
+    /// </summary>
+    [Fact]
+    public void CompactHeroPagesUseTighterContentSpacing()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains(".page-hero.compact + .section", styles);
+        Assert.Contains("padding-top: clamp(40px, 5vw, 60px);", styles);
+        Assert.Contains("padding-top: 38px;", styles);
+    }
+
+    /// <summary>
     /// Verifies the quote page sends custom manufacturing work to the dedicated quote engine.
     /// </summary>
     [Fact]

@@ -598,6 +598,10 @@ html:lang(th) .h1 {
   gap: 18px;
 }
 
+.page-hero.compact + .section {
+  padding-top: clamp(40px, 5vw, 60px);
+}
+
 .landing-hero {
   position: relative;
   display: grid;
@@ -2693,6 +2697,10 @@ html:lang(th) .h1 {
   .section {
     padding-top: 64px;
     padding-bottom: 64px;
+  }
+
+  .page-hero.compact + .section {
+    padding-top: 38px;
   }
 
   .page-hero {
