@@ -11,8 +11,6 @@
 @page "/blog"
 @page "/blog/{Slug}"
 @page "/account/quotes"
-@page "/account/orders"
-@page "/account/preferences"
 @inherits PreferenceAwareComponentBase
 @inject NavigationManager Navigation
 @inject MalievApiClient Api
@@ -388,7 +386,7 @@ else
 
     private string Eyebrow => Path switch
     {
-        "account/preferences" or "account/quotes" or "account/orders" => Text("Quote engine", "ระบบขอราคา"),
+        "account/quotes" => Text("Quote engine", "ระบบขอราคา"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("MALIEV Journal", "บทความ MALIEV"),
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("Case study", "ผลงาน"),
         "materials" => Text("Materials", "วัสดุ"),
@@ -408,8 +406,6 @@ else
         "case-studies" => Text("Case studies", "ผลงาน"),
         "blog" => Text("MALIEV Journal", "บทความ MALIEV"),
         "account/quotes" => Text("Saved quotes", "ใบเสนอราคาที่บันทึกไว้"),
-        "account/orders" => Text("Orders", "คำสั่งซื้อ"),
-        "account/preferences" => Text("Preferences", "การตั้งค่า"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => BlogPostTitle,
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CaseStudyTitle,
         _ => Text("About MALIEV", "เกี่ยวกับ MALIEV")
@@ -434,9 +430,7 @@ else
         "industries" => Text("MALIEV supports factories, designers, product builders, educators, and maintenance teams.", "MALIEV สนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
         "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
         "blog" => Text("Practical notes for preparing manufacturable parts and ordering from MALIEV.", "บันทึกเชิงปฏิบัติสำหรับเตรียมชิ้นงานให้ผลิตได้และสั่งงานกับ MALIEV"),
-        "account/preferences" => Text("Manage language and customer portal preferences in the quote engine.", "จัดการภาษาและการตั้งค่าพอร์ทัลลูกค้าในระบบราคา"),
         "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
-        "account/orders" => Text("Custom manufacturing orders now live in the dedicated quote engine.", "คำสั่งผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => Text("Manufacturing guidance for customers preparing custom parts and product work.", "คำแนะนำงานผลิตสำหรับลูกค้าที่เตรียมชิ้นงานเฉพาะและงานสินค้า"),
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => Text("How MALIEV turns files, samples, and requirements into production-ready work.", "วิธีที่ MALIEV เปลี่ยนไฟล์ ตัวอย่าง และความต้องการให้เป็นงานพร้อมผลิต"),
         _ => Text("MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand.", "MALIEV ผลิตเครื่องมือ เครื่องจักร สินค้าพิมพ์สามมิติ และชิ้นงานเฉพาะจากนนทบุรี ประเทศไทย")
@@ -488,7 +482,7 @@ else
             Section("Product orders", "คำสั่งซื้อสินค้า", "Prices, availability, and lead times are confirmed during checkout. MALIEV may contact you when shipping or configuration needs clarification.", "ราคา สถานะสินค้า และระยะเวลาจะยืนยันตอนชำระเงิน MALIEV อาจติดต่อหากต้องชี้แจงการจัดส่งหรือการตั้งค่า"),
             Section("Custom manufacturing", "งานผลิตเฉพาะแบบ", "Custom part pricing is based on submitted files, material, process, quantity, and accepted quotation. Requirement changes may require a new quote.", "ราคาชิ้นงานเฉพาะขึ้นกับไฟล์ วัสดุ กระบวนการ จำนวน และใบเสนอราคาที่อนุมัติ หากเปลี่ยนความต้องการอาจต้องออกใบเสนอราคาใหม่")
         ],
-        "account/preferences" or "account/quotes" or "account/orders" =>
+        "account/quotes" =>
         [
             Section("Dedicated quote portal", "พอร์ทัลราคาชิ้นงานโดยเฉพาะ", "Custom manufacturing account features live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ที่ quote.maliev.com เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
             Section("Product shop", "ร้านค้าสินค้า", "Product shopping remains on www.maliev.com and keeps a separate cart flow.", "การซื้อสินค้ายังอยู่ที่ www.maliev.com และใช้ตะกร้าแยกต่างหาก")
@@ -799,16 +793,12 @@ else
 
     private string PrimaryAction => Path switch
     {
-        "account/orders" => Text("Open order tracking", "เปิดหน้าติดตามคำสั่งซื้อ"),
-        "account/preferences" => Text("Open profile", "เปิดโปรไฟล์"),
         var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบราคา"),
         _ => Text("Get part price", "ดูราคาชิ้นงาน")
     };
 
     private string PrimaryHref => Path switch
     {
-        "account/orders" => SiteContent.QuoteOrdersUrl,
-        "account/preferences" => SiteContent.QuoteProfileUrl,
         _ => SiteContent.QuoteNewUrl
     };
     private string SecondaryAction => Path == "contact" ? Text("Shop products", "เลือกซื้อสินค้า") : Text("Contact MALIEV", "ติดต่อ MALIEV");

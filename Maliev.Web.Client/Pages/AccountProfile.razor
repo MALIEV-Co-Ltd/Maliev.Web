@@ -1,0 +1,142 @@
+@page "/account/profile"
+@attribute [Authorize]
+@inherits PreferenceAwareComponentBase
+@inject MalievApiClient Api
+
+<PageTitle>@Text("Profile", "โปรไฟล์") - MALIEV</PageTitle>
+
+<section class="page-hero compact account-hero">
+    <p class="eyebrow">@Text("Profile", "โปรไฟล์")</p>
+    <h1>@Text("Customer details", "ข้อมูลลูกค้า")</h1>
+    <p>@Text("These details are stored on your shared MALIEV customer profile for the website, quote workspace, and employee support team.", "ข้อมูลนี้บันทึกในโปรไฟล์ลูกค้า MALIEV ที่ใช้ร่วมกันระหว่างเว็บไซต์ พื้นที่ขอราคา และทีมดูแลลูกค้า")</p>
+</section>
+
+<section class="section account-two-column">
+    <div class="account-nav-card">
+        <a href="/account">@Text("Account home", "หน้าบัญชี")</a>
+        <a class="active" href="/account/profile">@Text("Profile", "โปรไฟล์")</a>
+        <a href="/account/addresses">@Text("Addresses", "ที่อยู่")</a>
+        <a href="/account/orders">@Text("Orders", "คำสั่งซื้อ")</a>
+        <a href="/account/preferences">@Text("Preferences", "การตั้งค่า")</a>
+    </div>
+
+    <div class="account-panel">
+        @if (_loading)
+        {
+            <p class="load-message">@Text("Loading profile...", "กำลังโหลดโปรไฟล์...")</p>
+        }
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(_status))
+            {
+                <p class="success-message">@_status</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
+
+            <EditForm Model="_form" OnValidSubmit="SaveAsync" FormName="account-profile-form" class="account-form">
+                <div class="form-grid two">
+                    <label>
+                        @Text("First name", "ชื่อ")
+                        <InputText @bind-Value="_form.FirstName" />
+                    </label>
+                    <label>
+                        @Text("Last name", "นามสกุล")
+                        <InputText @bind-Value="_form.LastName" />
+                    </label>
+                </div>
+                <div class="form-grid two">
+                    <label>
+                        @Text("Email", "อีเมล")
+                        <InputText type="email" @bind-Value="_form.Email" />
+                    </label>
+                    <label>
+                        @Text("Mobile", "โทรศัพท์มือถือ")
+                        <InputText @bind-Value="_form.Mobile" />
+                    </label>
+                </div>
+                <div class="form-grid two">
+                    <label>
+                        @Text("Preferred language", "ภาษาที่ต้องการ")
+                        <InputSelect @bind-Value="_form.PreferredLanguage">
+                            <option value="en">English</option>
+                            <option value="th">ไทย</option>
+                        </InputSelect>
+                    </label>
+                    <label>
+                        @Text("Timezone", "เขตเวลา")
+                        <InputText @bind-Value="_form.Timezone" />
+                    </label>
+                </div>
+                <button class="button primary" type="submit" disabled="@_saving">@Text("Save profile", "บันทึกโปรไฟล์")</button>
+            </EditForm>
+        }
+    </div>
+</section>
+
+@code {
+    private readonly CustomerAccountProfileUpdateRequest _form = new();
+    private bool _loading = true;
+    private bool _saving;
+    private string? _status;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var profile = await Api.GetAccountProfileAsync();
+            _form.FirstName = profile.FirstName;
+            _form.LastName = profile.LastName;
+            _form.Email = profile.Email;
+            _form.Mobile = profile.Mobile;
+            _form.PreferredLanguage = string.IsNullOrWhiteSpace(profile.PreferredLanguage)
+                ? (Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en")
+                : profile.PreferredLanguage;
+            _form.Timezone = string.IsNullOrWhiteSpace(profile.Timezone) ? "Asia/Bangkok" : profile.Timezone;
+            _form.Version = profile.Version;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _error = null;
+        _status = null;
+        try
+        {
+            var profile = await Api.UpdateAccountProfileAsync(_form);
+            _form.Version = profile.Version;
+            _status = Text("Profile saved.", "บันทึกโปรไฟล์แล้ว");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

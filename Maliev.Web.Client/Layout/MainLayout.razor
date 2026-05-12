@@ -48,7 +48,7 @@
                                Class="nav-icon-button"
                                aria-label="@Text("Cart", "ตะกร้า")" />
             </MudBadge>
-            <MudIconButton Href="@SiteContent.QuoteProfileUrl"
+            <MudIconButton Href="/account"
                            Icon="@Icons.Material.Filled.AccountCircle"
                            Variant="Variant.Text"
                            Color="Color.Inherit"
@@ -72,6 +72,8 @@
             <NavLink href="/case-studies" @onclick="CloseMobileNav">@Text("Case studies", "ผลงาน")</NavLink>
             <NavLink href="/blog" @onclick="CloseMobileNav">@Text("Journal", "บทความ")</NavLink>
             <NavLink href="/contact" @onclick="CloseMobileNav">@Text("Contact", "ติดต่อ")</NavLink>
+            <NavLink href="/account" @onclick="CloseMobileNav">@Text("Account", "บัญชี")</NavLink>
+            <NavLink href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
             <a href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
         </nav>
     </header>
@@ -104,7 +106,7 @@
             <h2>@Text("Support", "ช่วยเหลือ")</h2>
             <NavLink href="/faq">FAQ</NavLink>
             <NavLink href="/shipping-returns">@Text("Shipping", "การจัดส่ง")</NavLink>
-            <a href="@SiteContent.QuoteOrdersUrl">@Text("Track orders", "ติดตามคำสั่งซื้อ")</a>
+            <NavLink href="/account/orders">@Text("Track orders", "ติดตามคำสั่งซื้อ")</NavLink>
             <NavLink href="/privacy">@Text("Privacy", "ความเป็นส่วนตัว")</NavLink>
             <NavLink href="/terms">@Text("Terms", "เงื่อนไข")</NavLink>
         </nav>

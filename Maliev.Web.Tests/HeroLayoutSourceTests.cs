@@ -76,8 +76,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ThreeDimensionalScannerImageUrl", content);
         Assert.Contains("InjectionMoldingLineImageUrl", content);
         Assert.Contains("founded in Thailand", content);
+        Assert.Contains("12,000+", content);
         Assert.Contains("parts produced", content);
         Assert.Contains("businesses served", content);
+        Assert.DoesNotContain("12k+", content);
         Assert.DoesNotContain("feedback before order", content);
         Assert.DoesNotContain("continue when ready", content);
         Assert.DoesNotContain("/images/home/", content);
@@ -96,6 +98,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
+        Assert.Contains("home-services-section", source);
+        Assert.Contains(".home-services-section", styles);
+        Assert.Contains("padding-top: clamp(44px, 5vw, 72px);", styles);
+        Assert.Contains(".home-services-section .section-heading", styles);
+        Assert.Contains("margin-bottom: 30px;", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains(".social-link", styles);
     }
@@ -167,11 +174,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("MudBadge", source);
         Assert.Contains("Icons.Material.Filled.ShoppingCart", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
-        Assert.Contains("SiteContent.QuoteProfileUrl", source);
+        Assert.Contains("Href=\"/account\"", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.DoesNotContain("class=\"icon-link\"", source);
-        Assert.DoesNotContain("<NavLink href=\"/cart\"", source);
-        Assert.DoesNotContain("<NavLink href=\"/account/preferences\"", source);
     }
 
     /// <summary>
@@ -267,8 +272,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/shipping-returns\"", source);
         Assert.Contains("SubmitContactMessageAsync", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
-        Assert.Contains("SiteContent.QuoteProfileUrl", source);
-        Assert.Contains("SiteContent.QuoteOrdersUrl", source);
+        Assert.DoesNotContain("@page \"/account/orders\"", source);
+        Assert.DoesNotContain("@page \"/account/preferences\"", source);
         Assert.Contains("material-category-media", source);
         Assert.Contains("material-category-body", source);
         Assert.Contains("material-comparison-table", source);
@@ -294,6 +299,56 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);
+    }
+
+    /// <summary>
+    /// Verifies the public account area uses local authenticated routes backed by the Web BFF.
+    /// </summary>
+    [Fact]
+    public void AccountAreaUsesLocalCustomerSessionRoutes()
+    {
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+        var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+        var accountController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AccountController.cs");
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var routes = ReadRepoFile("Maliev.Web.Client", "Routes.razor");
+        var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
+        var profile = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountProfile.razor");
+        var addresses = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+        var preferences = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountPreferences.razor");
+        var orders = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor");
+
+        Assert.Contains("AddAuthentication", program);
+        Assert.Contains("AddCookie", program);
+        Assert.Contains("AddGoogle", program);
+        Assert.Contains("AddCascadingAuthenticationState", program);
+        Assert.Contains("UseAuthentication", program);
+        Assert.Contains("UseAuthorization", program);
+        Assert.Contains("IAuthServiceClient, AuthServiceClient", program);
+        Assert.Contains("ICustomerServiceClient, CustomerServiceClient", program);
+        Assert.Contains("ICountryServiceClient, CountryServiceClient", program);
+        Assert.Contains("customer_id", authController);
+        Assert.Contains("principal_id", authController);
+        Assert.Contains("[Route(\"web/v{version:apiVersion}/account\")]", accountController);
+        Assert.Contains("GetProfile", accountController);
+        Assert.Contains("GetAddresses", accountController);
+        Assert.Contains("GetOrders", accountController);
+        Assert.Contains("QuoteOrdersUrl", accountController);
+        Assert.Contains("Href=\"/account\"", layout);
+        Assert.Contains("<CascadingAuthenticationState>", routes);
+        Assert.Contains("<AuthorizeRouteView", routes);
+        Assert.Contains("@page \"/account\"", account);
+        Assert.Contains("@page \"/account/profile\"", profile);
+        Assert.Contains("@page \"/account/addresses\"", addresses);
+        Assert.Contains("@page \"/account/preferences\"", preferences);
+        Assert.Contains("@page \"/account/orders\"", orders);
+        Assert.Contains("@page \"/account/orders/{OrderId}\"", orders);
+        Assert.Contains("@attribute [Authorize]", account);
+        Assert.Contains("@attribute [Authorize]", profile);
+        Assert.Contains("@attribute [Authorize]", addresses);
+        Assert.Contains("@attribute [Authorize]", preferences);
+        Assert.Contains("@attribute [Authorize]", orders);
+        Assert.DoesNotContain("SiteContent.QuoteProfileUrl", layout);
     }
 
     /// <summary>

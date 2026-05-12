@@ -1,0 +1,160 @@
+@page "/account/preferences"
+@attribute [Authorize]
+@inherits PreferenceAwareComponentBase
+@inject MalievApiClient Api
+
+<PageTitle>@Text("Preferences", "การตั้งค่า") - MALIEV</PageTitle>
+
+<section class="page-hero compact account-hero">
+    <p class="eyebrow">@Text("Preferences", "การตั้งค่า")</p>
+    <h1>@Text("Language and display", "ภาษาและการแสดงผล")</h1>
+    <p>@Text("Choose the account language and browser theme used across the customer site.", "เลือกภาษาบัญชีและธีมที่ใช้บนเว็บไซต์ลูกค้า")</p>
+</section>
+
+<section class="section account-two-column">
+    <div class="account-nav-card">
+        <a href="/account">@Text("Account home", "หน้าบัญชี")</a>
+        <a href="/account/profile">@Text("Profile", "โปรไฟล์")</a>
+        <a href="/account/addresses">@Text("Addresses", "ที่อยู่")</a>
+        <a href="/account/orders">@Text("Orders", "คำสั่งซื้อ")</a>
+        <a class="active" href="/account/preferences">@Text("Preferences", "การตั้งค่า")</a>
+    </div>
+
+    <div class="account-panel">
+        @if (_loading)
+        {
+            <p class="load-message">@Text("Loading preferences...", "กำลังโหลดการตั้งค่า...")</p>
+        }
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(_status))
+            {
+                <p class="success-message">@_status</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
+
+            <div class="preference-grid">
+                <div class="preference-card">
+                    <span class="card-meta">@Text("Language", "ภาษา")</span>
+                    <h2>@Text("Account language", "ภาษาบัญชี")</h2>
+                    <div class="segmented-control">
+                        <button type="button" class="@EnglishCultureClass" @onclick="SetEnglishAsync">English</button>
+                        <button type="button" class="@ThaiCultureClass" @onclick="SetThaiAsync">ไทย</button>
+                    </div>
+                </div>
+
+                <div class="preference-card">
+                    <span class="card-meta">@Text("Theme", "ธีม")</span>
+                    <h2>@Text("Display theme", "ธีมการแสดงผล")</h2>
+                    <div class="segmented-control">
+                        <button type="button" class="@LightThemeClass" @onclick="SetLightThemeAsync">@Text("Light", "สว่าง")</button>
+                        <button type="button" class="@DarkThemeClass" @onclick="SetDarkThemeAsync">@Text("Dark", "มืด")</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="button primary" type="button" disabled="@_saving" @onclick="SaveAccountPreferencesAsync">@Text("Save account preferences", "บันทึกการตั้งค่าบัญชี")</button>
+        }
+    </div>
+</section>
+
+@code {
+    private CustomerAccountProfileDto? _profile;
+    private bool _loading = true;
+    private bool _saving;
+    private string? _status;
+    private string? _error;
+    private string EnglishCultureClass => CultureClass("en-US");
+    private string ThaiCultureClass => CultureClass("th-TH");
+    private string LightThemeClass => ThemeClass(PreferenceService.LightTheme);
+    private string DarkThemeClass => ThemeClass(PreferenceService.DarkTheme);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        try
+        {
+            _profile = await Api.GetAccountProfileAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private Task SetEnglishAsync()
+    {
+        return Preferences.SetCultureAsync("en-US");
+    }
+
+    private Task SetThaiAsync()
+    {
+        return Preferences.SetCultureAsync("th-TH");
+    }
+
+    private Task SetLightThemeAsync()
+    {
+        return Preferences.SetThemeAsync(PreferenceService.LightTheme);
+    }
+
+    private Task SetDarkThemeAsync()
+    {
+        return Preferences.SetThemeAsync(PreferenceService.DarkTheme);
+    }
+
+    private async Task SaveAccountPreferencesAsync()
+    {
+        if (_profile is null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _status = null;
+        _error = null;
+        try
+        {
+            _profile = await Api.UpdateAccountProfileAsync(new CustomerAccountProfileUpdateRequest
+            {
+                FirstName = _profile.FirstName,
+                LastName = _profile.LastName,
+                Email = _profile.Email,
+                Mobile = _profile.Mobile,
+                PreferredLanguage = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en",
+                Timezone = string.IsNullOrWhiteSpace(_profile.Timezone) ? "Asia/Bangkok" : _profile.Timezone,
+                Version = _profile.Version
+            });
+            _status = Text("Preferences saved.", "บันทึกการตั้งค่าแล้ว");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private string CultureClass(string culture)
+    {
+        return Preferences.Culture.Equals(culture, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+    }
+
+    private string ThemeClass(string theme)
+    {
+        return Preferences.Theme.Equals(theme, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

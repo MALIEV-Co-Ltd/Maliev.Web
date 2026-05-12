@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Forms;
+using Maliev.Web.Shared.Account;
 using Maliev.Web.Shared.Commerce;
 using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Quotes;
@@ -72,6 +73,57 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         var response = await httpClient.PostAsJsonAsync("web/v1/checkout/draft", request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<CheckoutDraftResponse>(cancellationToken) ?? new CheckoutDraftResponse();
+    }
+
+    internal async Task<CustomerAccountSessionDto> GetAccountSessionAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetJsonAsync<CustomerAccountSessionDto>("web/v1/account/session", cancellationToken) ?? new CustomerAccountSessionDto();
+    }
+
+    internal async Task<CustomerAccountProfileDto> GetAccountProfileAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetJsonAsync<CustomerAccountProfileDto>("web/v1/account/profile", cancellationToken) ?? new CustomerAccountProfileDto();
+    }
+
+    internal async Task<CustomerAccountProfileDto> UpdateAccountProfileAsync(CustomerAccountProfileUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PatchAsJsonAsync("web/v1/account/profile", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CustomerAccountProfileDto>(cancellationToken) ?? new CustomerAccountProfileDto();
+    }
+
+    internal async Task<IReadOnlyList<CustomerAddressDto>> GetAccountAddressesAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetJsonAsync<List<CustomerAddressDto>>("web/v1/account/addresses", cancellationToken) ?? [];
+    }
+
+    internal async Task<CustomerAddressDto> CreateAccountAddressAsync(CustomerAddressUpsertRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/account/addresses", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CustomerAddressDto>(cancellationToken) ?? new CustomerAddressDto();
+    }
+
+    internal async Task<CustomerAddressDto> UpdateAccountAddressAsync(Guid addressId, CustomerAddressUpsertRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PatchAsJsonAsync($"web/v1/account/addresses/{addressId}", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CustomerAddressDto>(cancellationToken) ?? new CustomerAddressDto();
+    }
+
+    internal async Task DeleteAccountAddressAsync(Guid addressId, uint version, CancellationToken cancellationToken = default)
+    {
+        using var message = new HttpRequestMessage(HttpMethod.Delete, $"web/v1/account/addresses/{addressId}")
+        {
+            Content = JsonContent.Create(new CustomerAddressDeleteRequest { Version = version })
+        };
+        var response = await httpClient.SendAsync(message, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    internal async Task<CustomerOrdersResponse> GetAccountOrdersAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetJsonAsync<CustomerOrdersResponse>("web/v1/account/orders", cancellationToken) ?? new CustomerOrdersResponse();
     }
 
     internal async Task<ContactMessageResponse> SubmitContactMessageAsync(ContactMessageRequest request, CancellationToken cancellationToken = default)

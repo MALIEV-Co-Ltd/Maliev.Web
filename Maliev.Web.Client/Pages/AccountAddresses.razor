@@ -1,0 +1,280 @@
+@page "/account/addresses"
+@attribute [Authorize]
+@inherits PreferenceAwareComponentBase
+@inject MalievApiClient Api
+
+<PageTitle>@Text("Addresses", "ที่อยู่") - MALIEV</PageTitle>
+
+<section class="page-hero compact account-hero">
+    <p class="eyebrow">@Text("Address book", "สมุดที่อยู่")</p>
+    <h1>@Text("Billing and shipping addresses", "ที่อยู่ออกบิลและจัดส่ง")</h1>
+    <p>@Text("Addresses are attached to the shared customer record. New addresses default to Thailand unless a specific country is supplied later by the address service.", "ที่อยู่ผูกกับข้อมูลลูกค้ากลาง ที่อยู่ใหม่จะใช้ประเทศไทยเป็นค่าเริ่มต้นจนกว่าระบบที่อยู่จะรองรับการเลือกประเทศโดยตรง")</p>
+</section>
+
+<section class="section account-two-column">
+    <div class="account-nav-card">
+        <a href="/account">@Text("Account home", "หน้าบัญชี")</a>
+        <a href="/account/profile">@Text("Profile", "โปรไฟล์")</a>
+        <a class="active" href="/account/addresses">@Text("Addresses", "ที่อยู่")</a>
+        <a href="/account/orders">@Text("Orders", "คำสั่งซื้อ")</a>
+        <a href="/account/preferences">@Text("Preferences", "การตั้งค่า")</a>
+    </div>
+
+    <div class="account-stack">
+        <div class="account-panel">
+            <div class="section-heading compact-heading">
+                <div>
+                    <p class="eyebrow">@Text("Saved addresses", "ที่อยู่ที่บันทึกไว้")</p>
+                    <h2>@Text("Customer address book", "สมุดที่อยู่ลูกค้า")</h2>
+                </div>
+            </div>
+
+            @if (_loading)
+            {
+                <p class="load-message">@Text("Loading addresses...", "กำลังโหลดที่อยู่...")</p>
+            }
+            else if (_addresses.Count == 0)
+            {
+                <div class="empty-state compact">
+                    <h3>@Text("No saved addresses yet", "ยังไม่มีที่อยู่ที่บันทึก")</h3>
+                    <p>@Text("Add the address your team uses for checkout and delivery.", "เพิ่มที่อยู่ที่ทีมของคุณใช้สำหรับชำระเงินและจัดส่ง")</p>
+                </div>
+            }
+            else
+            {
+                <div class="address-grid">
+                    @foreach (var address in _addresses)
+                    {
+                        <article class="address-card">
+                            <div>
+                                <span class="card-meta">@address.Type</span>
+                                <h3>@AddressTitle(address)</h3>
+                            </div>
+                            <p>@AddressLines(address)</p>
+                            <div class="address-actions">
+                                <button type="button" class="button secondary" @onclick="() => Edit(address)">@Text("Edit", "แก้ไข")</button>
+                                <button type="button" class="button secondary danger" @onclick="() => DeleteAsync(address)">@Text("Delete", "ลบ")</button>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="account-panel">
+            <div class="section-heading compact-heading">
+                <div>
+                    <p class="eyebrow">@Text("Address form", "ฟอร์มที่อยู่")</p>
+                    <h2>@(_editingAddressId.HasValue ? Text("Update address", "อัปเดตที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</h2>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_status))
+            {
+                <p class="success-message">@_status</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
+
+            <EditForm Model="_form" OnValidSubmit="SaveAsync" FormName="account-address-form" class="account-form">
+                <div class="form-grid two">
+                    <label>
+                        @Text("Type", "ประเภท")
+                        <InputSelect @bind-Value="_form.Type">
+                            <option value="Shipping">@Text("Shipping", "จัดส่ง")</option>
+                            <option value="Billing">@Text("Billing", "ออกบิล")</option>
+                        </InputSelect>
+                    </label>
+                    <label class="checkbox-label">
+                        <InputCheckbox @bind-Value="_form.IsDefault" />
+                        <span>@Text("Default address", "ที่อยู่เริ่มต้น")</span>
+                    </label>
+                </div>
+                <div class="form-grid two">
+                    <label>
+                        @Text("Recipient", "ผู้รับ")
+                        <InputText @bind-Value="_form.RecipientName" />
+                    </label>
+                    <label>
+                        @Text("Recipient phone", "เบอร์ผู้รับ")
+                        <InputText @bind-Value="_form.RecipientPhone" />
+                    </label>
+                </div>
+                <label class="form-full">
+                    @Text("Address line 1", "ที่อยู่บรรทัดที่ 1")
+                    <InputText @bind-Value="_form.AddressLine1" />
+                </label>
+                <label class="form-full">
+                    @Text("Address line 2", "ที่อยู่บรรทัดที่ 2")
+                    <InputText @bind-Value="_form.AddressLine2" />
+                </label>
+                <div class="form-grid three">
+                    <label>
+                        @Text("District", "เขต/อำเภอ")
+                        <InputText @bind-Value="_form.District" />
+                    </label>
+                    <label>
+                        @Text("City", "เมือง")
+                        <InputText @bind-Value="_form.City" />
+                    </label>
+                    <label>
+                        @Text("Province", "จังหวัด")
+                        <InputText @bind-Value="_form.StateProvince" />
+                    </label>
+                </div>
+                <label class="form-short">
+                    @Text("Postal code", "รหัสไปรษณีย์")
+                    <InputText @bind-Value="_form.PostalCode" />
+                </label>
+                <div class="account-form-actions">
+                    <button class="button primary" type="submit" disabled="@_saving">@(_editingAddressId.HasValue ? Text("Save address", "บันทึกที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</button>
+                    @if (_editingAddressId.HasValue)
+                    {
+                        <button class="button secondary" type="button" @onclick="ResetForm">@Text("Cancel edit", "ยกเลิกแก้ไข")</button>
+                    }
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</section>
+
+@code {
+    private readonly CustomerAddressUpsertRequest _form = new();
+    private List<CustomerAddressDto> _addresses = [];
+    private Guid? _editingAddressId;
+    private bool _loading = true;
+    private bool _saving;
+    private string? _status;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        ResetForm();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            _addresses = (await Api.GetAccountAddressesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _error = null;
+        _status = null;
+        try
+        {
+            if (_editingAddressId.HasValue)
+            {
+                await Api.UpdateAccountAddressAsync(_editingAddressId.Value, _form);
+                _status = Text("Address updated.", "อัปเดตที่อยู่แล้ว");
+            }
+            else
+            {
+                await Api.CreateAccountAddressAsync(_form);
+                _status = Text("Address added.", "เพิ่มที่อยู่แล้ว");
+            }
+
+            ResetForm();
+            _addresses = (await Api.GetAccountAddressesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteAsync(CustomerAddressDto address)
+    {
+        _error = null;
+        _status = null;
+        try
+        {
+            await Api.DeleteAccountAddressAsync(address.Id, address.Version);
+            _addresses.Remove(address);
+            _status = Text("Address deleted.", "ลบที่อยู่แล้ว");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void Edit(CustomerAddressDto address)
+    {
+        _editingAddressId = address.Id;
+        _form.Type = address.Type;
+        _form.IsDefault = address.IsDefault;
+        _form.AddressLine1 = address.AddressLine1;
+        _form.AddressLine2 = address.AddressLine2;
+        _form.AddressLine3 = address.AddressLine3;
+        _form.District = address.District;
+        _form.City = address.City;
+        _form.StateProvince = address.StateProvince;
+        _form.PostalCode = address.PostalCode;
+        _form.CountryId = address.CountryId;
+        _form.RecipientName = address.RecipientName;
+        _form.RecipientPhone = address.RecipientPhone;
+        _form.Version = address.Version;
+    }
+
+    private void ResetForm()
+    {
+        _editingAddressId = null;
+        _form.Type = "Shipping";
+        _form.IsDefault = false;
+        _form.AddressLine1 = string.Empty;
+        _form.AddressLine2 = null;
+        _form.AddressLine3 = null;
+        _form.District = null;
+        _form.City = string.Empty;
+        _form.StateProvince = string.Empty;
+        _form.PostalCode = string.Empty;
+        _form.CountryId = Guid.Empty;
+        _form.RecipientName = null;
+        _form.RecipientPhone = null;
+        _form.Version = 0;
+    }
+
+    private static string AddressTitle(CustomerAddressDto address)
+    {
+        return string.IsNullOrWhiteSpace(address.RecipientName) ? address.AddressLine1 : address.RecipientName;
+    }
+
+    private static string AddressLines(CustomerAddressDto address)
+    {
+        return string.Join(", ", new[]
+        {
+            address.AddressLine1,
+            address.AddressLine2,
+            address.District,
+            address.City,
+            address.StateProvince,
+            address.PostalCode
+        }.Where(part => !string.IsNullOrWhiteSpace(part)));
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

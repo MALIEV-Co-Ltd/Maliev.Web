@@ -1,0 +1,105 @@
+@page "/account/orders"
+@page "/account/orders/{OrderId}"
+@attribute [Authorize]
+@inherits PreferenceAwareComponentBase
+@inject MalievApiClient Api
+
+<PageTitle>@Text("Orders", "คำสั่งซื้อ") - MALIEV</PageTitle>
+
+<section class="page-hero compact account-hero">
+    <p class="eyebrow">@Text("Order history", "ประวัติคำสั่งซื้อ")</p>
+    <h1>@Text("Shop orders", "คำสั่งซื้อร้านค้า")</h1>
+    <p>@Text("Storefront orders are managed here. Manufacturing projects, quote configuration, DFM, and production tracking stay in the dedicated quote engine.", "คำสั่งซื้อร้านค้าอยู่ที่นี่ ส่วนโปรเจกต์งานผลิต การตั้งราคา DFM และติดตามการผลิตอยู่ในระบบราคาโดยเฉพาะ")</p>
+</section>
+
+<section class="section account-two-column">
+    <div class="account-nav-card">
+        <a href="/account">@Text("Account home", "หน้าบัญชี")</a>
+        <a href="/account/profile">@Text("Profile", "โปรไฟล์")</a>
+        <a href="/account/addresses">@Text("Addresses", "ที่อยู่")</a>
+        <a class="active" href="/account/orders">@Text("Orders", "คำสั่งซื้อ")</a>
+        <a href="/account/preferences">@Text("Preferences", "การตั้งค่า")</a>
+    </div>
+
+    <div class="account-stack">
+        <div class="account-panel">
+            @if (_loading)
+            {
+                <p class="load-message">@Text("Loading orders...", "กำลังโหลดคำสั่งซื้อ...")</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(OrderId))
+            {
+                <div class="empty-state compact">
+                    <h2>@Text("Order detail is not available yet", "ยังไม่มีรายละเอียดคำสั่งซื้อนี้")</h2>
+                    <p>@Text("This route is reserved for storefront order details. Manufacturing order details remain in the quote engine.", "เส้นทางนี้เตรียมไว้สำหรับรายละเอียดคำสั่งซื้อร้านค้า ส่วนรายละเอียดคำสั่งผลิตอยู่ในระบบราคา")</p>
+                    <a class="button secondary" href="/account/orders">@Text("Back to orders", "กลับไปคำสั่งซื้อ")</a>
+                </div>
+            }
+            else if (_orders?.ShopOrders.Count > 0)
+            {
+                <div class="order-list">
+                    @foreach (var order in _orders.ShopOrders)
+                    {
+                        <a class="order-row" href="/account/orders/@order.OrderId">
+                            <span>@order.OrderNumber</span>
+                            <strong>@order.Status</strong>
+                            <span>@order.Source</span>
+                            <span>@FormatCurrency(order.TotalThb)</span>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state compact">
+                    <h2>@Text("No shop orders yet", "ยังไม่มีคำสั่งซื้อร้านค้า")</h2>
+                    <p>@Text("Machine, product, and spare-part orders will appear here after storefront checkout is connected. Manufacturing projects are already separated into the quote engine.", "คำสั่งซื้อเครื่องจักร สินค้า และอะไหล่จะแสดงที่นี่หลังเชื่อมต่อ checkout ร้านค้า ส่วนโปรเจกต์งานผลิตแยกอยู่ในระบบราคาแล้ว")</p>
+                    <div class="quote-actions">
+                        <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
+                        <a class="button secondary" href="@_orders?.ManufacturingOrdersUrl">@Text("Open manufacturing orders", "เปิดคำสั่งผลิต")</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public string? OrderId { get; set; }
+
+    private CustomerOrdersResponse? _orders;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+        try
+        {
+            _orders = await Api.GetAccountOrdersAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private static string FormatCurrency(decimal amount)
+    {
+        return string.Create(CultureInfo.GetCultureInfo("th-TH"), $"฿{amount:N2}");
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+}

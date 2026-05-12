@@ -1,0 +1,72 @@
+@page "/auth/sign-in"
+@inherits PreferenceAwareComponentBase
+
+<PageTitle>@Text("Sign in", "เข้าสู่ระบบ") - MALIEV</PageTitle>
+
+<section class="auth-shell">
+    <div class="auth-panel">
+        <p class="eyebrow">@Text("Customer account", "บัญชีลูกค้า")</p>
+        <h1>@Text("Sign in to MALIEV", "เข้าสู่ระบบ MALIEV")</h1>
+        <p>@Text("Use your customer account for shop checkout, addresses, preferences, and order history. Manufacturing projects continue in the quote engine.", "ใช้บัญชีลูกค้าสำหรับชำระเงินร้านค้า ที่อยู่ การตั้งค่า และประวัติคำสั่งซื้อ ส่วนโปรเจกต์งานผลิตยังอยู่ในระบบราคา")</p>
+
+        @if (!string.IsNullOrWhiteSpace(Status))
+        {
+            <div class="auth-status">@Status</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Error))
+        {
+            <div class="auth-error">@Error</div>
+        }
+
+        <a class="auth-google" href="@GoogleHref">
+            <span class="auth-google-mark">G</span>
+            <span>@Text("Continue with Google", "ดำเนินการต่อด้วย Google")</span>
+        </a>
+
+        <div class="auth-divider"><span>@Text("or email", "หรือใช้อีเมล")</span></div>
+
+        <form class="auth-form" method="post" action="/auth/sign-in">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="@SafeReturnUrl" />
+            <label>
+                @Text("Email", "อีเมล")
+                <input name="Email" type="email" autocomplete="email" required />
+            </label>
+            <label>
+                @Text("Password", "รหัสผ่าน")
+                <input name="Password" type="password" autocomplete="current-password" required />
+            </label>
+            <button class="button primary" type="submit">@Text("Sign in", "เข้าสู่ระบบ")</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="/auth/forgot-password">@Text("Forgot password?", "ลืมรหัสผ่าน?")</a>
+            <a href="@SignUpHref">@Text("Create account", "สร้างบัญชี")</a>
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Status { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    private string SafeReturnUrl => string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith("/", StringComparison.Ordinal)
+        ? "/account"
+        : ReturnUrl;
+
+    private string GoogleHref => $"/auth/google?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
+    private string SignUpHref => $"/auth/sign-up?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+    }
+
+    private string Text(string en, string th) => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+}

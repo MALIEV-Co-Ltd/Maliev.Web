@@ -1,0 +1,14 @@
+@inject NavigationManager Navigation
+
+<p class="auth-redirect">@Text</p>
+
+@code {
+    private string Text => "Redirecting to sign in...";
+
+    protected override void OnInitialized()
+    {
+        var current = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = "/" + current;
+        Navigation.NavigateTo($"/auth/sign-in?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+}

@@ -2,6 +2,7 @@
 @inherits PreferenceAwareComponentBase
 @inject CartState ShoppingCart
 @inject MalievApiClient Api
+@inject NavigationManager Navigation
 
 <PageTitle>Cart - MALIEV</PageTitle>
 
@@ -81,6 +82,12 @@
         }
         catch (MalievApiException ex)
         {
+            if (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Navigation.NavigateTo("/auth/sign-in?returnUrl=%2Fcart", forceLoad: true);
+                return;
+            }
+
             _error = ex.Message;
         }
     }

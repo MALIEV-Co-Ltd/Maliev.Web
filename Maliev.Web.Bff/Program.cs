@@ -5,6 +5,8 @@ using Maliev.Web.Bff.Components;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 
@@ -18,6 +20,41 @@ builder.AddIAMServiceClient("WebBff");
 builder.Services.AddLocalization();
 builder.Services.AddMudServices();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddCascadingAuthenticationState();
+var authentication = builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = "MalievExternal";
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.Cookie.Name = "__Host-Maliev.Web";
+        options.LoginPath = "/auth/sign-in";
+        options.LogoutPath = "/auth/sign-out";
+        options.AccessDeniedPath = "/auth/sign-in";
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    })
+    .AddCookie("MalievExternal", options =>
+    {
+        options.Cookie.Name = "__Host-Maliev.Web.External";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    });
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    authentication.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+    {
+        options.SignInScheme = "MalievExternal";
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.CallbackPath = "/auth/google/signin";
+        options.SaveTokens = true;
+    });
+}
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -49,6 +86,8 @@ builder.AddAuthenticatedServiceClient<IOrderServiceClient, OrderServiceClient>("
 builder.AddAuthenticatedServiceClient<IPaymentServiceClient, PaymentServiceClient>("PaymentService");
 builder.AddAuthenticatedServiceClient<IDeliveryServiceClient, DeliveryServiceClient>("DeliveryService");
 builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>("CustomerService");
+builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
+builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
 
 builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
@@ -94,6 +133,8 @@ if (!app.Environment.IsEnvironment("Testing"))
     app.UseHttpsRedirection();
 }
 app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapDefaultEndpoints("web");

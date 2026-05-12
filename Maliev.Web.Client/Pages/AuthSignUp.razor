@@ -1,0 +1,74 @@
+@page "/auth/sign-up"
+@inherits PreferenceAwareComponentBase
+
+<PageTitle>@Text("Create account", "สร้างบัญชี") - MALIEV</PageTitle>
+
+<section class="auth-shell">
+    <div class="auth-panel">
+        <p class="eyebrow">@Text("Customer account", "บัญชีลูกค้า")</p>
+        <h1>@Text("Create your MALIEV account", "สร้างบัญชี MALIEV")</h1>
+        <p>@Text("Google is the fastest path. Email and password is available when your team needs a separate login.", "Google เป็นวิธีที่เร็วที่สุด หรือใช้อีเมลและรหัสผ่านเมื่อทีมต้องการบัญชีแยก")</p>
+
+        @if (!string.IsNullOrWhiteSpace(Error))
+        {
+            <div class="auth-error">@Error</div>
+        }
+
+        <a class="auth-google" href="@GoogleHref">
+            <span class="auth-google-mark">G</span>
+            <span>@Text("Continue with Google", "ดำเนินการต่อด้วย Google")</span>
+        </a>
+
+        <div class="auth-divider"><span>@Text("or create with email", "หรือสร้างด้วยอีเมล")</span></div>
+
+        <form class="auth-form" method="post" action="/auth/sign-up">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="@SafeReturnUrl" />
+            <div class="form-grid two">
+                <label>
+                    @Text("First name", "ชื่อ")
+                    <input name="FirstName" autocomplete="given-name" required />
+                </label>
+                <label>
+                    @Text("Last name", "นามสกุล")
+                    <input name="LastName" autocomplete="family-name" required />
+                </label>
+            </div>
+            <label>
+                @Text("Email", "อีเมล")
+                <input name="Email" type="email" autocomplete="email" required />
+            </label>
+            <label>
+                @Text("Password", "รหัสผ่าน")
+                <input name="Password" type="password" autocomplete="new-password" minlength="12" required />
+            </label>
+            <button class="button primary" type="submit">@Text("Create account", "สร้างบัญชี")</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="@SignInHref">@Text("Already have an account?", "มีบัญชีอยู่แล้ว?")</a>
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    private string SafeReturnUrl => string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith("/", StringComparison.Ordinal)
+        ? "/account"
+        : ReturnUrl;
+
+    private string GoogleHref => $"/auth/google?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
+    private string SignInHref => $"/auth/sign-in?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Preferences.InitializeAsync();
+    }
+
+    private string Text(string en, string th) => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+}

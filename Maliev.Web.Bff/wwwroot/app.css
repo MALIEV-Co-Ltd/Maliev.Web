@@ -42,6 +42,8 @@
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
   --media-shell: #111419;
+  --success-surface: #e9f8ef;
+  --success-text: #0d6b32;
   --danger-surface: #a21616;
   --danger-text: #ffffff;
   --footer-text: #e8eaee;
@@ -100,6 +102,8 @@ html[data-theme="dark"] {
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .16) 0%, rgba(91, 167, 255, .06) 34%, transparent 66%);
   --media-shell: #090c10;
+  --success-surface: #102819;
+  --success-text: #a8f0bf;
   --danger-surface: #8f1f1f;
   --danger-text: #ffffff;
   --footer-text: #e8eaee;
@@ -1589,7 +1593,11 @@ html:lang(th) .h1 {
 
 .shop-toolbar input,
 .form-grid input,
+.form-grid select,
 .form-grid textarea,
+.auth-form input,
+.account-form input,
+.account-form select,
 .variant-select select,
 .cart-line input {
   width: 100%;
@@ -1605,6 +1613,320 @@ html:lang(th) .h1 {
 .form-grid textarea {
   min-height: 132px;
   resize: vertical;
+}
+
+.auth-shell {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  place-items: center;
+  padding: clamp(48px, 8vw, 96px) var(--page-gutter);
+}
+
+.auth-panel {
+  width: min(100%, 560px);
+  display: grid;
+  gap: 18px;
+  padding: clamp(24px, 5vw, 38px);
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.auth-panel h1,
+.auth-panel p {
+  margin: 0;
+}
+
+.auth-panel h1 {
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: .98;
+}
+
+.auth-google {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: var(--radius);
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+  font-weight: 650;
+}
+
+.auth-google-mark {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #1a73e8;
+  font-weight: 700;
+}
+
+.auth-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  background: var(--rule);
+}
+
+.auth-form,
+.account-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-form label,
+.account-form label,
+.form-full,
+.form-short {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.auth-links,
+.account-form-actions,
+.address-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.auth-links {
+  justify-content: space-between;
+}
+
+.auth-status,
+.auth-error {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+}
+
+.auth-status {
+  color: var(--success-text);
+  background: var(--success-surface);
+}
+
+.auth-error {
+  color: var(--danger-text);
+  background: var(--danger-surface);
+}
+
+.account-hero {
+  padding-bottom: 56px;
+}
+
+.account-dashboard,
+.account-two-column {
+  padding-top: 0;
+}
+
+.account-dashboard {
+  display: grid;
+  grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.account-two-column {
+  display: grid;
+  grid-template-columns: minmax(220px, .34fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.account-stack,
+.account-action-grid,
+.preference-grid,
+.address-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.account-action-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preference-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.address-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-overview-card,
+.account-action-card,
+.account-nav-card,
+.account-panel,
+.preference-card,
+.address-card,
+.order-row {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.account-overview-card,
+.account-action-card,
+.account-panel,
+.preference-card,
+.address-card {
+  padding: 22px;
+}
+
+.account-overview-card,
+.account-action-card,
+.address-card,
+.preference-card {
+  display: grid;
+  gap: 12px;
+}
+
+.account-action-card {
+  min-height: 180px;
+  color: var(--ink);
+}
+
+.account-action-card h3,
+.account-action-card p,
+.preference-card h2,
+.address-card h3,
+.address-card p {
+  margin: 0;
+}
+
+.account-action-card p,
+.address-card p {
+  color: var(--muted);
+}
+
+.account-status-row {
+  display: grid;
+  grid-template-columns: minmax(110px, .42fr) minmax(0, 1fr);
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.account-status-row span {
+  color: var(--muted);
+}
+
+.account-status-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-nav-card {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  padding: 10px;
+}
+
+.account-nav-card a {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.account-nav-card a.active,
+.account-nav-card a:hover {
+  color: var(--ink);
+  background: var(--control-surface);
+}
+
+.compact-heading {
+  margin-bottom: 18px;
+}
+
+.compact-heading h2 {
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+}
+
+.checkbox-label {
+  min-height: 42px;
+  grid-template-columns: auto 1fr;
+  align-content: center;
+}
+
+.checkbox-label input {
+  width: 18px;
+  min-height: 18px;
+  box-shadow: none;
+}
+
+.form-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-full {
+  width: 100%;
+}
+
+.form-short {
+  width: min(100%, 260px);
+}
+
+.segmented-control {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+}
+
+.segmented-control button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 650;
+}
+
+.segmented-control button.active {
+  color: var(--inverse-text);
+  background: var(--inverse-surface);
+}
+
+.order-list {
+  display: grid;
+  gap: 10px;
+}
+
+.order-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  color: var(--ink);
 }
 
 .filters {
@@ -2173,6 +2495,8 @@ html:lang(th) .h1 {
   .final-cta,
   .product-detail,
   .cart-layout,
+  .account-dashboard,
+  .account-two-column,
   .shop-hero,
   .about-split,
   .contact-layout {
@@ -2198,7 +2522,8 @@ html:lang(th) .h1 {
   }
 
   .product-detail-copy,
-  .cart-summary {
+  .cart-summary,
+  .account-nav-card {
     position: static;
   }
 
@@ -2372,7 +2697,29 @@ html:lang(th) .h1 {
   .process-grid,
   .dark-stat-grid,
   .service-stat-strip,
-  .form-grid {
+  .form-grid,
+  .account-action-grid,
+  .preference-grid,
+  .address-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid.two,
+  .form-grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  .account-nav-card {
+    grid-auto-flow: column;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  .account-nav-card a {
+    white-space: nowrap;
+  }
+
+  .order-row {
     grid-template-columns: 1fr;
   }
 
