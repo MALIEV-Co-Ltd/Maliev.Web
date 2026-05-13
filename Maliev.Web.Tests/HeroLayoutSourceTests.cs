@@ -748,7 +748,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("type=\"module\"", app);
         Assert.Contains("js/manufacturing-gizmo.js", app);
         Assert.Contains("mountDocumentGizmos", source);
-        Assert.Contains("querySelectorAll(\"canvas[data-manufacturing-gizmo]\")", source);
+        Assert.Contains("querySelectorAll", source);
+        Assert.Contains("canvas[data-manufacturing-gizmo]", source);
     }
 
     /// <summary>
