@@ -160,12 +160,33 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
     [HttpPatch("addresses/{addressId:guid}")]
     [ProducesResponseType(typeof(CustomerAddressDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> UpdateAddress(Guid addressId, [FromBody] CustomerAddressUpsertRequest request, CancellationToken cancellationToken)
     {
-        if (!GetCurrentCustomerId().HasValue)
+        var customerId = GetCurrentCustomerId();
+        if (!customerId.HasValue)
         {
             return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can update an address.", StatusCodes.Status401Unauthorized));
+        }
+
+        var ownsAddress = await CustomerOwnsAddressAsync(customerId.Value, addressId, cancellationToken);
+        if (!ownsAddress.HasValue)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                AccountProblem(
+                    "Customer addresses unavailable",
+                    "MALIEV could not verify this address belongs to your account. Please try again later.",
+                    StatusCodes.Status503ServiceUnavailable));
+        }
+
+        if (!ownsAddress.Value)
+        {
+            return NotFound(AccountProblem(
+                "Address not found",
+                "This address is not attached to your customer account.",
+                StatusCodes.Status404NotFound));
         }
 
         using var response = await customerClient.UpdateCustomerAddressAsync(addressId, new
@@ -198,12 +219,33 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
     [HttpDelete("addresses/{addressId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> DeleteAddress(Guid addressId, [FromBody] CustomerAddressDeleteRequest request, CancellationToken cancellationToken)
     {
-        if (!GetCurrentCustomerId().HasValue)
+        var customerId = GetCurrentCustomerId();
+        if (!customerId.HasValue)
         {
             return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can delete an address.", StatusCodes.Status401Unauthorized));
+        }
+
+        var ownsAddress = await CustomerOwnsAddressAsync(customerId.Value, addressId, cancellationToken);
+        if (!ownsAddress.HasValue)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                AccountProblem(
+                    "Customer addresses unavailable",
+                    "MALIEV could not verify this address belongs to your account. Please try again later.",
+                    StatusCodes.Status503ServiceUnavailable));
+        }
+
+        if (!ownsAddress.Value)
+        {
+            return NotFound(AccountProblem(
+                "Address not found",
+                "This address is not attached to your customer account.",
+                StatusCodes.Status404NotFound));
         }
 
         using var response = await customerClient.DeleteCustomerAddressAsync(addressId, new { xmin = request.Version }, cancellationToken);
@@ -230,6 +272,26 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
     private Guid? GetCurrentCustomerId()
     {
         return GetClaimGuid("customer_id");
+    }
+
+    private async Task<bool?> CustomerOwnsAddressAsync(Guid customerId, Guid addressId, CancellationToken cancellationToken)
+    {
+        using var response = await customerClient.GetCustomerAddressesAsync(customerId, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        using var document = await ReadJsonAsync(response, cancellationToken);
+        if (document.RootElement.ValueKind != JsonValueKind.Array)
+        {
+            return false;
+        }
+
+        return document.RootElement
+            .EnumerateArray()
+            .Select(address => GetGuid(address, "id", "Id"))
+            .Any(id => id == addressId);
     }
 
     private Guid? GetClaimGuid(params string[] claimTypes)
