@@ -4,6 +4,8 @@ const instances = new WeakMap();
 let babylonRuntime;
 let babylonLoadersRuntime;
 
+mountDocumentGizmos();
+
 export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false) {
   if (!canvas || instances.has(canvas)) {
     return;
@@ -73,6 +75,52 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
   } else {
     state.visible = true;
     start();
+  }
+}
+
+function mountDocumentGizmos() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  const mountCanvas = canvas => mountManufacturingGizmo(
+    canvas,
+    canvas.dataset.modelUrl ?? "",
+    canvas.dataset.enableHoverMotion === "true",
+    canvas.dataset.usePlasticMaterial === "true");
+
+  const mount = root => {
+    if (root.matches?.("canvas[data-manufacturing-gizmo]")) {
+      mountCanvas(root);
+    }
+
+    root
+      .querySelectorAll?.("canvas[data-manufacturing-gizmo]")
+      .forEach(mountCanvas);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => mount(document), { once: true });
+  } else {
+    queueMicrotask(() => mount(document));
+  }
+
+  if ("MutationObserver" in window) {
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof Element) {
+            mount(node.matches("canvas[data-manufacturing-gizmo]") ? node.parentElement ?? node : node);
+          }
+        }
+      }
+    });
+
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      document.addEventListener("DOMContentLoaded", () => observer.observe(document.body, { childList: true, subtree: true }), { once: true });
+    }
   }
 }
 
@@ -285,12 +333,27 @@ async function createLandingHeroScene(state, BABYLON) {
   root.rotation.copyFrom(baseRotation);
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reducedMotion) {
+    addIdleLevitation(state, scene, root);
+  }
+
   if (state.enableHoverMotion && !reducedMotion) {
     addHoverMotion(state, scene, camera, root, baseRotation, BABYLON);
   }
 
   configureSceneRuntime(state, engine, scene, () => configureLandingHeroCamera(camera, state.host, BABYLON));
   markReady(state);
+}
+
+function addIdleLevitation(state, scene, root) {
+  const baseY = root.position.y;
+  const startedAt = performance.now();
+
+  scene.onBeforeRenderObservable.add(() => {
+    const elapsed = performance.now() - startedAt;
+    const levitation = Math.sin(elapsed * 0.0012) * 0.055;
+    root.position.y = baseY + levitation;
+  });
 }
 
 function configureLandingHeroCamera(camera, host, BABYLON) {

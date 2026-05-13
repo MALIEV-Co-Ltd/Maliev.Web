@@ -2,7 +2,12 @@
 @inject IJSRuntime JS
 
 <div class="@ContainerClass" aria-label="@AriaLabel">
-    <canvas @ref="_canvas" class="manufacturing-gizmo-canvas"></canvas>
+    <canvas @ref="_canvas"
+            class="manufacturing-gizmo-canvas"
+            data-manufacturing-gizmo
+            data-model-url="@ModelUrl"
+            data-enable-hover-motion="@EnableHoverMotion.ToString().ToLowerInvariant()"
+            data-use-plastic-material="@UsePlasticMaterial.ToString().ToLowerInvariant()"></canvas>
     <div class="manufacturing-gizmo-fallback" aria-hidden="true">
         <span></span>
         <span></span>
@@ -29,8 +34,8 @@
     private ElementReference _canvas;
     private IJSObjectReference? _module;
     private string ContainerClass => string.IsNullOrWhiteSpace(Class)
-        ? "manufacturing-gizmo"
-        : $"manufacturing-gizmo {Class}";
+        ? "manufacturing-gizmo is-loading"
+        : $"manufacturing-gizmo is-loading {Class}";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

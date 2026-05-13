@@ -727,8 +727,28 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
-        Assert.Contains(".manufacturing-gizmo--landing::before", styles);
+        Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
         Assert.Contains("background: transparent", styles);
+    }
+
+    /// <summary>
+    /// Verifies the prerendered 3D component starts in a visible loading state before Blazor interactivity mounts the scene.
+    /// </summary>
+    [Fact]
+    public void ManufacturingGizmoPrerendersLoadingFallback()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("\"manufacturing-gizmo is-loading\"", component);
+        Assert.Contains("$\"manufacturing-gizmo is-loading {Class}\"", component);
+        Assert.Contains("data-manufacturing-gizmo", component);
+        Assert.Contains("data-model-url=\"@ModelUrl\"", component);
+        Assert.Contains("type=\"module\"", app);
+        Assert.Contains("js/manufacturing-gizmo.js", app);
+        Assert.Contains("mountDocumentGizmos", source);
+        Assert.Contains("querySelectorAll(\"canvas[data-manufacturing-gizmo]\")", source);
     }
 
     /// <summary>
@@ -757,6 +777,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("targetStrength", source);
         Assert.Contains("pointerFollow", source);
         Assert.Contains("hoverFade", source);
+        Assert.Contains("addIdleLevitation", source);
+        Assert.Contains("root.position.y", source);
+        Assert.Contains("Math.sin", source);
         Assert.DoesNotContain("* 0.24", source);
         Assert.DoesNotContain("* 0.11", source);
     }
