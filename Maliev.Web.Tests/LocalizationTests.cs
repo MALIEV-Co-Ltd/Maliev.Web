@@ -139,8 +139,10 @@ public sealed class LocalizationTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var policy = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
 
-        Assert.Contains("Essential only", component);
+        Assert.Contains("Continue without optional", component);
         Assert.Contains("Accept optional", component);
+        Assert.Contains("cookie-consent-close", component);
+        Assert.Contains("Continue with essential cookies only", component);
         Assert.Contains("Optional analytics and ads cookies stay off unless you accept them.", component);
         Assert.Contains("href=\"/cookie-policy\"", component);
         Assert.Contains("malievConsent.get", component);
@@ -156,6 +158,10 @@ public sealed class LocalizationTests
         Assert.Contains("OpenCookieSettingsAsync", layout);
         Assert.Contains("Cookie settings", layout);
         Assert.Contains(".cookie-consent", styles);
+        Assert.Contains("right: clamp(12px, 2vw, 24px);", styles);
+        Assert.Contains(".cookie-consent-close", styles);
+        Assert.DoesNotContain("left: 50%;", styles);
+        Assert.DoesNotContain("transform: translateX(-50%);", styles);
         Assert.Contains(".footer-link-button", styles);
         Assert.Contains("Cookie settings link in the MALIEV footer", policy);
     }

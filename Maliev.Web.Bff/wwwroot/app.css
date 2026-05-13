@@ -390,20 +390,39 @@ main {
 
 .cookie-consent {
   position: fixed;
-  z-index: 1300;
-  left: 50%;
+  z-index: 900;
+  right: clamp(12px, 2vw, 24px);
   bottom: clamp(16px, 3vw, 32px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: end;
-  width: min(calc(100% - 32px), 920px);
-  padding: 18px;
+  gap: 14px;
+  width: min(calc(100% - 32px), 430px);
+  max-height: min(70vh, 520px);
+  padding: 18px 46px 18px 18px;
+  overflow: auto;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--paper);
   box-shadow: rgba(0, 0, 0, .10) 0 18px 48px -24px, var(--shadow-card);
-  transform: translateX(-50%);
+}
+
+.cookie-consent-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.cookie-consent-close:hover {
+  color: var(--ink);
+  background: var(--paper-2);
 }
 
 .cookie-consent-copy {
@@ -433,8 +452,8 @@ main {
 
 .cookie-consent-actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: stretch;
   gap: 10px;
 }
 
@@ -774,17 +793,6 @@ html:lang(th) .h1 {
   border-radius: 0;
   box-shadow: none;
   background: transparent;
-}
-
-.manufacturing-gizmo--landing::before {
-  content: "";
-  position: absolute;
-  inset: 22% 6% 8%;
-  pointer-events: none;
-  background: var(--landing-gizmo-surface);
-  border-radius: 999px;
-  filter: blur(26px);
-  opacity: .72;
 }
 
 .manufacturing-gizmo-canvas {
@@ -3220,16 +3228,13 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .cookie-consent {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
-  .cookie-consent-actions {
-    justify-content: stretch;
+    bottom: 12px;
+    width: min(calc(100% - 24px), 430px);
+    max-height: 46vh;
   }
 
   .cookie-consent-actions .button {
-    flex: 1 1 160px;
+    width: 100%;
   }
 
   .footer-brand,
@@ -3297,11 +3302,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .cookie-consent {
-    width: min(calc(100% - 24px), 920px);
     padding: 14px;
-  }
-
-  .cookie-consent-actions .button {
-    width: 100%;
+    padding-right: 42px;
   }
 }
