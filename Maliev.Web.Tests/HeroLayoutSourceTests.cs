@@ -15,11 +15,51 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("landing-hero", source);
         Assert.Contains("landing-hero-visual", source);
-        Assert.Contains("ModelUrl=\"/models/hero-3d.glb\"", source);
+        Assert.Contains("ModelUrl=\"@_heroModel.Url\"", source);
+        Assert.Contains("@key=\"_heroModel.Key\"", source);
+        Assert.Contains("HeroModelCatalog.SelectRandomForService(_primaryServiceSlug)", source);
+        Assert.Contains("home.hero.model", source);
         Assert.Contains("EnableHoverMotion=\"true\"", source);
-        Assert.Contains("UsePlasticMaterial=\"true\"", source);
+        Assert.Contains("UsePlasticMaterial=\"@_heroModel.UsePlasticMaterial\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("hero-workspace gizmo-workspace", source);
+        Assert.DoesNotContain("/models/hero-3d.glb", source);
+    }
+
+    /// <summary>
+    /// Verifies hero GLB models use a route-aware catalog and scalable naming convention.
+    /// </summary>
+    [Fact]
+    public void HeroModelsUseRouteAwareCatalogAndScalableNames()
+    {
+        var root = FindRepoRoot();
+        var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+        var catalog = ReadRepoFile("Maliev.Web.Client", "Content", "HeroModelCatalog.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var modelReadme = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "models", "README.md");
+
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-01.glb")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-02.glb")));
+        Assert.Contains("hero-{service-slug}-{short-subject}-{nn}.glb", modelReadme);
+        Assert.Contains("hero-cnc-machining-fixture-01.glb", modelReadme);
+        Assert.Contains("hero-3d-scanning-reference-01.glb", modelReadme);
+        Assert.Contains("internal const string DefaultServiceSlug = \"3d-printing\";", catalog);
+        Assert.Contains("\"/models/hero-3d-printing-part-01.glb\"", catalog);
+        Assert.Contains("\"/models/hero-3d-printing-part-02.glb\"", catalog);
+        Assert.Contains("SelectRandomForService", catalog);
+        Assert.Contains("ResolveForService", catalog);
+        Assert.Contains("RandomNumberGenerator.GetInt32", catalog);
+        Assert.Contains("HeroModelCatalog.SelectRandomForService(_primaryServiceSlug)", home);
+        Assert.Contains("HeroModelCatalog.SelectRandomForService(Service.Slug)", servicePage);
+        Assert.Contains("service.hero.model.", servicePage);
+        Assert.Contains("service-page-hero", servicePage);
+        Assert.Contains("service-page-hero-visual", servicePage);
+        Assert.Contains("Class=\"manufacturing-gizmo--service\"", servicePage);
+        Assert.Contains("@key=\"_heroModel.Key\"", servicePage);
+        Assert.Contains(".manufacturing-gizmo--service", styles);
+        Assert.DoesNotContain("hero-3d-2.glb", catalog);
+        Assert.DoesNotContain("hero-3d.glb", catalog);
     }
 
     /// <summary>
@@ -276,6 +316,7 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
+        Assert.Contains("SiteContent.QuoteDemoUrl", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.Contains("http-equiv=\"refresh\"", source);
         Assert.Contains("content=\"5; url=@SiteContent.QuoteNewUrl\"", source);
@@ -684,6 +725,7 @@ public sealed class HeroLayoutSourceTests
         var error = ReadRepoFile("Maliev.Web.Client", "Pages", "Error.razor");
 
         Assert.Contains("https://quote.maliev.com/projects/new", content);
+        Assert.Contains("https://quote.maliev.com/demo", content);
         Assert.DoesNotContain("https://quote.maliev.com/quotes/new", content);
         Assert.Contains("SiteContent.QuoteNewUrl", shop);
         Assert.Contains("SiteContent.QuoteNewUrl", product);

@@ -1,5 +1,6 @@
 @page "/services/{Slug}"
 @inherits PreferenceAwareComponentBase
+@inject PersistentComponentState ApplicationState
 
 <PageTitle>@Service.SeoTitle - MALIEV</PageTitle>
 <HeadContent>
@@ -7,12 +8,22 @@
     <link rel="canonical" href="@CanonicalUrl" />
 </HeadContent>
 
-<section class="page-hero compact">
-    <h1>@Service.Title.For(Preferences.Culture)</h1>
-    <p>@Service.Summary.For(Preferences.Culture)</p>
-    <div class="quote-actions">
-        <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
-        <a class="button secondary" href="/services">@Text("All services", "บริการทั้งหมด")</a>
+<section class="page-hero compact service-page-hero">
+    <div class="service-page-hero-copy">
+        <h1>@Service.Title.For(Preferences.Culture)</h1>
+        <p>@Service.Summary.For(Preferences.Culture)</p>
+        <div class="quote-actions">
+            <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+            <a class="button secondary" href="/services">@Text("All services", "บริการทั้งหมด")</a>
+        </div>
+    </div>
+    <div class="service-page-hero-visual" aria-label="@_heroModel.AriaLabel.For(Preferences.Culture)">
+        <ManufacturingGizmo Class="manufacturing-gizmo--service"
+                            @key="_heroModel.Key"
+                            ModelUrl="@_heroModel.Url"
+                            EnableHoverMotion="true"
+                            UsePlasticMaterial="@_heroModel.UsePlasticMaterial"
+                            AriaLabel="@_heroModel.AriaLabel.For(Preferences.Culture)" />
     </div>
 </section>
 
@@ -62,12 +73,21 @@
     [Parameter]
     public string Slug { get; set; } = string.Empty;
 
+    private PersistingComponentStateSubscription? _persistingSubscription;
+    private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private ServicePageContent Service => SiteContent.GetService(Slug);
     private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
+    private string HeroModelStateKey => $"service.hero.model.{Service.Slug}";
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+        _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistHeroModel);
+    }
+
+    protected override void OnParametersSet()
+    {
+        InitializeHeroModel();
     }
 
     private string Text(string en, string th)
@@ -83,5 +103,29 @@
             1 => Text("Lead time depends on file readiness, production load, and review clarity.", "ระยะเวลาขึ้นกับความพร้อมของไฟล์ งานในคิว และความชัดเจนของข้อมูล"),
             _ => Text("Send the detail with your quote request so MALIEV can price the work correctly.", "แนบรายละเอียดนี้ในคำขอราคาเพื่อให้ MALIEV ประเมินงานได้ถูกต้อง")
         };
+    }
+
+    private void InitializeHeroModel()
+    {
+        if (ApplicationState.TryTakeFromJson<string>(HeroModelStateKey, out var modelKey) &&
+            !string.IsNullOrWhiteSpace(modelKey))
+        {
+            _heroModel = HeroModelCatalog.Resolve(modelKey);
+            return;
+        }
+
+        _heroModel = HeroModelCatalog.SelectRandomForService(Service.Slug);
+    }
+
+    private Task PersistHeroModel()
+    {
+        ApplicationState.PersistAsJson(HeroModelStateKey, _heroModel.Key);
+        return Task.CompletedTask;
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        _persistingSubscription?.Dispose();
     }
 }

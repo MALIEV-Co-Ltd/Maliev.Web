@@ -618,6 +618,24 @@ html:lang(th) .h1 {
   gap: 18px;
 }
 
+.service-page-hero {
+  grid-template-columns: minmax(0, .9fr) minmax(300px, .62fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 76px);
+}
+
+.service-page-hero-copy {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.service-page-hero-visual {
+  position: relative;
+  min-height: 380px;
+  overflow: visible;
+}
+
 .page-hero.compact + .section {
   padding-top: clamp(40px, 5vw, 60px);
 }
@@ -789,6 +807,15 @@ html:lang(th) .h1 {
 .manufacturing-gizmo--landing {
   height: min(66vh, 620px);
   min-height: 520px;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.manufacturing-gizmo--service {
+  height: min(42vh, 420px);
+  min-height: 340px;
   overflow: visible;
   border-radius: 0;
   box-shadow: none;
@@ -2875,6 +2902,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .section-heading,
+  .service-page-hero,
   .split-section,
   .manufacturing-section,
   .feature-band,
@@ -2887,6 +2915,24 @@ html[data-theme="dark"] .auth-google-icon {
   .about-split,
   .contact-layout {
     grid-template-columns: 1fr;
+  }
+
+  .service-page-hero {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .service-page-hero-copy {
+    max-width: 760px;
+  }
+
+  .service-page-hero-copy .quote-actions {
+    justify-content: center;
+  }
+
+  .service-page-hero-visual {
+    width: min(100%, 720px);
+    min-height: 360px;
   }
 
   .feature-band {
@@ -3091,6 +3137,11 @@ html[data-theme="dark"] .auth-google-icon {
   .manufacturing-gizmo--landing {
     height: 340px;
     min-height: 320px;
+  }
+
+  .manufacturing-gizmo--service {
+    height: 320px;
+    min-height: 300px;
   }
 
   .metric-strip {

@@ -36,10 +36,11 @@
     </div>
     <div class="landing-hero-visual" aria-label="@Text("Interactive MALIEV manufacturing model", "โมเดลสามมิติ MALIEV")">
         <ManufacturingGizmo Class="manufacturing-gizmo--landing"
-                            ModelUrl="/models/hero-3d.glb"
+                            @key="_heroModel.Key"
+                            ModelUrl="@_heroModel.Url"
                             EnableHoverMotion="true"
-                            UsePlasticMaterial="true"
-                            AriaLabel="MALIEV injection molded plastic part preview" />
+                            UsePlasticMaterial="@_heroModel.UsePlasticMaterial"
+                            AriaLabel="@_heroModel.AriaLabel.For(Preferences.Culture)" />
     </div>
 </section>
 
@@ -193,11 +194,13 @@
     private const string CaseStudiesOrderStateKey = "home.caseStudies.order";
     private const string BlogPostsOrderStateKey = "home.blogPosts.order";
     private const string HeroCopyStateKey = "home.hero.copy";
+    private const string HeroModelStateKey = "home.hero.model";
     private PersistingComponentStateSubscription? _persistingSubscription;
     private IReadOnlyList<ServicePageContent> _services = SiteContent.Services;
     private IReadOnlyList<CaseStudyContent> _caseStudies = SiteContent.CaseStudies;
     private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts;
     private HeroCopy _heroCopy = HeroCopyCatalog.Default;
+    private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
     private string _primaryServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
     private int _heroVariantIndex;
@@ -214,6 +217,7 @@
     {
         await Preferences.InitializeAsync();
         InitializeHeroCopy();
+        InitializeHeroModel();
         InitializeRandomizedHomeContent();
         _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistRandomizedHomeContent);
     }
@@ -280,6 +284,19 @@
         _primaryServiceSlug = HeroCopyCatalog.ResolveServiceSlug(_heroTargetKey);
     }
 
+    private void InitializeHeroModel()
+    {
+        if (ApplicationState.TryTakeFromJson<HeroModelState>(HeroModelStateKey, out var persisted) &&
+            persisted is not null &&
+            string.Equals(persisted.ServiceSlug, _primaryServiceSlug, StringComparison.OrdinalIgnoreCase))
+        {
+            _heroModel = HeroModelCatalog.Resolve(persisted.ModelKey);
+            return;
+        }
+
+        _heroModel = HeroModelCatalog.SelectRandomForService(_primaryServiceSlug);
+    }
+
     private IReadOnlyList<ServicePageContent> RandomizeSupportingServices()
     {
         return PromoteTargetedService(Shuffle(SiteContent.Services));
@@ -306,6 +323,7 @@
     private Task PersistRandomizedHomeContent()
     {
         ApplicationState.PersistAsJson(HeroCopyStateKey, new HeroCopyState(_heroTargetKey, _heroVariantIndex));
+        ApplicationState.PersistAsJson(HeroModelStateKey, new HeroModelState(_primaryServiceSlug, _heroModel.Key));
         ApplicationState.PersistAsJson(ServicesOrderStateKey, _services.Select(service => service.Slug).ToArray());
         ApplicationState.PersistAsJson(CaseStudiesOrderStateKey, _caseStudies.Select(caseStudy => caseStudy.Slug).ToArray());
         ApplicationState.PersistAsJson(BlogPostsOrderStateKey, _blogPosts.Select(post => post.Slug).ToArray());
@@ -345,4 +363,6 @@
     private sealed record ProcessStep(string Number, LocalizedText Title, LocalizedText Body);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
+
+    private sealed record HeroModelState(string ServiceSlug, string ModelKey);
 }
