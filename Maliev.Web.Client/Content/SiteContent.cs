@@ -5,6 +5,7 @@ namespace Maliev.Web.Client.Content;
 internal static class SiteContent
 {
     internal const string QuoteEngineUrl = "https://quote.maliev.com";
+    internal const string QuoteDemoUrl = "https://quote.maliev.com/demo";
     internal const string QuoteNewUrl = "https://quote.maliev.com/projects/new";
     internal const string QuoteProfileUrl = "https://quote.maliev.com/profile";
     internal const string QuoteOrdersUrl = "https://quote.maliev.com/orders";
