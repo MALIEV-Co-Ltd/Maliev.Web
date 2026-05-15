@@ -27,7 +27,7 @@
                         <span>@Text($"{product.AvailableQuantity} available", $"มีสินค้า {product.AvailableQuantity}")</span>
                     }
                 </div>
-                <button type="button" class="button secondary" @onclick="() => Cart.Add(product)" disabled="@(!CanBuy(product))">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
+                <button type="button" class="button secondary" @onclick="async () => await Cart.AddAsync(product)" disabled="@(!CanBuy(product))">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
             </div>
         </article>
     }

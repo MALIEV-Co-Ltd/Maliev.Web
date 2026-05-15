@@ -102,11 +102,11 @@ else
         }
     }
 
-    private void AddToCart()
+    private async Task AddToCart()
     {
         if (_product is not null)
         {
-            Cart.Add(_product, SelectedVariant);
+            await Cart.AddAsync(_product, SelectedVariant);
         }
     }
 

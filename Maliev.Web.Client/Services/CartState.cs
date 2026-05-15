@@ -51,7 +51,7 @@ internal sealed class CartState(IJSRuntime js)
         Changed?.Invoke();
     }
 
-    internal void Add(ProductSummaryDto product, ProductVariantDto? variant = null)
+    internal async Task AddAsync(ProductSummaryDto product, ProductVariantDto? variant = null)
     {
         var selectedVariant = variant ?? new ProductVariantDto
         {
@@ -80,7 +80,7 @@ internal sealed class CartState(IJSRuntime js)
             existing.Quantity++;
         }
 
-        Persist();
+        await PersistAsync();
         Changed?.Invoke();
     }
 
