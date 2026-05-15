@@ -74,6 +74,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddTransient<InternalBrowserCookieForwardingHandler>();
 
 builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
 {
@@ -89,7 +90,8 @@ builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
     }
 
     client.Timeout = TimeSpan.FromSeconds(30);
-});
+})
+.AddHttpMessageHandler<InternalBrowserCookieForwardingHandler>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("MalievAPI"));
 builder.Services.AddScoped<MalievApiClient>();
 builder.Services.AddScoped<PreferenceService>();
