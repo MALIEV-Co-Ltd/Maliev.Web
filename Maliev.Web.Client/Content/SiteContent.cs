@@ -4,11 +4,17 @@ namespace Maliev.Web.Client.Content;
 
 internal static class SiteContent
 {
-    internal const string QuoteEngineUrl = "https://quote.maliev.com";
-    internal const string QuoteDemoUrl = "https://quote.maliev.com/demo";
-    internal const string QuoteNewUrl = "https://quote.maliev.com/projects/new";
-    internal const string QuoteProfileUrl = "https://quote.maliev.com/profile";
-    internal const string QuoteOrdersUrl = "https://quote.maliev.com/orders";
+    private const string DefaultQuoteEngineUrl = "https://quote.maliev.com";
+
+    internal static string QuoteEngineUrl => ResolveQuoteEngineUrl();
+
+    internal static string QuoteDemoUrl => $"{QuoteEngineUrl}/demo";
+
+    internal static string QuoteNewUrl => $"{QuoteEngineUrl}/projects/new";
+
+    internal static string QuoteProfileUrl => $"{QuoteEngineUrl}/profile";
+
+    internal static string QuoteOrdersUrl => $"{QuoteEngineUrl}/orders";
     private const string ThreeDimensionalPrinterImageUrl = "https://images.unsplash.com/photo-1756723902896-94e2d9332fbd?auto=format&fit=crop&w=1200&q=80";
     private const string ThreeDimensionalPrinterOperatorImageUrl = "https://images.unsplash.com/photo-1772566022519-e04921619df2?auto=format&fit=crop&w=1200&q=80";
     private const string MetalWorkshopImageUrl = "https://images.unsplash.com/photo-1764115424737-25aca6f47835?auto=format&fit=crop&w=1200&q=80";
@@ -124,6 +130,16 @@ internal static class SiteContent
     internal static LocalizedText Text(string en, string th)
     {
         return new LocalizedText { En = en, Th = th };
+    }
+
+    private static string ResolveQuoteEngineUrl()
+    {
+        var configuredUrl = Environment.GetEnvironmentVariable("QuoteEngine__BaseUrl")
+            ?? Environment.GetEnvironmentVariable("QUOTEENGINE_BASE_URL");
+
+        return string.IsNullOrWhiteSpace(configuredUrl)
+            ? DefaultQuoteEngineUrl
+            : configuredUrl.TrimEnd('/');
     }
 
     internal static ServicePageContent GetService(string? slug)
