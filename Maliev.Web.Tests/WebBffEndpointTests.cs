@@ -303,7 +303,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         public Task<ContactMessageResponse> SubmitAsync(ContactMessageRequest request, CancellationToken cancellationToken)
         {
             Assert.Equal("customer@example.com", request.Email);
-            return Task.FromResult(new ContactMessageResponse(Guid.Parse("e9f63ee7-5711-4392-893a-5380b90f80e5"), "Received"));
+            return Task.FromResult(new ContactMessageResponse("e9f63ee7-5711-4392-893a-5380b90f80e5", "Received"));
         }
     }
 }

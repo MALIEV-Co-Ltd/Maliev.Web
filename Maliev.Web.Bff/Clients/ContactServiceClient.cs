@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Contact;
 
@@ -21,7 +22,34 @@ internal sealed class ContactServiceClient(HttpClient httpClient) : IContactServ
 
         var created = await response.Content.ReadFromJsonAsync<ContactServiceCreateResponse>(cancellationToken)
             ?? throw new BackendUnavailableException("ContactService", "ContactService returned an empty contact response.");
-        return new ContactMessageResponse(created.Id, created.Status);
+        return new ContactMessageResponse(created.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), MapStatus(created.Status));
+    }
+
+    private static string MapStatus(JsonElement status)
+    {
+        if (status.ValueKind == JsonValueKind.Number && status.TryGetInt32(out var value))
+        {
+            return value switch
+            {
+                0 => "Received",
+                1 => "In progress",
+                2 => "Resolved",
+                3 => "Closed",
+                _ => value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            };
+        }
+
+        if (status.ValueKind == JsonValueKind.String)
+        {
+            return status.GetString() switch
+            {
+                "New" => "Received",
+                { Length: > 0 } text => text,
+                _ => "Received"
+            };
+        }
+
+        return "Received";
     }
 }
 
@@ -41,16 +69,35 @@ internal sealed class ContactServiceCreateRequest
 
     public Guid CountryId { get; set; }
 
-    public string ContactType { get; set; } = "General";
+    public int ContactType { get; set; } = ContactTypes.General;
 
-    public string Priority { get; set; } = "Normal";
+    public int Priority { get; set; } = Priorities.Medium;
 
-    public List<ContactAttachmentDto> Files { get; set; } = [];
+    public List<ContactServiceFileRequest> Files { get; set; } = [];
+
+    internal static class ContactTypes
+    {
+        public const int General = 0;
+    }
+
+    internal static class Priorities
+    {
+        public const int Medium = 1;
+    }
+}
+
+internal sealed class ContactServiceFileRequest
+{
+    public string FileName { get; set; } = string.Empty;
+
+    public byte[] FileContent { get; set; } = [];
+
+    public string? ContentType { get; set; }
 }
 
 internal sealed class ContactServiceCreateResponse
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public string Status { get; set; } = "Received";
+    public JsonElement Status { get; set; }
 }

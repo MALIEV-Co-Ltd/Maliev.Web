@@ -130,7 +130,7 @@ internal sealed class MalievApiClient(HttpClient httpClient)
     {
         var response = await httpClient.PostAsJsonAsync("web/v1/contact/messages", request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
-        return await response.Content.ReadFromJsonAsync<ContactMessageResponse>(cancellationToken) ?? new ContactMessageResponse(Guid.Empty, "Received");
+        return await response.Content.ReadFromJsonAsync<ContactMessageResponse>(cancellationToken) ?? new ContactMessageResponse(string.Empty, "Received");
     }
 
     private async Task<T?> GetJsonAsync<T>(string path, CancellationToken cancellationToken)

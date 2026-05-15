@@ -41,7 +41,7 @@ public sealed class ContactMessageRequest
     public string ContactType { get; set; } = "General";
 
     /// <summary>Gets or sets the selected country id.</summary>
-    public Guid CountryId { get; set; } = Guid.Parse("76400000-0000-0000-0000-000000000000");
+    public Guid CountryId { get; set; }
 
     /// <summary>Gets or sets uploaded contact attachments.</summary>
     public List<ContactAttachmentDto> Files { get; set; } = [];
@@ -67,4 +67,4 @@ public sealed class ContactAttachmentDto
 /// <summary>
 /// Contact form submission response.
 /// </summary>
-public sealed record ContactMessageResponse(Guid MessageId, string Status);
+public sealed record ContactMessageResponse(string MessageId, string Status);
