@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using Maliev.Web.Shared.Commerce;
 
 namespace Maliev.Web.Bff.Clients;
 
@@ -140,5 +139,3 @@ internal sealed class CountryServiceClient(HttpClient httpClient) : ICountryServ
     public Task<HttpResponseMessage> GetCountryByIso2Async(string iso2, CancellationToken cancellationToken) =>
         httpClient.GetAsync($"/country/v1/countries/iso2/{Uri.EscapeDataString(iso2)}", cancellationToken);
 }
-
-internal sealed record CustomerCheckoutDraft(Guid CustomerId, IReadOnlyList<CartItemDto> Items, string Culture);

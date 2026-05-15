@@ -1,8 +1,7 @@
 @page "/cart"
 @inherits PreferenceAwareComponentBase
 @inject CartState ShoppingCart
-@inject MalievApiClient Api
-@inject NavigationManager Navigation
+@using System.Text.Json
 
 <PageTitle>Cart - MALIEV</PageTitle>
 
@@ -48,47 +47,39 @@
                 <div><span>@Text("Shipping", "ค่าจัดส่ง")</span><strong>@Text("Calculated at checkout", "คำนวณในขั้นตอนชำระเงิน")</strong></div>
                 <div class="grand-total"><span>@Text("Estimated total", "ยอดรวมโดยประมาณ")</span><strong>@FormatCurrency(Subtotal)</strong></div>
             </div>
-            <button type="button" class="button primary" @onclick="CreateDraftAsync">@Text("Continue to checkout", "ดำเนินการชำระเงิน")</button>
-            @if (_checkout is not null)
+            <form method="post" action="/web/v1/checkout/draft-form" onsubmit="return window.malievCart?.syncCheckoutForm(this) ?? true">
+                <AntiforgeryToken />
+                <input type="hidden" name="Culture" value="@Preferences.Culture" />
+                <input type="hidden" name="ItemsJson" value="@CartItemsJson" />
+                <button type="submit" class="button primary">@Text("Continue to checkout", "ดำเนินการชำระเงิน")</button>
+            </form>
+            @if (IsCheckoutReady)
             {
                 <p class="success-message">@Text("Checkout is ready. Sign in to confirm delivery and payment.", "พร้อมดำเนินการชำระเงินแล้ว กรุณาเข้าสู่ระบบเพื่อยืนยันการจัดส่งและการชำระเงิน")</p>
             }
-            @if (!string.IsNullOrWhiteSpace(_error))
+            @if (!string.IsNullOrWhiteSpace(CurrentError))
             {
-                <p class="load-message">@_error</p>
+                <p class="load-message">@CurrentError</p>
             }
         </aside>
     }
 </section>
 
 @code {
-    private CheckoutDraftResponse? _checkout;
-    private string? _error;
+    [SupplyParameterFromQuery(Name = "checkout")]
+    public string? CheckoutStatus { get; set; }
+
     private decimal Subtotal => ShoppingCart.Items.Sum(item => item.UnitPriceThb * Math.Max(1, item.Quantity));
+    private bool IsCheckoutReady => string.Equals(CheckoutStatus, "ready", StringComparison.OrdinalIgnoreCase);
+    private string? CurrentError => string.Equals(CheckoutStatus, "unavailable", StringComparison.OrdinalIgnoreCase)
+        ? Text("We could not prepare checkout right now. Please refresh the page or contact MALIEV.", "ไม่สามารถเตรียมการชำระเงินได้ในขณะนี้ กรุณารีเฟรชหน้าหรือติดต่อ MALIEV")
+        : null;
+    private string CartItemsJson => JsonSerializer.Serialize(ShoppingCart.Items);
 
     protected override async Task OnInitializedAsync()
     {
         await ShoppingCart.InitializeAsync();
         await Preferences.InitializeAsync();
-    }
-
-    private async Task CreateDraftAsync()
-    {
-        try
-        {
-            _error = null;
-            _checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest { Culture = Preferences.Culture, Items = ShoppingCart.Items.ToList() });
-        }
-        catch (MalievApiException ex)
-        {
-            if (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                Navigation.NavigateTo("/auth/sign-in?returnUrl=%2Fcart", forceLoad: true);
-                return;
-            }
-
-            _error = ex.Message;
-        }
     }
 
     private void UpdateQuantity(CartItemDto item, object? value)

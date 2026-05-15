@@ -179,5 +179,20 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
             };
             return Task.FromResult(response);
         }
+
+        public Task<HttpResponseMessage> CreateCartAsync(object request, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not exercise checkout carts.");
+        }
+
+        public Task<HttpResponseMessage> UpsertCartLineAsync(Guid cartId, object request, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not exercise checkout cart lines.");
+        }
+
+        public Task<HttpResponseMessage> CreateCheckoutSessionAsync(object request, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not exercise checkout sessions.");
+        }
     }
 }
