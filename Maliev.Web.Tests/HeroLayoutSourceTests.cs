@@ -458,9 +458,11 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("<CustomerChatbot />", layout);
-        Assert.Contains("service-related topics", component);
+        Assert.Contains("customer manufacturing assistant", component);
+        Assert.Contains("Hi, I'm Mali.", component);
+        Assert.Contains("น้องมะลิ", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
-        Assert.Contains("aria-label=\"@Text(\"Open MALIEV assistant\"", component);
+        Assert.Contains("aria-label=\"@Text(\"Open Mali\"", component);
         Assert.DoesNotContain("Ask MALIEV", component);
         Assert.Contains(".customer-chatbot", styles);
         Assert.Contains(".customer-chatbot-panel", styles);

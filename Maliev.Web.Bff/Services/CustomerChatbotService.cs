@@ -30,10 +30,10 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "quote", "quotation", "price", "pricing", "cost", "order", "checkout", "lead time", "delivery",
         "shipping", "refund", "warranty", "file", "stl", "step", "stp", "iges", "obj", "3mf",
         "tolerance", "finish", "surface", "strength", "heat", "chemical", "contact", "phone", "address",
-        "line official", "service", "shop", "machine", "pimm",
+        "line official", "service", "shop", "machine", "pimm", "mali", "what can you do", "who are you", "your name",
         "ผลิต", "พิมพ์", "ปริ้น", "ซีเอ็นซี", "กัด", "กลึง", "สแกน", "ออกแบบ", "วัสดุ", "ต้นแบบ",
         "ชิ้นงาน", "อะไหล่", "แม่พิมพ์", "หล่อ", "ซิลิโคน", "ยูรีเทน", "เครื่องฉีด", "ลม", "ราคา",
-        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์"
+        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์", "มะลิ", "น้องมะลิ"
     ];
 
     private static readonly string[] GreetingTerms =
@@ -151,8 +151,8 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         {
             SessionId = sessionId,
             Content = language == "th"
-                ? "ผมช่วยตอบได้เฉพาะเรื่องบริการของ MALIEV เช่น งานผลิตชิ้นส่วน วัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ และการจัดส่งครับ"
-                : "I can help with MALIEV manufacturing and service-related topics only: custom parts, materials, 3D printing, CNC machining, 3D scanning, molding, quotations, orders, and delivery.",
+                ? "น้องมะลิช่วยตอบได้เฉพาะเรื่องบริการของ MALIEV เช่น งานผลิตชิ้นส่วน วัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ และการจัดส่งค่ะ"
+                : "Mali can help with MALIEV manufacturing and service-related topics only: custom parts, materials, 3D printing, CNC machining, 3D scanning, molding, quotations, orders, and delivery.",
             Role = "assistant",
             Language = language,
             IsOutOfScope = true,
@@ -163,7 +163,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
     private static string FallbackAnswer(string language)
     {
         return language == "th"
-            ? "ตอนนี้ผมยังตอบไม่ได้ครบถ้วน กรุณาถามเกี่ยวกับบริการของ MALIEV อีกครั้ง หรือติดต่อทีมงานเพื่อให้ช่วยตรวจไฟล์ครับ"
-            : "I could not generate a complete answer right now. Please ask another MALIEV service question or contact the team for file review.";
+            ? "ตอนนี้น้องมะลิยังตอบไม่ได้ครบถ้วน กรุณาถามเกี่ยวกับบริการของ MALIEV อีกครั้ง หรือติดต่อทีมงานเพื่อให้ช่วยตรวจไฟล์ค่ะ"
+            : "Mali could not generate a complete answer right now. Please ask another MALIEV service question or contact the team for file review.";
     }
 }

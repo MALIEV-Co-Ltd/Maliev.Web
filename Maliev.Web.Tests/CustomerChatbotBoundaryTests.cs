@@ -54,6 +54,7 @@ public sealed class CustomerChatbotBoundaryTests
 
         Assert.Null(response.SessionId);
         Assert.True(response.IsOutOfScope);
+        Assert.Contains("Mali", response.Content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("MALIEV", response.Content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("manufacturing", response.Content, StringComparison.OrdinalIgnoreCase);
         Assert.Null(client.InitiateRequest);
