@@ -1086,7 +1086,7 @@ html:lang(th) .h1 {
 .material-filter-block {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  align-items: end;
+  align-items: start;
   gap: 18px;
   padding: 18px;
   background: var(--paper);
@@ -1136,6 +1136,7 @@ html:lang(th) .h1 {
 }
 
 .material-comparison-count {
+  align-self: end;
   justify-self: end;
   padding: 10px 12px;
   color: var(--muted);

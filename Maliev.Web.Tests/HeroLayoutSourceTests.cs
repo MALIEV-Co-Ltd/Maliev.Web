@@ -555,6 +555,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-comparison-table", styles);
         Assert.Contains(".material-comparison-section .section-heading", styles);
         Assert.Contains("grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);", styles);
+        Assert.Contains(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: start;", styles);
+        Assert.Contains(".material-comparison-count {\n  align-self: end;\n  justify-self: end;", styles);
+        Assert.DoesNotContain(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: end;", styles);
         Assert.Contains("@media (max-width: 1180px)", styles);
         Assert.Contains("display: none;", styles);
         Assert.Contains("display: grid;", styles);
