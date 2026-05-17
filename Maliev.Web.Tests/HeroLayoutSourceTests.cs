@@ -853,6 +853,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("addIdleLevitation", source);
         Assert.Contains("root.position.y", source);
         Assert.Contains("Math.sin", source);
+        Assert.Contains("const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02)", source);
+        Assert.Contains("Math.sin(elapsed * 0.00055) * 0.025", source);
+        Assert.DoesNotContain("Math.sin(elapsed * 0.0012) * 0.055", source);
         Assert.DoesNotContain("* 0.24", source);
         Assert.DoesNotContain("* 0.11", source);
     }

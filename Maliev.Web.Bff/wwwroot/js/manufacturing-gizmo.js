@@ -329,7 +329,7 @@ async function createLandingHeroScene(state, BABYLON) {
   state.themeApplicator();
   observeDocumentTheme(state);
 
-  const baseRotation = new BABYLON.Vector3(-0.05, -0.36, 0.02);
+  const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02);
   root.rotation.copyFrom(baseRotation);
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -351,7 +351,7 @@ function addIdleLevitation(state, scene, root) {
 
   scene.onBeforeRenderObservable.add(() => {
     const elapsed = performance.now() - startedAt;
-    const levitation = Math.sin(elapsed * 0.0012) * 0.055;
+    const levitation = Math.sin(elapsed * 0.00055) * 0.025;
     root.position.y = baseY + levitation;
   });
 }
