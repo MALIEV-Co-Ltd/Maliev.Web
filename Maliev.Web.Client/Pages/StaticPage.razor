@@ -30,18 +30,7 @@
 <section class="page-hero compact">
     @if (Path == "blog")
     {
-        <h1 class="blog-hero-title">
-            @if (IsThaiCulture)
-            {
-                <span>@Text("Journal", "บทความ")</span>
-                <img class="blog-hero-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
-            }
-            else
-            {
-                <img class="blog-hero-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
-                <span>@Text("Journal", "บทความ")</span>
-            }
-        </h1>
+        <h1 class="blog-hero-title">@Text("Journal", "บทความ")</h1>
     }
     else
     {

@@ -558,9 +558,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/blog/{Slug}\"", source);
         Assert.Contains("SiteContent.BlogPosts", source);
         Assert.Contains("blog-hero-title", source);
-        Assert.Contains("blog-hero-logo", source);
+        Assert.DoesNotContain("blog-hero-logo", source);
         Assert.Contains("\"blog\" => Text(\"Journal\", \"บทความ\")", source);
         Assert.Contains("Text(\"Journal\", \"บทความ\")", source);
+        Assert.DoesNotContain("<img class=\"blog-hero-logo\"", source);
         Assert.DoesNotContain("\"blog\" => Text(\"MALIEV Journal\", \"บทความ MALIEV\")", source);
         Assert.Contains("@page \"/shipping-returns\"", source);
         Assert.Contains("@page \"/privacy\"", source);
@@ -633,7 +634,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ImageAlt", source);
         Assert.Contains(".material-category-media", styles);
         Assert.Contains(".material-category-body", styles);
-        Assert.Contains(".blog-hero-logo", styles);
+        Assert.DoesNotContain(".blog-hero-logo", styles);
         Assert.Contains(".content-stack ul", styles);
         Assert.Contains(".material-comparison-table", styles);
         Assert.Contains(".material-row-media", styles);
@@ -980,6 +981,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("babylonjs@9.6.0", source);
         Assert.Contains("IntersectionObserver", source);
+        Assert.Contains("isCanvasNearViewport", source);
+        Assert.Contains("requestAnimationFrame", source);
         Assert.Contains("alpha: true", source);
         Assert.Contains("antialias: true", source);
         Assert.Contains("premultipliedAlpha: false", source);
@@ -1035,10 +1038,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("babylonjs-loaders@9.6.0", source);
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
+        Assert.Contains("state.landingFrame = frameImportedModel", source);
+        Assert.Contains("frameLandingHeroCamera", source);
+        Assert.Contains("measureProjectedMeshFrame", source);
+        Assert.Contains("targetFill", source);
+        Assert.Contains("safeInset", source);
+        Assert.Contains("camera.getViewMatrix(true)", source);
         Assert.Contains("addHoverMotion", source);
         Assert.Contains("modelScale", source);
         Assert.Contains("const targetSize = 2.28 * modelScale", source);
-        Assert.Contains("wide ? 7.35 : 7.05", source);
+        Assert.DoesNotContain("wide ? 7.35 : 7.05", source);
         Assert.DoesNotContain("createLandingSurface", source);
         Assert.DoesNotContain("landing-contact-shadow", source);
         Assert.Contains("allowNativeContextMenu", source);
@@ -1085,10 +1094,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("width: min(100%, 820px);", styles);
         Assert.Contains("min-height: 440px;", styles);
         Assert.Contains("height: min(46vh, 470px);", styles);
+        Assert.Contains("@media (min-width: 1600px)", styles);
+        Assert.Contains("height: min(60vh, 760px);", styles);
+        Assert.Contains("@media (min-width: 2400px)", styles);
+        Assert.Contains("height: min(58vh, 860px);", styles);
         Assert.Contains("justify-content: center;", styles);
         Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
-        Assert.Contains("balancedTablet ? 0.43 : 0.44", gizmo);
-        Assert.Contains("balancedTablet ? 6.6 : wide ? 7.35 : 7.05", gizmo);
+        Assert.Contains("balancedTablet ? 0.46 : wide ? 0.43 : 0.45", gizmo);
+        Assert.Contains("frameLandingHeroCamera", gizmo);
+        Assert.Contains("measureProjectedMeshFrame", gizmo);
     }
 
     /// <summary>

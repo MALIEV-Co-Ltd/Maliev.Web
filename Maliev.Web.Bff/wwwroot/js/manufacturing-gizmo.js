@@ -35,7 +35,8 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     contextMenuHandler: null,
     cameraConfigurator: null,
     themeObserver: null,
-    themeApplicator: null
+    themeApplicator: null,
+    landingFrame: null
   };
 
   instances.set(canvas, state);
@@ -73,10 +74,28 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
       }
     }, { rootMargin: "180px 0px", threshold: 0.01 });
     state.observer.observe(canvas);
+    requestAnimationFrame(() => {
+      if (!state.started && isCanvasNearViewport(canvas)) {
+        state.visible = true;
+        start();
+        startRenderLoop(state);
+      }
+    });
   } else {
     state.visible = true;
     start();
   }
+}
+
+function isCanvasNearViewport(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const margin = 180;
+  return rect.width > 0 &&
+    rect.height > 0 &&
+    rect.bottom >= -margin &&
+    rect.right >= -margin &&
+    rect.top <= window.innerHeight + margin &&
+    rect.left <= window.innerWidth + margin;
 }
 
 function mountDocumentGizmos() {
@@ -295,7 +314,7 @@ async function createLandingHeroScene(state, BABYLON) {
   camera.upperRadiusLimit = camera.radius;
   camera.panningSensibility = 0;
   camera.inputs.clear();
-  configureLandingHeroCamera(camera, state.host, BABYLON);
+  configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
   const fill = new BABYLON.HemisphericLight("landing-fill", new BABYLON.Vector3(-0.5, 1, 0.2), scene);
 
@@ -322,7 +341,7 @@ async function createLandingHeroScene(state, BABYLON) {
     ? applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON)
     : null;
 
-  frameImportedModel(renderMeshes, root, BABYLON, state.modelScale);
+  state.landingFrame = frameImportedModel(renderMeshes, root, BABYLON, state.modelScale);
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
@@ -343,7 +362,7 @@ async function createLandingHeroScene(state, BABYLON) {
     addHoverMotion(state, scene, camera, root, baseRotation, BABYLON);
   }
 
-  configureSceneRuntime(state, engine, scene, () => configureLandingHeroCamera(camera, state.host, BABYLON));
+  configureSceneRuntime(state, engine, scene, () => configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame));
   markReady(state);
 }
 
@@ -358,18 +377,113 @@ function addIdleLevitation(state, scene, root) {
   });
 }
 
-function configureLandingHeroCamera(camera, host, BABYLON) {
+function configureLandingHeroCamera(camera, host, BABYLON, frame) {
+  const metrics = getLandingHeroViewportMetrics(host);
+
+  camera.fov = metrics.fov;
+  camera.target = new BABYLON.Vector3(0, metrics.targetY, 0);
+
+  if (frame?.meshes?.length) {
+    frameLandingHeroCamera(camera, frame.meshes, metrics, BABYLON);
+  } else {
+    camera.radius = metrics.fallbackRadius;
+  }
+
+  camera.lowerRadiusLimit = camera.radius;
+  camera.upperRadiusLimit = camera.radius;
+}
+
+function getLandingHeroViewportMetrics(host) {
   const width = host?.clientWidth ?? 780;
   const height = host?.clientHeight ?? 520;
+  const aspect = width / Math.max(height, 1);
   const compact = width < 560 || height < 360;
   const balancedTablet = width >= 640 && width <= 920 && height >= 460;
   const wide = width > 920;
 
-  camera.fov = compact ? 0.56 : balancedTablet ? 0.43 : 0.44;
-  camera.radius = compact ? 6.9 : balancedTablet ? 6.6 : wide ? 7.35 : 7.05;
-  camera.lowerRadiusLimit = camera.radius;
-  camera.upperRadiusLimit = camera.radius;
-  camera.target = new BABYLON.Vector3(0, 0.02, 0);
+  return {
+    fov: compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
+    targetFill: compact ? 0.76 : balancedTablet ? 0.82 : aspect > 1.55 ? 0.86 : 0.84,
+    safeInset: compact ? 0.07 : 0.055,
+    minRadius: compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
+    maxRadius: compact ? 8.4 : wide ? 9.2 : 8.8,
+    fallbackRadius: compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
+    targetY: compact ? 0.01 : 0.02
+  };
+}
+
+function frameLandingHeroCamera(camera, meshes, metrics, BABYLON) {
+  let low = metrics.minRadius;
+  let high = metrics.maxRadius;
+  let best = high;
+
+  for (let i = 0; i < 16; i += 1) {
+    const radius = (low + high) / 2;
+    camera.radius = radius;
+    camera.getViewMatrix(true);
+
+    const projected = measureProjectedMeshFrame(camera, meshes, BABYLON);
+    if (!projected || projected.clipped || projected.maxSpan > metrics.targetFill || projected.minInset < metrics.safeInset) {
+      low = radius;
+      continue;
+    }
+
+    best = radius;
+    high = radius;
+  }
+
+  camera.radius = best;
+}
+
+function measureProjectedMeshFrame(camera, meshes, BABYLON) {
+  const scene = camera.getScene();
+  const engine = scene.getEngine();
+  const viewport = camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
+  const transform = scene.getTransformMatrix();
+  const world = BABYLON.Matrix.Identity();
+
+  if (!viewport.width || !viewport.height) {
+    return null;
+  }
+
+  let minX = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  let projectedCount = 0;
+
+  for (const mesh of meshes) {
+    if (!mesh.getBoundingInfo) {
+      continue;
+    }
+
+    mesh.computeWorldMatrix(true);
+    const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
+    for (const vector of vectors) {
+      const point = BABYLON.Vector3.Project(vector, world, transform, viewport);
+      if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+        continue;
+      }
+
+      projectedCount += 1;
+      const normalizedX = (point.x - viewport.x) / viewport.width;
+      const normalizedY = (point.y - viewport.y) / viewport.height;
+      minX = Math.min(minX, normalizedX);
+      maxX = Math.max(maxX, normalizedX);
+      minY = Math.min(minY, normalizedY);
+      maxY = Math.max(maxY, normalizedY);
+    }
+  }
+
+  if (!projectedCount) {
+    return null;
+  }
+
+  return {
+    maxSpan: Math.max(maxX - minX, maxY - minY),
+    minInset: Math.min(minX, minY, 1 - maxX, 1 - maxY),
+    clipped: minX < 0 || minY < 0 || maxX > 1 || maxY > 1
+  };
 }
 
 function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
@@ -465,7 +579,7 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
 function frameImportedModel(meshes, root, BABYLON, modelScale = 1) {
   const bounds = computeMeshBounds(meshes, BABYLON);
   if (!bounds) {
-    return;
+    return null;
   }
 
   const size = bounds.max.subtract(bounds.min);
@@ -474,6 +588,11 @@ function frameImportedModel(meshes, root, BABYLON, modelScale = 1) {
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));
+
+  return {
+    meshes,
+    size: size.scale(scale)
+  };
 }
 
 function normalizeModelScale(value) {
