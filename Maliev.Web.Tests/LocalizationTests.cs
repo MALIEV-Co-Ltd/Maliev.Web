@@ -139,14 +139,16 @@ public sealed class LocalizationTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var policy = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
 
-        Assert.Contains("Continue without optional", component);
-        Assert.Contains("Accept optional", component);
-        Assert.Contains("cookie-consent-close", component);
-        Assert.Contains("Continue with essential cookies only", component);
+        Assert.Contains("@Text(\"Accept\"", component);
+        Assert.Contains("@Text(\"Decline optional\"", component);
+        Assert.Contains("cookie-consent-accept", component);
+        Assert.Contains("cookie-consent-decline", component);
+        Assert.DoesNotContain("cookie-consent-close", component);
         Assert.Contains("Optional analytics and ads cookies stay off unless you accept them.", component);
         Assert.Contains("href=\"/cookie-policy\"", component);
         Assert.Contains("malievConsent.get", component);
         Assert.Contains("malievConsent.set", component);
+        Assert.DoesNotContain(">x</span>", component);
         Assert.DoesNotContain("Accept all", component);
         Assert.DoesNotContain("Reject all", component);
         Assert.Contains("maliev.cookieConsent.v1", consentScript);
@@ -159,7 +161,11 @@ public sealed class LocalizationTests
         Assert.Contains("Cookie settings", layout);
         Assert.Contains(".cookie-consent", styles);
         Assert.Contains("right: clamp(12px, 2vw, 24px);", styles);
-        Assert.Contains(".cookie-consent-close", styles);
+        Assert.Contains(".cookie-consent-actions .button.primary", styles);
+        Assert.Contains(".cookie-consent-decline", styles);
+        Assert.DoesNotContain(".cookie-consent-close", styles);
+        Assert.DoesNotContain("padding-right: 42px;", styles);
+        Assert.DoesNotContain("padding: 18px 46px 18px 18px;", styles);
         Assert.DoesNotContain("left: 50%;", styles);
         Assert.DoesNotContain("transform: translateX(-50%);", styles);
         Assert.Contains(".footer-link-button", styles);

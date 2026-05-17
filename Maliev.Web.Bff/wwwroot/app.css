@@ -394,35 +394,15 @@ main {
   right: clamp(12px, 2vw, 24px);
   bottom: clamp(16px, 3vw, 32px);
   display: grid;
-  gap: 14px;
-  width: min(calc(100% - 32px), 430px);
+  gap: 12px;
+  width: min(calc(100% - 32px), 408px);
   max-height: min(70vh, 520px);
-  padding: 18px 46px 18px 18px;
+  padding: clamp(16px, 2vw, 20px);
   overflow: auto;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--paper);
   box-shadow: rgba(0, 0, 0, .10) 0 18px 48px -24px, var(--shadow-card);
-}
-
-.cookie-consent-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 999px;
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-}
-
-.cookie-consent-close:hover {
-  color: var(--ink);
-  background: var(--paper-2);
 }
 
 .cookie-consent-copy {
@@ -454,11 +434,32 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
+  gap: 8px;
 }
 
 .cookie-consent-actions .button {
   white-space: nowrap;
+}
+
+.cookie-consent-actions .button.primary {
+  color: var(--blue-on);
+  background: var(--blue);
+  box-shadow: color-mix(in srgb, var(--blue) 36%, transparent) 0 10px 24px -16px, var(--shadow-border);
+}
+
+.cookie-consent-actions .button.primary:hover {
+  background: var(--blue-hover);
+}
+
+.cookie-consent-decline {
+  color: var(--muted);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.cookie-consent-decline:hover {
+  color: var(--ink-2);
+  background: var(--paper-2);
 }
 
 .accent-blue {
@@ -3280,7 +3281,7 @@ html[data-theme="dark"] .auth-google-icon {
 
   .cookie-consent {
     bottom: 12px;
-    width: min(calc(100% - 24px), 430px);
+    width: min(calc(100% - 24px), 408px);
     max-height: 46vh;
   }
 
@@ -3354,6 +3355,5 @@ html[data-theme="dark"] .auth-google-icon {
 
   .cookie-consent {
     padding: 14px;
-    padding-right: 42px;
   }
 }

@@ -4,20 +4,14 @@
 @if (_visible)
 {
     <section class="cookie-consent" role="region" aria-label="@Text("Cookie consent", "การยินยอมคุกกี้")">
-        <button class="cookie-consent-close"
-                type="button"
-                aria-label="@Text("Continue with essential cookies only", "ใช้ต่อด้วยคุกกี้จำเป็นเท่านั้น")"
-                @onclick="AcceptEssentialAsync">
-            <span aria-hidden="true">x</span>
-        </button>
         <div class="cookie-consent-copy">
             <strong>@Text("Cookie choices", "ตัวเลือกคุกกี้")</strong>
             <p>@Text("Essential cookies keep language, theme, cart, account, and security flows working. Optional analytics and ads cookies stay off unless you accept them.", "คุกกี้จำเป็นช่วยให้ภาษา ธีม ตะกร้า บัญชี และความปลอดภัยทำงานได้ คุกกี้วิเคราะห์และโฆษณาแบบไม่จำเป็นจะปิดไว้จนกว่าคุณจะยอมรับ")</p>
             <a href="/cookie-policy">@Text("Cookie policy", "นโยบายคุกกี้")</a>
         </div>
         <div class="cookie-consent-actions">
-            <button class="button secondary" type="button" @onclick="AcceptEssentialAsync">@Text("Continue without optional", "ใช้ต่อโดยไม่เปิดคุกกี้เพิ่มเติม")</button>
-            <button class="button secondary" type="button" @onclick="AcceptOptionalAsync">@Text("Accept optional", "ยอมรับเพิ่มเติม")</button>
+            <button class="button primary cookie-consent-accept" type="button" @onclick="AcceptOptionalAsync">@Text("Accept", "ยอมรับ")</button>
+            <button class="button cookie-consent-decline" type="button" @onclick="AcceptEssentialAsync">@Text("Decline optional", "ปฏิเสธคุกกี้เพิ่มเติม")</button>
         </div>
     </section>
 }
