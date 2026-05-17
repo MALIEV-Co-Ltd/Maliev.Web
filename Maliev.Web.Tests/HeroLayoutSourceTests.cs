@@ -659,6 +659,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".blog-hero-logo", styles);
         Assert.Contains(".content-stack ul", styles);
         Assert.Contains(".material-comparison-table", styles);
+        Assert.Contains("border-collapse: separate;", styles);
+        Assert.Contains("border-spacing: 0;", styles);
+        Assert.Contains(".material-comparison-table thead th:first-child,\n.material-comparison-table tbody td:first-child {\n  position: sticky;\n  left: 0;", styles);
+        Assert.Contains(".material-comparison-table tbody td:first-child {\n  z-index: 3;\n  background: var(--paper);", styles);
         Assert.Contains(".material-row-media", styles);
         Assert.Contains(".material-mobile-card-media", styles);
         Assert.Contains(".material-comparison-section .section-heading", styles);
