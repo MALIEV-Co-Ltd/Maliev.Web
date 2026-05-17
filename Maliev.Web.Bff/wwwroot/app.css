@@ -1085,6 +1085,9 @@ html:lang(th) .h1 {
 }
 
 .material-comparison-section {
+  max-width: none;
+  padding-left: clamp(24px, 4vw, 72px);
+  padding-right: clamp(24px, 4vw, 72px);
   padding-top: 0;
 }
 
@@ -1095,6 +1098,7 @@ html:lang(th) .h1 {
 
 .material-comparison-panel {
   display: grid;
+  width: 100%;
   gap: 22px;
 }
 
@@ -1163,6 +1167,7 @@ html:lang(th) .h1 {
 }
 
 .material-table-shell {
+  width: 100%;
   overflow-x: auto;
   background: var(--paper);
   border-radius: var(--radius-lg);
@@ -3044,6 +3049,11 @@ html[data-theme="dark"] .auth-google-icon {
     display: none;
   }
 
+  .material-comparison-section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
   .material-mobile-list {
     display: grid;
     gap: 14px;
@@ -3480,6 +3490,8 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .material-comparison-section {
+    padding-left: 18px;
+    padding-right: 18px;
     padding-top: 0;
   }
 
