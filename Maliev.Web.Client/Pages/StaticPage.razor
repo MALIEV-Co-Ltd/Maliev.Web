@@ -196,22 +196,17 @@
                                 <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
                             </span>
                         </div>
-                        <div class="material-mobile-card-content">
-                            <div class="material-mobile-card-head">
-                                <div class="material-mobile-card-title">
-                                    <span class="material-mobile-card-copy">
-                                        <strong>@material.Name</strong>
-                                        <span>@material.Family.For(Preferences.Culture)</span>
-                                    </span>
-                                </div>
-                                <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
-                                    @MaterialSelectButtonText(material)
-                                </button>
+                        <div class="material-mobile-card-basic">
+                            <div class="material-mobile-card-title">
+                                <span class="material-mobile-card-copy">
+                                    <strong>@material.Name</strong>
+                                    <span>@material.Family.For(Preferences.Culture)</span>
+                                </span>
                             </div>
-                            <div class="material-mobile-card-meta">
-                                <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
-                                <span>@material.BestFor.For(Preferences.Culture)</span>
-                            </div>
+                            <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
+                        </div>
+                        <div class="material-mobile-card-detail">
+                            <p class="material-mobile-card-best-fit">@material.BestFor.For(Preferences.Culture)</p>
                             <dl class="material-mobile-specs">
                                 <div>
                                     <dt>@Text("Mechanical", "เชิงกล")</dt>
@@ -226,6 +221,9 @@
                                     <dd>@material.Chemical.For(Preferences.Culture)</dd>
                                 </div>
                             </dl>
+                            <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
+                                @MaterialSelectButtonText(material)
+                            </button>
                         </div>
                     </article>
                 }
