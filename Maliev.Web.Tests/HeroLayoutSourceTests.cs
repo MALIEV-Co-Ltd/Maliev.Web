@@ -593,6 +593,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-compare-workbench", source);
         Assert.Contains("material-row-summary", source);
         Assert.Contains("material-row-media", source);
+        Assert.Contains("material-mobile-card-visual", source);
+        Assert.Contains("material-mobile-card-content", source);
         Assert.Contains("material-mobile-card-media", source);
         Assert.Contains("<img src=\"@material.ImageUrl\"", source);
         Assert.Contains("string ImageUrl,\n        LocalizedText ImageAlt", source);
@@ -611,13 +613,18 @@ public sealed class HeroLayoutSourceTests
         Assert.True(materialRowMediaIndex >= 0, "material row media should exist");
         Assert.True(materialRowCopyIndex < materialRowMediaIndex, "desktop material table should render text before image");
 
+        var materialMobileVisualIndex = source.IndexOf("<div class=\"material-mobile-card-visual\">", StringComparison.Ordinal);
+        var materialMobileContentIndex = source.IndexOf("<div class=\"material-mobile-card-content\">", StringComparison.Ordinal);
         var materialMobileTitleIndex = source.IndexOf("<div class=\"material-mobile-card-title\">", StringComparison.Ordinal);
-        var materialMobileMediaIndex = source.IndexOf("<span class=\"material-mobile-card-media\">", materialMobileTitleIndex, StringComparison.Ordinal);
+        var materialMobileMediaIndex = source.IndexOf("<span class=\"material-mobile-card-media\">", materialMobileVisualIndex, StringComparison.Ordinal);
         var materialMobileCopyIndex = source.IndexOf("<span class=\"material-mobile-card-copy\">", materialMobileTitleIndex, StringComparison.Ordinal);
+        Assert.True(materialMobileVisualIndex >= 0, "material mobile card visual markup should exist");
+        Assert.True(materialMobileContentIndex >= 0, "material mobile card content markup should exist");
         Assert.True(materialMobileTitleIndex >= 0, "material mobile card title markup should exist");
         Assert.True(materialMobileCopyIndex >= 0, "material mobile card copy should exist");
         Assert.True(materialMobileMediaIndex >= 0, "material mobile card media should exist");
-        Assert.True(materialMobileCopyIndex < materialMobileMediaIndex, "mobile material cards should render text before image");
+        Assert.True(materialMobileVisualIndex < materialMobileContentIndex, "tablet material cards should render the material image column before the data column");
+        Assert.True(materialMobileMediaIndex < materialMobileCopyIndex, "tablet material cards should render material imagery before the data copy");
 
         Assert.Contains("material-pro-con-line material-pro-con-pro", source);
         Assert.Contains("material-pro-con-line material-pro-con-con", source);
@@ -651,6 +658,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-comparison-count {\n  align-self: end;\n  justify-self: end;", styles);
         Assert.DoesNotContain(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: end;", styles);
         Assert.Contains("@media (max-width: 1180px)", styles);
+        Assert.Contains("@media (min-width: 681px) and (max-width: 1180px)", styles);
+        Assert.Contains(".material-mobile-card {\n    grid-template-columns: minmax(240px, .42fr) minmax(0, 1fr);", styles);
         Assert.Contains(".material-comparison-section {\n    padding-left: 24px;\n    padding-right: 24px;", styles);
         Assert.Contains("@media (max-width: 680px)", styles);
         Assert.Contains(".material-comparison-section {\n    padding-left: 18px;\n    padding-right: 18px;", styles);
@@ -667,6 +676,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("max-width: 168px;", styles);
         Assert.DoesNotContain("grid-template-columns: 68px minmax(0, 1fr);", styles);
         Assert.Contains(".material-mobile-card-title {\n  display: grid;\n  gap: 12px;", styles);
+        Assert.Contains(".material-mobile-card-content {\n  display: grid;\n  align-content: start;\n  gap: 14px;", styles);
+        Assert.Contains(".material-mobile-card-media {\n    align-self: stretch;\n    height: 100%;\n    min-height: 220px;", styles);
         Assert.Contains(".material-mobile-card-copy", styles);
         Assert.DoesNotContain(".material-mobile-card-title {\n  display: grid;\n  grid-template-columns: 74px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);

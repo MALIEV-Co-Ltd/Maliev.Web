@@ -191,38 +191,42 @@
                 @foreach (var material in FilteredMaterialComparisons)
                 {
                     <article class="@MaterialSelectionCardClass(material)">
-                        <div class="material-mobile-card-head">
-                            <div class="material-mobile-card-title">
-                                <span class="material-mobile-card-copy">
-                                    <strong>@material.Name</strong>
-                                    <span>@material.Family.For(Preferences.Culture)</span>
-                                </span>
-                                <span class="material-mobile-card-media">
-                                    <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                                </span>
-                            </div>
-                            <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
-                                @MaterialSelectButtonText(material)
-                            </button>
+                        <div class="material-mobile-card-visual">
+                            <span class="material-mobile-card-media">
+                                <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                            </span>
                         </div>
-                        <div class="material-mobile-card-meta">
-                            <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
-                            <span>@material.BestFor.For(Preferences.Culture)</span>
+                        <div class="material-mobile-card-content">
+                            <div class="material-mobile-card-head">
+                                <div class="material-mobile-card-title">
+                                    <span class="material-mobile-card-copy">
+                                        <strong>@material.Name</strong>
+                                        <span>@material.Family.For(Preferences.Culture)</span>
+                                    </span>
+                                </div>
+                                <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
+                                    @MaterialSelectButtonText(material)
+                                </button>
+                            </div>
+                            <div class="material-mobile-card-meta">
+                                <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
+                                <span>@material.BestFor.For(Preferences.Culture)</span>
+                            </div>
+                            <dl class="material-mobile-specs">
+                                <div>
+                                    <dt>@Text("Mechanical", "เชิงกล")</dt>
+                                    <dd>@material.Mechanical.For(Preferences.Culture)</dd>
+                                </div>
+                                <div>
+                                    <dt>@Text("Heat", "ความร้อน")</dt>
+                                    <dd>@material.Heat.For(Preferences.Culture)</dd>
+                                </div>
+                                <div>
+                                    <dt>@Text("Chemical", "สารเคมี")</dt>
+                                    <dd>@material.Chemical.For(Preferences.Culture)</dd>
+                                </div>
+                            </dl>
                         </div>
-                        <dl class="material-mobile-specs">
-                            <div>
-                                <dt>@Text("Mechanical", "เชิงกล")</dt>
-                                <dd>@material.Mechanical.For(Preferences.Culture)</dd>
-                            </div>
-                            <div>
-                                <dt>@Text("Heat", "ความร้อน")</dt>
-                                <dd>@material.Heat.For(Preferences.Culture)</dd>
-                            </div>
-                            <div>
-                                <dt>@Text("Chemical", "สารเคมี")</dt>
-                                <dd>@material.Chemical.For(Preferences.Culture)</dd>
-                            </div>
-                        </dl>
                     </article>
                 }
             </div>
