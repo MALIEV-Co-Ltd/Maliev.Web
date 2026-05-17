@@ -147,6 +147,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-stat-grid", source);
         Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
+        Assert.Contains("<div><strong>300/350°C</strong><small>@Text(\"max melt\", \"อุณหภูมิสูงสุด\")</small></div>", source);
+        Assert.DoesNotContain("<div><strong>180°C</strong><small>@Text(\"max melt\", \"อุณหภูมิสูงสุด\")</small></div>", source);
         Assert.Contains("<div><strong>7 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>6 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.Contains("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
@@ -155,6 +157,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("background: linear-gradient(135deg, #ffffff 0%, #eef5ff 52%, #f7f8fb 100%);", styles);
         Assert.Contains(".machine-feature .h-display", styles);
         Assert.Contains(".machine-stat-grid", styles);
+        Assert.Contains("font-size: clamp(1.35rem, 1.75vw, 1.65rem);", styles);
         Assert.Contains("margin-bottom: 30px;", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains(".social-link", styles);
