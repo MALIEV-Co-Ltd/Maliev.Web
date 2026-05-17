@@ -995,13 +995,21 @@ public sealed class HeroLayoutSourceTests
     [Fact]
     public void ManufacturingGizmoSupportsHoverDrivenPlasticLandingModel()
     {
+        var catalog = ReadRepoFile("Maliev.Web.Client", "Content", "HeroModelCatalog.cs");
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
+        Assert.Contains("DisplayScale", catalog);
+        Assert.Contains("\"3d-printing-part-02\"", catalog);
+        Assert.Contains("1.72", catalog);
+        Assert.Contains("ModelScale", component);
+        Assert.Contains("data-model-scale=\"@ModelScale.ToString(CultureInfo.InvariantCulture)\"", component);
         Assert.Contains("babylonjs-loaders@9.6.0", source);
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("addHoverMotion", source);
-        Assert.Contains("const targetSize = 2.28", source);
+        Assert.Contains("modelScale", source);
+        Assert.Contains("const targetSize = 2.28 * modelScale", source);
         Assert.Contains("wide ? 7.35 : 7.05", source);
         Assert.DoesNotContain("createLandingSurface", source);
         Assert.DoesNotContain("landing-contact-shadow", source);

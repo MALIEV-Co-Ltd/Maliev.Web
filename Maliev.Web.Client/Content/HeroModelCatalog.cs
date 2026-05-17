@@ -21,7 +21,8 @@ internal static class HeroModelCatalog
             DefaultServiceSlug,
             "/models/hero-3d-printing-part-02.glb",
             SiteContent.Text("3D printed functional part preview", "ตัวอย่างชิ้นงานใช้งานจากงานพิมพ์ 3 มิติ"),
-            true)
+            true,
+            1.72)
     ];
 
     private static readonly IReadOnlyDictionary<string, HeroModelAsset> AssetsByKey = Assets.ToDictionary(
@@ -65,4 +66,5 @@ internal sealed record HeroModelAsset(
     string ServiceSlug,
     string Url,
     LocalizedText AriaLabel,
-    bool UsePlasticMaterial);
+    bool UsePlasticMaterial,
+    double DisplayScale = 1.0);

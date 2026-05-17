@@ -6,7 +6,7 @@ let babylonLoadersRuntime;
 
 mountDocumentGizmos();
 
-export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false) {
+export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false, modelScale = 1) {
   if (!canvas || instances.has(canvas)) {
     return;
   }
@@ -18,6 +18,7 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     modelUrl: typeof modelUrl === "string" ? modelUrl.trim() : "",
     enableHoverMotion: Boolean(enableHoverMotion),
     usePlasticMaterial: Boolean(usePlasticMaterial),
+    modelScale: normalizeModelScale(modelScale),
     scene: null,
     engine: null,
     disposed: false,
@@ -87,7 +88,8 @@ function mountDocumentGizmos() {
     canvas,
     canvas.dataset.modelUrl ?? "",
     canvas.dataset.enableHoverMotion === "true",
-    canvas.dataset.usePlasticMaterial === "true");
+    canvas.dataset.usePlasticMaterial === "true",
+    canvas.dataset.modelScale ?? "1");
 
   const mount = root => {
     if (root.matches?.("canvas[data-manufacturing-gizmo]")) {
@@ -320,7 +322,7 @@ async function createLandingHeroScene(state, BABYLON) {
     ? applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON)
     : null;
 
-  frameImportedModel(renderMeshes, root, BABYLON);
+  frameImportedModel(renderMeshes, root, BABYLON, state.modelScale);
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
@@ -460,7 +462,7 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   return plastic;
 }
 
-function frameImportedModel(meshes, root, BABYLON) {
+function frameImportedModel(meshes, root, BABYLON, modelScale = 1) {
   const bounds = computeMeshBounds(meshes, BABYLON);
   if (!bounds) {
     return;
@@ -468,10 +470,19 @@ function frameImportedModel(meshes, root, BABYLON) {
 
   const size = bounds.max.subtract(bounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.28;
+  const targetSize = 2.28 * modelScale;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
   root.position.copyFrom(bounds.center.scale(-scale));
+}
+
+function normalizeModelScale(value) {
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return 1;
+  }
+
+  return clamp(parsed, 0.5, 2.4);
 }
 
 function computeMeshBounds(meshes, BABYLON) {
