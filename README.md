@@ -60,14 +60,25 @@ The local site runs from the BFF launch profile at `https://localhost:7236` or `
 
 ### Google Sign-In
 
-`Maliev.Web.Bff` follows the same local Google OAuth setup as `Maliev.Intranet.Bff`. In `Development`, the BFF loads `sharedsecrets.json` from `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`. The file is git-ignored and must provide:
+`Maliev.Web.Bff` uses its own customer-facing Google OAuth client. For direct local Web runs, store the Web client in the BFF user-secrets store:
+
+```powershell
+dotnet user-secrets set "Authentication:Google:ClientId" "<web-google-oauth-client-id>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
+dotnet user-secrets set "Authentication:Google:ClientSecret" "<web-google-oauth-client-secret>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
+```
+
+When the site runs under Aspire, store the Web-specific client in `Maliev.Aspire.AppHost` user-secrets or in the git-ignored `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`. The shared root values stay available for internal apps such as `Maliev.Intranet`; Web can override them with:
 
 ```json
 {
   "Authentication": {
     "Google": {
       "ClientId": "<google-oauth-client-id>",
-      "ClientSecret": "<google-oauth-client-secret>"
+      "ClientSecret": "<google-oauth-client-secret>",
+      "Web": {
+        "ClientId": "<web-google-oauth-client-id>",
+        "ClientSecret": "<web-google-oauth-client-secret>"
+      }
     }
   }
 }
@@ -81,7 +92,7 @@ https://localhost:7236/auth/google/signin
 https://www.maliev.com/auth/google/signin
 ```
 
-When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the same values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`.
+When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the Web-specific values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`, falling back to the shared Google values only when no Web override is configured.
 
 ## Google Ads Landing Routes
 
