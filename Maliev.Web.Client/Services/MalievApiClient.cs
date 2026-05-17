@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Forms;
 using Maliev.Web.Shared.Account;
+using Maliev.Web.Shared.Chatbot;
 using Maliev.Web.Shared.Commerce;
 using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Quotes;
@@ -131,6 +132,13 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         var response = await httpClient.PostAsJsonAsync("web/v1/contact/messages", request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<ContactMessageResponse>(cancellationToken) ?? new ContactMessageResponse(string.Empty, "Received");
+    }
+
+    internal async Task<CustomerChatbotResponse> SendChatbotMessageAsync(CustomerChatbotRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/chatbot/messages", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>(cancellationToken) ?? new CustomerChatbotResponse();
     }
 
     private async Task<T?> GetJsonAsync<T>(string path, CancellationToken cancellationToken)

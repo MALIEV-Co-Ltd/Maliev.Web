@@ -1,0 +1,163 @@
+@inject MalievApiClient ApiClient
+@inject PreferenceService Preferences
+
+<aside class="customer-chatbot" aria-label="@Text("MALIEV customer assistant", "ผู้ช่วยลูกค้า MALIEV")">
+    @if (_isOpen)
+    {
+        <section class="customer-chatbot-panel" aria-live="polite">
+            <header class="customer-chatbot-header">
+                <div>
+                    <span>@Text("MALIEV assistant", "ผู้ช่วย MALIEV")</span>
+                    <small>@Text("service-related topics only", "เฉพาะหัวข้อบริการของ MALIEV")</small>
+                </div>
+                <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpen">
+                    <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                </button>
+            </header>
+
+            <div class="customer-chatbot-messages">
+                @foreach (var message in _messages)
+                {
+                    <div class="@MessageClass(message.Role)">
+                        <p>@message.Content</p>
+                    </div>
+                }
+
+                @if (_isSending)
+                {
+                    <div class="customer-chatbot-message assistant pending">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                }
+            </div>
+
+            <div class="customer-chatbot-prompts" aria-label="@Text("Suggested topics", "หัวข้อแนะนำ")">
+                @foreach (var prompt in SuggestedPrompts)
+                {
+                    <button type="button" @onclick="() => SendSuggestionAsync(prompt.Value.For(Preferences.Culture))" disabled="@_isSending">
+                        @prompt.Label.For(Preferences.Culture)
+                    </button>
+                }
+            </div>
+
+            <div class="customer-chatbot-composer">
+                <textarea rows="2"
+                          maxlength="1000"
+                          placeholder="@Text("Ask about materials, processes, quotes, or delivery", "ถามเรื่องวัสดุ กระบวนการ ใบเสนอราคา หรือการจัดส่ง")"
+                          @bind="_draft"
+                          @bind:event="oninput"
+                          disabled="@_isSending"></textarea>
+                <button type="button" aria-label="@Text("Send message", "ส่งข้อความ")" @onclick="SendDraftAsync" disabled="@(!CanSend)">
+                    <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" />
+                </button>
+            </div>
+        </section>
+    }
+
+    <button type="button"
+            class="customer-chatbot-toggle"
+            aria-expanded="@_isOpen.ToString().ToLowerInvariant()"
+            aria-label="@Text("Open MALIEV assistant", "เปิดผู้ช่วย MALIEV")"
+            @onclick="ToggleOpen">
+        <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Size="Size.Medium" />
+        <span>@Text("Ask MALIEV", "ถาม MALIEV")</span>
+    </button>
+</aside>
+
+@code {
+    private readonly List<CustomerChatMessage> _messages = [];
+    private Guid? _sessionId;
+    private string _draft = string.Empty;
+    private bool _isOpen;
+    private bool _isSending;
+
+    private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
+
+    private IReadOnlyList<CustomerChatPrompt> SuggestedPrompts =>
+    [
+        new(Localized("Materials", "วัสดุ"), Localized("Which material should I use for a heat-resistant prototype?", "ควรใช้วัสดุอะไรสำหรับต้นแบบที่ทนความร้อน")),
+        new(Localized("Lead time", "ระยะเวลา"), Localized("What lead time should I expect for 3D printed parts?", "งานพิมพ์ 3D ใช้เวลาประมาณกี่วัน")),
+        new(Localized("PIMM", "เครื่อง PIMM"), Localized("What is the difference between the PIMM-30 and PIMM-50 machines?", "PIMM-30 และ PIMM-50 ต่างกันอย่างไร"))
+    ];
+
+    protected override void OnInitialized()
+    {
+        _messages.Add(new CustomerChatMessage(
+            "assistant",
+            Text(
+                "Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.",
+                "ถามผมเรื่องวัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้ครับ")));
+    }
+
+    private void ToggleOpen()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private Task SendDraftAsync()
+    {
+        var message = _draft;
+        _draft = string.Empty;
+        return SendAsync(message);
+    }
+
+    private Task SendSuggestionAsync(string message)
+    {
+        return SendAsync(message);
+    }
+
+    private async Task SendAsync(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message) || _isSending)
+        {
+            return;
+        }
+
+        var trimmed = message.Trim();
+        _messages.Add(new CustomerChatMessage("user", trimmed));
+        _isSending = true;
+
+        try
+        {
+            var response = await ApiClient.SendChatbotMessageAsync(new CustomerChatbotRequest
+            {
+                SessionId = _sessionId,
+                Message = trimmed,
+                Language = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en"
+            });
+            _sessionId = response.SessionId ?? _sessionId;
+            _messages.Add(new CustomerChatMessage(response.Role, response.Content));
+        }
+        catch (MalievApiException ex)
+        {
+            _messages.Add(new CustomerChatMessage("assistant", ex.Message));
+        }
+        finally
+        {
+            _isSending = false;
+        }
+    }
+
+    private static string MessageClass(string role)
+    {
+        return string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
+            ? "customer-chatbot-message user"
+            : "customer-chatbot-message assistant";
+    }
+
+    private string Text(string en, string th)
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private static LocalizedText Localized(string en, string th)
+    {
+        return new LocalizedText { En = en, Th = th };
+    }
+
+    private sealed record CustomerChatMessage(string Role, string Content);
+
+    private sealed record CustomerChatPrompt(LocalizedText Label, LocalizedText Value);
+}

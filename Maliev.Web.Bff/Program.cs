@@ -109,6 +109,8 @@ builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClien
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
 builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService")
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
+builder.AddServiceClient<IChatbotServiceClient, ChatbotServiceClient>("ChatbotService")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(45));
 
 builder.Services.AddHttpClient("UploadServiceStreaming", (sp, client) =>
 {
@@ -129,6 +131,7 @@ builder.Services.AddScoped<IWebQuoteService, WebQuoteService>();
 builder.Services.AddScoped<IQuoteUploadService, QuoteUploadService>();
 builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
+builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 
 var app = builder.Build();
 

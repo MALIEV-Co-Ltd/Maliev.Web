@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using Maliev.Web.Bff.Services;
+using Maliev.Web.Shared.Chatbot;
 using Maliev.Web.Shared.Commerce;
 using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Localization;
@@ -35,11 +36,13 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 services.RemoveAll<IWebQuoteService>();
                 services.RemoveAll<ICheckoutDraftService>();
                 services.RemoveAll<IContactMessageService>();
+                services.RemoveAll<ICustomerChatbotService>();
                 services.AddSingleton<ICommerceCatalogService, FakeCommerceCatalogService>();
                 services.AddSingleton<IManufacturingCatalogService, FakeManufacturingCatalogService>();
                 services.AddSingleton<IWebQuoteService, FakeWebQuoteService>();
                 services.AddSingleton<ICheckoutDraftService, FakeCheckoutDraftService>();
                 services.AddSingleton<IContactMessageService, FakeContactMessageService>();
+                services.AddSingleton<ICustomerChatbotService, FakeCustomerChatbotService>();
             }));
     }
 
@@ -130,6 +133,28 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(contact);
         Assert.Equal("Received", contact.Status);
+    }
+
+    /// <summary>
+    /// Verifies customer chatbot messages are routed through the website chatbot boundary.
+    /// </summary>
+    [Fact]
+    public async Task POST_ChatbotMessage_RoutesThroughChatbotBoundary()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/chatbot/messages", new CustomerChatbotRequest
+        {
+            Message = "Can MALIEV help with CNC aluminum parts?",
+            Language = "en"
+        });
+        var chat = await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(chat);
+        Assert.Equal("assistant", chat.Role);
+        Assert.False(chat.IsOutOfScope);
+        Assert.Contains("CNC", chat.Content, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -304,6 +329,23 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         {
             Assert.Equal("customer@example.com", request.Email);
             return Task.FromResult(new ContactMessageResponse("e9f63ee7-5711-4392-893a-5380b90f80e5", "Received"));
+        }
+    }
+
+    private sealed class FakeCustomerChatbotService : ICustomerChatbotService
+    {
+        public Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("Can MALIEV help with CNC aluminum parts?", request.Message);
+            return Task.FromResult(new CustomerChatbotResponse
+            {
+                SessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
+                MessageId = Guid.Parse("80adf440-8f28-4a4c-9ac9-a7f8ae9d5362"),
+                Content = "Yes. MALIEV can support CNC aluminum prototypes, fixtures, and production aids.",
+                Role = "assistant",
+                Language = "en",
+                CreatedAt = DateTimeOffset.Parse("2026-05-17T00:00:00+07:00")
+            });
         }
     }
 }

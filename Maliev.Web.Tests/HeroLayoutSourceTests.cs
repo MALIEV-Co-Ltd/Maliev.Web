@@ -445,6 +445,22 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the public layout includes the service-bounded customer chatbot widget.
+    /// </summary>
+    [Fact]
+    public void PublicLayoutIncludesCustomerChatbotWidget()
+    {
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("<CustomerChatbot />", layout);
+        Assert.Contains("service-related topics", component);
+        Assert.Contains(".customer-chatbot", styles);
+        Assert.Contains(".customer-chatbot-panel", styles);
+    }
+
+    /// <summary>
     /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
     /// </summary>
     [Fact]
