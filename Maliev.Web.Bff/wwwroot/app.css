@@ -1741,10 +1741,10 @@ html:lang(th) .h1 {
   position: relative;
 }
 
-.process-section::before {
+.process-section::after {
   content: "";
   position: absolute;
-  inset: 42px 32px auto 32px;
+  inset: auto 32px 0 32px;
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, rgba(10, 114, 239, .24) 18%, rgba(222, 29, 141, .18) 82%, transparent 100%);
   pointer-events: none;
@@ -1755,18 +1755,6 @@ html:lang(th) .h1 {
   gap: 14px;
   max-width: 840px;
   margin-bottom: 34px;
-}
-
-.process-kicker {
-  width: fit-content;
-  padding: 7px 10px;
-  color: var(--blue-ink);
-  background: rgba(10, 114, 239, .08);
-  border: 1px solid rgba(10, 114, 239, .18);
-  border-radius: var(--radius);
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: 0;
 }
 
 .workflow-step {
@@ -1787,6 +1775,26 @@ html:lang(th) .h1 {
   height: 4px;
   background: linear-gradient(90deg, rgba(10, 114, 239, .94), rgba(222, 29, 141, .74));
   opacity: .84;
+}
+
+.workflow-step-number {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid rgba(23, 23, 23, .08);
+  border-radius: 999px;
+  box-shadow: rgba(17, 24, 39, .09) 0 12px 28px -18px;
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-weight: 700;
 }
 
 .workflow-step-visual {
@@ -1812,24 +1820,6 @@ html:lang(th) .h1 {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 3;
-}
-
-.workflow-step-visual span {
-  position: absolute;
-  top: 9px;
-  right: 9px;
-  display: grid;
-  place-items: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, .86);
-  border: 1px solid rgba(23, 23, 23, .08);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: .68rem;
-  font-weight: 700;
 }
 
 .workflow-step p {

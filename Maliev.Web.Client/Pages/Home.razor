@@ -115,7 +115,6 @@
 
 <section class="section process-section" aria-labelledby="process-title">
     <div class="section-lede process-lede">
-        <span class="process-kicker">@Text("Customer workflow", "ขั้นตอนลูกค้า")</span>
         <h2 id="process-title">@Text("From CAD file to production order, in one workspace.", "จากไฟล์ CAD สู่คำสั่งผลิตในพื้นที่เดียว")</h2>
         <p>@Text("Visual checks, DFM feedback, pricing choices, and production tracking stay connected so teams can move faster with fewer handoffs.", "การตรวจไฟล์ DFM ตัวเลือกราคา และการติดตามผลิตอยู่ในขั้นตอนเดียว ทีมจึงเดินงานได้เร็วขึ้นและส่งต่อน้อยลง")</p>
     </div>
@@ -123,6 +122,7 @@
         @foreach (var step in ProcessSteps)
         {
             <article class="workflow-step workflow-step--@step.Icon">
+                <span class="workflow-step-number">@step.Number</span>
                 <div class="workflow-step-visual" aria-hidden="true">
                     <svg viewBox="0 0 64 64" focusable="false">
                         @switch (step.Icon)
@@ -154,7 +154,6 @@
                                 break;
                         }
                     </svg>
-                    <span>@step.Number</span>
                 </div>
                 <h2>@step.Title.For(Preferences.Culture)</h2>
                 <p>@step.Body.For(Preferences.Culture)</p>
