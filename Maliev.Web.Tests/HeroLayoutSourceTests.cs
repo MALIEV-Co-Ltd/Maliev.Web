@@ -318,6 +318,7 @@ public sealed class HeroLayoutSourceTests
     public void FooterUsesLogoAndManufacturingContactLinks()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("footer-logo", source);
         Assert.Contains("/images/logo.svg", source);
@@ -330,6 +331,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("page.line.me/maliev", source);
         Assert.Contains("line-contact-link", source);
         Assert.Contains("line-contact-icon", source);
+        Assert.Contains("line-contact-logo", source);
+        Assert.Contains("line-contact-logo-bg", source);
+        Assert.Contains("line-contact-logo-bubble", source);
+        Assert.Contains("line-contact-logo-text", source);
         Assert.Contains("Official Account @@maliev", source);
         Assert.Contains("facebook.com/maliev.manufacturing", source);
         Assert.Contains("youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig", source);
@@ -346,6 +351,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(">YouTube</a>", source);
         Assert.DoesNotContain(">Instagram</a>", source);
         Assert.DoesNotContain(">LINE @@maliev</a>", source);
+        Assert.DoesNotContain("M20.2 4.4C18.1 2.7", source);
+        Assert.Contains(".line-contact-logo-bg", styles);
+        Assert.Contains(".line-contact-logo-bubble", styles);
+        Assert.Contains(".line-contact-logo-text", styles);
         Assert.Contains("FoundingYear = 2018", source);
         Assert.Contains("DateTime.Today.Year", source);
         Assert.Contains("All rights reserved", source);

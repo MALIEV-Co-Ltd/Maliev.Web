@@ -2898,22 +2898,41 @@ html[data-theme="dark"] .auth-google-icon {
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  color: var(--line-on);
-  background: var(--line-green);
+  width: 34px;
+  height: 34px;
+  background: transparent;
   border-radius: var(--radius);
 }
 
-.line-contact-link:hover .line-contact-icon {
-  color: var(--line-green);
-  background: var(--line-on);
+.line-contact-logo {
+  display: block;
+  width: 34px;
+  height: 34px;
 }
 
-.line-contact-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: currentColor;
+.line-contact-logo-bg {
+  fill: var(--line-green);
+}
+
+.line-contact-logo-bubble {
+  fill: var(--line-on);
+}
+
+.line-contact-logo-text {
+  fill: var(--line-green);
+  font-family: var(--maliev-font-sans);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.line-contact-link:hover .line-contact-logo-bg {
+  fill: var(--line-on);
+}
+
+.line-contact-link:hover .line-contact-logo-bubble,
+.line-contact-link:hover .line-contact-logo-text {
+  fill: var(--line-green);
 }
 
 .line-contact-copy {
