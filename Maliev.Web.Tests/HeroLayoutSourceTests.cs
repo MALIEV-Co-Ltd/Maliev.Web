@@ -753,6 +753,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".blog-detail .content-stack article", styles);
         Assert.Contains("box-shadow: none", styles);
         Assert.Contains(".detail-sidebar", styles);
+        Assert.Contains("detail-sidebar-actions", source);
+        Assert.Contains(".detail-sidebar-actions", styles);
+        Assert.Contains(".detail-sidebar-actions .button {\n  width: 100%;", styles);
         Assert.DoesNotContain("var path when path == \"blog\" || path.StartsWith(\"blog/\"", source);
         Assert.DoesNotContain("var path when path == \"case-studies\" || path.StartsWith(\"case-studies/\"", source);
 

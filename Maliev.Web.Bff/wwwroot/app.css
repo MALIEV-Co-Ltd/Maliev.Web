@@ -1990,6 +1990,31 @@ html:lang(th) .h1 {
   justify-self: start;
 }
 
+.detail-sidebar-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.detail-sidebar-actions .button {
+  width: 100%;
+  min-height: 46px;
+  justify-self: stretch;
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.detail-sidebar-actions .button.primary {
+  font-weight: 700;
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
+.detail-sidebar-actions .button.secondary {
+  border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper) 88%, var(--control-surface));
+}
+
 .case-study-detail .detail-sidebar {
   border-color: color-mix(in srgb, var(--blue) 22%, var(--rule));
 }
