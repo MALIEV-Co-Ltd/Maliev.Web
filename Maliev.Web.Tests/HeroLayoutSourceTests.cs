@@ -145,6 +145,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature", source);
         Assert.Contains("machine-feature-media", source);
         Assert.Contains("machine-stat-grid", source);
+        Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
+        Assert.DoesNotContain("<div><strong>50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.Contains("<div><strong>7 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>6 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.Contains("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
