@@ -455,7 +455,9 @@ public sealed class HeroLayoutSourceTests
     {
         var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
 
         Assert.Contains("<CustomerChatbot />", layout);
         Assert.Contains("customer manufacturing assistant", component);
@@ -469,11 +471,20 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("CustomerContext = BuildCustomerContext()", component);
         Assert.Contains("customer-chatbot-popout", component);
         Assert.Contains("customer-chatbot-unread-badge", component);
+        Assert.Contains("rows=\"1\"", component);
+        Assert.Contains("OnDraftInputAsync", component);
+        Assert.Contains("malievChatbot.fitComposer", component);
+        Assert.Contains("js/maliev-chatbot.js", app);
+        Assert.Contains("lineHeight * 5", script);
+        Assert.Contains("textarea.style.overflowY", script);
         Assert.DoesNotContain("Ask MALIEV", component);
         Assert.Contains(".customer-chatbot", styles);
         Assert.Contains(".customer-chatbot-panel", styles);
         Assert.Contains(".customer-chatbot-popout", styles);
         Assert.Contains(".customer-chatbot-unread-badge", styles);
+        Assert.Contains(".customer-chatbot-composer {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) 44px;\n  align-items: end;", styles);
+        Assert.Contains(".customer-chatbot-composer textarea {\n  height: 42px;", styles);
+        Assert.Contains(".customer-chatbot-composer button {\n  width: 44px;\n  height: 42px;", styles);
         Assert.Contains(".customer-chatbot-toggle {\n  width: 56px;\n  min-height: 56px;\n  padding: 0;\n  border-radius: 9999px;", styles);
         Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
         Assert.Contains(".customer-chatbot-toggle {\n    width: 50px;\n    min-height: 50px;", styles);

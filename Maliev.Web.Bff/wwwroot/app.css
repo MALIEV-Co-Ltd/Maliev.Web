@@ -3289,7 +3289,8 @@ html[data-theme="dark"] .auth-google-icon {
 
 .customer-chatbot-composer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: end;
   gap: 8px;
   padding: 12px 14px 14px;
   border-top: 1px solid var(--rule-soft);
@@ -3297,15 +3298,18 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .customer-chatbot-composer textarea {
+  height: 42px;
   min-height: 42px;
-  max-height: 112px;
-  resize: vertical;
+  max-height: calc((1em * 1.42 * 5) + 22px);
+  resize: none;
+  overflow-y: hidden;
   padding: 10px 11px;
   color: var(--ink);
   background: var(--paper-2);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   outline: none;
+  line-height: 1.42;
 }
 
 .customer-chatbot-composer textarea:focus {
@@ -3323,8 +3327,16 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .customer-chatbot-composer button {
-  width: 42px;
+  width: 44px;
+  height: 42px;
   min-height: 42px;
+  align-self: end;
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: rgba(10, 114, 239, .22) 0 10px 22px -16px, var(--shadow-border);
+}
+
+.customer-chatbot-composer button .mud-icon-root {
+  transform: translateX(1px);
 }
 
 .customer-chatbot-composer button:disabled,

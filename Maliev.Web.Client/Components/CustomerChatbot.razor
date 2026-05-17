@@ -49,11 +49,12 @@
             </div>
 
             <div class="customer-chatbot-composer">
-                <textarea rows="2"
+                <textarea @ref="_draftInput"
+                          rows="1"
                           maxlength="1000"
-                          placeholder="@Text("Ask about materials, processes, quotes, or delivery", "ถามเรื่องวัสดุ กระบวนการ ใบเสนอราคา หรือการจัดส่ง")"
-                          @bind="_draft"
-                          @bind:event="oninput"
+                          placeholder="@Text("Ask Mali about materials or quotes", "ถามเรื่องวัสดุ ราคา หรือจัดส่ง")"
+                          value="@_draft"
+                          @oninput="OnDraftInputAsync"
                           disabled="@_isSending"></textarea>
                 <button type="button" aria-label="@Text("Send message", "ส่งข้อความ")" @onclick="SendDraftAsync" disabled="@(!CanSend)">
                     <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" />
@@ -90,6 +91,7 @@
 
     private readonly List<CustomerChatMessage> _messages = [];
     private CustomerChatbotMemory _memory = new();
+    private ElementReference _draftInput;
     private Guid? _sessionId;
     private string _draft = string.Empty;
     private string _storageKey = $"{PersonalizationStoragePrefix}:guest";
@@ -98,6 +100,7 @@
     private bool _isSending;
     private bool _storageReady;
     private bool _showPopout;
+    private bool _composerResizePending;
     private int _unreadCount;
     private CancellationTokenSource? _popoutCts;
 
@@ -120,12 +123,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (firstRender)
         {
-            return;
+            await InitializePersonalizationAsync();
         }
 
-        await InitializePersonalizationAsync();
+        if (_composerResizePending && _isOpen)
+        {
+            _composerResizePending = false;
+            await FitComposerAsync();
+        }
     }
 
     private async Task InitializePersonalizationAsync()
@@ -170,6 +177,7 @@
         if (_isOpen)
         {
             _showPopout = false;
+            _composerResizePending = true;
             CancelPopoutTimer();
             _unreadCount = 0;
             _memory.UnreadCount = 0;
@@ -185,11 +193,34 @@
         }
     }
 
-    private Task SendDraftAsync()
+    private async Task FitComposerAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("malievChatbot.fitComposer", _draftInput);
+        }
+        catch (InvalidOperationException)
+        {
+            // The textarea can disappear while the chat panel is closing.
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore browser disconnects during shutdown or preview reloads.
+        }
+    }
+
+    private async Task OnDraftInputAsync(ChangeEventArgs args)
+    {
+        _draft = args.Value?.ToString() ?? string.Empty;
+        await FitComposerAsync();
+    }
+
+    private async Task SendDraftAsync()
     {
         var message = _draft;
         _draft = string.Empty;
-        return SendAsync(message);
+        await FitComposerAsync();
+        await SendAsync(message);
     }
 
     private Task SendSuggestionAsync(string message)
