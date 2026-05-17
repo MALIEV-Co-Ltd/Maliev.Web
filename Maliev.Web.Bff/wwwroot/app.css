@@ -623,6 +623,21 @@ html:lang(th) .h1 {
   gap: 18px;
 }
 
+.services-hero-title {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: .22em;
+  row-gap: .08em;
+  align-items: baseline;
+}
+
+.services-hero-logo {
+  width: 2.9em;
+  height: auto;
+  filter: var(--logo-filter);
+  transform: translateY(.04em);
+}
+
 .service-page-hero {
   grid-template-columns: minmax(0, .9fr) minmax(300px, .62fr);
   align-items: center;

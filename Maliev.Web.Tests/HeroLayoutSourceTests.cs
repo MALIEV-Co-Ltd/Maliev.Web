@@ -480,11 +480,18 @@ public sealed class HeroLayoutSourceTests
         var services = ReadRepoFile("Maliev.Web.Client", "Pages", "Services.razor");
         var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("@page \"/services\"", services);
         Assert.Contains("@page \"/services/{Slug}\"", servicePage);
         Assert.Contains("SiteContent.QuoteNewUrl", services);
         Assert.Contains("SiteContent.QuoteNewUrl", servicePage);
+        Assert.Contains("services-hero-title", services);
+        Assert.Contains("services-hero-logo", services);
+        Assert.Contains("src=\"/images/logo.svg\"", services);
+        Assert.DoesNotContain("Seven manufacturing services under one MALIEV workflow.", services);
+        Assert.DoesNotContain("เวิร์กโฟลว์ MALIEV เดียว", services);
+        Assert.Contains(".services-hero-logo", styles);
         Assert.Contains("\"silicone-casting\"", content);
         Assert.Contains("\"rapid-prototyping\"", content);
         Assert.Contains("\"deviation-analysis\"", content);

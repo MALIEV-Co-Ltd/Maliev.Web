@@ -8,7 +8,11 @@
 </HeadContent>
 
 <section class="page-hero compact">
-    <h1>@Text("Seven manufacturing services under one MALIEV workflow.", "เจ็ดบริการผลิตภายใต้เวิร์กโฟลว์ MALIEV เดียว")</h1>
+    <h1 class="services-hero-title">
+        <span>@Text("Seven manufacturing services under one", "เจ็ดบริการผลิตภายใต้เวิร์กโฟลว์")</span>
+        <img class="services-hero-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
+        <span>@Text("workflow.", "เดียว")</span>
+    </h1>
     <p>@Text("Choose the right process, or start with a CAD upload and let MALIEV review manufacturability before quotation.", "เลือกกระบวนการที่เหมาะสม หรือเริ่มจากอัปโหลด CAD แล้วให้ MALIEV ตรวจความเหมาะสมก่อนเสนอราคา")</p>
     <div class="quote-actions">
         <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
