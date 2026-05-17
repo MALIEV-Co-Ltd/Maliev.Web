@@ -512,6 +512,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
         Assert.Contains("@page \"/blog/{Slug}\"", source);
         Assert.Contains("SiteContent.BlogPosts", source);
+        Assert.Contains("blog-hero-title", source);
+        Assert.Contains("blog-hero-logo", source);
+        Assert.Contains("\"blog\" => Text(\"Journal\", \"บทความ\")", source);
+        Assert.Contains("Text(\"Journal\", \"บทความ\")", source);
+        Assert.DoesNotContain("\"blog\" => Text(\"MALIEV Journal\", \"บทความ MALIEV\")", source);
         Assert.Contains("@page \"/shipping-returns\"", source);
         Assert.Contains("@page \"/privacy\"", source);
         Assert.Contains("@page \"/terms\"", source);
@@ -561,6 +566,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ImageAlt", source);
         Assert.Contains(".material-category-media", styles);
         Assert.Contains(".material-category-body", styles);
+        Assert.Contains(".blog-hero-logo", styles);
         Assert.Contains(".content-stack ul", styles);
         Assert.Contains(".material-comparison-table", styles);
         Assert.Contains(".material-row-media", styles);

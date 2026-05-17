@@ -28,7 +28,25 @@
 </HeadContent>
 
 <section class="page-hero compact">
-    <h1>@Title</h1>
+    @if (Path == "blog")
+    {
+        <h1 class="blog-hero-title">
+            @if (IsThaiCulture)
+            {
+                <span>@Text("Journal", "บทความ")</span>
+                <img class="blog-hero-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
+            }
+            else
+            {
+                <img class="blog-hero-logo" src="/images/logo.svg" width="154" height="35" alt="MALIEV" />
+                <span>@Text("Journal", "บทความ")</span>
+            }
+        </h1>
+    }
+    else
+    {
+        <h1>@Title</h1>
+    }
     <p>@Body</p>
     <div class="quote-actions">
         <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
@@ -442,7 +460,7 @@ else
         "materials" => Text("Materials", "วัสดุ"),
         "industries" => Text("Industries", "อุตสาหกรรม"),
         "case-studies" => Text("Case studies", "ผลงาน"),
-        "blog" => Text("MALIEV Journal", "บทความ MALIEV"),
+        "blog" => Text("Journal", "บทความ"),
         "account/quotes" => Text("Saved quotes", "ใบเสนอราคาที่บันทึกไว้"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => BlogPostTitle,
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CaseStudyTitle,
@@ -1119,9 +1137,11 @@ else
         }
     }
 
+    private bool IsThaiCulture => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);
+
     private string Text(string en, string th)
     {
-        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+        return IsThaiCulture ? th : en;
     }
 
     private static ContentSection Section(string titleEn, string titleTh, string bodyEn, string bodyTh, params (string En, string Th)[] items)
