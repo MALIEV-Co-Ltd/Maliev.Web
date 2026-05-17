@@ -253,6 +253,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Rapid manufacturing, custom parts, workshop-made machines", source);
         Assert.Contains("36/1 Moo 3", source);
         Assert.Contains("Khlong Khoi", source);
+        Assert.Contains("https://maps.app.goo.gl/DPefucxBN2FTnZQa6", source);
+        Assert.DoesNotContain("https://www.google.com/maps/search/", source);
         Assert.Contains("info@maliev.com", source);
         Assert.Contains("page.line.me/maliev", source);
         Assert.Contains("line-contact-link", source);
