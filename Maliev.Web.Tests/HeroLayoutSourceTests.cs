@@ -537,6 +537,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-comparison-table", source);
         Assert.Contains("material-mobile-list", source);
         Assert.Contains("material-compare-workbench", source);
+        Assert.Contains("material-pro-con-line material-pro-con-pro", source);
+        Assert.Contains("material-pro-con-line material-pro-con-con", source);
+        Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-pro", source);
+        Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-con", source);
         Assert.Contains("Compare material properties before uploading CAD.", source);
         Assert.Contains("เปรียบเทียบคุณสมบัติวัสดุก่อนอัปโหลด CAD", source);
         Assert.DoesNotContain("Compare strength, heat, chemistry, finish, and trade-offs before uploading CAD.", source);
@@ -563,6 +567,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("display: grid;", styles);
         Assert.Contains(".material-select-button", styles);
         Assert.Contains(".material-compare-matrix", styles);
+        Assert.Contains(".material-pro-con-pro", styles);
+        Assert.Contains(".material-pro-con-con", styles);
+        Assert.Contains("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
         Assert.Contains(".material-filter", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);

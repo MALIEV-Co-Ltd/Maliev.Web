@@ -1226,12 +1226,39 @@ html:lang(th) .h1 {
 
 .material-pro-con {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   min-width: 210px;
   line-height: 1.45;
 }
 
-.material-pro-con strong {
+.material-pro-con-pro {
+  --material-tone: var(--success-text);
+  --material-tone-bg: color-mix(in srgb, var(--success-text) 10%, transparent);
+}
+
+.material-pro-con-con {
+  --material-tone: color-mix(in srgb, var(--red) 72%, var(--ink));
+  --material-tone-bg: color-mix(in srgb, var(--red) 9%, transparent);
+}
+
+.material-pro-con-line {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--material-tone-bg);
+  border-left: 3px solid var(--material-tone);
+  border-radius: var(--radius);
+}
+
+.material-pro-con-line strong {
+  color: var(--material-tone);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.material-pro-con-line > span {
   color: var(--ink);
 }
 
@@ -1318,6 +1345,14 @@ html:lang(th) .h1 {
 
 .material-compare-row > *:last-child {
   border-right: 0;
+}
+
+.material-compare-tone-row > * {
+  background: var(--material-tone-bg);
+}
+
+.material-compare-tone-row .material-compare-label {
+  color: var(--material-tone);
 }
 
 .material-compare-row:last-child > * {

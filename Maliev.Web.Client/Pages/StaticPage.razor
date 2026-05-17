@@ -162,14 +162,14 @@
                                 <span>@material.Finish.For(Preferences.Culture)</span>
                             }
                         </div>
-                        <div class="material-compare-row">
+                        <div class="material-compare-row material-compare-tone-row material-pro-con-pro">
                             <span class="material-compare-label">@Text("Pros", "ข้อดี")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
                                 <span>@material.Pros.For(Preferences.Culture)</span>
                             }
                         </div>
-                        <div class="material-compare-row">
+                        <div class="material-compare-row material-compare-tone-row material-pro-con-con">
                             <span class="material-compare-label">@Text("Watch", "ระวัง")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
@@ -251,8 +251,14 @@
                                 <td>@material.Finish.For(Preferences.Culture)</td>
                                 <td>
                                     <div class="material-pro-con">
-                                        <span><strong>@Text("Pro", "ข้อดี"):</strong> @material.Pros.For(Preferences.Culture)</span>
-                                        <span><strong>@Text("Watch", "ระวัง"):</strong> @material.Cons.For(Preferences.Culture)</span>
+                                        <span class="material-pro-con-line material-pro-con-pro">
+                                            <strong>@Text("Pro", "ข้อดี")</strong>
+                                            <span>@material.Pros.For(Preferences.Culture)</span>
+                                        </span>
+                                        <span class="material-pro-con-line material-pro-con-con">
+                                            <strong>@Text("Watch", "ระวัง")</strong>
+                                            <span>@material.Cons.For(Preferences.Culture)</span>
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
