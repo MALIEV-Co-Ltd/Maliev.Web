@@ -160,12 +160,7 @@
 
         if (!_isOpen)
         {
-            var message = _memory.Messages.Count > 0 && !string.IsNullOrWhiteSpace(greetingName)
-                ? Text($"Hi {greetingName}, Mali can continue your previous MALIEV chat.", $"สวัสดีค่ะ {greetingName} น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
-                : _memory.Messages.Count > 0
-                    ? Text("Mali can continue your previous MALIEV chat.", "น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
-                : Text("Ask Mali about materials, pricing, lead time, or the right manufacturing process.", "ถามน้องมะลิเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
-            _ = ShowPopoutTemporarilyAsync(message);
+            _ = ShowPopoutTemporarilyAsync(CreatePopoutMessage(greetingName));
         }
 
         StateHasChanged();
@@ -281,7 +276,9 @@
     {
         _messages.Clear();
         _messages.Add(new CustomerChatMessage("assistant", CreateGreeting(name, hasPreviousMessages), false));
-        _messages.AddRange(_memory.Messages.Select(message => new CustomerChatMessage(message.Role, message.Content)));
+        _messages.AddRange(_memory.Messages
+            .Where(message => !IsGeneratedGreeting(message))
+            .Select(message => new CustomerChatMessage(message.Role, message.Content)));
     }
 
     private string CreateGreeting(string? name, bool hasPreviousMessages)
@@ -296,6 +293,18 @@
         return Text(
             "Hi, I'm Mali. Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.",
             "สวัสดีค่ะ น้องมะลิช่วยตอบเรื่องวัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้ค่ะ");
+    }
+
+    private string CreatePopoutMessage(string? name)
+    {
+        if (_memory.Messages.Count > 0 && !string.IsNullOrWhiteSpace(name))
+        {
+            return Text($"Hi {name}, Mali can continue your previous MALIEV chat.", $"สวัสดีค่ะ {name} น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ");
+        }
+
+        return _memory.Messages.Count > 0
+            ? Text("Mali can continue your previous MALIEV chat.", "น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
+            : Text("Ask Mali about materials, pricing, lead time, or the right manufacturing process.", "ถามน้องมะลิเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
     }
 
     private async Task<CustomerChatbotIdentity> ResolveIdentityAsync()
@@ -515,7 +524,7 @@
 
         _memory.LastSessionId = _sessionId;
         _memory.Messages = _messages
-            .Where(message => message.Persist)
+            .Where(message => message.Persist && !IsGeneratedGreeting(message))
             .TakeLast(MaxStoredMessages)
             .Select(message => new StoredChatMessage { Role = message.Role, Content = message.Content })
             .ToList();
@@ -579,12 +588,13 @@
         memory.Preferences = NormalizeList(memory.Preferences, MaxStoredItems, 100);
         memory.Messages = memory.Messages
             .Where(message => !string.IsNullOrWhiteSpace(message.Content))
-            .TakeLast(MaxStoredMessages)
             .Select(message => new StoredChatMessage
             {
                 Role = string.Equals(message.Role, "user", StringComparison.OrdinalIgnoreCase) ? "user" : "assistant",
                 Content = CleanMultiline(message.Content, 1400)
             })
+            .Where(message => !IsGeneratedGreeting(message))
+            .TakeLast(MaxStoredMessages)
             .ToList();
         memory.UnreadCount = Math.Clamp(memory.UnreadCount, 0, 99);
         return memory;
@@ -714,6 +724,36 @@
         return string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
             ? "customer-chatbot-message user"
             : "customer-chatbot-message assistant";
+    }
+
+    private static bool IsGeneratedGreeting(CustomerChatMessage message)
+    {
+        return IsGeneratedGreeting(message.Role, message.Content);
+    }
+
+    private static bool IsGeneratedGreeting(StoredChatMessage message)
+    {
+        return IsGeneratedGreeting(message.Role, message.Content);
+    }
+
+    private static bool IsGeneratedGreeting(string role, string? content)
+    {
+        if (!string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var cleaned = CleanOneLine(content, 320);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return false;
+        }
+
+        return cleaned.StartsWith("Hi, I'm Mali.", StringComparison.OrdinalIgnoreCase)
+            || (cleaned.StartsWith("Hi ", StringComparison.OrdinalIgnoreCase) && cleaned.Contains("I'm Mali.", StringComparison.OrdinalIgnoreCase))
+            || cleaned.StartsWith("Mali can continue your previous MALIEV chat.", StringComparison.OrdinalIgnoreCase)
+            || (cleaned.StartsWith("สวัสดีค่ะ", StringComparison.Ordinal) && cleaned.Contains("น้องมะลิ", StringComparison.Ordinal))
+            || cleaned.StartsWith("น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ", StringComparison.Ordinal);
     }
 
     private string Text(string en, string th)

@@ -463,6 +463,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("customer manufacturing assistant", component);
         Assert.Contains("Hi, I'm Mali.", component);
         Assert.Contains("น้องมะลิ", component);
+        Assert.Contains("ResetDisplayedConversation(greetingName", component);
+        Assert.Contains("CreatePopoutMessage(greetingName)", component);
+        Assert.Contains("IsGeneratedGreeting", component);
+        Assert.Contains("Where(message => !IsGeneratedGreeting(message))", component);
+        Assert.DoesNotContain("OnPreferencesChanged", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
         Assert.Contains("aria-label=\"@Text(\"Open Mali\"", component);
         Assert.Contains("maliev.chatbot.personalization.v1", component);
