@@ -1220,7 +1220,6 @@ html:lang(th) .h1 {
 
 .material-row-summary {
   display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   min-width: 188px;
@@ -1236,8 +1235,9 @@ html:lang(th) .h1 {
 }
 
 .material-row-media {
-  width: 68px;
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-width: 168px;
+  aspect-ratio: 16 / 10;
 }
 
 .material-row-media img,
@@ -1464,23 +1464,24 @@ html:lang(th) .h1 {
 
 .material-mobile-card-title {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
   gap: 12px;
-  align-items: center;
+  align-items: start;
   min-width: 0;
 }
 
 .material-mobile-card-media {
-  width: 74px;
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 16 / 10;
 }
 
 .material-mobile-card-title strong,
-.material-mobile-card-title span span {
+.material-mobile-card-copy,
+.material-mobile-card-copy span {
   display: block;
 }
 
-.material-mobile-card-title span span {
+.material-mobile-card-copy span {
   margin-top: 4px;
   color: var(--muted);
   font-size: .88rem;

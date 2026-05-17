@@ -564,7 +564,29 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-mobile-card-media", source);
         Assert.Contains("<img src=\"@material.ImageUrl\"", source);
         Assert.Contains("string ImageUrl,\n        LocalizedText ImageAlt", source);
-        Assert.Contains("/images/materials/pla.svg", source);
+        Assert.DoesNotContain("/images/materials/pla.svg", source);
+        Assert.DoesNotContain("/images/materials/petg.svg", source);
+        Assert.Contains("https://images.unsplash.com/photo-1742971239045-afabc9f7d744", source);
+        Assert.Contains("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg", source);
+        Assert.Contains("https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg", source);
+        Assert.Contains("https://images.unsplash.com/photo-1740209475472-aa7d280f7452", source);
+
+        var materialRowSummaryIndex = source.IndexOf("<div class=\"material-row-summary\">", StringComparison.Ordinal);
+        var materialRowCopyIndex = source.IndexOf("<span class=\"material-row-copy\">", materialRowSummaryIndex, StringComparison.Ordinal);
+        var materialRowMediaIndex = source.IndexOf("<span class=\"material-row-media\">", materialRowSummaryIndex, StringComparison.Ordinal);
+        Assert.True(materialRowSummaryIndex >= 0, "material row summary markup should exist");
+        Assert.True(materialRowCopyIndex >= 0, "material row copy should exist");
+        Assert.True(materialRowMediaIndex >= 0, "material row media should exist");
+        Assert.True(materialRowCopyIndex < materialRowMediaIndex, "desktop material table should render text before image");
+
+        var materialMobileTitleIndex = source.IndexOf("<div class=\"material-mobile-card-title\">", StringComparison.Ordinal);
+        var materialMobileMediaIndex = source.IndexOf("<span class=\"material-mobile-card-media\">", materialMobileTitleIndex, StringComparison.Ordinal);
+        var materialMobileCopyIndex = source.IndexOf("<span class=\"material-mobile-card-copy\">", materialMobileTitleIndex, StringComparison.Ordinal);
+        Assert.True(materialMobileTitleIndex >= 0, "material mobile card title markup should exist");
+        Assert.True(materialMobileCopyIndex >= 0, "material mobile card copy should exist");
+        Assert.True(materialMobileMediaIndex >= 0, "material mobile card media should exist");
+        Assert.True(materialMobileCopyIndex < materialMobileMediaIndex, "mobile material cards should render text before image");
+
         Assert.Contains("material-pro-con-line material-pro-con-pro", source);
         Assert.Contains("material-pro-con-line material-pro-con-con", source);
         Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-pro", source);
@@ -609,31 +631,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
         Assert.Contains(".material-filter", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
-        Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);
+        Assert.Contains(".material-row-summary {\n  display: grid;\n  gap: 12px;", styles);
+        Assert.Contains("max-width: 168px;", styles);
+        Assert.DoesNotContain("grid-template-columns: 68px minmax(0, 1fr);", styles);
+        Assert.Contains(".material-mobile-card-title {\n  display: grid;\n  gap: 12px;", styles);
+        Assert.Contains(".material-mobile-card-copy", styles);
+        Assert.DoesNotContain(".material-mobile-card-title {\n  display: grid;\n  grid-template-columns: 74px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);
-
-        var root = FindRepoRoot();
-        string[] materialImages =
-        [
-            "pla.svg",
-            "petg.svg",
-            "abs.svg",
-            "asa.svg",
-            "tpu.svg",
-            "pa12-nylon.svg",
-            "pa-gf-cf.svg",
-            "standard-resin.svg",
-            "tough-resin.svg",
-            "aluminum-6061.svg",
-            "stainless-304-316.svg",
-            "brass.svg",
-            "silicone-urethane.svg"
-        ];
-
-        foreach (var image in materialImages)
-        {
-            Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "materials", image)), image);
-        }
     }
 
     /// <summary>

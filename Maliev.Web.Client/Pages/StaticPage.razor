@@ -204,12 +204,12 @@
                     <article class="@MaterialSelectionCardClass(material)">
                         <div class="material-mobile-card-head">
                             <div class="material-mobile-card-title">
-                                <span class="material-mobile-card-media">
-                                    <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                                </span>
-                                <span>
+                                <span class="material-mobile-card-copy">
                                     <strong>@material.Name</strong>
                                     <span>@material.Family.For(Preferences.Culture)</span>
+                                </span>
+                                <span class="material-mobile-card-media">
+                                    <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
                                 </span>
                             </div>
                             <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
@@ -264,12 +264,12 @@
                                 </td>
                                 <th scope="row">
                                     <div class="material-row-summary">
-                                        <span class="material-row-media">
-                                            <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                                        </span>
                                         <span class="material-row-copy">
                                             <strong>@material.Name</strong>
                                             <span>@material.Family.For(Preferences.Culture)</span>
+                                        </span>
+                                        <span class="material-row-media">
+                                            <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
                                         </span>
                                     </div>
                                 </th>
@@ -825,34 +825,39 @@ else
         ]
     };
 
+    private const string FdmThermoplasticsImageUrl = "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80";
+    private const string PowderBedNylonImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg";
+    private const string SlaResinImageUrl = "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900";
+    private const string CncCastMaterialsImageUrl = "https://images.unsplash.com/photo-1740209475472-aa7d280f7452?auto=format&fit=crop&w=900&q=80";
+
     private IReadOnlyList<MaterialCategory> MaterialCategories =>
     [
         new(
             SiteContent.Text("FDM thermoplastics", "เทอร์โมพลาสติก FDM"),
             "PLA · PETG · ABS · ASA · TPU",
             SiteContent.Text("Fast printed plastics for prototypes, brackets, guards, fixtures, and flexible parts.", "พลาสติกพิมพ์เร็วสำหรับต้นแบบ ขายึด การ์ด ฟิกซ์เจอร์ และชิ้นงานยืดหยุ่น"),
-            "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("Colorful 3D printing filament spools", "ม้วนเส้นพลาสติกสำหรับพิมพ์ 3 มิติ"),
             [SiteContent.Text("Fast prototypes", "ต้นแบบเร็ว"), SiteContent.Text("Low tooling cost", "ไม่ต้องทำแม่พิมพ์")]),
         new(
             SiteContent.Text("Powder-bed nylon", "ไนลอนพาวเดอร์เบด"),
             "MJF · SLS",
             SiteContent.Text("Tough nylon families for functional housings, living hinges, assemblies, and low-volume production.", "กลุ่มไนลอนทนทานสำหรับเคสใช้งานจริง บานพับ ชุดประกอบ และผลิตจำนวนน้อย"),
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg",
+            PowderBedNylonImageUrl,
             SiteContent.Text("SLS printed nylon pulley shaft", "ชิ้นงานไนลอนที่ผลิตด้วย SLS"),
             [SiteContent.Text("Functional", "ใช้งานจริง"), SiteContent.Text("Batch ready", "เหมาะกับจำนวนน้อย")]),
         new(
             SiteContent.Text("SLA engineering resins", "เรซินวิศวกรรม SLA"),
             "Standard · Tough · Rigid",
             SiteContent.Text("High-detail resin options for visual masters, fine features, fit checks, and selected functional prototypes.", "เรซินรายละเอียดสูงสำหรับ Master โมเดลผิวสวย ตรวจประกอบ และต้นแบบใช้งานบางประเภท"),
-            "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900",
+            SlaResinImageUrl,
             SiteContent.Text("Resin printer lifting a detailed part from the vat", "เครื่องพิมพ์เรซินยกชิ้นงานละเอียดออกจากถังเรซิน"),
             [SiteContent.Text("Fine detail", "รายละเอียดสูง"), SiteContent.Text("Smooth finish", "ผิวเรียบ")]),
         new(
             SiteContent.Text("CNC and cast materials", "วัสดุ CNC และหล่อ"),
             "Aluminum · Steel · Brass · Silicone",
             SiteContent.Text("Metals and casting materials for machined fixtures, jigs, plates, inserts, seals, and end-use components.", "โลหะและวัสดุหล่อสำหรับฟิกซ์เจอร์ จิ๊ก แผ่นงาน อินเสิร์ต ซีล และชิ้นส่วนใช้งานจริง"),
-            "https://images.unsplash.com/photo-1740209475472-aa7d280f7452?auto=format&fit=crop&w=900&q=80",
+            CncCastMaterialsImageUrl,
             SiteContent.Text("CNC milling an aluminum workpiece", "เครื่อง CNC กัดชิ้นงานอะลูมิเนียม"),
             [SiteContent.Text("Precise", "แม่นยำ"), SiteContent.Text("Production ready", "พร้อมใช้งานจริง")])
     ];
@@ -948,7 +953,7 @@ else
     [
         new(
             "PLA",
-            "/images/materials/pla.svg",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("PLA filament and pellets", "เส้นพิมพ์และเม็ดพลาสติก PLA"),
             "fdm",
             SiteContent.Text("Commodity FDM thermoplastic", "เทอร์โมพลาสติก FDM ทั่วไป"),
@@ -963,7 +968,7 @@ else
             ["prototype"]),
         new(
             "PETG",
-            "/images/materials/petg.svg",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("PETG filament sample", "ตัวอย่างเส้นพิมพ์ PETG"),
             "fdm",
             SiteContent.Text("Tough FDM thermoplastic", "เทอร์โมพลาสติก FDM เหนียว"),
@@ -978,7 +983,7 @@ else
             ["prototype", "functional", "chemical"]),
         new(
             "ABS",
-            "/images/materials/abs.svg",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("ABS filament and printed surface sample", "เส้นพิมพ์และตัวอย่างผิว ABS"),
             "fdm",
             SiteContent.Text("Impact-resistant FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนแรงกระแทก"),
@@ -993,7 +998,7 @@ else
             ["functional", "heat"]),
         new(
             "ASA",
-            "/images/materials/asa.svg",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("ASA outdoor plastic sample", "ตัวอย่างพลาสติก ASA สำหรับงานกลางแจ้ง"),
             "fdm",
             SiteContent.Text("Weatherable FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนสภาพอากาศ"),
@@ -1008,7 +1013,7 @@ else
             ["functional", "heat", "outdoor"]),
         new(
             "TPU",
-            "/images/materials/tpu.svg",
+            FdmThermoplasticsImageUrl,
             SiteContent.Text("Flexible TPU strip and spool", "เส้น TPU และตัวอย่างแถบยืดหยุ่น"),
             "fdm",
             SiteContent.Text("Flexible FDM elastomer", "อีลาสโตเมอร์ FDM ยืดหยุ่น"),
@@ -1023,7 +1028,7 @@ else
             ["prototype", "functional", "flexible", "chemical"]),
         new(
             "PA12 nylon",
-            "/images/materials/pa12-nylon.svg",
+            PowderBedNylonImageUrl,
             SiteContent.Text("PA12 nylon powder and printed part", "ผงไนลอน PA12 และชิ้นงานพิมพ์"),
             "powder-bed",
             SiteContent.Text("Powder-bed engineering nylon", "ไนลอนวิศวกรรมพาวเดอร์เบด"),
@@ -1038,7 +1043,7 @@ else
             ["prototype", "functional", "chemical"]),
         new(
             "PA-GF / PA-CF",
-            "/images/materials/pa-gf-cf.svg",
+            PowderBedNylonImageUrl,
             SiteContent.Text("Glass or carbon filled nylon sample", "ตัวอย่างไนลอนผสมใยแก้วหรือคาร์บอน"),
             "powder-bed",
             SiteContent.Text("Glass or carbon-filled nylon", "ไนลอนผสมใยแก้วหรือคาร์บอน"),
@@ -1053,7 +1058,7 @@ else
             ["functional", "heat", "chemical"]),
         new(
             "Standard resin",
-            "/images/materials/standard-resin.svg",
+            SlaResinImageUrl,
             SiteContent.Text("Standard resin and detailed print sample", "เรซินทั่วไปและตัวอย่างพิมพ์ละเอียด"),
             "sla",
             SiteContent.Text("High-detail photopolymer", "โฟโตพอลิเมอร์รายละเอียดสูง"),
@@ -1068,7 +1073,7 @@ else
             ["prototype"]),
         new(
             "Tough resin",
-            "/images/materials/tough-resin.svg",
+            SlaResinImageUrl,
             SiteContent.Text("Tough engineering resin sample", "ตัวอย่างเรซินวิศวกรรมเหนียว"),
             "sla",
             SiteContent.Text("Engineering SLA resin", "เรซิน SLA วิศวกรรม"),
@@ -1083,7 +1088,7 @@ else
             ["prototype", "functional"]),
         new(
             "Aluminum 6061",
-            "/images/materials/aluminum-6061.svg",
+            CncCastMaterialsImageUrl,
             SiteContent.Text("Aluminum 6061 machined billet", "แท่งอะลูมิเนียม 6061 กัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("General-purpose machined aluminum", "อะลูมิเนียมกัดขึ้นรูปอเนกประสงค์"),
@@ -1098,7 +1103,7 @@ else
             ["functional", "heat", "metal"]),
         new(
             "Stainless steel 304 / 316",
-            "/images/materials/stainless-304-316.svg",
+            CncCastMaterialsImageUrl,
             SiteContent.Text("Stainless steel machined bar stock", "แท่งสแตนเลสสำหรับกัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("Corrosion-resistant machined steel", "สแตนเลสกัดขึ้นรูปทนกัดกร่อน"),
@@ -1113,7 +1118,7 @@ else
             ["functional", "heat", "metal", "chemical"]),
         new(
             "Brass",
-            "/images/materials/brass.svg",
+            CncCastMaterialsImageUrl,
             SiteContent.Text("Brass machined alloy stock", "แท่งทองเหลืองสำหรับกัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("Machinable copper alloy", "โลหะผสมทองแดงกัดง่าย"),
@@ -1128,7 +1133,7 @@ else
             ["functional", "metal", "chemical"]),
         new(
             "Silicone / Urethane",
-            "/images/materials/silicone-urethane.svg",
+            CncCastMaterialsImageUrl,
             SiteContent.Text("Silicone and urethane casting samples", "ตัวอย่างงานหล่อซิลิโคนและยูรีเทน"),
             "casting",
             SiteContent.Text("Short-run elastomer or cast polymer", "อีลาสโตเมอร์หรืองานหล่อพอลิเมอร์จำนวนน้อย"),
