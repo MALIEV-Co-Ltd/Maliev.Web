@@ -145,6 +145,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature", source);
         Assert.Contains("machine-feature-media", source);
         Assert.Contains("machine-stat-grid", source);
+        Assert.Contains("<div><strong>7 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
+        Assert.DoesNotContain("<div><strong>6 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
         Assert.Contains("background: linear-gradient(135deg, #ffffff 0%, #eef5ff 52%, #f7f8fb 100%);", styles);
         Assert.Contains(".machine-feature .h-display", styles);
