@@ -3260,11 +3260,15 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .customer-chatbot-toggle {
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 14px 0 12px;
+  width: 56px;
+  min-height: 56px;
+  padding: 0;
+  border-radius: 9999px;
   box-shadow: rgba(10, 114, 239, .28) 0 14px 34px -20px, var(--shadow-border);
-  font-weight: 750;
+}
+
+.customer-chatbot-toggle .mud-icon-root {
+  font-size: 1.45rem;
 }
 
 .customer-chatbot-toggle:hover,
@@ -4000,12 +4004,9 @@ html[data-theme="dark"] .auth-google-icon {
     min-height: 220px;
   }
 
-  .customer-chatbot-toggle span {
-    display: none;
-  }
-
   .customer-chatbot-toggle {
-    width: 46px;
+    width: 50px;
+    min-height: 50px;
     padding: 0;
   }
 

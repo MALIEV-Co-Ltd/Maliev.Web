@@ -459,8 +459,14 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("<CustomerChatbot />", layout);
         Assert.Contains("service-related topics", component);
+        Assert.Contains("Icons.Material.Filled.SupportAgent", component);
+        Assert.Contains("aria-label=\"@Text(\"Open MALIEV assistant\"", component);
+        Assert.DoesNotContain("Ask MALIEV", component);
         Assert.Contains(".customer-chatbot", styles);
         Assert.Contains(".customer-chatbot-panel", styles);
+        Assert.Contains(".customer-chatbot-toggle {\n  width: 56px;\n  min-height: 56px;\n  padding: 0;\n  border-radius: 9999px;", styles);
+        Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
+        Assert.Contains(".customer-chatbot-toggle {\n    width: 50px;\n    min-height: 50px;", styles);
     }
 
     /// <summary>
