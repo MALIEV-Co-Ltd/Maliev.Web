@@ -93,5 +93,19 @@ public sealed class HeroCopyCatalogTests
     public void ResolveTargetKey_MapsAdUrlToMatchingHeroCategory(string url, string expected)
     {
         Assert.Equal(expected, HeroCopyCatalog.ResolveTargetKey(url));
+        Assert.Equal(expected, HeroCopyCatalog.ResolveExplicitTargetKey(url));
+    }
+
+    /// <summary>
+    /// Verifies generic home traffic can be distinguished from explicit service intent.
+    /// </summary>
+    [Theory]
+    [InlineData("https://www.maliev.com/")]
+    [InlineData("https://www.maliev.com/?service=unknown")]
+    [InlineData("https://www.maliev.com/?utm_campaign=general-brand")]
+    public void ResolveExplicitTargetKey_ReturnsNullForGenericOrUnknownTraffic(string url)
+    {
+        Assert.Null(HeroCopyCatalog.ResolveExplicitTargetKey(url));
+        Assert.Equal(HeroCopyCatalog.DefaultTargetKey, HeroCopyCatalog.ResolveTargetKey(url));
     }
 }

@@ -381,15 +381,20 @@ internal static class HeroCopyCatalog
 
     internal static string ResolveTargetKey(string? url)
     {
+        return ResolveExplicitTargetKey(url) ?? DefaultTargetKey;
+    }
+
+    internal static string? ResolveExplicitTargetKey(string? url)
+    {
         if (string.IsNullOrWhiteSpace(url))
         {
-            return DefaultTargetKey;
+            return null;
         }
 
         var query = ExtractQuery(url);
         if (string.IsNullOrWhiteSpace(query))
         {
-            return DefaultTargetKey;
+            return null;
         }
 
         var parsed = QueryHelpers.ParseQuery(query);
@@ -426,7 +431,7 @@ internal static class HeroCopyCatalog
             return aliasMatch.Profile.Key;
         }
 
-        return DefaultTargetKey;
+        return null;
     }
 
     private static HeroCopyProfile ResolveProfile(string? targetKey)

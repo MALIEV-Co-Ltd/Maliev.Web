@@ -17,7 +17,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-hero-visual", source);
         Assert.Contains("ModelUrl=\"@_heroModel.Url\"", source);
         Assert.Contains("@key=\"_heroModel.Key\"", source);
-        Assert.Contains("HeroModelCatalog.SelectRandomForService(_primaryServiceSlug)", source);
+        Assert.Contains("HeroModelCatalog.SelectRandomForService(_heroServiceSlug)", source);
         Assert.Contains("home.hero.model", source);
         Assert.Contains("EnableHoverMotion=\"true\"", source);
         Assert.Contains("UsePlasticMaterial=\"@_heroModel.UsePlasticMaterial\"", source);
@@ -50,7 +50,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SelectRandomForService", catalog);
         Assert.Contains("ResolveForService", catalog);
         Assert.Contains("RandomNumberGenerator.GetInt32", catalog);
-        Assert.Contains("HeroModelCatalog.SelectRandomForService(_primaryServiceSlug)", home);
+        Assert.Contains("HeroModelCatalog.SelectRandomForService(_heroServiceSlug)", home);
         Assert.Contains("HeroModelCatalog.SelectRandomForService(Service.Slug)", servicePage);
         Assert.Contains("service.hero.model.", servicePage);
         Assert.Contains("service-page-hero", servicePage);
@@ -177,7 +177,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".final-dropzone-arrow", styles);
         Assert.DoesNotContain(".final-dropzone-icon", styles);
         Assert.DoesNotContain(".final-dropzone-copy", styles);
-        Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
+        Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
@@ -263,7 +263,8 @@ public sealed class HeroLayoutSourceTests
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "HeroCopyCatalog.cs");
 
         Assert.Contains("@inject NavigationManager Navigation", source);
-        Assert.Contains("HeroCopyCatalog.ResolveTargetKey(Navigation.Uri)", source);
+        Assert.Contains("HeroCopyCatalog.ResolveExplicitTargetKey(Navigation.Uri)", source);
+        Assert.Contains("explicitTargetKey ?? HeroCopyCatalog.DefaultTargetKey", source);
         Assert.Contains("HeroCopyCatalog.SelectRandom", source);
         Assert.Contains("HeroCopyCatalog.GetVariant", source);
         Assert.Contains("home.hero.copy", source);
@@ -283,20 +284,27 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the home services grid highlights the same service category selected for ad-targeted hero copy.
+    /// Verifies the home services grid hides shuffled catalog numbers, rotates generic highlights, and pins explicit service intent.
     /// </summary>
     [Fact]
-    public void HomeServicesPromoteAdMatchedServiceCard()
+    public void HomeServicesRotateGenericHighlightAndPinExplicitServiceTargets()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "HeroCopyCatalog.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey)", source);
-        Assert.Contains("HeroCopyCatalog.ResolveServiceSlug(_heroTargetKey)", source);
+        Assert.Contains("HeroCopyCatalog.ResolveExplicitTargetKey(Navigation.Uri)", source);
+        Assert.Contains("_hasExplicitHeroTarget", source);
+        Assert.Contains("_heroServiceSlug", source);
+        Assert.Contains("_highlightServiceSlug", source);
         Assert.Contains("@if (IsPrimaryService(service))", source);
-        Assert.Contains("PromoteTargetedService", source);
+        Assert.Contains("PromoteHighlightedService", source);
+        Assert.Contains("SelectRotatingHighlightedService", source);
         Assert.Contains("StringComparison.OrdinalIgnoreCase", source);
+        Assert.Contains("internal static string? ResolveExplicitTargetKey(string? url)", content);
         Assert.Contains("internal static string ResolveServiceSlug(string? targetKey)", content);
+        Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto;", styles);
+        Assert.DoesNotContain("<span class=\"card-meta\">@service.Number</span>", source);
         Assert.DoesNotContain("return service.Primary ? \"service-card primary\" : \"service-card\";", source);
         Assert.DoesNotContain("@if (service.Primary)", source);
     }
