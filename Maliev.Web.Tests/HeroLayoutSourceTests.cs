@@ -93,6 +93,7 @@ public sealed class HeroLayoutSourceTests
     [Fact]
     public void HomeUsesFinishedManufacturingAndNewsSections()
     {
+        var root = FindRepoRoot();
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
@@ -143,7 +144,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("padding-top: clamp(44px, 5vw, 72px);", styles);
         Assert.Contains(".home-services-section .section-heading", styles);
         Assert.Contains("machine-feature", source);
-        Assert.Contains("machine-feature-media", source);
+        Assert.Contains("machine-feature-backdrop", source);
+        Assert.Contains("/images/products/pneumatic-injection-molding-machines.png", source);
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines.png")));
+        Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
+        Assert.Contains("PIMM-30 / PIMM-50", source);
+        Assert.Contains("PIMM-30 reaches 300°C, PIMM-50 reaches 350°C", source);
         Assert.Contains("machine-stat-grid", source);
         Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
@@ -154,10 +160,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
-        Assert.Contains("background: linear-gradient(135deg, #ffffff 0%, #eef5ff 52%, #f7f8fb 100%);", styles);
+        Assert.Contains("grid-template-columns: minmax(0, .9fr) minmax(540px, .82fr);", styles);
+        Assert.Contains(".machine-feature-backdrop", styles);
+        Assert.Contains("object-fit: cover;", styles);
         Assert.Contains(".machine-feature .h-display", styles);
         Assert.Contains(".machine-stat-grid", styles);
-        Assert.Contains("font-size: clamp(1.35rem, 1.75vw, 1.65rem);", styles);
+        Assert.Contains("font-size: clamp(1.5rem, 2.1vw, 2rem);", styles);
         Assert.Contains("margin-bottom: 30px;", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains(".social-link", styles);
