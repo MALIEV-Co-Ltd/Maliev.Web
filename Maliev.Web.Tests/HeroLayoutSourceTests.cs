@@ -192,7 +192,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("/images/products/pneumatic-injection-molding-machines.png", source);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines.png")));
         Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
-        Assert.Contains("PIMM-30 / PIMM-50", source);
+        Assert.DoesNotContain("machine-feature-kicker", source);
+        Assert.DoesNotContain("PIMM-30 / PIMM-50", source);
+        Assert.DoesNotContain(".machine-feature-kicker", styles);
         Assert.Contains("PIMM-30 reaches 300°C, PIMM-50 reaches 350°C", source);
         Assert.Contains("machine-stat-grid", source);
         Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);

@@ -1551,19 +1551,6 @@ html:lang(th) .h1 {
   z-index: 2;
 }
 
-.machine-feature-kicker {
-  width: fit-content;
-  margin: 0;
-  padding: 7px 10px;
-  color: var(--blue-ink);
-  background: rgba(10, 114, 239, .09);
-  border: 1px solid rgba(10, 114, 239, .18);
-  border-radius: var(--radius);
-  font-size: .82rem;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
 .machine-feature-backdrop {
   position: absolute;
   inset: 0;
