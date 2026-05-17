@@ -398,16 +398,17 @@ function getLandingHeroViewportMetrics(host) {
   const height = host?.clientHeight ?? 520;
   const aspect = width / Math.max(height, 1);
   const compact = width < 560 || height < 360;
+  const narrowTall = width < 700 && height >= 500 && aspect < 1.12;
   const balancedTablet = width >= 640 && width <= 920 && height >= 460;
   const wide = width > 920;
 
   return {
-    fov: compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
-    targetFill: compact ? 0.76 : balancedTablet ? 0.82 : aspect > 1.55 ? 0.86 : 0.84,
-    safeInset: compact ? 0.07 : 0.055,
-    minRadius: compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
-    maxRadius: compact ? 8.4 : wide ? 9.2 : 8.8,
-    fallbackRadius: compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
+    fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
+    targetFill: narrowTall ? 0.72 : compact ? 0.76 : balancedTablet ? 0.82 : aspect > 1.55 ? 0.86 : 0.84,
+    safeInset: narrowTall ? 0.12 : compact ? 0.07 : 0.055,
+    minRadius: narrowTall ? 4.2 : compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
+    maxRadius: narrowTall ? 9.6 : compact ? 8.4 : wide ? 9.2 : 8.8,
+    fallbackRadius: narrowTall ? 7.15 : compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
     targetY: compact ? 0.01 : 0.02
   };
 }

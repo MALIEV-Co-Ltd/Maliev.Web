@@ -38,6 +38,7 @@
 
     private ElementReference _canvas;
     private IJSObjectReference? _module;
+    private const string ModulePath = "/js/manufacturing-gizmo.js?v=20260517-hero-frame";
     private string ContainerClass => string.IsNullOrWhiteSpace(Class)
         ? "manufacturing-gizmo is-loading"
         : $"manufacturing-gizmo is-loading {Class}";
@@ -49,7 +50,7 @@
             return;
         }
 
-        _module = await JS.InvokeAsync<IJSObjectReference>("import", "/js/manufacturing-gizmo.js");
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", ModulePath);
         await _module.InvokeVoidAsync(
             "mountManufacturingGizmo",
             _canvas,

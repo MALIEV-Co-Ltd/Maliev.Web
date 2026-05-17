@@ -1156,6 +1156,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@media (min-width: 2400px)", styles);
         Assert.Contains("height: min(58vh, 860px);", styles);
         Assert.Contains("justify-content: center;", styles);
+        Assert.Contains("const narrowTall = width < 700 && height >= 500 && aspect < 1.12;", gizmo);
+        Assert.Contains("narrowTall ? 0.72 : compact ? 0.76", gizmo);
+        Assert.Contains("safeInset: narrowTall ? 0.12 : compact ? 0.07 : 0.055", gizmo);
+        Assert.Contains("fallbackRadius: narrowTall ? 7.15", gizmo);
         Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
         Assert.Contains("balancedTablet ? 0.46 : wide ? 0.43 : 0.45", gizmo);
         Assert.Contains("frameLandingHeroCamera", gizmo);
@@ -1171,6 +1175,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260517-hero-frame\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
