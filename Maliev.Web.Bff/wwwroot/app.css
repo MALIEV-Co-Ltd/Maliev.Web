@@ -3706,9 +3706,21 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-hero {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
     min-height: auto;
     padding-top: 42px;
     padding-bottom: 56px;
+  }
+
+  .landing-hero-copy {
+    max-width: none;
+  }
+
+  .landing-hero-copy > p,
+  .landing-hero-actions {
+    max-width: none;
   }
 
   .landing-hero h1,
@@ -3755,6 +3767,8 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-hero-visual {
+    justify-self: center;
+    width: min(100%, 560px);
     min-height: 320px;
   }
 

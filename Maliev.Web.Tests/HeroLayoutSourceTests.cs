@@ -1129,6 +1129,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("width: min(100%, 820px);", styles);
         Assert.Contains("min-height: 440px;", styles);
         Assert.Contains("height: min(46vh, 470px);", styles);
+        Assert.Contains("@media (max-width: 680px)", styles);
+        Assert.Contains(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    align-items: start;\n    gap: 24px;", styles);
+        Assert.Contains(".landing-hero-copy {\n    max-width: none;", styles);
+        Assert.Contains(".landing-hero-visual {\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
         Assert.Contains("@media (min-width: 1600px)", styles);
         Assert.Contains("height: min(60vh, 760px);", styles);
         Assert.Contains("@media (min-width: 2400px)", styles);
