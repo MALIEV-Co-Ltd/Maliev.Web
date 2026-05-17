@@ -1194,16 +1194,47 @@ html:lang(th) .h1 {
 }
 
 .material-comparison-table tbody th {
-  width: 170px;
+  width: 220px;
   font-weight: 600;
 }
 
-.material-comparison-table tbody th strong,
-.material-comparison-table tbody th span {
+.material-row-summary {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  min-width: 188px;
+}
+
+.material-row-media,
+.material-mobile-card-media {
+  display: block;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.material-row-media {
+  width: 68px;
+  aspect-ratio: 4 / 3;
+}
+
+.material-row-media img,
+.material-mobile-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.material-row-copy,
+.material-row-copy strong,
+.material-row-copy > span {
   display: block;
 }
 
-.material-comparison-table tbody th span {
+.material-row-copy > span {
   margin-top: 5px;
   color: var(--muted);
   font-size: .82rem;
@@ -1411,12 +1442,25 @@ html:lang(th) .h1 {
   gap: 14px;
 }
 
-.material-mobile-card-head strong,
-.material-mobile-card-head span {
+.material-mobile-card-title {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.material-mobile-card-media {
+  width: 74px;
+  aspect-ratio: 4 / 3;
+}
+
+.material-mobile-card-title strong,
+.material-mobile-card-title span span {
   display: block;
 }
 
-.material-mobile-card-head span {
+.material-mobile-card-title span span {
   margin-top: 4px;
   color: var(--muted);
   font-size: .88rem;

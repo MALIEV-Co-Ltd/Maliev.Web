@@ -537,6 +537,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-comparison-table", source);
         Assert.Contains("material-mobile-list", source);
         Assert.Contains("material-compare-workbench", source);
+        Assert.Contains("material-row-summary", source);
+        Assert.Contains("material-row-media", source);
+        Assert.Contains("material-mobile-card-media", source);
+        Assert.Contains("<img src=\"@material.ImageUrl\"", source);
+        Assert.Contains("string ImageUrl,\n        LocalizedText ImageAlt", source);
+        Assert.Contains("/images/materials/pla.svg", source);
         Assert.Contains("material-pro-con-line material-pro-con-pro", source);
         Assert.Contains("material-pro-con-line material-pro-con-con", source);
         Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-pro", source);
@@ -557,6 +563,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-category-body", styles);
         Assert.Contains(".content-stack ul", styles);
         Assert.Contains(".material-comparison-table", styles);
+        Assert.Contains(".material-row-media", styles);
+        Assert.Contains(".material-mobile-card-media", styles);
         Assert.Contains(".material-comparison-section .section-heading", styles);
         Assert.Contains("grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);", styles);
         Assert.Contains(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: start;", styles);
@@ -574,6 +582,29 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains("grid-template-columns: 122px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);
+
+        var root = FindRepoRoot();
+        string[] materialImages =
+        [
+            "pla.svg",
+            "petg.svg",
+            "abs.svg",
+            "asa.svg",
+            "tpu.svg",
+            "pa12-nylon.svg",
+            "pa-gf-cf.svg",
+            "standard-resin.svg",
+            "tough-resin.svg",
+            "aluminum-6061.svg",
+            "stainless-304-316.svg",
+            "brass.svg",
+            "silicone-urethane.svg"
+        ];
+
+        foreach (var image in materialImages)
+        {
+            Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "materials", image)), image);
+        }
     }
 
     /// <summary>

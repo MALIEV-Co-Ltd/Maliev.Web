@@ -185,9 +185,14 @@
                 {
                     <article class="@MaterialSelectionCardClass(material)">
                         <div class="material-mobile-card-head">
-                            <div>
-                                <strong>@material.Name</strong>
-                                <span>@material.Family.For(Preferences.Culture)</span>
+                            <div class="material-mobile-card-title">
+                                <span class="material-mobile-card-media">
+                                    <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                                </span>
+                                <span>
+                                    <strong>@material.Name</strong>
+                                    <span>@material.Family.For(Preferences.Culture)</span>
+                                </span>
                             </div>
                             <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
                                 @MaterialSelectButtonText(material)
@@ -240,8 +245,15 @@
                                     </button>
                                 </td>
                                 <th scope="row">
-                                    <strong>@material.Name</strong>
-                                    <span>@material.Family.For(Preferences.Culture)</span>
+                                    <div class="material-row-summary">
+                                        <span class="material-row-media">
+                                            <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                                        </span>
+                                        <span class="material-row-copy">
+                                            <strong>@material.Name</strong>
+                                            <span>@material.Family.For(Preferences.Culture)</span>
+                                        </span>
+                                    </div>
                                 </th>
                                 <td><span class="material-process-pill">@material.Process.For(Preferences.Culture)</span></td>
                                 <td>@material.BestFor.For(Preferences.Culture)</td>
@@ -853,6 +865,8 @@ else
     [
         new(
             "PLA",
+            "/images/materials/pla.svg",
+            SiteContent.Text("PLA filament and pellets", "เส้นพิมพ์และเม็ดพลาสติก PLA"),
             "fdm",
             SiteContent.Text("Commodity FDM thermoplastic", "เทอร์โมพลาสติก FDM ทั่วไป"),
             SiteContent.Text("FDM", "FDM"),
@@ -866,6 +880,8 @@ else
             ["prototype"]),
         new(
             "PETG",
+            "/images/materials/petg.svg",
+            SiteContent.Text("PETG filament sample", "ตัวอย่างเส้นพิมพ์ PETG"),
             "fdm",
             SiteContent.Text("Tough FDM thermoplastic", "เทอร์โมพลาสติก FDM เหนียว"),
             SiteContent.Text("FDM", "FDM"),
@@ -879,6 +895,8 @@ else
             ["prototype", "functional", "chemical"]),
         new(
             "ABS",
+            "/images/materials/abs.svg",
+            SiteContent.Text("ABS filament and printed surface sample", "เส้นพิมพ์และตัวอย่างผิว ABS"),
             "fdm",
             SiteContent.Text("Impact-resistant FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนแรงกระแทก"),
             SiteContent.Text("FDM", "FDM"),
@@ -892,6 +910,8 @@ else
             ["functional", "heat"]),
         new(
             "ASA",
+            "/images/materials/asa.svg",
+            SiteContent.Text("ASA outdoor plastic sample", "ตัวอย่างพลาสติก ASA สำหรับงานกลางแจ้ง"),
             "fdm",
             SiteContent.Text("Weatherable FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนสภาพอากาศ"),
             SiteContent.Text("FDM", "FDM"),
@@ -905,6 +925,8 @@ else
             ["functional", "heat", "outdoor"]),
         new(
             "TPU",
+            "/images/materials/tpu.svg",
+            SiteContent.Text("Flexible TPU strip and spool", "เส้น TPU และตัวอย่างแถบยืดหยุ่น"),
             "fdm",
             SiteContent.Text("Flexible FDM elastomer", "อีลาสโตเมอร์ FDM ยืดหยุ่น"),
             SiteContent.Text("FDM", "FDM"),
@@ -918,6 +940,8 @@ else
             ["prototype", "functional", "flexible", "chemical"]),
         new(
             "PA12 nylon",
+            "/images/materials/pa12-nylon.svg",
+            SiteContent.Text("PA12 nylon powder and printed part", "ผงไนลอน PA12 และชิ้นงานพิมพ์"),
             "powder-bed",
             SiteContent.Text("Powder-bed engineering nylon", "ไนลอนวิศวกรรมพาวเดอร์เบด"),
             SiteContent.Text("MJF / SLS", "MJF / SLS"),
@@ -931,6 +955,8 @@ else
             ["prototype", "functional", "chemical"]),
         new(
             "PA-GF / PA-CF",
+            "/images/materials/pa-gf-cf.svg",
+            SiteContent.Text("Glass or carbon filled nylon sample", "ตัวอย่างไนลอนผสมใยแก้วหรือคาร์บอน"),
             "powder-bed",
             SiteContent.Text("Glass or carbon-filled nylon", "ไนลอนผสมใยแก้วหรือคาร์บอน"),
             SiteContent.Text("MJF / SLS", "MJF / SLS"),
@@ -944,6 +970,8 @@ else
             ["functional", "heat", "chemical"]),
         new(
             "Standard resin",
+            "/images/materials/standard-resin.svg",
+            SiteContent.Text("Standard resin and detailed print sample", "เรซินทั่วไปและตัวอย่างพิมพ์ละเอียด"),
             "sla",
             SiteContent.Text("High-detail photopolymer", "โฟโตพอลิเมอร์รายละเอียดสูง"),
             SiteContent.Text("SLA", "SLA"),
@@ -957,6 +985,8 @@ else
             ["prototype"]),
         new(
             "Tough resin",
+            "/images/materials/tough-resin.svg",
+            SiteContent.Text("Tough engineering resin sample", "ตัวอย่างเรซินวิศวกรรมเหนียว"),
             "sla",
             SiteContent.Text("Engineering SLA resin", "เรซิน SLA วิศวกรรม"),
             SiteContent.Text("SLA", "SLA"),
@@ -970,6 +1000,8 @@ else
             ["prototype", "functional"]),
         new(
             "Aluminum 6061",
+            "/images/materials/aluminum-6061.svg",
+            SiteContent.Text("Aluminum 6061 machined billet", "แท่งอะลูมิเนียม 6061 กัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("General-purpose machined aluminum", "อะลูมิเนียมกัดขึ้นรูปอเนกประสงค์"),
             SiteContent.Text("CNC", "CNC"),
@@ -983,6 +1015,8 @@ else
             ["functional", "heat", "metal"]),
         new(
             "Stainless steel 304 / 316",
+            "/images/materials/stainless-304-316.svg",
+            SiteContent.Text("Stainless steel machined bar stock", "แท่งสแตนเลสสำหรับกัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("Corrosion-resistant machined steel", "สแตนเลสกัดขึ้นรูปทนกัดกร่อน"),
             SiteContent.Text("CNC", "CNC"),
@@ -996,6 +1030,8 @@ else
             ["functional", "heat", "metal", "chemical"]),
         new(
             "Brass",
+            "/images/materials/brass.svg",
+            SiteContent.Text("Brass machined alloy stock", "แท่งทองเหลืองสำหรับกัดขึ้นรูป"),
             "cnc",
             SiteContent.Text("Machinable copper alloy", "โลหะผสมทองแดงกัดง่าย"),
             SiteContent.Text("CNC", "CNC"),
@@ -1009,6 +1045,8 @@ else
             ["functional", "metal", "chemical"]),
         new(
             "Silicone / Urethane",
+            "/images/materials/silicone-urethane.svg",
+            SiteContent.Text("Silicone and urethane casting samples", "ตัวอย่างงานหล่อซิลิโคนและยูรีเทน"),
             "casting",
             SiteContent.Text("Short-run elastomer or cast polymer", "อีลาสโตเมอร์หรืองานหล่อพอลิเมอร์จำนวนน้อย"),
             SiteContent.Text("Casting", "งานหล่อ"),
@@ -1102,6 +1140,8 @@ else
 
     private sealed record MaterialComparisonItem(
         string Name,
+        string ImageUrl,
+        LocalizedText ImageAlt,
         string ProcessKey,
         LocalizedText Family,
         LocalizedText Process,
