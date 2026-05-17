@@ -901,6 +901,11 @@ html:lang(th) .h1 {
   font-weight: 600;
 }
 
+.metric-strip strong {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
 .metric-strip small,
 .service-stat-strip small,
 .stat-card small {

@@ -88,6 +88,34 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the home hero metrics render crawlable final values and enhance them with viewport-triggered count-up motion.
+    /// </summary>
+    [Fact]
+    public void HomeHeroMetricsUseCountUpEnhancement()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-countup.js");
+
+        Assert.Contains("data-count-up", source);
+        Assert.Contains("data-count-target=\"@metric.CountTarget\"", source);
+        Assert.Contains("data-count-suffix=\"@metric.Suffix\"", source);
+        Assert.Contains("data-count-final=\"@metric.Value.For(Preferences.Culture)\"", source);
+        Assert.Contains("new(Text(\"12,000+\", \"12,000+\"), Text(\"parts produced\", \"ชิ้นงานที่ผลิตแล้ว\"), 12000, \"+\")", content);
+        Assert.Contains("new(Text(\"850+\", \"850+\"), Text(\"businesses served\", \"ธุรกิจที่ให้บริการ\"), 850, \"+\")", content);
+        Assert.Contains("internal sealed record MetricItem(LocalizedText Value, LocalizedText Label, int CountTarget, string Suffix = \"\")", content);
+        Assert.Contains("js/maliev-countup.js", app);
+        Assert.Contains("requestAnimationFrame", script);
+        Assert.Contains("IntersectionObserver", script);
+        Assert.Contains("prefers-reduced-motion: reduce", script);
+        Assert.Contains("Intl.NumberFormat(\"en-US\"", script);
+        Assert.Contains("[data-count-up]", script);
+        Assert.Contains("font-variant-numeric: tabular-nums", styles);
+    }
+
+    /// <summary>
     /// Verifies the lower landing sections use finished page sections and no proof-band mock block.
     /// </summary>
     [Fact]

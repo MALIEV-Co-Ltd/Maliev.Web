@@ -27,9 +27,9 @@ internal static class SiteContent
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
     [
-        new(Text("2018", "2018"), Text("founded in Thailand", "เริ่มต้นในประเทศไทย")),
-        new(Text("12,000+", "12,000+"), Text("parts produced", "ชิ้นงานที่ผลิตแล้ว")),
-        new(Text("850+", "850+"), Text("businesses served", "ธุรกิจที่ให้บริการ"))
+        new(Text("2018", "2018"), Text("founded in Thailand", "เริ่มต้นในประเทศไทย"), 2018),
+        new(Text("12,000+", "12,000+"), Text("parts produced", "ชิ้นงานที่ผลิตแล้ว"), 12000, "+"),
+        new(Text("850+", "850+"), Text("businesses served", "ธุรกิจที่ให้บริการ"), 850, "+")
     ];
 
     internal static readonly IReadOnlyList<ServicePageContent> Services =
@@ -148,7 +148,7 @@ internal static class SiteContent
     }
 }
 
-internal sealed record MetricItem(LocalizedText Value, LocalizedText Label);
+internal sealed record MetricItem(LocalizedText Value, LocalizedText Label, int CountTarget, string Suffix = "");
 
 internal sealed record ServicePageContent(
     string Slug,
