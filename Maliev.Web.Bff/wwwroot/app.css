@@ -2964,6 +2964,9 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .social-link {
+  --social-hover-bg: var(--blue);
+  --social-hover-color: var(--blue-on);
+
   display: inline-grid;
   place-items: center;
   width: 40px;
@@ -2974,9 +2977,24 @@ html[data-theme="dark"] .auth-google-icon {
   box-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
 }
 
-.social-link:hover {
-  color: var(--blue-on);
-  background: var(--blue);
+.social-link:is(:hover, :focus-visible) {
+  color: var(--social-hover-color);
+  background: var(--social-hover-bg);
+}
+
+.social-link--facebook {
+  --social-hover-bg: #1877f2;
+  --social-hover-color: #fff;
+}
+
+.social-link--youtube {
+  --social-hover-bg: #ff0000;
+  --social-hover-color: #fff;
+}
+
+.social-link--instagram {
+  --social-hover-bg: linear-gradient(135deg, #833ab4 0%, #e1306c 48%, #f77737 100%);
+  --social-hover-color: #fff;
 }
 
 .social-link svg {

@@ -339,7 +339,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("facebook.com/maliev.manufacturing", source);
         Assert.Contains("youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig", source);
         Assert.Contains("instagram.com/maliev.manufacturing", source);
-        Assert.Contains("class=\"social-link\"", source);
+        Assert.Contains("class=\"social-link social-link--facebook\"", source);
+        Assert.Contains("class=\"social-link social-link--youtube\"", source);
+        Assert.Contains("class=\"social-link social-link--instagram\"", source);
         Assert.Contains("<svg viewBox=\"0 0 24 24\"", source);
         Assert.Contains("aria-label=\"Facebook\"", source);
         Assert.Contains("aria-label=\"YouTube\"", source);
@@ -355,6 +357,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".line-contact-logo-bg", styles);
         Assert.Contains(".line-contact-logo-bubble", styles);
         Assert.Contains(".line-contact-logo-text", styles);
+        Assert.Contains(".social-link--facebook", styles);
+        Assert.Contains(".social-link--youtube", styles);
+        Assert.Contains(".social-link--instagram", styles);
+        Assert.Contains("#1877f2", styles);
+        Assert.Contains("#ff0000", styles);
+        Assert.Contains("#833ab4", styles);
         Assert.Contains("FoundingYear = 2018", source);
         Assert.Contains("DateTime.Today.Year", source);
         Assert.Contains("All rights reserved", source);
