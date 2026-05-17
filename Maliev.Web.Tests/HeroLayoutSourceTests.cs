@@ -1109,6 +1109,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("targetFill", source);
         Assert.Contains("safeInset", source);
         Assert.Contains("camera.getViewMatrix(true)", source);
+        Assert.Contains("refreshCameraMatrices", source);
+        Assert.Contains("camera.getProjectionMatrix?.(true)", source);
+        Assert.Contains("projectedFrameFits", source);
+        Assert.Contains("high *= 1.24", source);
+        Assert.Contains("getModelAwareHeroMetrics", source);
+        Assert.Contains("radiusFloor", source);
+        Assert.Contains("camera.upperRadiusLimit = null", source);
+        Assert.Contains("updateWorldMatrixChain", source);
+        Assert.Contains("state.engine.resize();\n  state.cameraConfigurator?.();", source);
         Assert.Contains("addHoverMotion", source);
         Assert.Contains("modelScale", source);
         Assert.Contains("const targetSize = 2.28 * modelScale", source);
@@ -1180,6 +1189,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("balancedTablet ? 0.46 : wide ? 0.43 : 0.45", gizmo);
         Assert.Contains("frameLandingHeroCamera", gizmo);
         Assert.Contains("measureProjectedMeshFrame", gizmo);
+        Assert.Contains("projectedFrameFits", gizmo);
+        Assert.Contains("high *= 1.24", gizmo);
     }
 
     /// <summary>
@@ -1191,7 +1202,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260517-hero-frame\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260517-hero-fit\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

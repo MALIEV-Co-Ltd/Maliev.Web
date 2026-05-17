@@ -382,9 +382,11 @@ function configureLandingHeroCamera(camera, host, BABYLON, frame) {
 
   camera.fov = metrics.fov;
   camera.target = new BABYLON.Vector3(0, metrics.targetY, 0);
+  camera.lowerRadiusLimit = null;
+  camera.upperRadiusLimit = null;
 
   if (frame?.meshes?.length) {
-    frameLandingHeroCamera(camera, frame.meshes, metrics, BABYLON);
+    frameLandingHeroCamera(camera, frame.meshes, getModelAwareHeroMetrics(metrics, frame), BABYLON);
   } else {
     camera.radius = metrics.fallbackRadius;
   }
@@ -413,18 +415,59 @@ function getLandingHeroViewportMetrics(host) {
   };
 }
 
+function getModelAwareHeroMetrics(metrics, frame) {
+  const frameSize = frame?.size;
+  const frameSpan = Math.max(frameSize?.x ?? 0, frameSize?.y ?? 0, frameSize?.z ?? 0);
+  if (!Number.isFinite(frameSpan) || frameSpan <= 0) {
+    return metrics;
+  }
+
+  const radiusFloor = frameSpan / (2 * Math.tan(metrics.fov / 2) * metrics.targetFill);
+  if (!Number.isFinite(radiusFloor)) {
+    return metrics;
+  }
+
+  return {
+    ...metrics,
+    minRadius: Math.max(metrics.minRadius, radiusFloor),
+    maxRadius: Math.max(metrics.maxRadius, radiusFloor * 1.6),
+    fallbackRadius: Math.max(metrics.fallbackRadius, radiusFloor)
+  };
+}
+
 function frameLandingHeroCamera(camera, meshes, metrics, BABYLON) {
   let low = metrics.minRadius;
   let high = metrics.maxRadius;
   let best = high;
+  let highFits = false;
+
+  for (let i = 0; i < 8; i += 1) {
+    camera.radius = high;
+    refreshCameraMatrices(camera);
+
+    if (projectedFrameFits(measureProjectedMeshFrame(camera, meshes, BABYLON), metrics)) {
+      highFits = true;
+      break;
+    }
+
+    low = high;
+    high *= 1.24;
+  }
+
+  if (!highFits) {
+    camera.radius = high;
+    return;
+  }
+
+  low = metrics.minRadius;
 
   for (let i = 0; i < 16; i += 1) {
     const radius = (low + high) / 2;
     camera.radius = radius;
-    camera.getViewMatrix(true);
+    refreshCameraMatrices(camera);
 
     const projected = measureProjectedMeshFrame(camera, meshes, BABYLON);
-    if (!projected || projected.clipped || projected.maxSpan > metrics.targetFill || projected.minInset < metrics.safeInset) {
+    if (!projectedFrameFits(projected, metrics)) {
       low = radius;
       continue;
     }
@@ -434,6 +477,18 @@ function frameLandingHeroCamera(camera, meshes, metrics, BABYLON) {
   }
 
   camera.radius = best;
+}
+
+function refreshCameraMatrices(camera) {
+  camera.getViewMatrix(true);
+  camera.getProjectionMatrix?.(true);
+}
+
+function projectedFrameFits(projected, metrics) {
+  return Boolean(projected) &&
+    !projected.clipped &&
+    projected.maxSpan <= metrics.targetFill &&
+    projected.minInset >= metrics.safeInset;
 }
 
 function measureProjectedMeshFrame(camera, meshes, BABYLON) {
@@ -458,7 +513,7 @@ function measureProjectedMeshFrame(camera, meshes, BABYLON) {
       continue;
     }
 
-    mesh.computeWorldMatrix(true);
+    updateWorldMatrixChain(mesh);
     const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
     for (const vector of vectors) {
       const point = BABYLON.Vector3.Project(vector, world, transform, viewport);
@@ -615,7 +670,7 @@ function computeMeshBounds(meshes, BABYLON) {
   let max = new BABYLON.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
 
   for (const mesh of renderMeshes) {
-    mesh.computeWorldMatrix(true);
+    updateWorldMatrixChain(mesh);
     const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
     for (const vector of vectors) {
       min = BABYLON.Vector3.Minimize(min, vector);
@@ -628,6 +683,18 @@ function computeMeshBounds(meshes, BABYLON) {
     max,
     center: min.add(max).scale(0.5)
   };
+}
+
+function updateWorldMatrixChain(node) {
+  if (!node) {
+    return;
+  }
+
+  if (node.parent) {
+    updateWorldMatrixChain(node.parent);
+  }
+
+  node.computeWorldMatrix?.(true);
 }
 
 function observeDocumentTheme(state) {
@@ -829,9 +896,9 @@ function resizeScene(state) {
     return;
   }
 
-  state.cameraConfigurator?.();
   configureHardwareScaling(state.engine);
   state.engine.resize();
+  state.cameraConfigurator?.();
 }
 
 function startRenderLoop(state) {
