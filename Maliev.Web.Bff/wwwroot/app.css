@@ -1797,14 +1797,11 @@ html:lang(th) .h1 {
   border-radius: 8px;
 }
 
-.workflow-step-visual svg {
+.workflow-step-visual .mud-icon-root {
   width: 54px;
   height: 54px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
+  color: currentColor;
+  fill: currentColor;
 }
 
 .workflow-step p {

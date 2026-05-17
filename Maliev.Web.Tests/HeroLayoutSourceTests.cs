@@ -141,11 +141,12 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("process-kicker", source);
         Assert.DoesNotContain("Customer workflow", source);
         Assert.DoesNotContain("ขั้นตอนลูกค้า", source);
-        Assert.Contains("viewBox=\"0 0 64 64\"", source);
-        Assert.Contains("new(\"01\", \"upload\"", source);
-        Assert.Contains("new(\"02\", \"dfm\"", source);
-        Assert.Contains("new(\"03\", \"price\"", source);
-        Assert.Contains("new(\"04\", \"order\"", source);
+        Assert.Contains("<MudIcon Icon=\"@step.Icon\" Size=\"Size.Large\" />", source);
+        Assert.DoesNotContain("viewBox=\"0 0 64 64\"", source);
+        Assert.Contains("new(\"01\", \"upload\", Icons.Material.Filled.UploadFile", source);
+        Assert.Contains("new(\"02\", \"dfm\", Icons.Material.Filled.FactCheck", source);
+        Assert.Contains("new(\"03\", \"price\", Icons.Material.Filled.PriceChange", source);
+        Assert.Contains("new(\"04\", \"order\", Icons.Material.Filled.Inventory2", source);
         Assert.True(
             source.IndexOf("class=\"workflow-step-number\"", StringComparison.Ordinal) <
             source.IndexOf("class=\"workflow-step-visual\"", StringComparison.Ordinal));
@@ -192,7 +193,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".process-section::before", styles);
         Assert.DoesNotContain(".process-kicker", styles);
         Assert.Contains(".workflow-step-number", styles);
-        Assert.Contains(".workflow-step-visual svg", styles);
+        Assert.Contains(".workflow-step-visual .mud-icon-root", styles);
         Assert.DoesNotContain(".workflow-step-visual span", styles);
         Assert.Contains(".workflow-step--dfm .workflow-step-visual", styles);
         Assert.Contains("home-services-section", source);

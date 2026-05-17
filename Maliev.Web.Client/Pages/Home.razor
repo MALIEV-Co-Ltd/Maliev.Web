@@ -121,39 +121,10 @@
     <div class="process-grid">
         @foreach (var step in ProcessSteps)
         {
-            <article class="workflow-step workflow-step--@step.Icon">
+            <article class="workflow-step workflow-step--@step.Accent">
                 <span class="workflow-step-number">@step.Number</span>
                 <div class="workflow-step-visual" aria-hidden="true">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                        @switch (step.Icon)
-                        {
-                            case "upload":
-                                <path d="M18 52h28a6 6 0 0 0 6-6V24L40 12H18a6 6 0 0 0-6 6v28a6 6 0 0 0 6 6Z" />
-                                <path d="M39 13v12h12" />
-                                <path d="M24 38l8-8 8 8" />
-                                <path d="M32 30v17" />
-                                break;
-                            case "dfm":
-                                <path d="M32 10l19 8v14c0 12-7.8 20.4-19 23-11.2-2.6-19-11-19-23V18l19-8Z" />
-                                <path d="M22 33l7 7 14-15" />
-                                <path d="M21 21h22" />
-                                break;
-                            case "price":
-                                <path d="M14 18h36" />
-                                <path d="M14 32h36" />
-                                <path d="M14 46h36" />
-                                <circle cx="26" cy="18" r="5" />
-                                <circle cx="40" cy="32" r="5" />
-                                <circle cx="23" cy="46" r="5" />
-                                break;
-                            default:
-                                <path d="M16 25l16-9 16 9-16 9-16-9Z" />
-                                <path d="M16 25v18l16 9 16-9V25" />
-                                <path d="M32 34v18" />
-                                <path d="M23 45l4 4 12-14" />
-                                break;
-                        }
-                    </svg>
+                    <MudIcon Icon="@step.Icon" Size="Size.Large" />
                 </div>
                 <h2>@step.Title.For(Preferences.Culture)</h2>
                 <p>@step.Body.For(Preferences.Culture)</p>
@@ -248,10 +219,10 @@
 
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
     [
-        new("01", "upload", SiteContent.Text("Upload your file", "อัปโหลดไฟล์"), SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
-        new("02", "dfm", SiteContent.Text("Review DFM", "ตรวจ DFM"), SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
-        new("03", "price", SiteContent.Text("Adjust price", "ปรับราคา"), SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
-        new("04", "order", SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"), SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
+        new("01", "upload", Icons.Material.Filled.UploadFile, SiteContent.Text("Upload your file", "อัปโหลดไฟล์"), SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
+        new("02", "dfm", Icons.Material.Filled.FactCheck, SiteContent.Text("Review DFM", "ตรวจ DFM"), SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
+        new("03", "price", Icons.Material.Filled.PriceChange, SiteContent.Text("Adjust price", "ปรับราคา"), SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
+        new("04", "order", Icons.Material.Filled.Inventory2, SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"), SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
     ];
 
     protected override async Task OnInitializedAsync()
@@ -416,7 +387,7 @@
         _persistingSubscription?.Dispose();
     }
 
-    private sealed record ProcessStep(string Number, string Icon, LocalizedText Title, LocalizedText Body);
+    private sealed record ProcessStep(string Number, string Accent, string Icon, LocalizedText Title, LocalizedText Body);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 
