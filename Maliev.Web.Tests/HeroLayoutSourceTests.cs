@@ -614,6 +614,40 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies public journal and case-study cards navigate to real detail pages with slug-specific content.
+    /// </summary>
+    [Fact]
+    public void JournalAndCaseStudyCardsHaveRealDetailPages()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("CurrentBlogPost", source);
+        Assert.Contains("CurrentCaseStudy", source);
+        Assert.Contains("article-detail-layout", source);
+        Assert.Contains("case-study-detail", source);
+        Assert.Contains(".article-detail-layout", styles);
+        Assert.Contains(".detail-sidebar", styles);
+        Assert.DoesNotContain("var path when path == \"blog\" || path.StartsWith(\"blog/\"", source);
+        Assert.DoesNotContain("var path when path == \"case-studies\" || path.StartsWith(\"case-studies/\"", source);
+
+        Assert.Contains("IReadOnlyList<ArticleSectionContent> Sections", content);
+        Assert.Contains("design-for-manufacturing", content);
+        Assert.Contains("Wall thickness is the first DFM signal", content);
+        Assert.Contains("choosing-3d-printing-materials", content);
+        Assert.Contains("Start from the part's job, not the material name", content);
+        Assert.Contains("instant-part-pricing", content);
+        Assert.Contains("Instant pricing is a quoting workspace, not a blind checkout", content);
+        Assert.Contains("fixture-turnaround", content);
+        Assert.Contains("The worn sample was not enough by itself", content);
+        Assert.Contains("prototype-iteration", content);
+        Assert.Contains("Each revision had one decision to answer", content);
+        Assert.Contains("scan-to-cad-repair", content);
+        Assert.Contains("Scanning captured the old part before CAD cleanup", content);
+    }
+
+    /// <summary>
     /// Verifies the public account area uses local authenticated routes backed by the Web BFF.
     /// </summary>
     [Fact]
