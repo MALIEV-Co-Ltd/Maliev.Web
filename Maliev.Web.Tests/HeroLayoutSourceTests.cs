@@ -100,7 +100,14 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("service-grid", source);
         Assert.Contains("feature-band", source);
+        Assert.Contains("process-section", source);
         Assert.Contains("process-grid", source);
+        Assert.Contains("workflow-step-visual", source);
+        Assert.Contains("viewBox=\"0 0 64 64\"", source);
+        Assert.Contains("new(\"01\", \"upload\"", source);
+        Assert.Contains("new(\"02\", \"dfm\"", source);
+        Assert.Contains("new(\"03\", \"price\"", source);
+        Assert.Contains("new(\"04\", \"order\"", source);
         Assert.DoesNotContain("quote-flow-band", source);
         Assert.Contains("blog-grid", source);
         Assert.Contains("SiteContent.BlogPosts", source);
@@ -139,6 +146,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-rows: auto auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
+        Assert.Contains(".process-section", styles);
+        Assert.Contains(".workflow-step-visual svg", styles);
+        Assert.Contains(".workflow-step--dfm .workflow-step-visual", styles);
         Assert.Contains("home-services-section", source);
         Assert.Contains(".home-services-section", styles);
         Assert.Contains("padding-top: clamp(44px, 5vw, 72px);", styles);
