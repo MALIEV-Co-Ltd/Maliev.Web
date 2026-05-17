@@ -3048,8 +3048,40 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .customer-chatbot-panel,
-.customer-chatbot-toggle {
+.customer-chatbot-toggle,
+.customer-chatbot-popout {
   pointer-events: auto;
+}
+
+.customer-chatbot-popout {
+  width: min(320px, calc(100vw - 32px));
+  display: grid;
+  gap: 3px;
+  padding: 12px 14px;
+  text-align: left;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 96%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue) 34%, var(--rule));
+  border-radius: var(--radius);
+  box-shadow: rgba(10, 114, 239, .18) 0 18px 42px -24px, var(--shadow-border);
+  backdrop-filter: blur(14px);
+}
+
+.customer-chatbot-popout strong {
+  font-size: .86rem;
+  line-height: 1.2;
+}
+
+.customer-chatbot-popout span {
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.35;
+}
+
+.customer-chatbot-popout:hover,
+.customer-chatbot-popout:focus-visible {
+  border-color: color-mix(in srgb, var(--blue) 58%, var(--rule));
+  box-shadow: rgba(10, 114, 239, .24) 0 22px 48px -26px, var(--shadow-border);
 }
 
 .customer-chatbot-panel {
@@ -3264,11 +3296,34 @@ html[data-theme="dark"] .auth-google-icon {
   min-height: 56px;
   padding: 0;
   border-radius: 9999px;
+  position: relative;
   box-shadow: rgba(10, 114, 239, .28) 0 14px 34px -20px, var(--shadow-border);
 }
 
 .customer-chatbot-toggle .mud-icon-root {
   font-size: 1.45rem;
+}
+
+.customer-chatbot-toggle.has-unread {
+  box-shadow: rgba(10, 114, 239, .36) 0 16px 38px -18px, 0 0 0 4px color-mix(in srgb, var(--blue) 12%, transparent), var(--shadow-border);
+}
+
+.customer-chatbot-unread-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  color: var(--blue-on);
+  background: #ff3b30;
+  border: 2px solid var(--paper);
+  border-radius: 9999px;
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .customer-chatbot-toggle:hover,
@@ -3998,6 +4053,10 @@ html[data-theme="dark"] .auth-google-icon {
   .customer-chatbot-panel {
     width: calc(100vw - 24px);
     max-height: calc(100svh - 92px);
+  }
+
+  .customer-chatbot-popout {
+    width: min(300px, calc(100vw - 24px));
   }
 
   .customer-chatbot-messages {

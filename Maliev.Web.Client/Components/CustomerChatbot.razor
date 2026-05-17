@@ -1,5 +1,11 @@
+@using System.Security.Claims
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@implements IDisposable
 @inject MalievApiClient ApiClient
 @inject PreferenceService Preferences
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <aside class="customer-chatbot" aria-label="@Text("Mali customer assistant", "ผู้ช่วยลูกค้าน้องมะลิ")">
     @if (_isOpen)
@@ -10,7 +16,7 @@
                     <span>@Text("Mali", "น้องมะลิ")</span>
                     <small>@Text("customer manufacturing assistant", "ผู้ช่วยงานผลิตสำหรับลูกค้า")</small>
                 </div>
-                <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpen">
+                <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpenAsync">
                     <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
                 </button>
             </header>
@@ -55,24 +61,50 @@
             </div>
         </section>
     }
+    else if (_showPopout)
+    {
+        <button type="button" class="customer-chatbot-popout" @onclick="OpenFromPopoutAsync">
+            <strong>@Text("Mali", "น้องมะลิ")</strong>
+            <span>@_popoutMessage</span>
+        </button>
+    }
 
     <button type="button"
-            class="customer-chatbot-toggle"
+            class="@ToggleButtonClass"
             aria-expanded="@_isOpen.ToString().ToLowerInvariant()"
             aria-label="@Text("Open Mali", "เปิดน้องมะลิ")"
-            @onclick="ToggleOpen">
+            @onclick="ToggleOpenAsync">
         <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Size="Size.Medium" />
+        @if (_unreadCount > 0)
+        {
+            <span class="customer-chatbot-unread-badge" aria-label="@UnreadBadgeAriaLabel">@UnreadBadgeText</span>
+        }
     </button>
 </aside>
 
 @code {
+    private const string PersonalizationStoragePrefix = "maliev.chatbot.personalization.v1";
+    private const int MaxStoredMessages = 24;
+    private const int MaxStoredItems = 6;
+    private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
+
     private readonly List<CustomerChatMessage> _messages = [];
+    private CustomerChatbotMemory _memory = new();
     private Guid? _sessionId;
     private string _draft = string.Empty;
+    private string _storageKey = $"{PersonalizationStoragePrefix}:guest";
+    private string _popoutMessage = string.Empty;
     private bool _isOpen;
     private bool _isSending;
+    private bool _storageReady;
+    private bool _showPopout;
+    private int _unreadCount;
+    private CancellationTokenSource? _popoutCts;
 
     private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
+    private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
+    private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
+    private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread Mali messages", $"{_unreadCount} ข้อความจากน้องมะลิที่ยังไม่ได้อ่าน");
 
     private IReadOnlyList<CustomerChatPrompt> SuggestedPrompts =>
     [
@@ -83,16 +115,74 @@
 
     protected override void OnInitialized()
     {
-        _messages.Add(new CustomerChatMessage(
-            "assistant",
-            Text(
-                "Hi, I'm Mali. Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.",
-                "สวัสดีค่ะ น้องมะลิช่วยตอบเรื่องวัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้ค่ะ")));
+        ResetDisplayedConversation(null, false);
     }
 
-    private void ToggleOpen()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await InitializePersonalizationAsync();
+    }
+
+    private async Task InitializePersonalizationAsync()
+    {
+        await Preferences.InitializeAsync();
+        var identity = await ResolveIdentityAsync();
+        _storageKey = BuildStorageKey(identity);
+
+        var storedMemory = await ReadMemoryAsync(_storageKey);
+        if (storedMemory is null && identity.IsAuthenticated)
+        {
+            storedMemory = await ReadMemoryAsync($"{PersonalizationStoragePrefix}:guest");
+        }
+
+        _memory = NormalizeMemory(storedMemory ?? new CustomerChatbotMemory());
+        ApplyIdentityToMemory(identity);
+        await EnrichMemoryFromAccountAsync(identity);
+
+        _sessionId = _memory.LastSessionId;
+        _unreadCount = Math.Clamp(_memory.UnreadCount, 0, 99);
+        _storageReady = true;
+        var greetingName = GetPersonalGreetingName(identity);
+        ResetDisplayedConversation(greetingName, _memory.Messages.Count > 0);
+        await PersistMemoryAsync();
+
+        if (!_isOpen)
+        {
+            var message = _memory.Messages.Count > 0 && !string.IsNullOrWhiteSpace(greetingName)
+                ? Text($"Hi {greetingName}, Mali can continue your previous MALIEV chat.", $"สวัสดีค่ะ {greetingName} น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
+                : _memory.Messages.Count > 0
+                    ? Text("Mali can continue your previous MALIEV chat.", "น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
+                : Text("Ask Mali about materials, pricing, lead time, or the right manufacturing process.", "ถามน้องมะลิเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
+            _ = ShowPopoutTemporarilyAsync(message);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ToggleOpenAsync()
     {
         _isOpen = !_isOpen;
+        if (_isOpen)
+        {
+            _showPopout = false;
+            CancelPopoutTimer();
+            _unreadCount = 0;
+            _memory.UnreadCount = 0;
+            await PersistMemoryAsync();
+        }
+    }
+
+    private async Task OpenFromPopoutAsync()
+    {
+        if (!_isOpen)
+        {
+            await ToggleOpenAsync();
+        }
     }
 
     private Task SendDraftAsync()
@@ -116,7 +206,9 @@
 
         var trimmed = message.Trim();
         _messages.Add(new CustomerChatMessage("user", trimmed));
+        LearnFromCustomerMessage(trimmed);
         _isSending = true;
+        await PersistMemoryAsync();
 
         try
         {
@@ -124,19 +216,466 @@
             {
                 SessionId = _sessionId,
                 Message = trimmed,
+                CustomerContext = BuildCustomerContext(),
                 Language = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en"
             });
             _sessionId = response.SessionId ?? _sessionId;
-            _messages.Add(new CustomerChatMessage(response.Role, response.Content));
+            await AddAssistantMessageAsync(response.Role, response.Content);
         }
         catch (MalievApiException ex)
         {
-            _messages.Add(new CustomerChatMessage("assistant", ex.Message));
+            await AddAssistantMessageAsync("assistant", ex.Message);
         }
         finally
         {
             _isSending = false;
+            await PersistMemoryAsync();
         }
+    }
+
+    private async Task AddAssistantMessageAsync(string role, string content)
+    {
+        _messages.Add(new CustomerChatMessage(role, content));
+        if (!_isOpen)
+        {
+            _unreadCount = Math.Clamp(_unreadCount + 1, 0, 99);
+            _memory.UnreadCount = _unreadCount;
+            _ = ShowPopoutTemporarilyAsync(Text("Mali replied. Open the chat to continue.", "น้องมะลิตอบแล้ว เปิดแชทเพื่อคุยต่อได้ค่ะ"));
+        }
+
+        await PersistMemoryAsync();
+    }
+
+    private void ResetDisplayedConversation(string? name, bool hasPreviousMessages)
+    {
+        _messages.Clear();
+        _messages.Add(new CustomerChatMessage("assistant", CreateGreeting(name, hasPreviousMessages), false));
+        _messages.AddRange(_memory.Messages.Select(message => new CustomerChatMessage(message.Role, message.Content)));
+    }
+
+    private string CreateGreeting(string? name, bool hasPreviousMessages)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            return hasPreviousMessages
+                ? Text($"Hi {name}, I'm Mali. I saved your previous MALIEV chat so we can continue from there.", $"สวัสดีค่ะ {name} น้องมะลิบันทึกบทสนทนาเรื่อง MALIEV ไว้และคุยต่อได้ค่ะ")
+                : Text($"Hi {name}, I'm Mali. Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.", $"สวัสดีค่ะ {name} น้องมะลิช่วยตอบเรื่องวัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้ค่ะ");
+        }
+
+        return Text(
+            "Hi, I'm Mali. Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.",
+            "สวัสดีค่ะ น้องมะลิช่วยตอบเรื่องวัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้ค่ะ");
+    }
+
+    private async Task<CustomerChatbotIdentity> ResolveIdentityAsync()
+    {
+        try
+        {
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = state.User;
+            if (user.Identity?.IsAuthenticated != true)
+            {
+                return new CustomerChatbotIdentity(false, null, null, null);
+            }
+
+            var email = CleanOneLine(user.FindFirstValue(ClaimTypes.Email) ?? user.FindFirstValue("email"), 120);
+            var displayName = CleanOneLine(
+                user.FindFirstValue(ClaimTypes.Name)
+                ?? user.FindFirstValue("name")
+                ?? user.FindFirstValue("given_name")
+                ?? email,
+                80);
+            var key = user.FindFirstValue("customer_id")
+                ?? user.FindFirstValue("principal_id")
+                ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? email;
+
+            return new CustomerChatbotIdentity(true, CleanOneLine(key, 140), displayName, email);
+        }
+        catch (InvalidOperationException)
+        {
+            return new CustomerChatbotIdentity(false, null, null, null);
+        }
+    }
+
+    private async Task EnrichMemoryFromAccountAsync(CustomerChatbotIdentity identity)
+    {
+        if (!identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        try
+        {
+            var profile = await ApiClient.GetAccountProfileAsync();
+            var displayName = FirstNonEmpty(profile.DisplayName, JoinName(profile.FirstName, profile.LastName), profile.Email, identity.DisplayName);
+            if (!string.IsNullOrWhiteSpace(displayName))
+            {
+                _memory.Name = displayName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(profile.Email))
+            {
+                _memory.Email = profile.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(profile.CompanyName))
+            {
+                _memory.Company = profile.CompanyName;
+            }
+        }
+        catch (Exception)
+        {
+            ApplyIdentityToMemory(identity);
+        }
+
+        try
+        {
+            var addresses = await ApiClient.GetAccountAddressesAsync();
+            foreach (var address in addresses.Select(FormatAddress).Where(value => !string.IsNullOrWhiteSpace(value)))
+            {
+                AddDistinct(_memory.Addresses, address, MaxStoredItems, 180);
+            }
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private void ApplyIdentityToMemory(CustomerChatbotIdentity identity)
+    {
+        if (!identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(identity.DisplayName))
+        {
+            _memory.Name = identity.DisplayName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(identity.Email))
+        {
+            _memory.Email = identity.Email;
+        }
+    }
+
+    private string? BuildCustomerContext()
+    {
+        var parts = new List<string>();
+        AddContextPart(parts, "Name", _memory.Name);
+        AddContextPart(parts, "Email", _memory.Email);
+        AddContextPart(parts, "Company", _memory.Company);
+        AddContextPart(parts, "Service interests", JoinList(_memory.ServiceInterests));
+        AddContextPart(parts, "Preferences", JoinList(_memory.Preferences));
+        AddContextPart(parts, "Known addresses", JoinList(_memory.Addresses.Take(3)));
+
+        return parts.Count == 0
+            ? null
+            : string.Join("\n", parts);
+    }
+
+    private void LearnFromCustomerMessage(string message)
+    {
+        CaptureName(message);
+        CaptureCompany(message);
+        CaptureAddress(message);
+        CaptureServiceInterests(message);
+        CapturePreferences(message);
+        _memory.LastUpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    private void CaptureName(string message)
+    {
+        var name = MatchFirst(message,
+            @"\bmy name is\s+([A-Za-z][A-Za-z\s'.-]{1,50})(?:[,.]|$)",
+            @"\b(?:i am|i'm)\s+([A-Z][A-Za-z\s'.-]{1,50})(?:\s+from|[,.]|$)",
+            @"(?:ผมชื่อ|ฉันชื่อ|ดิฉันชื่อ|ชื่อ)\s*([^\s,.]{2,40})");
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            _memory.Name = name;
+        }
+    }
+
+    private void CaptureCompany(string message)
+    {
+        var company = MatchFirst(message,
+            @"\b(?:my company is|company is|company name is|we are)\s+([A-Za-z0-9&.,'()\-\s]{2,80})(?:[,.]|$)",
+            @"บริษัท\s*([ก-๙A-Za-z0-9&.,'()\-\s]{2,80})(?:[,.]|$)");
+        if (!string.IsNullOrWhiteSpace(company))
+        {
+            _memory.Company = company;
+        }
+    }
+
+    private void CaptureAddress(string message)
+    {
+        var normalized = message.ToLowerInvariant();
+        var looksLikeAddress = normalized.Contains("address is", StringComparison.Ordinal)
+            || normalized.Contains("ship to", StringComparison.Ordinal)
+            || normalized.Contains("deliver to", StringComparison.Ordinal)
+            || message.Contains("ที่อยู่", StringComparison.Ordinal)
+            || message.Contains("ส่งที่", StringComparison.Ordinal);
+        if (looksLikeAddress && message.Length >= 12)
+        {
+            AddDistinct(_memory.Addresses, message, MaxStoredItems, 180);
+        }
+    }
+
+    private void CaptureServiceInterests(string message)
+    {
+        var normalized = message.ToLowerInvariant();
+        AddInterestIfMatch(normalized, "3D printing", "3d print", "3d printing", "fdm", "sla", "resin", "mjf", "sls", "พิมพ์", "ปริ้น");
+        AddInterestIfMatch(normalized, "CNC machining", "cnc", "machining", "milling", "turning", "ซีเอ็นซี", "กัด", "กลึง");
+        AddInterestIfMatch(normalized, "3D scanning", "3d scan", "3d scanning", "scan", "inspection", "deviation", "สแกน");
+        AddInterestIfMatch(normalized, "3D design and DFM", "cad", "design", "dfm", "ออกแบบ");
+        AddInterestIfMatch(normalized, "Silicone or urethane casting", "silicone", "urethane", "casting", "ซิลิโคน", "ยูรีเทน", "หล่อ");
+        AddInterestIfMatch(normalized, "Pneumatic injection molding", "injection", "molding", "pneumatic", "เครื่องฉีด");
+    }
+
+    private void CapturePreferences(string message)
+    {
+        var normalized = message.ToLowerInvariant();
+        AddPreferenceIfMatch(normalized, "Prefers fast lead time", "urgent", "asap", "fast", "rush", "ด่วน", "เร็ว");
+        AddPreferenceIfMatch(normalized, "Needs heat-resistant material", "heat", "temperature", "hot", "ความร้อน", "อุณหภูมิ");
+        AddPreferenceIfMatch(normalized, "Needs outdoor or UV resistance", "outdoor", "uv", "sunlight", "กลางแจ้ง", "แดด");
+        AddPreferenceIfMatch(normalized, "Needs chemical resistance", "chemical", "solvent", "oil", "สารเคมี", "น้ำมัน");
+        AddPreferenceIfMatch(normalized, "Needs fit or tight tolerance support", "fit", "tolerance", "dimension", "assembly", "ประกอบ", "ขนาด");
+        AddPreferenceIfMatch(normalized, "Budget-sensitive", "budget", "cheap", "low cost", "ราคา", "ประหยัด");
+    }
+
+    private void AddInterestIfMatch(string normalizedMessage, string interest, params string[] terms)
+    {
+        if (terms.Any(term => normalizedMessage.Contains(term, StringComparison.Ordinal)))
+        {
+            AddDistinct(_memory.ServiceInterests, interest, MaxStoredItems, 80);
+        }
+    }
+
+    private void AddPreferenceIfMatch(string normalizedMessage, string preference, params string[] terms)
+    {
+        if (terms.Any(term => normalizedMessage.Contains(term, StringComparison.Ordinal)))
+        {
+            AddDistinct(_memory.Preferences, preference, MaxStoredItems, 100);
+        }
+    }
+
+    private async Task<CustomerChatbotMemory?> ReadMemoryAsync(string key)
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string?>("localStorage.getItem", key);
+            return string.IsNullOrWhiteSpace(json)
+                ? null
+                : JsonSerializer.Deserialize<CustomerChatbotMemory>(json, StorageJson);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JsonException)
+        {
+            return null;
+        }
+    }
+
+    private async Task PersistMemoryAsync()
+    {
+        if (!_storageReady)
+        {
+            return;
+        }
+
+        _memory.LastSessionId = _sessionId;
+        _memory.Messages = _messages
+            .Where(message => message.Persist)
+            .TakeLast(MaxStoredMessages)
+            .Select(message => new StoredChatMessage { Role = message.Role, Content = message.Content })
+            .ToList();
+        _memory.UnreadCount = _unreadCount;
+        _memory.LastUpdatedAt = DateTimeOffset.UtcNow;
+
+        try
+        {
+            var json = JsonSerializer.Serialize(_memory, StorageJson);
+            await JS.InvokeVoidAsync("localStorage.setItem", _storageKey, json);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException)
+        {
+        }
+    }
+
+    private async Task ShowPopoutTemporarilyAsync(string message)
+    {
+        if (_isOpen || string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        CancelPopoutTimer();
+        var cts = new CancellationTokenSource();
+        _popoutCts = cts;
+        _popoutMessage = message;
+        _showPopout = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(6), cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!cts.IsCancellationRequested)
+        {
+            _showPopout = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void CancelPopoutTimer()
+    {
+        _popoutCts?.Cancel();
+        _popoutCts?.Dispose();
+        _popoutCts = null;
+    }
+
+    private static CustomerChatbotMemory NormalizeMemory(CustomerChatbotMemory memory)
+    {
+        memory.Name = CleanOneLine(memory.Name, 80);
+        memory.Email = CleanOneLine(memory.Email, 120);
+        memory.Company = CleanOneLine(memory.Company, 120);
+        memory.Addresses = NormalizeList(memory.Addresses, MaxStoredItems, 180);
+        memory.ServiceInterests = NormalizeList(memory.ServiceInterests, MaxStoredItems, 80);
+        memory.Preferences = NormalizeList(memory.Preferences, MaxStoredItems, 100);
+        memory.Messages = memory.Messages
+            .Where(message => !string.IsNullOrWhiteSpace(message.Content))
+            .TakeLast(MaxStoredMessages)
+            .Select(message => new StoredChatMessage
+            {
+                Role = string.Equals(message.Role, "user", StringComparison.OrdinalIgnoreCase) ? "user" : "assistant",
+                Content = CleanMultiline(message.Content, 1400)
+            })
+            .ToList();
+        memory.UnreadCount = Math.Clamp(memory.UnreadCount, 0, 99);
+        return memory;
+    }
+
+    private static List<string> NormalizeList(IEnumerable<string>? values, int limit, int maxLength)
+    {
+        return (values ?? [])
+            .Select(value => CleanOneLine(value, maxLength))
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(limit)
+            .ToList();
+    }
+
+    private static void AddDistinct(List<string> list, string value, int limit, int maxLength)
+    {
+        var cleaned = CleanOneLine(value, maxLength);
+        if (string.IsNullOrWhiteSpace(cleaned) || list.Any(item => string.Equals(item, cleaned, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        list.Insert(0, cleaned);
+        if (list.Count > limit)
+        {
+            list.RemoveRange(limit, list.Count - limit);
+        }
+    }
+
+    private static string? MatchFirst(string input, params string[] patterns)
+    {
+        foreach (var pattern in patterns)
+        {
+            var match = Regex.Match(input, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            if (match.Success)
+            {
+                return CleanOneLine(match.Groups[1].Value, 80);
+            }
+        }
+
+        return null;
+    }
+
+    private static string BuildStorageKey(CustomerChatbotIdentity identity)
+    {
+        if (!identity.IsAuthenticated || string.IsNullOrWhiteSpace(identity.UserKey))
+        {
+            return $"{PersonalizationStoragePrefix}:guest";
+        }
+
+        return $"{PersonalizationStoragePrefix}:{Uri.EscapeDataString(identity.UserKey.ToLowerInvariant())}";
+    }
+
+    private string? GetPersonalGreetingName(CustomerChatbotIdentity identity)
+    {
+        return FirstNonEmpty(_memory.Name, identity.DisplayName, identity.Email);
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+    {
+        return values.Select(value => CleanOneLine(value, 120)).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+    }
+
+    private static string JoinName(string firstName, string lastName)
+    {
+        return CleanOneLine($"{firstName} {lastName}", 100) ?? string.Empty;
+    }
+
+    private static string FormatAddress(CustomerAddressDto address)
+    {
+        return string.Join(", ", new[]
+        {
+            address.RecipientName,
+            address.AddressLine1,
+            address.AddressLine2,
+            address.AddressLine3,
+            address.District,
+            address.City,
+            address.StateProvince,
+            address.PostalCode
+        }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    }
+
+    private static void AddContextPart(List<string> parts, string label, string? value)
+    {
+        var cleaned = CleanOneLine(value, 220);
+        if (!string.IsNullOrWhiteSpace(cleaned))
+        {
+            parts.Add($"{label}: {cleaned}");
+        }
+    }
+
+    private static string? JoinList(IEnumerable<string> values)
+    {
+        var joined = string.Join("; ", values.Where(value => !string.IsNullOrWhiteSpace(value)));
+        return string.IsNullOrWhiteSpace(joined) ? null : joined;
+    }
+
+    private static string? CleanOneLine(string? value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var cleaned = string.Join(" ", value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+            .Replace("\u0000", string.Empty, StringComparison.Ordinal)
+            .Trim();
+        return cleaned.Length > maxLength ? cleaned[..maxLength].Trim() : cleaned;
+    }
+
+    private static string CleanMultiline(string? value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var cleaned = new string(value.Where(ch => !char.IsControl(ch) || ch is '\r' or '\n' or '\t').ToArray()).Trim();
+        return cleaned.Length > maxLength ? cleaned[..maxLength].Trim() : cleaned;
     }
 
     private static string MessageClass(string role)
@@ -156,7 +695,44 @@
         return new LocalizedText { En = en, Th = th };
     }
 
-    private sealed record CustomerChatMessage(string Role, string Content);
+    public void Dispose()
+    {
+        CancelPopoutTimer();
+    }
+
+    private sealed record CustomerChatMessage(string Role, string Content, bool Persist = true);
 
     private sealed record CustomerChatPrompt(LocalizedText Label, LocalizedText Value);
+
+    private sealed record CustomerChatbotIdentity(bool IsAuthenticated, string? UserKey, string? DisplayName, string? Email);
+
+    private sealed class CustomerChatbotMemory
+    {
+        public Guid? LastSessionId { get; set; }
+
+        public string? Name { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? Company { get; set; }
+
+        public List<string> Addresses { get; set; } = [];
+
+        public List<string> ServiceInterests { get; set; } = [];
+
+        public List<string> Preferences { get; set; } = [];
+
+        public List<StoredChatMessage> Messages { get; set; } = [];
+
+        public int UnreadCount { get; set; }
+
+        public DateTimeOffset LastUpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    }
+
+    private sealed class StoredChatMessage
+    {
+        public string Role { get; set; } = "assistant";
+
+        public string Content { get; set; } = string.Empty;
+    }
 }

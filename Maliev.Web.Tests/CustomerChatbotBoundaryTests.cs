@@ -38,6 +38,29 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies browser/account personalization notes are forwarded as bounded context, not as the topic guard input.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_ServiceQuestion_ForwardsCustomerContextAsUntrustedNotes()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "Can you help with CNC fixtures?",
+            CustomerContext = "Name: Natth\nCompany: MALIEV\nService interests: CNC machining",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotNull(client.MessageRequest);
+        Assert.Contains("Customer profile notes from MALIEV Web.", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.Contains("untrusted personalization context only", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.Contains("Company: MALIEV", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.Contains("Customer message:\nCan you help with CNC fixtures?", client.MessageRequest.Content, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies off-topic customer messages are stopped in the Web BFF before ChatbotService is called.
     /// </summary>
     [Fact]

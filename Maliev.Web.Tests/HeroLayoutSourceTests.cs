@@ -463,9 +463,17 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("น้องมะลิ", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
         Assert.Contains("aria-label=\"@Text(\"Open Mali\"", component);
+        Assert.Contains("maliev.chatbot.personalization.v1", component);
+        Assert.Contains("localStorage.getItem", component);
+        Assert.Contains("localStorage.setItem", component);
+        Assert.Contains("CustomerContext = BuildCustomerContext()", component);
+        Assert.Contains("customer-chatbot-popout", component);
+        Assert.Contains("customer-chatbot-unread-badge", component);
         Assert.DoesNotContain("Ask MALIEV", component);
         Assert.Contains(".customer-chatbot", styles);
         Assert.Contains(".customer-chatbot-panel", styles);
+        Assert.Contains(".customer-chatbot-popout", styles);
+        Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-toggle {\n  width: 56px;\n  min-height: 56px;\n  padding: 0;\n  border-radius: 9999px;", styles);
         Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
         Assert.Contains(".customer-chatbot-toggle {\n    width: 50px;\n    min-height: 50px;", styles);

@@ -15,6 +15,10 @@ public sealed class CustomerChatbotRequest
     [StringLength(1000, MinimumLength = 1)]
     public string Message { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets optional browser/account personalization notes for the assistant.</summary>
+    [StringLength(1600)]
+    public string? CustomerContext { get; set; }
+
     /// <summary>Gets or sets the preferred language code, either en or th.</summary>
     [RegularExpression("^(en|th)?$", ErrorMessage = "Language must be 'en' or 'th'.")]
     public string? Language { get; set; }
