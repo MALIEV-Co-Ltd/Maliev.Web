@@ -1073,6 +1073,11 @@ html:lang(th) .h1 {
   padding-top: 0;
 }
 
+.material-comparison-section .section-heading {
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+  align-items: start;
+}
+
 .material-comparison-panel {
   display: grid;
   gap: 22px;
