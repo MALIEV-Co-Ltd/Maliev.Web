@@ -37,7 +37,14 @@ function mountCounter(counter) {
     return;
   }
 
-  const runAnimation = () => animateCounter(counter, target, suffix, finalText);
+  const runAnimation = () => {
+    const counterGroup = counter.closest(".metric-strip") ?? document;
+    const counters = Array.from(counterGroup.querySelectorAll(counterSelector));
+    const counterIndex = Math.max(0, counters.indexOf(counter));
+    const staggerDelay = counterIndex * 180;
+
+    setTimeout(() => animateCounter(counter, target, suffix, finalText), staggerDelay);
+  };
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting)) {
@@ -58,7 +65,9 @@ function mountCounter(counter) {
 function animateCounter(counter, target, suffix, finalText) {
   const formatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   const startedAt = performance.now();
-  const duration = Number(counter.dataset.countDuration || 1400);
+  const defaultDuration = 2400;
+  const duration = Number(counter.dataset.countDuration || defaultDuration);
+  counter.dataset.countState = "running";
 
   const tick = now => {
     const progress = Math.min(1, (now - startedAt) / duration);
@@ -73,6 +82,7 @@ function animateCounter(counter, target, suffix, finalText) {
     }
 
     counter.textContent = finalText;
+    counter.dataset.countState = "complete";
     counter.dataset.countAnimated = "true";
   };
 

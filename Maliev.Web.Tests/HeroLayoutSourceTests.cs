@@ -99,6 +99,7 @@ public sealed class HeroLayoutSourceTests
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-countup.js");
 
+        Assert.Contains("!string.IsNullOrWhiteSpace(metric.Suffix)", source);
         Assert.Contains("data-count-up", source);
         Assert.Contains("data-count-target=\"@metric.CountTarget\"", source);
         Assert.Contains("data-count-suffix=\"@metric.Suffix\"", source);
@@ -112,6 +113,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("prefers-reduced-motion: reduce", script);
         Assert.Contains("Intl.NumberFormat(\"en-US\"", script);
         Assert.Contains("[data-count-up]", script);
+        Assert.Contains("const defaultDuration = 2400;", script);
+        Assert.Contains("const counterIndex", script);
+        Assert.Contains("const staggerDelay = counterIndex * 180;", script);
+        Assert.Contains("setTimeout(() => animateCounter", script);
+        Assert.Contains("counter.dataset.countState = \"running\";", script);
         Assert.Contains("font-variant-numeric: tabular-nums", styles);
     }
 

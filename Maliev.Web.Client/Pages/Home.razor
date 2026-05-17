@@ -28,10 +28,17 @@
             @foreach (var metric in SiteContent.HeroMetrics)
             {
                 <div>
-                    <strong data-count-up
-                            data-count-target="@metric.CountTarget"
-                            data-count-suffix="@metric.Suffix"
-                            data-count-final="@metric.Value.For(Preferences.Culture)">@metric.Value.For(Preferences.Culture)</strong>
+                    @if (!string.IsNullOrWhiteSpace(metric.Suffix))
+                    {
+                        <strong data-count-up
+                                data-count-target="@metric.CountTarget"
+                                data-count-suffix="@metric.Suffix"
+                                data-count-final="@metric.Value.For(Preferences.Culture)">@metric.Value.For(Preferences.Culture)</strong>
+                    }
+                    else
+                    {
+                        <strong>@metric.Value.For(Preferences.Culture)</strong>
+                    }
                     <small>@metric.Label.For(Preferences.Culture)</small>
                 </div>
             }
