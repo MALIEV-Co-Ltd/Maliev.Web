@@ -207,7 +207,9 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("machine-feature-kicker", source);
         Assert.DoesNotContain("PIMM-30 / PIMM-50", source);
         Assert.DoesNotContain(".machine-feature-kicker", styles);
-        Assert.Contains("PIMM-30 reaches 300°C, PIMM-50 reaches 350°C", source);
+        Assert.DoesNotContain("PIMM-30", source);
+        Assert.DoesNotContain("PIMM-50", source);
+        Assert.Contains("the 30g variant reaches 300°C, the 50g variant reaches 350°C", source);
         Assert.Contains("machine-stat-grid", source);
         Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
