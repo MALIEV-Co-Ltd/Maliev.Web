@@ -29,23 +29,23 @@ internal static class HeroCopyCatalog
             Text("FDM 3D Printing", "งานพิมพ์ 3 มิติ FDM"),
             ["fdm", "fdm 3d printing", "fdm 3d printing service", "fdm near me", "รับพิมพ์ 3 มิติ fdm", "พิมพ์ fdm", "พิมพ์ 3d fdm"],
             [
-                Text("FDM 3D printed prototypes", "ต้นแบบพิมพ์ 3 มิติ FDM"),
-                Text("FDM parts for functional testing", "ชิ้นงาน FDM สำหรับทดสอบใช้งาน"),
-                Text("FDM fixtures and jigs", "ฟิกซ์เจอร์และจิ๊กงานพิมพ์ FDM"),
-                Text("FDM enclosures and brackets", "เคสและขายึดงานพิมพ์ FDM"),
+                Text("FDM prototypes", "ต้นแบบ FDM"),
+                Text("FDM fit-test parts", "ชิ้นงาน FDM ทดสอบฟิต"),
+                Text("FDM fixtures", "ฟิกซ์เจอร์ FDM"),
+                Text("FDM enclosures", "เคส FDM"),
                 Text("FDM low-volume parts", "ชิ้นงาน FDM จำนวนน้อย"),
                 Text("FDM production aids", "อุปกรณ์ช่วยผลิตจาก FDM"),
-                Text("FDM PLA and PETG parts", "ชิ้นงาน PLA และ PETG แบบ FDM"),
+                Text("PLA and PETG FDM", "FDM วัสดุ PLA และ PETG"),
                 Text("FDM concept models", "โมเดลคอนเซ็ปต์แบบ FDM"),
-                Text("FDM workshop-ready builds", "งาน FDM พร้อมผลิตในเวิร์กช็อป"),
-                Text("FDM parts from your CAD", "ชิ้นงาน FDM จากไฟล์ CAD ของคุณ")
+                Text("Workshop FDM builds", "งาน FDM จากเวิร์กช็อป"),
+                Text("FDM parts from CAD", "ชิ้นงาน FDM จาก CAD")
             ],
             [
-                Text("priced before production", "พร้อมประเมินราคาก่อนผลิต"),
-                Text("with DFM checks included", "พร้อมตรวจ DFM ในขั้นตอนเดียว"),
-                Text("ready for fast iteration", "พร้อมปรับแบบและทดลองเร็ว"),
-                Text("ordered from one upload", "สั่งต่อจากไฟล์เดียว"),
-                Text("matched to material and quantity", "ตรงวัสดุและจำนวน")
+                Text("priced before build", "เห็นราคาก่อนผลิต"),
+                Text("with DFM checks", "พร้อมตรวจ DFM"),
+                Text("ready to iterate", "พร้อมทดลองต่อ"),
+                Text("ordered from upload", "สั่งต่อจากไฟล์"),
+                Text("matched to material", "ตรงวัสดุที่เลือก")
             ],
             [
                 Text("Upload CAD, pick FDM material, review DFM, and order without vendor handoffs.", "อัปโหลด CAD เลือกวัสดุ FDM ตรวจ DFM และสั่งผลิตในที่เดียว"),
@@ -61,23 +61,23 @@ internal static class HeroCopyCatalog
             Text("3D Printing", "งานพิมพ์ 3 มิติ"),
             ["3d printing", "3d print", "3d printing near me", "3d printing service near me", "additive manufacturing", "รับพิมพ์ 3 มิติ", "พิมพ์ 3d", "พิมพ์ 3d ใกล้ฉัน", "ร้าน 3d print ใกล้ฉัน", "งานพิมพ์สามมิติ"],
             [
-                Text("3D printed parts for prototypes", "ชิ้นงานพิมพ์ 3 มิติสำหรับต้นแบบ"),
-                Text("3D printing for low-volume runs", "งานพิมพ์ 3 มิติสำหรับผลิตจำนวนน้อย"),
-                Text("Production-grade printed polymers", "โพลีเมอร์พิมพ์ 3 มิติระดับผลิตจริง"),
-                Text("Printed fixtures and test parts", "ฟิกซ์เจอร์และชิ้นทดสอบจากงานพิมพ์"),
-                Text("Resin, FDM, and nylon parts", "ชิ้นงานเรซิน FDM และไนลอน"),
-                Text("3D printing from CAD files", "พิมพ์ 3 มิติจากไฟล์ CAD"),
-                Text("Custom 3D printed components", "ชิ้นส่วนพิมพ์ 3 มิติตามแบบ"),
-                Text("Engineering 3D printing support", "บริการพิมพ์ 3 มิติเชิงวิศวกรรม"),
-                Text("Fast prototype printing", "พิมพ์ต้นแบบรวดเร็ว"),
-                Text("3D printed parts for product teams", "ชิ้นงานพิมพ์ 3 มิติสำหรับทีมสินค้า")
+                Text("3D prototypes", "ต้นแบบ 3 มิติ"),
+                Text("Small-batch prints", "พิมพ์ล็อตเล็ก"),
+                Text("Production prints", "ชิ้นพิมพ์พร้อมผลิต"),
+                Text("Printed fixtures", "ฟิกซ์เจอร์งานพิมพ์"),
+                Text("Resin/FDM/nylon", "เรซิน FDM ไนลอน"),
+                Text("CAD to 3D print", "CAD สู่งานพิมพ์"),
+                Text("Custom prints", "ชิ้นพิมพ์ตามแบบ"),
+                Text("Engineer prints", "งานพิมพ์วิศวกรรม"),
+                Text("Fast prototypes", "ต้นแบบรวดเร็ว"),
+                Text("3D printed parts", "ชิ้นงานพิมพ์ 3 มิติ")
             ],
             [
-                Text("quoted with material choices", "เสนอราคาพร้อมตัวเลือกวัสดุ"),
-                Text("checked before you order", "ตรวจความพร้อมก่อนสั่งผลิต"),
-                Text("fit and function ready", "พร้อมทดสอบฟิตและใช้งาน"),
+                Text("material options", "เลือกวัสดุได้"),
+                Text("pre-order check", "ตรวจก่อนสั่ง"),
+                Text("fit ready", "พร้อมทดสอบฟิต"),
                 Text("ready to order", "พร้อมสั่งผลิต"),
-                Text("matched to your quantity", "ตรงจำนวนและผิวงาน")
+                Text("quantity matched", "ตรงจำนวนงาน")
             ],
             [
                 Text("Upload CAD once, compare print routes, review DFM, and move straight to order.", "อัปโหลด CAD ครั้งเดียว เทียบวิธีพิมพ์ ตรวจ DFM แล้วสั่งผลิตต่อ"),
@@ -93,12 +93,12 @@ internal static class HeroCopyCatalog
             Text("Resin 3D Printing", "งานพิมพ์เรซิน 3 มิติ"),
             ["resin 3d printing", "sla 3d printing", "resin print", "พิมพ์เรซิน", "พิมพ์ sla", "งานเรซิน 3 มิติ"],
             [
-                Text("Resin 3D printed detail parts", "ชิ้นงานเรซิน 3 มิติรายละเอียดสูง"),
-                Text("SLA prototypes with smooth finish", "ต้นแบบ SLA ผิวเนียน"),
-                Text("Resin models for product review", "โมเดลเรซินสำหรับรีวิวสินค้า"),
-                Text("Fine-detail printed components", "ชิ้นส่วนพิมพ์รายละเอียดละเอียด"),
+                Text("Resin detail parts", "ชิ้นงานเรซินละเอียด"),
+                Text("Smooth SLA prototypes", "ต้นแบบ SLA ผิวเนียน"),
+                Text("Resin review models", "โมเดลเรซินรีวิวสินค้า"),
+                Text("Fine-detail components", "ชิ้นส่วนละเอียดสูง"),
                 Text("Resin parts for fit checks", "ชิ้นงานเรซินสำหรับตรวจฟิต"),
-                Text("Small resin production batches", "ล็อตผลิตเรซินจำนวนน้อย"),
+                Text("Small resin batches", "ล็อตเรซินจำนวนน้อย"),
                 Text("Visual prototypes in resin", "ต้นแบบโชว์งานด้วยเรซิน"),
                 Text("Resin parts from CAD", "ชิ้นงานเรซินจากไฟล์ CAD"),
                 Text("High-resolution 3D prints", "งานพิมพ์ 3 มิติความละเอียดสูง"),
@@ -125,23 +125,23 @@ internal static class HeroCopyCatalog
             Text("Aluminum CNC Milling", "งานกัด CNC อลูมิเนียม"),
             ["aluminum cnc milling", "aluminium cnc milling", "aluminum cnc near me", "cnc aluminum", "cnc aluminium", "กัดอลูมิเนียม cnc", "cnc อลูมิเนียม", "กัดอะลูมิเนียม", "กัดอลูมิเนียมใกล้ฉัน"],
             [
-                Text("Aluminum CNC milled parts", "ชิ้นงานกัด CNC อลูมิเนียม"),
+                Text("Aluminum CNC parts", "ชิ้นงาน CNC อลูมิเนียม"),
                 Text("CNC aluminum brackets", "ขายึดอลูมิเนียม CNC"),
                 Text("Aluminum prototypes from STEP", "ต้นแบบอลูมิเนียมจากไฟล์ STEP"),
                 Text("CNC milled aluminum housings", "เคสอลูมิเนียมกัด CNC"),
-                Text("Machined aluminum fixtures", "ฟิกซ์เจอร์อลูมิเนียมแมชชีนนิ่ง"),
-                Text("Aluminum tooling components", "ชิ้นส่วนทูลลิ่งอลูมิเนียม"),
+                Text("Aluminum fixtures", "ฟิกซ์เจอร์อลูมิเนียม"),
+                Text("Aluminum tooling parts", "ชิ้นส่วนทูลลิ่งอลูมิเนียม"),
                 Text("Precision aluminum plates", "เพลตอลูมิเนียมความแม่นยำ"),
-                Text("CNC aluminum production aids", "อุปกรณ์ช่วยผลิตอลูมิเนียม CNC"),
+                Text("CNC aluminum aids", "อุปกรณ์ช่วยผลิต CNC"),
                 Text("Aluminum parts with drawings", "ชิ้นงานอลูมิเนียมพร้อม Drawing"),
                 Text("CNC milled parts for engineers", "ชิ้นงานกัด CNC สำหรับวิศวกร")
             ],
             [
                 Text("reviewed for tolerance", "ตรวจ tolerance ก่อนผลิต"),
-                Text("quoted with setup notes", "พร้อมหมายเหตุการจับงาน"),
+                Text("with setup notes", "พร้อมหมายเหตุจับงาน"),
                 Text("matched to finish", "ตรงเป้าหมายผิวงาน"),
-                Text("ready for production", "พร้อมตรวจผลิต"),
-                Text("ordered from CAD and drawings", "สั่งต่อได้จาก CAD และ Drawing")
+                Text("production ready", "พร้อมส่งผลิต"),
+                Text("ordered from CAD/drawings", "สั่งจาก CAD และ Drawing")
             ],
             [
                 Text("Send STEP, drawings, material notes, and quantities for aluminum CNC pricing.", "ส่ง STEP, Drawing, วัสดุ และจำนวน เพื่อขอราคา CNC อลูมิเนียม"),
@@ -158,7 +158,7 @@ internal static class HeroCopyCatalog
             ["cnc", "cnc machining", "cnc milling", "cnc near me", "cnc shop near me", "machining service", "cnc service", "งาน cnc", "รับกัด cnc", "ร้าน cnc", "cnc ใกล้ฉัน", "ร้าน cnc ใกล้ฉัน", "โรงกลึง cnc", "แมชชีนนิ่ง"],
             [
                 Text("CNC machined parts from CAD", "ชิ้นงาน CNC จากไฟล์ CAD"),
-                Text("Machined plastic and metal parts", "ชิ้นงานกัดพลาสติกและโลหะ"),
+                Text("Plastic and metal CNC", "CNC พลาสติกและโลหะ"),
                 Text("CNC brackets and fixtures", "ขายึดและฟิกซ์เจอร์ CNC"),
                 Text("Precision machined prototypes", "ต้นแบบแมชชีนนิ่งความแม่นยำ"),
                 Text("CNC parts with drawings", "ชิ้นงาน CNC พร้อม Drawing"),
@@ -173,7 +173,7 @@ internal static class HeroCopyCatalog
                 Text("priced by tolerance need", "คิดราคาตาม tolerance"),
                 Text("matched to material", "ตรงวัสดุและผิวงาน"),
                 Text("ready for production", "พร้อมส่งผลิต"),
-                Text("quoted from STEP and drawings", "เสนอราคาจาก STEP และ Drawing")
+                Text("quoted from STEP/drawings", "ราคาจาก STEP และ Drawing")
             ],
             [
                 Text("Send CAD, drawings, material, tolerance, finish, and quantity for CNC review.", "ส่ง CAD, Drawing, วัสดุ tolerance ผิวงาน และจำนวนเพื่อตรวจ CNC"),
@@ -190,22 +190,22 @@ internal static class HeroCopyCatalog
             ["3d scanning", "3d scan", "reverse engineering", "scan to cad", "สแกน 3 มิติ", "สแกนสามมิติ", "รีเวิร์สเอนจิเนียริ่ง"],
             [
                 Text("3D scanning for real parts", "สแกน 3 มิติจากชิ้นงานจริง"),
-                Text("Scan-to-CAD reverse engineering", "สแกนสู่ CAD เพื่อรีเวิร์สเอนจิเนียริ่ง"),
+                Text("Scan-to-CAD rebuilds", "สแกนสู่ CAD"),
                 Text("Legacy part 3D scanning", "สแกน 3 มิติชิ้นส่วนเดิม"),
                 Text("Replacement parts from scans", "ชิ้นส่วนทดแทนจากข้อมูลสแกน"),
                 Text("Inspection-ready scan data", "ข้อมูลสแกนพร้อมใช้ตรวจสอบ"),
                 Text("3D capture for repair work", "เก็บข้อมูล 3 มิติสำหรับงานซ่อม"),
                 Text("Handmade parts into CAD", "เปลี่ยนชิ้นงานทำมือเป็น CAD"),
-                Text("Scan data for production review", "ข้อมูลสแกนเพื่อทบทวนการผลิต"),
-                Text("Measurable references from parts", "สร้างข้อมูลอ้างอิงที่วัดได้จากชิ้นงาน"),
-                Text("Reverse engineering support", "บริการช่วยรีเวิร์สเอนจิเนียริ่ง")
+                Text("Scan data for review", "ข้อมูลสแกนเพื่อรีวิว"),
+                Text("Measured part references", "ข้อมูลอ้างอิงจากชิ้นงาน"),
+                Text("Reverse engineering support", "ช่วยรีเวิร์สงาน")
             ],
             [
                 Text("captured before remaking", "เก็บข้อมูลก่อนผลิตใหม่"),
                 Text("prepared for CAD rebuilding", "พร้อมนำไปขึ้นแบบ CAD"),
-                Text("checked against critical dimensions", "ตรวจเทียบมิติสำคัญ"),
-                Text("ready for repair decisions", "พร้อมใช้ตัดสินใจงานซ่อม"),
-                Text("routed into design or production", "ส่งต่อสู่งานออกแบบหรือผลิต")
+                Text("checked to key dimensions", "ตรวจเทียบมิติสำคัญ"),
+                Text("ready for repair calls", "พร้อมตัดสินใจซ่อม"),
+                Text("routed to design or build", "ส่งต่อสู่ออกแบบหรือผลิต")
             ],
             [
                 Text("Share photos, rough size, output format, and why the part needs capture.", "ส่งรูป ขนาดคร่าวๆ รูปแบบไฟล์ และเหตุผลที่ต้องสแกน"),
@@ -221,12 +221,12 @@ internal static class HeroCopyCatalog
             Text("3D Design", "ออกแบบ 3 มิติ"),
             ["3d design", "cad design", "product design", "design for manufacturing", "ออกแบบ 3 มิติ", "ออกแบบ cad", "ขึ้นแบบ 3d"],
             [
-                Text("3D design for manufacturable parts", "ออกแบบ 3 มิติให้ผลิตได้จริง"),
+                Text("Manufacturable 3D design", "ออกแบบ 3 มิติพร้อมผลิต"),
                 Text("CAD modeling from rough ideas", "ขึ้นแบบ CAD จากไอเดียคร่าวๆ"),
-                Text("Product enclosures and mechanisms", "ออกแบบเคสสินค้าและกลไก"),
+                Text("Enclosures and mechanisms", "ออกแบบเคสและกลไก"),
                 Text("DFM-ready 3D design support", "ช่วยออกแบบ 3 มิติพร้อมตรวจ DFM"),
                 Text("CAD cleanup before production", "ปรับไฟล์ CAD ก่อนผลิต"),
-                Text("Design fixes for prototype parts", "แก้แบบสำหรับชิ้นงานต้นแบบ"),
+                Text("Prototype design fixes", "แก้แบบชิ้นงานต้นแบบ"),
                 Text("Manufacturing-focused CAD work", "งาน CAD ที่คิดเผื่อการผลิต"),
                 Text("3D models from sketches", "โมเดล 3 มิติจากสเก็ตช์"),
                 Text("Design support before quoting", "ช่วยออกแบบก่อนขอราคา"),
@@ -237,7 +237,7 @@ internal static class HeroCopyCatalog
                 Text("checked before upload", "ตรวจความพร้อมก่อนอัปโหลด"),
                 Text("routed into printing or CNC", "ส่งต่อสู่งานพิมพ์หรือ CNC"),
                 Text("refined for fit", "ปรับเพื่อการประกอบ"),
-                Text("ready for quote review", "พร้อมเข้าสู่การตรวจเสนอราคา")
+                Text("ready for quote review", "พร้อมตรวจเสนอราคา")
             ],
             [
                 Text("Start from sketches, photos, dimensions, samples, or unfinished CAD.", "เริ่มจากสเก็ตช์ รูปถ่าย ขนาด ตัวอย่าง หรือไฟล์ CAD ที่ยังไม่จบ"),
@@ -253,22 +253,22 @@ internal static class HeroCopyCatalog
             Text("Silicone Casting", "หล่อซิลิโคน"),
             ["silicone casting", "urethane casting", "vacuum casting", "rapid mold", "หล่อซิลิโคน", "หล่อยูรีเทน", "แม่พิมพ์เร็ว"],
             [
-                Text("Silicone casting for pilot batches", "หล่อซิลิโคนสำหรับล็อตทดลอง"),
-                Text("Urethane parts before hard tooling", "ชิ้นงานยูรีเทนก่อนทำแม่พิมพ์จริง"),
+                Text("Pilot silicone casting", "หล่อซิลิโคนล็อตทดลอง"),
+                Text("Urethane pilot parts", "ชิ้นงานยูรีเทนทดลอง"),
                 Text("Small-batch cast parts", "ชิ้นงานหล่อจำนวนน้อย"),
                 Text("Rapid molds for prototype runs", "แม่พิมพ์เร็วสำหรับล็อตต้นแบบ"),
-                Text("Casting bridge to production", "งานหล่อเพื่อเชื่อมสู่การผลิตจริง"),
+                Text("Casting bridge to production", "เชื่อมงานหล่อสู่ผลิต"),
                 Text("Soft and rigid cast components", "ชิ้นงานหล่อทั้งนิ่มและแข็ง"),
                 Text("Short-run silicone-like parts", "ชิ้นงานคล้ายซิลิโคนจำนวนน้อย"),
                 Text("Prototype casting from CAD", "หล่อต้นแบบจากไฟล์ CAD"),
                 Text("Casting for repeated samples", "งานหล่อสำหรับตัวอย่างหลายชิ้น"),
-                Text("Rapid tooling quote support", "ช่วยเสนอราคาเส้นทางแม่พิมพ์เร็ว")
+                Text("Rapid tooling quote support", "ช่วยประเมินแม่พิมพ์เร็ว")
             ],
             [
                 Text("planned before tooling spend", "วางแผนก่อนลงทุนทูลลิ่ง"),
                 Text("priced by quantity", "คิดราคาตามจำนวน"),
                 Text("ready for pilot validation", "พร้อมทดสอบล็อตทดลอง"),
-                Text("bridged from prototype to batch", "เชื่อมจากต้นแบบสู่ล็อตผลิต"),
+                Text("bridged to small batches", "เชื่อมสู่ล็อตผลิต"),
                 Text("reviewed for mold path", "ตรวจเส้นทางแม่พิมพ์")
             ],
             [
@@ -285,23 +285,23 @@ internal static class HeroCopyCatalog
             Text("Rapid Prototyping", "สร้างต้นแบบรวดเร็ว"),
             ["rapid prototyping", "prototype service", "prototype manufacturing", "สร้างต้นแบบ", "ทำต้นแบบรวดเร็ว", "รับทำ prototype"],
             [
-                Text("Rapid prototypes for product teams", "ต้นแบบรวดเร็วสำหรับทีมสินค้า"),
-                Text("Prototype parts ready for testing", "ชิ้นงานต้นแบบพร้อมทดสอบ"),
+                Text("Rapid product prototypes", "ต้นแบบสินค้าแบบเร็ว"),
+                Text("Test-ready prototypes", "ต้นแบบพร้อมทดสอบ"),
                 Text("Multi-process prototype builds", "ต้นแบบหลายกระบวนการ"),
                 Text("Fast design iteration support", "ช่วยทดลองแบบอย่างรวดเร็ว"),
                 Text("Prototype fixtures and samples", "ฟิกซ์เจอร์และตัวอย่างต้นแบบ"),
                 Text("From idea to usable prototype", "จากไอเดียสู่ต้นแบบที่ใช้งานได้"),
                 Text("Prototype geometry from CAD", "Geometry ต้นแบบจาก CAD"),
-                Text("Engineering prototypes with review", "ต้นแบบวิศวกรรมพร้อมตรวจ"),
+                Text("Engineering prototypes", "ต้นแบบวิศวกรรม"),
                 Text("Proof-of-concept manufacturing", "ผลิตชิ้นงานพิสูจน์คอนเซ็ปต์"),
-                Text("Prototype path before production", "เส้นทางต้นแบบก่อนผลิตจริง")
+                Text("Prototype-to-production path", "เส้นทางต้นแบบสู่ผลิตจริง")
             ],
             [
                 Text("built around your deadline", "วางตามกำหนดเวลา"),
-                Text("routed through the right process", "เลือกกระบวนการที่เหมาะกับงาน"),
+                Text("routed to the right process", "เลือกกระบวนการให้เหมาะ"),
                 Text("checked before each build", "ตรวจก่อนสร้างแต่ละรอบ"),
                 Text("priced before you commit", "เห็นราคาก่อนตัดสินใจ"),
-                Text("ready for the next build", "พร้อมไปต่อสู่รอบผลิตถัดไป")
+                Text("ready for the next build", "พร้อมไปต่อรอบถัดไป")
             ],
             [
                 Text("Combine printing, CNC, scanning, design, and finish around the test you need.", "รวมพิมพ์ CNC สแกน ออกแบบ และผิวงานตามการทดสอบที่ต้องการ"),
@@ -317,22 +317,22 @@ internal static class HeroCopyCatalog
             Text("Deviation Analysis", "วิเคราะห์ความคลาดเคลื่อน"),
             ["deviation analysis", "scan inspection", "scan to cad comparison", "dimensional inspection", "วิเคราะห์ความคลาดเคลื่อน", "ตรวจเทียบสแกน", "รายงานวัดชิ้นงาน"],
             [
-                Text("Deviation analysis for real parts", "วิเคราะห์ความคลาดเคลื่อนจากชิ้นงานจริง"),
+                Text("Deviation analysis", "วิเคราะห์คลาดเคลื่อน"),
                 Text("Scan-to-CAD inspection reports", "รายงานตรวจเทียบสแกนกับ CAD"),
-                Text("Dimensional evidence before acceptance", "หลักฐานมิติก่อนรับงาน"),
-                Text("Part comparison for suppliers", "ตรวจเทียบชิ้นงานสำหรับ Supplier"),
-                Text("Wear and fit measurement support", "ช่วยวัดการสึกและการประกอบ"),
+                Text("Dimensional evidence", "หลักฐานมิติงาน"),
+                Text("Part comparison for suppliers", "เทียบชิ้นงาน Supplier"),
+                Text("Wear and fit measurement", "วัดการสึกและการประกอบ"),
                 Text("Inspection data for remakes", "ข้อมูลตรวจสำหรับผลิตใหม่"),
                 Text("Critical dimensions checked", "ตรวจมิติสำคัญ"),
-                Text("Measured findings from scan data", "ผลวัดจากข้อมูลสแกน"),
-                Text("Deviation reports for engineers", "รายงานความคลาดเคลื่อนสำหรับวิศวกร"),
-                Text("Evidence-led production decisions", "ตัดสินใจผลิตด้วยหลักฐานการวัด")
+                Text("Measured scan findings", "ผลวัดจากข้อมูลสแกน"),
+                Text("Engineer deviation reports", "รายงานคลาดเคลื่อนให้วิศวกร"),
+                Text("Evidence-led decisions", "ตัดสินใจด้วยหลักฐาน")
             ],
             [
                 Text("checked before you remake", "ตรวจก่อนผลิตใหม่"),
                 Text("reported against CAD", "รายงานเทียบกับ CAD"),
                 Text("ready for acceptance review", "พร้อมใช้ทบทวนก่อนรับงาน"),
-                Text("matched to critical dimensions", "จับคู่กับมิติสำคัญ"),
+                Text("matched to key dimensions", "จับคู่กับมิติสำคัญ"),
                 Text("connected to repair", "เชื่อมกับการซ่อม")
             ],
             [

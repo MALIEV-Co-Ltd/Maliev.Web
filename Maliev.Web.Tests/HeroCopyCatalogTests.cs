@@ -7,7 +7,8 @@ namespace Maliev.Web.Tests;
 /// </summary>
 public sealed class HeroCopyCatalogTests
 {
-    private const int MaxHeadlineLineLength = 42;
+    private const int MaxHeadlineLineLength = 30;
+    private const int MaxDefaultHeadlineLineLength = 20;
     private const int MaxBodyLength = 90;
     private const int MaxMetaDescriptionLength = 155;
 
@@ -55,6 +56,14 @@ public sealed class HeroCopyCatalogTests
                 Assert.InRange(variant.HeadlineLead.Th.Length, 1, MaxHeadlineLineLength);
                 Assert.InRange(variant.HeadlineAccent.En.Length, 1, MaxHeadlineLineLength);
                 Assert.InRange(variant.HeadlineAccent.Th.Length, 1, MaxHeadlineLineLength);
+                if (target.Key == HeroCopyCatalog.DefaultTargetKey)
+                {
+                    Assert.InRange(variant.HeadlineLead.En.Length, 1, MaxDefaultHeadlineLineLength);
+                    Assert.InRange(variant.HeadlineLead.Th.Length, 1, MaxDefaultHeadlineLineLength);
+                    Assert.InRange(variant.HeadlineAccent.En.Length, 1, MaxDefaultHeadlineLineLength);
+                    Assert.InRange(variant.HeadlineAccent.Th.Length, 1, MaxDefaultHeadlineLineLength);
+                }
+
                 Assert.InRange(variant.Body.En.Length, 1, MaxBodyLength);
                 Assert.InRange(variant.Body.Th.Length, 1, MaxBodyLength);
                 Assert.InRange(variant.MetaDescription.En.Length, 1, MaxMetaDescriptionLength);

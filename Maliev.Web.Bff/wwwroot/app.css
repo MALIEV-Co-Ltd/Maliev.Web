@@ -553,7 +553,11 @@ main {
   letter-spacing: 0;
 }
 
-.landing-hero h1,
+.landing-hero h1 {
+  font-size: 3.65rem;
+  line-height: 1.02;
+}
+
 .h-display {
   font-size: 4.75rem;
   line-height: 1;
@@ -644,8 +648,8 @@ html:lang(th) .h1 {
 .landing-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, .94fr) minmax(420px, 1.06fr);
-  gap: 56px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr);
+  gap: 48px;
   align-items: center;
   min-height: calc(100svh - 66px);
   padding-top: 56px;
@@ -664,7 +668,7 @@ html:lang(th) .h1 {
 .landing-hero-copy {
   position: relative;
   z-index: 1;
-  max-width: 680px;
+  max-width: 720px;
 }
 
 .chip {
@@ -690,6 +694,7 @@ html:lang(th) .h1 {
 .landing-hero-copy h1 {
   margin-top: 0;
   margin-bottom: 20px;
+  text-wrap: balance;
 }
 
 .landing-hero-copy > p {
@@ -2753,7 +2758,10 @@ html[data-theme="dark"] .auth-google-icon {
     --container: 1680px;
   }
 
-  .landing-hero h1,
+  .landing-hero h1 {
+    font-size: 4.5rem;
+  }
+
   .h-display {
     font-size: 5.5rem;
   }
@@ -2826,7 +2834,7 @@ html[data-theme="dark"] .auth-google-icon {
 
 @media (min-width: 961px) and (max-width: 1180px) {
   .landing-hero {
-    grid-template-columns: minmax(0, .96fr) minmax(340px, .92fr);
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
     gap: clamp(26px, 3vw, 40px);
     min-height: calc(100svh - 66px);
     padding-top: 48px;
@@ -2834,11 +2842,11 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-hero-copy {
-    max-width: 560px;
+    max-width: 600px;
   }
 
   .landing-hero h1 {
-    font-size: 3.85rem;
+    font-size: 3.25rem;
   }
 
   .landing-hero-visual {

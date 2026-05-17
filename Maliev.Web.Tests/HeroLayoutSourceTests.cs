@@ -845,7 +845,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-hero-badge", styles);
         Assert.Contains("display: none;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1180px)", styles);
-        Assert.Contains("grid-template-columns: minmax(0, .96fr) minmax(340px, .92fr);", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);", styles);
+        Assert.Contains("text-wrap: balance;", styles);
         Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
         Assert.Contains("text-align: center;", styles);
         Assert.Contains("gap: 18px;", styles);
