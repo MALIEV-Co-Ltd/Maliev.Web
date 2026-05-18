@@ -427,7 +427,7 @@ else if (Path == "contact")
                     <div class="contact-section-head">
                         <div>
                             <h2>@Text("Sales and quotations", "ฝ่ายขายและใบเสนอราคา")</h2>
-                            <p>@Text("Send product questions, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ MALIEV จะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า")</p>
+                            <p>@Text("Send product questions, drawings, 3D files, or project notes. We will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ เราจะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า")</p>
                         </div>
                     </div>
                     <dl class="contact-info-rows">
@@ -718,15 +718,15 @@ else
         "refund-policy" => Text("When refunds, cancellations, credits, rework, or replacements apply to product orders and custom manufacturing.", "กรณีที่การคืนเงิน การยกเลิก เครดิต การแก้งาน หรือการเปลี่ยนสินค้าใช้กับคำสั่งซื้อและงานผลิตเฉพาะ"),
         "warranty-policy" => Text("Warranty, workmanship review, support, and exclusions for MALIEV products, machines, spare parts, and custom-made parts.", "การรับประกัน การตรวจงานผลิต การสนับสนุน และข้อยกเว้นสำหรับสินค้า เครื่องจักร อะไหล่ และชิ้นงานเฉพาะของ MALIEV"),
         "materials" => Text("Compare materials by process, use case, finishing expectation, and quoting readiness.", "เปรียบเทียบวัสดุตามกระบวนการ การใช้งาน ผิวงาน และความพร้อมในการขอราคา"),
-        "industries" => Text("MALIEV supports factories, designers, product builders, educators, and maintenance teams.", "MALIEV สนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
+        "industries" => Text("We support factories, designers, product builders, educators, and maintenance teams.", "เราสนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
         "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
         "blog" => Text("Practical notes for preparing manufacturable parts and ordering from MALIEV.", "บันทึกเชิงปฏิบัติสำหรับเตรียมชิ้นงานให้ผลิตได้และสั่งงานกับ MALIEV"),
         "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => CurrentBlogPost?.Summary.For(Preferences.Culture)
             ?? Text("Manufacturing guidance for customers preparing custom parts and product work.", "คำแนะนำงานผลิตสำหรับลูกค้าที่เตรียมชิ้นงานเฉพาะและงานสินค้า"),
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CurrentCaseStudy?.Summary.For(Preferences.Culture)
-            ?? Text("How MALIEV turns files, samples, and requirements into production-ready work.", "วิธีที่ MALIEV เปลี่ยนไฟล์ ตัวอย่าง และความต้องการให้เป็นงานพร้อมผลิต"),
-        _ => Text("MALIEV builds manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand.", "MALIEV ผลิตเครื่องมือ เครื่องจักร สินค้าพิมพ์สามมิติ และชิ้นงานเฉพาะจากนนทบุรี ประเทศไทย")
+            ?? Text("How we turn files, samples, and requirements into production-ready work.", "วิธีที่เราเปลี่ยนไฟล์ ตัวอย่าง และความต้องการให้เป็นงานพร้อมผลิต"),
+        _ => Text("We build manufacturing tools, machines, printed products, and custom parts from Nonthaburi, Thailand.", "เราผลิตเครื่องมือ เครื่องจักร สินค้าพิมพ์สามมิติ และชิ้นงานเฉพาะจากนนทบุรี ประเทศไทย")
     };
 
     private IReadOnlyList<ContentSection> Sections => Path switch
@@ -750,14 +750,14 @@ else
         ],
         "contact" =>
         [
-            Section("Sales and quotations", "ฝ่ายขายและใบเสนอราคา", "Send product questions, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ MALIEV จะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า"),
+            Section("Sales and quotations", "ฝ่ายขายและใบเสนอราคา", "Send product questions, drawings, 3D files, or project notes. We will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ เราจะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า"),
             Section("Machine and product support", "สนับสนุนเครื่องจักรและสินค้า", "For machines, spare parts, and printed products, include the product name, order reference, photos, and the issue you want checked.", "สำหรับเครื่องจักร อะไหล่ และสินค้าพิมพ์ ระบุชื่อสินค้า เลขอ้างอิงคำสั่งซื้อ รูปถ่าย และปัญหาที่ต้องการให้ตรวจ")
         ],
         "faq" =>
         [
             Section("Where do custom quotes happen?", "งานเฉพาะแบบดูราคาที่ไหน", "Custom manufacturing quotes start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มที่ quote.maliev.com เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
             Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่คำนวณราคาชิ้นงานได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจากระบบราคา"),
-            Section("Can I request Thai or English documents?", "ขอเอกสารไทยหรืออังกฤษได้ไหม", "Yes. Keep your preferred language in the customer workspace and MALIEV will use it where available.", "ได้ ตั้งค่าภาษาที่ต้องการในพื้นที่ลูกค้า แล้ว MALIEV จะใช้ภาษานั้นเมื่อรองรับ")
+            Section("Can I request Thai or English documents?", "ขอเอกสารไทยหรืออังกฤษได้ไหม", "Yes. Keep your preferred language in the customer workspace and we will use it where available.", "ได้ ตั้งค่าภาษาที่ต้องการในพื้นที่ลูกค้า แล้วเราจะใช้ภาษานั้นเมื่อรองรับ")
         ],
         "shipping-returns" =>
         [
@@ -989,7 +989,7 @@ else
         ],
         _ =>
         [
-            Section("What we make", "สิ่งที่เราผลิต", "MALIEV supports 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products.", "MALIEV รองรับงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ CAD เครื่องฉีดพลาสติกระบบลม อะไหล่ ฟิกซ์เจอร์ และสินค้าพิมพ์"),
+            Section("What we make", "สิ่งที่เราผลิต", "We support 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products.", "เรารองรับงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ CAD เครื่องฉีดพลาสติกระบบลม อะไหล่ ฟิกซ์เจอร์ และสินค้าพิมพ์"),
             Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ระบบราคาชิ้นงานเมื่องานเป็นแบบเฉพาะ")
         ]
     };

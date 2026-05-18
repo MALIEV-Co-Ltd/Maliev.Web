@@ -126,7 +126,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Silicone casting service details", content);
         Assert.Contains("Rapid prototyping service details", content);
         Assert.Contains("Deviation analysis service details", content);
-        Assert.Contains("MALIEV narrows the process from the part's job", source);
+        Assert.Contains("We narrow the process from the part's job", source);
+        Assert.DoesNotContain("MALIEV narrows the process from the part's job", source);
         Assert.Contains("STL", content);
         Assert.Contains("STEP / STP", content);
         Assert.Contains("OBJ", content);

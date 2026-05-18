@@ -335,7 +335,7 @@ internal static class SiteContent
                 Section(
                     "The file is checked for manufacturing signals",
                     "ไฟล์ถูกตรวจจากสัญญาณงานผลิต",
-                    "A CAD upload can reveal volume, bounding box, wall patterns, hole features, mesh quality, and process risks. The engine uses these signals to prepare the workspace, while MALIEV can still ask for drawings, photos, or notes when geometry alone does not explain the requirement.",
+                    "A CAD upload can reveal volume, bounding box, wall patterns, hole features, mesh quality, and process risks. The engine uses these signals to prepare the workspace, while we can still ask for drawings, photos, or notes when geometry alone does not explain the requirement.",
                     "การอัปโหลด CAD ทำให้เห็นปริมาตร Bounding box รูปแบบผนัง Feature รู คุณภาพ Mesh และความเสี่ยงของกระบวนการ ระบบใช้สัญญาณเหล่านี้เพื่อเตรียมพื้นที่ราคา ขณะเดียวกัน MALIEV ยังอาจขอ Drawing รูป หรือหมายเหตุเมื่อ Geometry อย่างเดียวอธิบายความต้องการไม่พอ",
                     ("STEP is preferred when controlled faces and machining features matter.", "ควรใช้ STEP เมื่อผิวควบคุมและ Feature สำหรับกัดสำคัญ"),
                     ("STL, OBJ, and 3MF can work for print-focused geometry.", "STL, OBJ และ 3MF ใช้ได้กับ Geometry ที่เน้นงานพิมพ์")),
@@ -368,8 +368,8 @@ internal static class SiteContent
             "Prototype, validate, and produce polymer parts with the right print route.",
             "ทำต้นแบบ ตรวจแบบ และผลิตชิ้นงานโพลีเมอร์ด้วยเส้นทางพิมพ์ที่เหมาะสม"),
         Text(
-            "MALIEV supports FDM, SLA/resin, MJF/SLS nylon, and engineering polymer conversations for prototypes, jigs, fixtures, housings, display samples, and low-volume parts. We review manufacturability before accepting production so material, orientation, tolerance, finish, and delivery expectations stay realistic.",
-            "MALIEV รองรับงาน FDM, SLA/เรซิน, MJF/SLS ไนลอน และการเลือกโพลีเมอร์วิศวกรรมสำหรับต้นแบบ จิ๊ก ฟิกซ์เจอร์ เคส ตัวอย่างโชว์ และงานจำนวนน้อย เราตรวจความเหมาะสมในการผลิตก่อนรับงาน เพื่อให้วัสดุ ทิศทางพิมพ์ tolerance ผิวงาน และระยะส่งมอบอยู่บนความจริง"),
+            "We support FDM, SLA/resin, MJF/SLS nylon, and engineering polymer conversations for prototypes, jigs, fixtures, housings, display samples, and low-volume parts. We review manufacturability before accepting production so material, orientation, tolerance, finish, and delivery expectations stay realistic.",
+            "เรารองรับงาน FDM, SLA/เรซิน, MJF/SLS ไนลอน และการเลือกโพลีเมอร์วิศวกรรมสำหรับต้นแบบ จิ๊ก ฟิกซ์เจอร์ เคส ตัวอย่างโชว์ และงานจำนวนน้อย เราตรวจความเหมาะสมในการผลิตก่อนรับงาน เพื่อให้วัสดุ ทิศทางพิมพ์ tolerance ผิวงาน และระยะส่งมอบอยู่บนความจริง"),
         [
             new(Text("STL", "STL"), Text("mesh for print-focused geometry", "mesh สำหรับงานพิมพ์โดยตรง"), Text("CAD", "CAD"), "file"),
             new(Text("STEP / STP", "STEP / STP"), Text("preferred when fit, holes, and faces matter", "เหมาะเมื่อผิวประกบ รู และมิติสำคัญ"), Text("CAD", "CAD"), "cad"),
@@ -418,7 +418,7 @@ internal static class SiteContent
         ],
         [
             new(Text("Upload CAD and requirements", "อัปโหลด CAD และข้อกำหนด"), Text("Send files, quantity, deadline, material preference, finish notes, and what the part must prove.", "ส่งไฟล์ จำนวน กำหนดเวลา วัสดุที่ต้องการ หมายเหตุผิวงาน และสิ่งที่ชิ้นงานต้องพิสูจน์"), Text("", ""), "upload"),
-            new(Text("Review DFM and route options", "ตรวจ DFM และเส้นทางผลิต"), Text("MALIEV reviews geometry risks and helps compare FDM, resin, nylon, finish, and lead-time trade-offs.", "MALIEV ตรวจความเสี่ยง Geometry และช่วยเปรียบเทียบ FDM เรซิน ไนลอน ผิวงาน และข้อแลกเปลี่ยนด้านเวลา"), Text("", ""), "review"),
+            new(Text("Review DFM and route options", "ตรวจ DFM และเส้นทางผลิต"), Text("We review geometry risks and help compare FDM, resin, nylon, finish, and lead-time trade-offs.", "เราตรวจความเสี่ยง Geometry และช่วยเปรียบเทียบ FDM เรซิน ไนลอน ผิวงาน และข้อแลกเปลี่ยนด้านเวลา"), Text("", ""), "review"),
             new(Text("Confirm quote and production setup", "ยืนยันราคาและการตั้งค่างานผลิต"), Text("Approve the selected process, material, quantity, tolerance notes, and delivery expectation before production starts.", "อนุมัติกระบวนการ วัสดุ จำนวน หมายเหตุ tolerance และระยะส่งมอบก่อนเริ่มผลิต"), Text("", ""), "price"),
             new(Text("Produce, check, and deliver", "ผลิต ตรวจ และส่งมอบ"), Text("The accepted quote continues into production tracking, QA notes, photos when needed, and delivery coordination.", "ใบเสนอราคาที่อนุมัติจะต่อไปสู่การติดตามผลิต หมายเหตุ QA รูปประกอบเมื่อจำเป็น และการประสานส่งมอบ"), Text("", ""), "delivery")
         ],
@@ -438,8 +438,8 @@ internal static class SiteContent
             "Machining works best when the functional faces are identified before pricing.",
             "งานกัดจะคุมได้ดีที่สุดเมื่อระบุผิวใช้งานจริงก่อนประเมินราคา"),
         Text(
-            "MALIEV reviews the part for stock size, tool access, setup direction, fixture risk, sharp internal corners, tolerance stack-up, and finishing needs. The answer is not just whether the part can be cut; it is which surfaces must be controlled and which surfaces should stay at practical process default.",
-            "MALIEV ตรวจขนาดวัตถุดิบ ทางเข้าเครื่องมือ ทิศทางการตั้งงาน ความเสี่ยงฟิกซ์เจอร์ มุมในที่คม Stack-up ของ tolerance และผิวงาน คำตอบไม่ใช่แค่ว่ากัดได้หรือไม่ แต่คือผิวใดต้องคุม และผิวใดควรปล่อยตามค่ากระบวนการที่เหมาะสม"),
+            "We review the part for stock size, tool access, setup direction, fixture risk, sharp internal corners, tolerance stack-up, and finishing needs. The answer is not just whether the part can be cut; it is which surfaces must be controlled and which surfaces should stay at practical process default.",
+            "เราตรวจขนาดวัตถุดิบ ทางเข้าเครื่องมือ ทิศทางการตั้งงาน ความเสี่ยงฟิกซ์เจอร์ มุมในที่คม Stack-up ของ tolerance และผิวงาน คำตอบไม่ใช่แค่ว่ากัดได้หรือไม่ แต่คือผิวใดต้องคุม และผิวใดควรปล่อยตามค่ากระบวนการที่เหมาะสม"),
         [
             new(Text("STEP / STP", "STEP / STP"), Text("preferred for machinable faces, holes, and setup review", "เหมาะสำหรับผิวกัด รู และการตรวจทิศทางตั้งงาน"), Text("CAD", "CAD"), "cad"),
             new(Text("PDF / drawings", "PDF / Drawing"), Text("tolerances, thread callouts, finish, and inspection dimensions", "tolerance เกลียว ผิวงาน และมิติที่ต้องตรวจรับ"), Text("Control", "ควบคุม"), "review"),
@@ -525,7 +525,7 @@ internal static class SiteContent
         ],
         [
             new(Text("Share photos and capture purpose", "ส่งรูปและเป้าหมายการสแกน"), Text("Explain whether the job is for repair, inspection, CAD rebuild, supplier check, or manufacturing handoff.", "อธิบายว่างานนี้เพื่อซ่อม ตรวจรับ สร้าง CAD เทียบ Supplier หรือส่งต่องานผลิต"), Text("", ""), "upload"),
-            new(Text("Confirm access and preparation", "ยืนยันการเข้าถึงและการเตรียมชิ้นงาน"), Text("MALIEV checks size, surface, hidden areas, fixtures, and whether part preparation is needed.", "MALIEV ตรวจขนาด ผิว จุดซ่อน ฟิกซ์เจอร์ และความจำเป็นในการเตรียมชิ้นงาน"), Text("", ""), "review"),
+            new(Text("Confirm access and preparation", "ยืนยันการเข้าถึงและการเตรียมชิ้นงาน"), Text("We check size, surface, hidden areas, fixtures, and whether part preparation is needed.", "เราตรวจขนาด ผิว จุดซ่อน ฟิกซ์เจอร์ และความจำเป็นในการเตรียมชิ้นงาน"), Text("", ""), "review"),
             new(Text("Capture, align, and process", "สแกน จัดแนว และประมวลผล"), Text("The data is aligned to useful references, cleaned, compared, or rebuilt depending on the agreed output.", "ข้อมูลถูกจัดแนวกับจุดอ้างอิงที่มีประโยชน์ เก็บผิว เทียบ หรือสร้างใหม่ตามผลลัพธ์ที่ตกลง"), Text("", ""), "fit"),
             new(Text("Deliver data and next recommendation", "ส่งข้อมูลและคำแนะนำถัดไป"), Text("The result includes files, notes, and the practical route for printing, CNC, design, or inspection follow-up.", "ผลลัพธ์รวมไฟล์ หมายเหตุ และเส้นทางที่เหมาะสำหรับพิมพ์ CNC ออกแบบ หรือการตรวจต่อ"), Text("", ""), "delivery")
         ],
@@ -544,7 +544,7 @@ internal static class SiteContent
             "Good design work starts from the decision the prototype must answer.",
             "งานออกแบบที่ดีเริ่มจากคำตอบที่ต้นแบบต้องพิสูจน์"),
         Text(
-            "MALIEV can turn sketches, photos, rough dimensions, broken samples, or existing CAD into manufacturable files. The design conversation stays tied to process choices, wall thickness, fastening, tolerance, material, finish, and what the customer needs to learn before ordering parts.",
+            "We can turn sketches, photos, rough dimensions, broken samples, or existing CAD into manufacturable files. The design conversation stays tied to process choices, wall thickness, fastening, tolerance, material, finish, and what the customer needs to learn before ordering parts.",
             "MALIEV เปลี่ยนสเก็ตช์ รูปถ่าย ขนาดคร่าว ๆ ตัวอย่างเสีย หรือ CAD เดิมให้เป็นไฟล์ที่ผลิตได้ บทสนทนาออกแบบจะผูกกับกระบวนการ ความหนา การยึด tolerance วัสดุ ผิวงาน และสิ่งที่ลูกค้าต้องรู้ก่อนสั่งผลิต"),
         [
             new(Text("Sketches or photos", "สเก็ตช์หรือรูปถ่าย"), Text("rough shape, installation space, product references, and design intent", "รูปร่างคร่าว พื้นที่ติดตั้ง Reference สินค้า และเจตนาออกแบบ"), Text("Input", "ข้อมูลตั้งต้น"), "file"),
@@ -566,7 +566,7 @@ internal static class SiteContent
         ],
         [
             new(Text("Send the problem, not only the shape", "ส่งโจทย์ ไม่ใช่แค่รูปทรง"), Text("Share what the part must hold, cover, align, protect, display, or prove.", "บอกว่าชิ้นงานต้องยึด ครอบ จัดแนว ป้องกัน โชว์ หรือพิสูจน์อะไร"), Text("", ""), "upload"),
-            new(Text("Convert intent into CAD decisions", "แปลงเจตนาเป็นการตัดสินใจ CAD"), Text("MALIEV turns constraints into wall, rib, fastener, tolerance, split, and process choices.", "MALIEV แปลงข้อจำกัดเป็นความหนา Rib จุดยึด tolerance การแยกชิ้น และกระบวนการ"), Text("", ""), "cad"),
+            new(Text("Convert intent into CAD decisions", "แปลงเจตนาเป็นการตัดสินใจ CAD"), Text("We turn constraints into wall, rib, fastener, tolerance, split, and process choices.", "เราแปลงข้อจำกัดเป็นความหนา Rib จุดยึด tolerance การแยกชิ้น และกระบวนการ"), Text("", ""), "cad"),
             new(Text("Prototype the uncertain parts", "ทำต้นแบบส่วนที่ยังไม่แน่ใจ"), Text("The first print or machined sample should answer fit, handling, surface, or assembly risk.", "ต้นแบบแรกควรตอบเรื่องประกอบ การหยิบจับ ผิว หรือความเสี่ยง Assembly"), Text("", ""), "review"),
             new(Text("Lock a production-ready package", "ล็อกแพ็กเกจพร้อมผลิต"), Text("Final files move into quotation with drawings, notes, quantities, and acceptance expectations.", "ไฟล์สุดท้ายเข้าสู่ใบเสนอราคาพร้อม Drawing หมายเหตุ จำนวน และเกณฑ์รับงาน"), Text("", ""), "delivery")
         ],
@@ -585,8 +585,8 @@ internal static class SiteContent
             "Casting decisions start with the master, the mold, and what the batch must prove.",
             "การตัดสินใจงานหล่อเริ่มจาก Master แม่พิมพ์ และสิ่งที่ล็อตต้องพิสูจน์"),
         Text(
-            "MALIEV reviews the master part, surface finish, split lines, air traps, wall sections, shrink risk, color, hardness, and quantity before accepting a cast batch. The goal is to produce useful pilot parts without pretending the route behaves like full injection molding.",
-            "MALIEV ตรวจ Master ผิวงาน เส้นแยกแม่พิมพ์ จุดอากาศค้าง ความหนา ความเสี่ยงหด สี ความแข็ง และจำนวนก่อนรับล็อตหล่อ เป้าหมายคือผลิตล็อตทดลองที่ใช้ได้ โดยไม่สื่อว่ากระบวนการนี้เหมือนฉีดพลาสติกจริงทุกอย่าง"),
+            "We review the master part, surface finish, split lines, air traps, wall sections, shrink risk, color, hardness, and quantity before accepting a cast batch. The goal is to produce useful pilot parts without pretending the route behaves like full injection molding.",
+            "เราตรวจ Master ผิวงาน เส้นแยกแม่พิมพ์ จุดอากาศค้าง ความหนา ความเสี่ยงหด สี ความแข็ง และจำนวนก่อนรับล็อตหล่อ เป้าหมายคือผลิตล็อตทดลองที่ใช้ได้ โดยไม่สื่อว่ากระบวนการนี้เหมือนฉีดพลาสติกจริงทุกอย่าง"),
         [
             new(Text("Master file or part", "ไฟล์หรือชิ้น Master"), Text("CAD, printed master, machined master, or sample to duplicate", "CAD, Master พิมพ์, Master กัด หรือชิ้นตัวอย่างที่ต้องทำซ้ำ"), Text("Master", "Master"), "cad"),
             new(Text("Material behavior", "พฤติกรรมวัสดุ"), Text("soft grip, rigid shell, clear, color, shore hardness, or chemical exposure", "ผิวนิ่ม โครงแข็ง ใส สี Shore hardness หรือการสัมผัสสารเคมี"), Text("Spec", "สเปก"), "chemical"),
@@ -607,7 +607,7 @@ internal static class SiteContent
         ],
         [
             new(Text("Confirm master and use case", "ยืนยัน Master และการใช้งาน"), Text("Send CAD or sample, target material feel, visible surfaces, quantity, and delivery target.", "ส่ง CAD หรือชิ้นตัวอย่าง ความรู้สึกวัสดุเป้าหมาย ผิวโชว์ จำนวน และกำหนดส่ง"), Text("", ""), "upload"),
-            new(Text("Review mold strategy", "ตรวจกลยุทธ์แม่พิมพ์"), Text("MALIEV checks split line, venting, master finish, expected repeats, and risk areas.", "MALIEV ตรวจเส้นแยก ทางระบาย ผิว Master จำนวนซ้ำ และจุดเสี่ยง"), Text("", ""), "review"),
+            new(Text("Review mold strategy", "ตรวจกลยุทธ์แม่พิมพ์"), Text("We check split line, venting, master finish, expected repeats, and risk areas.", "เราตรวจเส้นแยก ทางระบาย ผิว Master จำนวนซ้ำ และจุดเสี่ยง"), Text("", ""), "review"),
             new(Text("Approve sample and batch scope", "อนุมัติตัวอย่างและขอบเขตล็อต"), Text("The quote defines sample approval, quantity, material, finish, and inspection expectations.", "ใบเสนอราคากำหนดการอนุมัติชิ้นตัวอย่าง จำนวน วัสดุ ผิว และเกณฑ์ตรวจ"), Text("", ""), "price"),
             new(Text("Cast, finish, and deliver", "หล่อ เก็บงาน และส่งมอบ"), Text("Batch work moves through molding, trimming, finishing, QA notes, and delivery coordination.", "งานล็อตจะผ่านแม่พิมพ์ ตัดแต่ง เก็บผิว หมายเหตุ QA และประสานส่งมอบ"), Text("", ""), "delivery")
         ],
@@ -766,7 +766,7 @@ internal static class SiteContent
             ],
             [
                 new(Text("Upload files", "อัปโหลดไฟล์"), Text("Share CAD, drawings, photos, quantity, and the manufacturing goal.", "ส่ง CAD, Drawing, รูปถ่าย จำนวน และเป้าหมายงานผลิต"), Text("", ""), "upload"),
-                new(Text("Review route", "ตรวจเส้นทางผลิต"), Text("MALIEV checks process, material, DFM risks, and missing requirements.", "MALIEV ตรวจกระบวนการ วัสดุ ความเสี่ยง DFM และข้อมูลที่ขาด"), Text("", ""), "review"),
+                new(Text("Review route", "ตรวจเส้นทางผลิต"), Text("We check process, material, DFM risks, and missing requirements.", "เราตรวจกระบวนการ วัสดุ ความเสี่ยง DFM และข้อมูลที่ขาด"), Text("", ""), "review"),
                 new(Text("Approve quote", "อนุมัติราคา"), Text("Confirm the selected scope, price, and delivery expectation before production.", "ยืนยันขอบเขต ราคา และระยะส่งมอบก่อนผลิต"), Text("", ""), "price"),
                 new(Text("Track production", "ติดตามผลิต"), Text("Accepted work continues into order tracking and delivery coordination.", "งานที่รับแล้วต่อไปสู่การติดตามผลิตและส่งมอบ"), Text("", ""), "delivery")
             ],
