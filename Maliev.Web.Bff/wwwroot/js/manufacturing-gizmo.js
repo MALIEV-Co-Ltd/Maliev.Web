@@ -361,6 +361,15 @@ async function createLandingHeroScene(state, BABYLON) {
 
   const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02);
   root.rotation.copyFrom(baseRotation);
+
+  // Snapshot the world AABB *after* baseRotation is applied. This is the single
+  // source of truth that downstream camera framing uses — recomputing this every
+  // frame would pick up the levitation/hover offsets, which is not what we want.
+  state.landingFrame = {
+    ...state.landingFrame,
+    worldBounds: captureWorldAabb(state.landingFrame?.meshes ?? renderMeshes, BABYLON)
+  };
+
   configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -391,13 +400,13 @@ function configureLandingHeroCamera(camera, host, BABYLON, frame) {
   const metrics = getLandingHeroViewportMetrics(host);
 
   camera.fov = metrics.fov;
-  camera.target = new BABYLON.Vector3(0, metrics.targetY, 0);
   camera.lowerRadiusLimit = null;
   camera.upperRadiusLimit = null;
 
-  if (frame?.meshes?.length) {
-    applyLandingHeroFraming(camera, frame, metrics, BABYLON);
+  if (frame?.worldBounds) {
+    applyLandingHeroFraming(camera, frame.worldBounds, metrics, BABYLON);
   } else {
+    camera.target = new BABYLON.Vector3(0, metrics.targetY, 0);
     camera.radius = metrics.fallbackRadius;
   }
 
