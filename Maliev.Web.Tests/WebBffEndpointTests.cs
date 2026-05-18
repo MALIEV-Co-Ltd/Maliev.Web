@@ -9,6 +9,7 @@ using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -134,6 +135,29 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(contact);
         Assert.Equal("Received", contact.Status);
+    }
+
+    /// <summary>
+    /// Verifies contact backend failures are returned as problem details instead of developer exception text.
+    /// </summary>
+    [Fact]
+    public async Task POST_ContactMessage_BackendUnavailable_ReturnsProblemDetails()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/contact/messages", new ContactMessageRequest
+        {
+            FullName = "Website Customer",
+            Email = "unavailable@example.com",
+            Subject = "Manufacturing question",
+            Message = "Can MALIEV review this project?"
+        });
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("ContactService unavailable", problem.Title);
+        Assert.Contains("did not respond", problem.Detail, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -352,6 +376,11 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     {
         public Task<ContactMessageResponse> SubmitAsync(ContactMessageRequest request, CancellationToken cancellationToken)
         {
+            if (request.Email == "unavailable@example.com")
+            {
+                throw new BackendUnavailableException("ContactService", "ContactService did not respond while creating the contact message.");
+            }
+
             Assert.Equal("customer@example.com", request.Email);
             return Task.FromResult(new ContactMessageResponse("e9f63ee7-5711-4392-893a-5380b90f80e5", "Received"));
         }

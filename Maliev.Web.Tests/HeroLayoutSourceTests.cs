@@ -1025,6 +1025,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<li>@point.For(Preferences.Culture)</li>", source);
         Assert.Contains("SubmitContactMessageAsync", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("class=\"@ContactStatusClass\" role=\"@ContactStatusRole\"", source);
+        Assert.Contains("form-status--error", source);
+        Assert.Contains("We could not send the message right now.", source);
+        Assert.DoesNotContain("_contactStatus = ex.Message;", source);
         Assert.DoesNotContain("@page \"/account/orders\"", source);
         Assert.DoesNotContain("@page \"/account/preferences\"", source);
         Assert.Contains("material-category-media", source);

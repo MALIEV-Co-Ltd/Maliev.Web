@@ -14,15 +14,40 @@ internal sealed class ContactServiceClient(HttpClient httpClient) : IContactServ
 {
     public async Task<ContactMessageResponse> CreateContactMessageAsync(ContactServiceCreateRequest request, CancellationToken cancellationToken)
     {
-        using var response = await httpClient.PostAsJsonAsync("/contact/v1/contacts", request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response;
+        try
         {
-            throw new BackendUnavailableException("ContactService", $"ContactService returned {(int)response.StatusCode} while creating a contact message.");
+            response = await httpClient.PostAsJsonAsync("/contact/v1/contacts", request, cancellationToken);
+        }
+        catch (Exception ex) when (IsUnavailableFailure(ex, cancellationToken))
+        {
+            throw new BackendUnavailableException("ContactService", "ContactService did not respond while creating the contact message.", ex);
         }
 
-        var created = await response.Content.ReadFromJsonAsync<ContactServiceCreateResponse>(cancellationToken)
-            ?? throw new BackendUnavailableException("ContactService", "ContactService returned an empty contact response.");
-        return new ContactMessageResponse(created.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), MapStatus(created.Status));
+        using (response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new BackendUnavailableException("ContactService", $"ContactService returned {(int)response.StatusCode} while creating a contact message.");
+            }
+
+            var created = await response.Content.ReadFromJsonAsync<ContactServiceCreateResponse>(cancellationToken)
+                ?? throw new BackendUnavailableException("ContactService", "ContactService returned an empty contact response.");
+            return new ContactMessageResponse(created.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), MapStatus(created.Status));
+        }
+    }
+
+    private static bool IsUnavailableFailure(Exception exception, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
+
+        return exception is HttpRequestException
+            || exception is TimeoutException
+            || exception is TaskCanceledException
+            || exception.GetType().FullName == "Polly.Timeout.TimeoutRejectedException";
     }
 
     private static string MapStatus(JsonElement status)

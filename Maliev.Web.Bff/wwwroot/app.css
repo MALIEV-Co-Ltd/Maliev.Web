@@ -1649,6 +1649,32 @@ html:lang(th) .h1 {
   font-size: .88rem;
 }
 
+.form-status {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  line-height: 1.45;
+}
+
+.form-status--success {
+  color: var(--success-text);
+  background: var(--success-surface);
+  border-color: rgba(13, 107, 50, .25);
+}
+
+.form-status--error {
+  color: #8d2118;
+  background: #fff3f1;
+  border-color: rgba(255, 91, 79, .38);
+}
+
+html[data-theme="dark"] .form-status--error {
+  color: #ffc8c3;
+  background: rgba(255, 91, 79, .14);
+  border-color: rgba(255, 91, 79, .34);
+}
+
 .card-link {
   align-self: end;
   color: var(--blue);

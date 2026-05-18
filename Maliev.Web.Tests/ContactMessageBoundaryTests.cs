@@ -97,6 +97,32 @@ public sealed class ContactMessageBoundaryTests
         Assert.Contains("\"priority\":1", requestBody, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Verifies unavailable ContactService calls are mapped to the Web BFF backend-unavailable contract.
+    /// </summary>
+    [Fact]
+    public async Task CreateContactMessageAsync_Timeout_ThrowsBackendUnavailable()
+    {
+        using var httpClient = new HttpClient(new StubHttpMessageHandler(_ =>
+            Task.FromException<HttpResponseMessage>(new TimeoutException("ContactService timed out."))))
+        {
+            BaseAddress = new Uri("http://contact.test")
+        };
+        var client = new ContactServiceClient(httpClient);
+
+        var exception = await Assert.ThrowsAsync<BackendUnavailableException>(() => client.CreateContactMessageAsync(new ContactServiceCreateRequest
+        {
+            FullName = "Website Customer",
+            Email = "customer@example.com",
+            Subject = "Manufacturing question",
+            Message = "Can MALIEV review this project?",
+            CountryId = Guid.Parse("60f7ba70-8e45-49a5-b8a3-9d78ceda60c9")
+        }, CancellationToken.None));
+
+        Assert.Equal("ContactService", exception.BackendName);
+        Assert.Contains("did not respond", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class CapturingContactServiceClient : IContactServiceClient
     {
         public ContactServiceCreateRequest? Request { get; private set; }

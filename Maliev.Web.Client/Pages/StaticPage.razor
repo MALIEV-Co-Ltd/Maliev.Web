@@ -584,7 +584,7 @@ else if (Path == "contact")
             }
             @if (!string.IsNullOrWhiteSpace(_contactStatus))
             {
-                <p class="form-status">@_contactStatus</p>
+                <p class="@ContactStatusClass" role="@ContactStatusRole">@_contactStatus</p>
             }
             <button class="button primary" type="submit" disabled="@_submittingContact">@Text("Send message", "ส่งข้อความ")</button>
         </EditForm>
@@ -666,6 +666,7 @@ else
     private bool _submittingContact;
     private bool _showContactMapDialog;
     private string? _contactStatus;
+    private ContactFormStatus _contactStatusKind = ContactFormStatus.None;
     private const string AllMaterialsFilter = "all";
     private readonly HashSet<string> _selectedMaterialNames = new(StringComparer.Ordinal);
     private string _materialProcessFilter = AllMaterialsFilter;
@@ -706,6 +707,15 @@ else
         ?? Text("MALIEV case study", "ผลงาน MALIEV");
 
     private string Description => Body;
+
+    private string ContactStatusClass => _contactStatusKind switch
+    {
+        ContactFormStatus.Success => "form-status form-status--success",
+        ContactFormStatus.Error => "form-status form-status--error",
+        _ => "form-status"
+    };
+
+    private string ContactStatusRole => _contactStatusKind == ContactFormStatus.Error ? "alert" : "status";
 
     private string Body => Path switch
     {
@@ -1367,15 +1377,21 @@ else
     private async Task SubmitContactAsync()
     {
         _submittingContact = true;
-        _contactStatus = null;
+        ClearContactStatus();
         try
         {
             var response = await Api.SubmitContactMessageAsync(_contact);
-            _contactStatus = Text($"Message received. Reference {response.MessageId}.", $"ได้รับข้อความแล้ว เลขอ้างอิง {response.MessageId}");
+            SetContactStatus(
+                Text($"Message received. Reference {response.MessageId}.", $"ได้รับข้อความแล้ว เลขอ้างอิง {response.MessageId}"),
+                ContactFormStatus.Success);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _contactStatus = ex.Message;
+            SetContactStatus(
+                Text(
+                    "We could not send the message right now. Please try again, or email info@maliev.com / LINE @maliev if this is urgent.",
+                    "ขณะนี้ยังส่งข้อความไม่ได้ กรุณาลองใหม่อีกครั้ง หรืออีเมล info@maliev.com / LINE @maliev หากเป็นเรื่องเร่งด่วน"),
+                ContactFormStatus.Error);
         }
         finally
         {
@@ -1385,7 +1401,7 @@ else
 
     private async Task HandleContactFilesAsync(InputFileChangeEventArgs args)
     {
-        _contactStatus = null;
+        ClearContactStatus();
         _contact.Files.Clear();
         _selectedContactFileSummaries.Clear();
 
@@ -1396,7 +1412,9 @@ else
         }
         catch (InvalidOperationException)
         {
-            _contactStatus = Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through the Quote Engine.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่านระบบราคา");
+            SetContactStatus(
+                Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through the Quote Engine.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่านระบบราคา"),
+                ContactFormStatus.Error);
             return;
         }
 
@@ -1404,7 +1422,9 @@ else
         {
             if (file.Size > MaxContactFileBytes)
             {
-                _contactStatus = Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through the Quote Engine.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่านระบบราคา");
+                SetContactStatus(
+                    Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through the Quote Engine.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่านระบบราคา"),
+                    ContactFormStatus.Error);
                 _contact.Files.Clear();
                 _selectedContactFileSummaries.Clear();
                 return;
@@ -1421,6 +1441,25 @@ else
             });
             _selectedContactFileSummaries.Add($"{file.Name} ({FormatBytes(file.Size)})");
         }
+    }
+
+    private void ClearContactStatus()
+    {
+        _contactStatus = null;
+        _contactStatusKind = ContactFormStatus.None;
+    }
+
+    private void SetContactStatus(string status, ContactFormStatus kind)
+    {
+        _contactStatus = status;
+        _contactStatusKind = kind;
+    }
+
+    private enum ContactFormStatus
+    {
+        None,
+        Success,
+        Error
     }
 
     private bool IsThaiCulture => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);
