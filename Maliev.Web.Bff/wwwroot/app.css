@@ -3544,12 +3544,96 @@ html[data-theme="dark"] .auth-google-icon {
   gap: 6px;
 }
 
-.customer-chatbot-message p {
+.customer-chatbot-message-rich {
+  display: grid;
+  gap: 8px;
   margin: 0;
-  white-space: pre-wrap;
   word-break: break-word;
   font-size: .92rem;
   line-height: 1.48;
+}
+
+.customer-chatbot-message-rich :where(p, ul, ol, blockquote, pre, table, h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+}
+
+.customer-chatbot-message-rich :where(ul, ol) {
+  display: grid;
+  gap: 4px;
+  padding-left: 1.25rem;
+}
+
+.customer-chatbot-message-rich :where(h1, h2, h3, h4, h5, h6) {
+  color: inherit;
+  font-size: .98rem;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.customer-chatbot-message-rich a {
+  color: var(--blue-ink);
+  font-weight: 720;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.customer-chatbot-message-rich :where(code, pre) {
+  font-family: var(--font-mono);
+}
+
+.customer-chatbot-message-rich code {
+  padding: 1px 4px;
+  background: var(--control-surface);
+  border-radius: 4px;
+  box-shadow: var(--shadow-border);
+}
+
+.customer-chatbot-message-rich pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 10px;
+  background: var(--control-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-border);
+}
+
+.customer-chatbot-message-rich pre code {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.customer-chatbot-message-rich blockquote {
+  padding-left: 10px;
+  color: var(--muted);
+  border-left: 3px solid var(--blue);
+}
+
+.customer-chatbot-message-rich table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: var(--shadow-border);
+}
+
+.customer-chatbot-message-rich :where(th, td) {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.customer-chatbot-message-rich th {
+  font-weight: 760;
+  background: var(--control-surface);
+}
+
+.customer-chatbot-message.user .customer-chatbot-message-rich a {
+  color: currentColor;
+}
+
+.customer-chatbot-message.user .customer-chatbot-message-rich :where(code, pre) {
+  color: var(--ink);
 }
 
 .customer-chatbot-message.assistant {

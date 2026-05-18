@@ -1,3 +1,5 @@
+@using Ganss.Xss
+@using Markdig
 @using System.Security.Claims
 @using System.Text.Json
 @using System.Text.RegularExpressions
@@ -25,7 +27,9 @@
                 @foreach (var message in _messages)
                 {
                     <div class="@MessageClass(message.Role)">
-                        <p>@message.Content</p>
+                        <div class="customer-chatbot-message-rich">
+                            @RenderMessageContent(message.Content)
+                        </div>
                     </div>
                 }
 
@@ -88,6 +92,16 @@
     private const int MaxStoredMessages = 24;
     private const int MaxStoredItems = 6;
     private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
+    private static readonly Regex DangerousHtmlBlockPattern = new(
+        @"<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>",
+        RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly Regex DangerousHtmlTagPattern = new(
+        @"<\s*/?\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly MarkdownPipeline MessageMarkdownPipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .Build();
+    private static readonly HtmlSanitizer MessageHtmlSanitizer = CreateMessageHtmlSanitizer();
 
     private readonly List<CustomerChatMessage> _messages = [];
     private CustomerChatbotMemory _memory = new();
@@ -724,6 +738,49 @@
         return string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
             ? "customer-chatbot-message user"
             : "customer-chatbot-message assistant";
+    }
+
+    private static MarkupString RenderMessageContent(string? content)
+    {
+        var cleaned = CleanMultiline(content, 4000);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return new MarkupString(string.Empty);
+        }
+
+        cleaned = DangerousHtmlTagPattern.Replace(DangerousHtmlBlockPattern.Replace(cleaned, string.Empty), string.Empty);
+        var html = Markdown.ToHtml(cleaned, MessageMarkdownPipeline);
+        return new MarkupString(MessageHtmlSanitizer.Sanitize(html));
+    }
+
+    private static HtmlSanitizer CreateMessageHtmlSanitizer()
+    {
+        var sanitizer = new HtmlSanitizer
+        {
+            KeepChildNodes = true
+        };
+
+        sanitizer.AllowedTags.Clear();
+        foreach (var tag in new[]
+        {
+            "a", "blockquote", "br", "code", "del", "div", "em", "h1", "h2", "h3", "h4", "h5", "h6",
+            "hr", "li", "ol", "p", "pre", "span", "strong", "table", "tbody", "td", "th", "thead", "tr", "ul"
+        })
+        {
+            sanitizer.AllowedTags.Add(tag);
+        }
+
+        sanitizer.AllowedAttributes.Clear();
+        sanitizer.AllowedAttributes.Add("href");
+        sanitizer.AllowedAttributes.Add("title");
+
+        sanitizer.AllowedSchemes.Clear();
+        sanitizer.AllowedSchemes.Add("http");
+        sanitizer.AllowedSchemes.Add("https");
+        sanitizer.AllowedSchemes.Add("mailto");
+        sanitizer.AllowedSchemes.Add("tel");
+
+        return sanitizer;
     }
 
     private static bool IsGeneratedGreeting(CustomerChatMessage message)
