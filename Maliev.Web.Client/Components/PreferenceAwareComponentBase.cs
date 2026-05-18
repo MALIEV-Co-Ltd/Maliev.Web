@@ -1,5 +1,6 @@
 using Maliev.Web.Client.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace Maliev.Web.Client;
 
@@ -12,15 +13,25 @@ public abstract class PreferenceAwareComponentBase : ComponentBase, IDisposable
     [Inject]
     protected PreferenceService Preferences { get; set; } = default!;
 
+    /// <summary>Gets the navigation manager used to refresh shared route-backed components.</summary>
+    [Inject]
+    protected NavigationManager PageNavigation { get; set; } = default!;
+
     private bool _disposed;
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         Preferences.Changed += OnPreferencesChanged;
+        PageNavigation.LocationChanged += OnLocationChanged;
     }
 
     private void OnPreferencesChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
     {
         _ = InvokeAsync(StateHasChanged);
     }
@@ -34,6 +45,7 @@ public abstract class PreferenceAwareComponentBase : ComponentBase, IDisposable
         }
 
         Preferences.Changed -= OnPreferencesChanged;
+        PageNavigation.LocationChanged -= OnLocationChanged;
         _disposed = true;
     }
 }

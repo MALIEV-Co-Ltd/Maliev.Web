@@ -77,6 +77,27 @@ public sealed class LocalizationTests
     }
 
     /// <summary>
+    /// Verifies reused route components repaint from the new URL during client-side navigation.
+    /// </summary>
+    [Fact]
+    public void PreferenceAwareComponents_RepaintWhenClientSideRouteChanges()
+    {
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var preferenceAwareBase = ReadRepoFile("Maliev.Web.Client", "Components", "PreferenceAwareComponentBase.cs");
+        var staticPage = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+
+        Assert.Contains("PageNavigation.LocationChanged += OnLocationChanged", preferenceAwareBase);
+        Assert.Contains("PageNavigation.LocationChanged -= OnLocationChanged", preferenceAwareBase);
+        Assert.Contains("private void OnLocationChanged(object? sender, LocationChangedEventArgs args)", preferenceAwareBase);
+        Assert.Contains("_ = InvokeAsync(StateHasChanged);", preferenceAwareBase);
+        Assert.Contains("@page \"/case-studies\"", staticPage);
+        Assert.Contains("@page \"/blog\"", staticPage);
+        Assert.Contains("private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();", staticPage);
+        Assert.DoesNotContain("forceLoad: true", layout);
+        Assert.DoesNotContain("Navigation.NavigateTo(Navigation.Uri", layout);
+    }
+
+    /// <summary>
     /// Verifies interactive landing labels use the same preference-backed bilingual text path as the rest of the page.
     /// </summary>
     [Fact]
