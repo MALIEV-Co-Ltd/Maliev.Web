@@ -564,6 +564,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("customer-chatbot-profile", component);
         Assert.Contains("customer-chatbot-gemini-icon", component);
         Assert.Contains("customer-chatbot-title", component);
+        Assert.Contains("customer-chatbot-messages-wrap", component);
+        Assert.Contains("@ref=\"_messagesContainer\"", component);
+        Assert.Contains("customer-chatbot-jump-latest", component);
+        Assert.Contains("Icons.Material.Filled.KeyboardArrowDown", component);
         Assert.Contains("aria-label=\"@Text(\"Open customer manufacturing assistant\"", component);
         Assert.DoesNotContain("<span>@Text(\"Mali\", \"น้องมะลิ\")</span>", component);
         Assert.DoesNotContain("<strong>@Text(\"Mali\", \"น้องมะลิ\")</strong>", component);
@@ -579,6 +583,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("rows=\"1\"", component);
         Assert.Contains("OnDraftInputAsync", component);
         Assert.Contains("malievChatbot.fitComposer", component);
+        Assert.Contains("malievChatbot.isNearBottom", component);
+        Assert.Contains("malievChatbot.scrollToBottom", component);
+        Assert.Contains("QueueMessageScroll(true)", component);
+        Assert.Contains("JumpToLatestAsync", component);
         Assert.Contains("HtmlSanitizer", component);
         Assert.Contains("Markdown.ToHtml", component);
         Assert.Contains("MessageHtmlSanitizer.Sanitize(html)", component);
@@ -601,6 +609,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-gemini-icon", styles);
         Assert.Contains(".customer-chatbot-gemini-icon .mud-icon-root", styles);
         Assert.Contains(".customer-chatbot-title", styles);
+        Assert.Contains(".customer-chatbot-messages-wrap", styles);
+        Assert.Contains(".customer-chatbot-jump-latest", styles);
+        Assert.Contains(".customer-chatbot-jump-badge", styles);
         Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-message-rich", styles);
         Assert.Contains(".customer-chatbot-message-rich a", styles);
@@ -613,6 +624,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-toggle {\n  width: 56px;\n  min-height: 56px;\n  padding: 0;\n  border-radius: 9999px;", styles);
         Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
         Assert.Contains(".customer-chatbot-toggle {\n    width: 50px;\n    min-height: 50px;", styles);
+        Assert.Contains("isNearBottom: function (container)", script);
+        Assert.Contains("scrollToBottom: function (container, smooth)", script);
+        Assert.Contains("container.scrollTo({", script);
     }
 
     /// <summary>

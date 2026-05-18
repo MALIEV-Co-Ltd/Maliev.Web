@@ -3534,6 +3534,7 @@ html[data-theme="dark"] .auth-google-icon {
 
 .customer-chatbot-close,
 .customer-chatbot-toggle,
+.customer-chatbot-jump-latest,
 .customer-chatbot-composer button,
 .customer-chatbot-prompts button {
   border: 0;
@@ -3555,14 +3556,59 @@ html[data-theme="dark"] .auth-google-icon {
   background: var(--paper-3);
 }
 
+.customer-chatbot-messages-wrap {
+  position: relative;
+  min-height: 240px;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .customer-chatbot-messages {
+  height: 100%;
+  min-height: 0;
   display: grid;
   align-content: start;
   gap: 10px;
-  min-height: 240px;
   padding: 14px;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.customer-chatbot-jump-latest {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--blue-on);
+  background: var(--blue);
+  border-radius: 9999px;
+  box-shadow: rgba(10, 114, 239, .34) 0 12px 28px -14px, var(--shadow-border);
+}
+
+.customer-chatbot-jump-latest:hover,
+.customer-chatbot-jump-latest:focus-visible {
+  background: var(--blue-hover);
+}
+
+.customer-chatbot-jump-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 19px;
+  height: 19px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  color: var(--blue-on);
+  background: #ff3b30;
+  border: 2px solid var(--paper);
+  border-radius: 9999px;
+  font-size: .66rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .customer-chatbot-message {
@@ -4607,7 +4653,7 @@ html[data-theme="dark"] .auth-google-icon {
     width: min(300px, calc(100vw - 24px));
   }
 
-  .customer-chatbot-messages {
+  .customer-chatbot-messages-wrap {
     min-height: 220px;
   }
 

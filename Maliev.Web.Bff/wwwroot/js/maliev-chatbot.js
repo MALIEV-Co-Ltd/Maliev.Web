@@ -21,5 +21,27 @@ window.malievChatbot = {
     const nextHeight = Math.min(textarea.scrollHeight + border, maxHeight);
     textarea.style.height = `${Math.max(minHeight, nextHeight)}px`;
     textarea.style.overflowY = textarea.scrollHeight + border > maxHeight ? 'auto' : 'hidden';
+  },
+
+  isNearBottom: function (container) {
+    if (!container) {
+      return true;
+    }
+
+    const threshold = 24;
+    return container.scrollHeight - container.scrollTop - container.clientHeight <= threshold;
+  },
+
+  scrollToBottom: function (container, smooth) {
+    if (!container) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+    });
   }
 };

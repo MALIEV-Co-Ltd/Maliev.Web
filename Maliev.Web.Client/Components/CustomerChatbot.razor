@@ -28,23 +28,33 @@
                 </button>
             </header>
 
-            <div class="customer-chatbot-messages">
-                @foreach (var message in _messages)
-                {
-                    <div class="@MessageClass(message.Role)">
-                        <div class="customer-chatbot-message-rich">
-                            @RenderMessageContent(message.Content)
+            <div class="customer-chatbot-messages-wrap">
+                <div class="customer-chatbot-messages" @ref="_messagesContainer" @onscroll="OnMessagesScrolledAsync">
+                    @foreach (var message in _messages)
+                    {
+                        <div class="@MessageClass(message.Role)">
+                            <div class="customer-chatbot-message-rich">
+                                @RenderMessageContent(message.Content)
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
 
-                @if (_isSending)
+                    @if (_isSending)
+                    {
+                        <div class="customer-chatbot-message assistant pending">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    }
+                </div>
+
+                @if (_showJumpToLatest)
                 {
-                    <div class="customer-chatbot-message assistant pending">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
+                    <button type="button" class="customer-chatbot-jump-latest" aria-label="@Text("Jump to latest message", "ไปยังข้อความล่าสุด")" @onclick="JumpToLatestAsync">
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" />
+                        <span class="customer-chatbot-jump-badge">@LatestUnreadBadgeText</span>
+                    </button>
                 }
             </div>
 
@@ -111,6 +121,7 @@
     private readonly List<CustomerChatMessage> _messages = [];
     private CustomerChatbotMemory _memory = new();
     private ElementReference _draftInput;
+    private ElementReference _messagesContainer;
     private Guid? _sessionId;
     private string _draft = string.Empty;
     private string _storageKey = $"{PersonalizationStoragePrefix}:guest";
@@ -120,13 +131,18 @@
     private bool _storageReady;
     private bool _showPopout;
     private bool _composerResizePending;
+    private bool _messageScrollPending;
+    private bool _messageScrollSmooth;
+    private bool _showJumpToLatest;
     private int _unreadCount;
+    private int _latestUnreadCount;
     private CancellationTokenSource? _popoutCts;
 
     private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
+    private string LatestUnreadBadgeText => _latestUnreadCount > 9 ? "9+" : Math.Max(_latestUnreadCount, 1).ToString(CultureInfo.InvariantCulture);
 
     private IReadOnlyList<CustomerChatPrompt> SuggestedPrompts =>
     [
@@ -151,6 +167,14 @@
         {
             _composerResizePending = false;
             await FitComposerAsync();
+        }
+
+        if (_messageScrollPending && _isOpen)
+        {
+            var smooth = _messageScrollSmooth;
+            _messageScrollPending = false;
+            _messageScrollSmooth = false;
+            await ScrollMessagesToBottomAsync(smooth);
         }
     }
 
@@ -192,6 +216,9 @@
         {
             _showPopout = false;
             _composerResizePending = true;
+            _showJumpToLatest = false;
+            _latestUnreadCount = 0;
+            QueueMessageScroll(false);
             CancelPopoutTimer();
             _unreadCount = 0;
             _memory.UnreadCount = 0;
@@ -229,6 +256,29 @@
         await FitComposerAsync();
     }
 
+    private async Task OnMessagesScrolledAsync()
+    {
+        if (!_showJumpToLatest || !_isOpen)
+        {
+            return;
+        }
+
+        if (await IsMessagesNearBottomAsync())
+        {
+            _showJumpToLatest = false;
+            _latestUnreadCount = 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task JumpToLatestAsync()
+    {
+        _showJumpToLatest = false;
+        _latestUnreadCount = 0;
+        QueueMessageScroll(true);
+        await ScrollMessagesToBottomAsync(true);
+    }
+
     private async Task SendDraftAsync()
     {
         var message = _draft;
@@ -253,7 +303,11 @@
         _messages.Add(new CustomerChatMessage("user", trimmed));
         LearnFromCustomerMessage(trimmed);
         _isSending = true;
+        _showJumpToLatest = false;
+        _latestUnreadCount = 0;
+        QueueMessageScroll(true);
         await PersistMemoryAsync();
+        await InvokeAsync(StateHasChanged);
 
         try
         {
@@ -274,12 +328,18 @@
         finally
         {
             _isSending = false;
+            if (_isOpen && !_showJumpToLatest)
+            {
+                QueueMessageScroll(true);
+            }
+
             await PersistMemoryAsync();
         }
     }
 
     private async Task AddAssistantMessageAsync(string role, string content)
     {
+        var shouldAutoScroll = _isOpen && await IsMessagesNearBottomAsync();
         _messages.Add(new CustomerChatMessage(role, content));
         if (!_isOpen)
         {
@@ -287,8 +347,53 @@
             _memory.UnreadCount = _unreadCount;
             _ = ShowPopoutTemporarilyAsync(Text("The assistant replied. Open the chat to continue.", "ผู้ช่วยตอบแล้ว เปิดแชทเพื่อคุยต่อได้ค่ะ"));
         }
+        else if (shouldAutoScroll)
+        {
+            _showJumpToLatest = false;
+            _latestUnreadCount = 0;
+            QueueMessageScroll(true);
+        }
+        else
+        {
+            _showJumpToLatest = true;
+            _latestUnreadCount = Math.Clamp(_latestUnreadCount + 1, 1, 99);
+        }
 
         await PersistMemoryAsync();
+    }
+
+    private void QueueMessageScroll(bool smooth)
+    {
+        _messageScrollPending = true;
+        _messageScrollSmooth = smooth;
+    }
+
+    private async Task<bool> IsMessagesNearBottomAsync()
+    {
+        if (!_isOpen)
+        {
+            return true;
+        }
+
+        try
+        {
+            return await JS.InvokeAsync<bool>("malievChatbot.isNearBottom", _messagesContainer);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+            return true;
+        }
+    }
+
+    private async Task ScrollMessagesToBottomAsync(bool smooth)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("malievChatbot.scrollToBottom", _messagesContainer, smooth);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+        }
     }
 
     private void ResetDisplayedConversation(string? name, bool hasPreviousMessages)
