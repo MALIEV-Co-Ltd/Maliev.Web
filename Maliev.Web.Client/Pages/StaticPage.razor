@@ -422,87 +422,116 @@ else if (Path == "contact")
 {
     <section class="section contact-layout">
         <div class="contact-details">
-            <div class="content-stack">
-                @foreach (var item in Sections)
-                {
-                    <article>
-                        <h2>@item.Title.For(Preferences.Culture)</h2>
-                        <p>@item.Body.For(Preferences.Culture)</p>
-                        @if (item.Items.Count > 0)
-                        {
-                            <ul>
-                                @foreach (var point in item.Items)
-                                {
-                                    <li>@point.For(Preferences.Culture)</li>
-                                }
-                            </ul>
-                        }
-                    </article>
-                }
-            </div>
-            <div class="contact-direct-grid" aria-label='@Text("MALIEV direct contact channels", "ช่องทางติดต่อ MALIEV โดยตรง")'>
-                <article class="contact-direct-card">
-                    <span class="contact-direct-icon" aria-hidden="true">
-                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Medium" />
-                    </span>
-                    <div>
-                        <h3>@Text("Company address", "ที่อยู่บริษัท")</h3>
-                        <p>
-                            <strong>@Text("MALIEV Co., Ltd.", "บริษัท มาลีฟ จำกัด")</strong>
-                            <span>@Text("36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand", "36/1 หมู่ 3 ตำบลคลองข่อย อำเภอปากเกร็ด จังหวัดนนทบุรี 11120 ประเทศไทย")</span>
-                        </p>
-                        <a class="contact-inline-link" href="https://maps.app.goo.gl/DPefucxBN2FTnZQa6" target="_blank" rel="noopener noreferrer">@Text("Open in Google Maps", "เปิดใน Google Maps")</a>
+            <div class="contact-business-panel" aria-label='@Text("MALIEV contact channels", "ช่องทางติดต่อ MALIEV")'>
+                <article class="contact-business-section contact-business-section--sales">
+                    <div class="contact-section-head">
+                        <span class="contact-section-icon" aria-hidden="true">
+                            <MudIcon Icon="@Icons.Material.Filled.RequestQuote" Size="Size.Medium" />
+                        </span>
+                        <div>
+                            <h2>@Text("Sales and quotations", "ฝ่ายขายและใบเสนอราคา")</h2>
+                            <p>@Text("Send product questions, drawings, 3D files, or project notes. MALIEV will confirm the manufacturing route, lead time, and next commercial step.", "ส่งคำถามสินค้า Drawing ไฟล์ 3D หรือหมายเหตุโปรเจกต์ MALIEV จะยืนยันเส้นทางผลิต ระยะเวลา และขั้นตอนการค้า")</p>
+                        </div>
                     </div>
-                </article>
-                <article class="contact-direct-card">
-                    <span class="contact-direct-icon" aria-hidden="true">
-                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Medium" />
-                    </span>
-                    <div>
-                        <h3>@Text("Opening hours", "เวลาทำการ")</h3>
-                        <p>
-                            <strong>@Text("Weekdays", "วันจันทร์-ศุกร์")</strong>
-                            <span>@Text("10:00-18:00, excluding public holidays", "10:00-18:00 น. ยกเว้นวันหยุดนักขัตฤกษ์")</span>
-                        </p>
+                    <dl class="contact-info-rows">
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.AlternateEmail" Size="Size.Small" /> @Text("Email", "อีเมล")</dt>
+                            <dd><a href="mailto:info@maliev.com">info@maliev.com</a></dd>
+                        </div>
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" /> @Text("Opening hours", "เวลาทำการ")</dt>
+                            <dd>@Text("Weekdays 10:00-18:00, excluding public holidays", "วันจันทร์-ศุกร์ 10:00-18:00 น. ยกเว้นวันหยุดนักขัตฤกษ์")</dd>
+                        </div>
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" /> @Text("Address", "ที่อยู่")</dt>
+                            <dd>@Text("MALIEV Co., Ltd. 36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand", "บริษัท มาลีฟ จำกัด 36/1 หมู่ 3 ตำบลคลองข่อย อำเภอปากเกร็ด จังหวัดนนทบุรี 11120 ประเทศไทย")</dd>
+                        </div>
+                    </dl>
+                    <div class="contact-section-actions">
+                        <a class="button primary" href="mailto:info@maliev.com">@Text("Email sales", "อีเมลฝ่ายขาย")</a>
+                        <a class="button secondary" href="tel:+66818030404">+66 81 803 0404</a>
+                        <a class="contact-line-add-friend"
+                           href="https://page.line.me/maliev"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="@Text("Add MALIEV on LINE Official Account @maliev", "เพิ่มเพื่อน MALIEV ทาง LINE Official Account @maliev")">
+                            <svg class="line-contact-logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                                <rect class="line-contact-logo-bg" width="48" height="48" rx="12" />
+                                <path class="line-contact-logo-bubble" d="M24 10c-8.3 0-15 5.2-15 11.6 0 5.7 5.4 10.5 12.6 11.4.5.1.9.5.9 1v2.2c0 .8.9 1.3 1.6.8l5-3.6c5.8-1.5 9.9-6 9.9-11.8C39 15.2 32.3 10 24 10Z" />
+                                <text class="line-contact-logo-text" x="24" y="25.4" text-anchor="middle" dominant-baseline="middle">LINE</text>
+                            </svg>
+                            <span>@Text("Add friend on LINE", "เพิ่มเพื่อนทาง LINE")</span>
+                        </a>
                     </div>
-                </article>
-                <article class="contact-direct-card contact-direct-card--wide">
-                    <span class="contact-direct-icon" aria-hidden="true">
-                        <MudIcon Icon="@Icons.Material.Filled.AlternateEmail" Size="Size.Medium" />
-                    </span>
-                    <div>
-                        <h3>@Text("Sales and quotations", "ฝ่ายขายและใบเสนอราคา")</h3>
-                        <p>@Text("Send drawings, 3D files, order questions, or machine support requests through the channel that fits your workflow.", "ส่ง Drawing ไฟล์ 3D คำถามคำสั่งซื้อ หรือคำขอสนับสนุนเครื่องจักรผ่านช่องทางที่สะดวก")</p>
-                        <div class="contact-link-list">
-                            <a class="contact-link-pill" href="mailto:info@maliev.com">info@maliev.com</a>
-                            <a class="contact-link-pill" href="tel:+66818030404">+66 81 803 0404</a>
-                            <a class="contact-link-pill contact-link-pill--line" href="https://page.line.me/maliev" target="_blank" rel="noopener noreferrer">@Text("LINE @maliev", "LINE @maliev")</a>
+                    <div class="contact-social-cluster">
+                        <span>@Text("Follow manufacturing updates", "ติดตามข่าวงานผลิต")</span>
+                        <div class="contact-social-icon-row" aria-label="@Text("MALIEV social media channels", "ช่องทางโซเชียลของ MALIEV")">
+                            <a class="contact-social-icon-link contact-social-icon-link--facebook" href="https://www.facebook.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M22 12.06C22 6.49 17.52 2 11.95 2S2 6.49 2 12.06c0 5.03 3.66 9.2 8.45 9.94v-7.03H7.9v-2.91h2.55V9.84c0-2.52 1.49-3.91 3.78-3.91 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.91h2.78l-.44 2.91h-2.34V22A10.03 10.03 0 0 0 22 12.06Z" />
+                                </svg>
+                                <span class="sr-only">Facebook</span>
+                            </a>
+                            <a class="contact-social-icon-link contact-social-icon-link--youtube" href="https://www.youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M21.58 7.19a2.51 2.51 0 0 0-1.76-1.77C18.26 5 12 5 12 5s-6.26 0-7.82.42a2.51 2.51 0 0 0-1.76 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81a2.51 2.51 0 0 0 1.76 1.77C5.74 19 12 19 12 19s6.26 0 7.82-.42a2.51 2.51 0 0 0 1.76-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81ZM10 15.05v-6.1L15.25 12 10 15.05Z" />
+                                </svg>
+                                <span class="sr-only">YouTube</span>
+                            </a>
+                            <a class="contact-social-icon-link contact-social-icon-link--instagram" href="https://www.instagram.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 4.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm0 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm4.75-3.25a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z" />
+                                </svg>
+                                <span class="sr-only">Instagram</span>
+                            </a>
                         </div>
                     </div>
                 </article>
-                <article class="contact-direct-card contact-direct-card--wide">
-                    <span class="contact-direct-icon" aria-hidden="true">
-                        <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Medium" />
-                    </span>
-                    <div>
-                        <h3>@Text("Social channels", "ช่องทางโซเชียล")</h3>
-                        <p>@Text("Follow MALIEV manufacturing updates, product launches, and workshop activity.", "ติดตามข่าวงานผลิต สินค้าใหม่ และกิจกรรมเวิร์กช็อปของ MALIEV")</p>
-                        <div class="contact-social-links">
-                            <a class="contact-social-link contact-social-link--facebook" href="https://www.facebook.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer">Facebook</a>
-                            <a class="contact-social-link contact-social-link--youtube" href="https://www.youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig" target="_blank" rel="noopener noreferrer">YouTube</a>
-                            <a class="contact-social-link contact-social-link--instagram" href="https://www.instagram.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <article class="contact-business-section contact-business-section--support">
+                    <div class="contact-section-head">
+                        <span class="contact-section-icon" aria-hidden="true">
+                            <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Size="Size.Medium" />
+                        </span>
+                        <div>
+                            <h2>@Text("Machine and product support", "สนับสนุนเครื่องจักรและสินค้า")</h2>
+                            <p>@Text("For machines, spare parts, printed products, or order follow-up, include the product name, order reference, photos, and the issue you want checked.", "สำหรับเครื่องจักร อะไหล่ สินค้าพิมพ์ หรือการติดตามคำสั่งซื้อ ระบุชื่อสินค้า เลขอ้างอิงคำสั่งซื้อ รูปถ่าย และปัญหาที่ต้องการให้ตรวจ")</p>
                         </div>
+                    </div>
+                    <dl class="contact-info-rows">
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.MarkEmailUnread" Size="Size.Small" /> @Text("Support email", "อีเมลสนับสนุน")</dt>
+                            <dd><a href="mailto:support@maliev.com">support@maliev.com</a></dd>
+                        </div>
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Small" /> @Text("What to include", "ควรแนบข้อมูล")</dt>
+                            <dd>@Text("Order reference, product name, photos or video, symptoms, machine serial number when available.", "เลขอ้างอิงคำสั่งซื้อ ชื่อสินค้า รูปหรือวิดีโอ อาการ และหมายเลขเครื่องเมื่อมี")</dd>
+                        </div>
+                        <div class="contact-info-row">
+                            <dt><MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" /> @Text("Support hours", "เวลาสนับสนุน")</dt>
+                            <dd>@Text("Weekdays 10:00-18:00. Urgent safety issues should stop machine operation before contacting support.", "วันจันทร์-ศุกร์ 10:00-18:00 น. หากเป็นประเด็นความปลอดภัยเร่งด่วน ให้หยุดใช้งานเครื่องก่อนติดต่อทีมสนับสนุน")</dd>
+                        </div>
+                    </dl>
+                    <div class="contact-section-actions">
+                        <a class="button secondary" href="mailto:support@maliev.com">@Text("Email support", "อีเมลฝ่ายสนับสนุน")</a>
+                        <a class="contact-line-add-friend" href="https://page.line.me/maliev" target="_blank" rel="noopener noreferrer">
+                            <svg class="line-contact-logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                                <rect class="line-contact-logo-bg" width="48" height="48" rx="12" />
+                                <path class="line-contact-logo-bubble" d="M24 10c-8.3 0-15 5.2-15 11.6 0 5.7 5.4 10.5 12.6 11.4.5.1.9.5.9 1v2.2c0 .8.9 1.3 1.6.8l5-3.6c5.8-1.5 9.9-6 9.9-11.8C39 15.2 32.3 10 24 10Z" />
+                                <text class="line-contact-logo-text" x="24" y="25.4" text-anchor="middle" dominant-baseline="middle">LINE</text>
+                            </svg>
+                            <span>@Text("Message support on LINE", "คุยกับทีมสนับสนุนทาง LINE")</span>
+                        </a>
                     </div>
                 </article>
             </div>
-            <article class="contact-map-card">
+            <article class="contact-map-section">
                 <div class="contact-map-heading">
-                    <span class="contact-direct-icon" aria-hidden="true">
+                    <span class="contact-section-icon" aria-hidden="true">
                         <MudIcon Icon="@Icons.Material.Filled.Map" Size="Size.Medium" />
                     </span>
                     <div>
-                        <h3>@Text("Google Maps location preview", "ตัวอย่างตำแหน่งบน Google Maps")</h3>
-                        <p>@Text("Use the map preview to confirm route, parking, and delivery access before visiting.", "ใช้แผนที่เพื่อตรวจเส้นทาง ที่จอดรถ และทางเข้าส่งของก่อนเข้ามา")</p>
+                        <h2>@Text("Visit MALIEV", "เข้ามาที่ MALIEV")</h2>
+                        <p>@Text("Preview the workshop location for deliveries, pickups, parking, and route planning before visiting.", "ดูตำแหน่งเวิร์กช็อปสำหรับส่งของ รับสินค้า ที่จอดรถ และวางแผนเส้นทางก่อนเข้ามา")</p>
                     </div>
                 </div>
                 <iframe class="contact-map-preview"
@@ -510,6 +539,9 @@ else if (Path == "contact")
                         title='@Text("Google Maps location preview for MALIEV", "แผนที่ Google Maps ของ MALIEV")'
                         loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="contact-map-actions">
+                    <a class="button secondary" href="https://maps.app.goo.gl/DPefucxBN2FTnZQa6" target="_blank" rel="noopener noreferrer">@Text("Open larger map", "เปิดแผนที่ขนาดใหญ่")</a>
+                </div>
             </article>
         </div>
         <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
