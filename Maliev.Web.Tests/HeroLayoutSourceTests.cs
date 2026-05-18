@@ -459,6 +459,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("contact-business-section contact-business-section--support", source);
         Assert.Contains("contact-map-section", source);
         Assert.Contains("contact-map-preview", source);
+        Assert.Contains("contact-map-title", source);
+        Assert.Contains("contact-map-title-logo", source);
+        Assert.Contains("src=\"/images/logo.svg\"", source);
+        Assert.Contains("alt=\"MALIEV\"", source);
+        Assert.DoesNotContain("Visit MALIEV", source);
+        Assert.DoesNotContain("เข้ามาที่ MALIEV", source);
         Assert.Contains("contact-section-head", source);
         Assert.Contains("contact-info-rows", source);
         Assert.Contains("contact-section-actions", source);
@@ -546,6 +552,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-social-icon-link--facebook:hover", styles);
         Assert.Contains(".contact-social-icon-link--youtube:hover", styles);
         Assert.Contains(".contact-social-icon-link--instagram:hover", styles);
+        Assert.Contains(".contact-map-title", styles);
+        Assert.Contains(".contact-map-title-logo", styles);
+        Assert.Contains("filter: var(--logo-filter);", styles);
         Assert.Contains("grid-template-columns: 46px minmax(0, 1fr);", styles);
         Assert.DoesNotContain(".contact-direct-grid", styles);
         Assert.DoesNotContain(".contact-direct-card", styles);

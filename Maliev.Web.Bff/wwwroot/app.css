@@ -2339,6 +2339,21 @@ html:lang(th) .h1 {
   line-height: 1.18;
 }
 
+.contact-map-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .42em;
+  flex-wrap: wrap;
+}
+
+.contact-map-title-logo {
+  display: inline-block;
+  width: 3.25em;
+  height: auto;
+  filter: var(--logo-filter);
+  transform: translateY(.08em);
+}
+
 .contact-business-section p,
 .contact-map-section p {
   margin: 8px 0 0;
