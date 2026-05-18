@@ -199,24 +199,28 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies public quote dropzones upload selected or dropped CAD files before handing the workspace to QuoteEngine.
+    /// Verifies public quote dropzones route selected or dropped CAD files to QuoteEngine without Web-side uploads.
     /// </summary>
     [Fact]
-    public void QuoteDropzoneUploadsDroppedFilesBeforeQuoteEngineHandoff()
+    public void QuoteDropzoneRoutesSelectedFilesToQuoteEngine()
     {
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-quote-dropzone.js");
-        var uploadService = ReadRepoFile("Maliev.Web.Bff", "Services", "QuoteUploadService.cs");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("type=\"file\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("data-opening-label=\"@OpeningText\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("malievQuoteDropzone.register", dropzone, StringComparison.Ordinal);
         Assert.Contains("event.dataTransfer.files", script, StringComparison.Ordinal);
-        Assert.Contains("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
-        Assert.Contains("Content-Range", script, StringComparison.Ordinal);
-        Assert.Contains("handoff", script, StringComparison.Ordinal);
-        Assert.Contains("quotes/temp/", uploadService, StringComparison.Ordinal);
-        Assert.Contains("quote-temp-uploads", uploadService, StringComparison.Ordinal);
+        Assert.Contains("routeToQuoteEngine(Array.from(input.files), dropzone, quoteEngineUrl, state)", script, StringComparison.Ordinal);
+        Assert.Contains("redirectToQuoteEngine(quoteEngineUrl)", script, StringComparison.Ordinal);
+        Assert.Contains("window.location.assign(url.toString())", script, StringComparison.Ordinal);
+        Assert.Contains("Opening quote engine", script, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);
+        Assert.DoesNotContain("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Content-Range", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Uploading ", script, StringComparison.Ordinal);
         Assert.Contains("js/maliev-quote-dropzone.js", app, StringComparison.Ordinal);
     }
 

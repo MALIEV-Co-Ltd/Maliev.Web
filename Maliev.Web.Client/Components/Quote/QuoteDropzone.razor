@@ -12,7 +12,7 @@
             class="@ButtonClass"
             aria-label="@AriaLabel"
             data-idle-label="@ActionText"
-            data-uploading-label="@UploadingText">
+            data-opening-label="@OpeningText">
         <span class="landing-quote-dropzone-inner">
             <span class="landing-quote-dropzone-icon" aria-hidden="true">
                 <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
@@ -52,7 +52,7 @@
     public string? AriaLabel { get; set; }
 
     [Parameter]
-    public string UploadingText { get; set; } = "Uploading files";
+    public string OpeningText { get; set; } = "Opening quote engine";
 
     private string WrapperClass => string.IsNullOrWhiteSpace(Class)
         ? "landing-quote-dropzone-shell"

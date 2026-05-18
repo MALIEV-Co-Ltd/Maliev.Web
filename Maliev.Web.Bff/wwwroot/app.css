@@ -779,7 +779,7 @@ html:lang(th) .h1 {
   outline: none;
 }
 
-.landing-quote-dropzone.is-uploading {
+.landing-quote-dropzone.is-opening {
   cursor: progress;
   opacity: .78;
 }
