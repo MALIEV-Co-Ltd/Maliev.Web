@@ -2392,7 +2392,13 @@ html:lang(th) .h1 {
 
 .service-answer-card.has-media {
   grid-template-columns: minmax(132px, .42fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.service-answer-card.has-media > div {
+  padding: 18px;
 }
 
 .service-answer-card-media {
@@ -2402,8 +2408,6 @@ html:lang(th) .h1 {
   margin: 0;
   overflow: hidden;
   background: color-mix(in srgb, var(--service-soft) 70%, var(--paper));
-  border: 1px solid color-mix(in srgb, var(--service-accent) 16%, var(--rule));
-  border-radius: calc(var(--radius) - 2px);
 }
 
 .service-answer-card-media img {
