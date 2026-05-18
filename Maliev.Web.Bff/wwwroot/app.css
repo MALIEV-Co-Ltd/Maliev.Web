@@ -2458,39 +2458,10 @@ html:lang(th) .h1 {
   gap: 8px;
 }
 
-.contact-social-icon-link {
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  color: var(--muted);
-  background: var(--control-surface);
-  border-radius: 999px;
-  box-shadow: var(--shadow-border);
-  transition: transform .18s ease, background-color .18s ease, color .18s ease;
-}
-
-.contact-social-icon-link:hover {
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.contact-social-icon-link--facebook:hover {
-  background: #1877f2;
-}
-
-.contact-social-icon-link--youtube:hover {
-  background: #ff0000;
-}
-
-.contact-social-icon-link--instagram:hover {
-  background: #833ab4;
-}
-
-.contact-social-icon-link svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+.contact-social-icon-row .social-link {
+  --social-color: var(--muted);
+  --social-bg: var(--control-surface);
+  --social-ring: var(--shadow-border);
 }
 
 .contact-map-section {
@@ -3684,15 +3655,19 @@ html[data-theme="dark"] .auth-google-icon {
 .social-link {
   --social-hover-bg: var(--blue);
   --social-hover-color: var(--blue-on);
+  --social-color: var(--footer-text);
+  --social-bg: rgba(255, 255, 255, .06);
+  --social-ring: rgba(255, 255, 255, .12) 0 0 0 1px;
 
   display: inline-grid;
   place-items: center;
   width: 40px;
   height: 40px;
-  color: var(--footer-text);
-  background: rgba(255, 255, 255, .06);
+  color: var(--social-color);
+  background: var(--social-bg);
   border-radius: var(--radius);
-  box-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
+  box-shadow: var(--social-ring);
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
 
 .social-link:is(:hover, :focus-visible) {

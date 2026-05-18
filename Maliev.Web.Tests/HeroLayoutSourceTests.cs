@@ -473,9 +473,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("contact-info-rows", source);
         Assert.Contains("contact-section-actions", source);
         Assert.Contains("contact-line-add-friend", source);
-        Assert.Contains("contact-social-icon-link contact-social-icon-link--facebook", source);
-        Assert.Contains("contact-social-icon-link contact-social-icon-link--youtube", source);
-        Assert.Contains("contact-social-icon-link contact-social-icon-link--instagram", source);
+        Assert.Contains("contact-social-icon-row footer-social", source);
+        Assert.Contains("class=\"social-link social-link--facebook\"", source);
+        Assert.Contains("class=\"social-link social-link--youtube\"", source);
+        Assert.Contains("class=\"social-link social-link--instagram\"", source);
         Assert.Contains("Icons.Material.Filled.LocationOn", source);
         Assert.Contains("Icons.Material.Filled.Schedule", source);
         Assert.Contains("Icons.Material.Filled.AlternateEmail", source);
@@ -547,7 +548,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-section-icon", styles);
         Assert.Contains(".contact-info-row", styles);
         Assert.Contains(".contact-line-add-friend", styles);
-        Assert.Contains(".contact-social-icon-link", styles);
+        Assert.Contains(".contact-social-icon-row .social-link", styles);
         Assert.Contains(".contact-map-preview", styles);
         Assert.Contains(".contact-map-actions", styles);
         Assert.Contains(".contact-map-dialog-backdrop", styles);
@@ -557,9 +558,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-rfq-notice", styles);
         Assert.Contains(".contact-upload-panel", styles);
         Assert.Contains(".contact-file-list", styles);
-        Assert.Contains(".contact-social-icon-link--facebook:hover", styles);
-        Assert.Contains(".contact-social-icon-link--youtube:hover", styles);
-        Assert.Contains(".contact-social-icon-link--instagram:hover", styles);
+        Assert.Contains(".social-link--facebook", styles);
+        Assert.Contains(".social-link--youtube", styles);
+        Assert.Contains(".social-link--instagram", styles);
+        Assert.Contains("--social-bg", styles);
         Assert.Contains(".contact-map-title", styles);
         Assert.Contains(".contact-map-title-logo", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
