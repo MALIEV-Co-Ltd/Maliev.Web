@@ -2399,11 +2399,12 @@ html:lang(th) .h1 {
 .contact-line-add-friend {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 40px;
-  padding: 7px 13px 7px 8px;
-  color: var(--line-on);
-  background: var(--line-green);
+  gap: 10px;
+  min-height: 50px;
+  padding: 5px 15px 5px 5px;
+  color: var(--line-green);
+  background: var(--paper);
+  border: 1px solid color-mix(in srgb, var(--line-green) 34%, var(--rule));
   border-radius: 999px;
   box-shadow: rgba(6, 199, 85, .24) 0 10px 22px -14px, var(--shadow-border);
   font-size: .9rem;
@@ -2412,22 +2413,16 @@ html:lang(th) .h1 {
 }
 
 .contact-line-add-friend:hover {
-  color: var(--line-on);
-  background: #05b84e;
+  color: #049d44;
+  background: color-mix(in srgb, var(--line-green) 8%, var(--paper));
 }
 
-.contact-line-add-friend .line-contact-logo {
-  width: 26px;
-  height: 26px;
-}
-
-.contact-line-add-friend .line-contact-logo-bg {
-  fill: rgba(255, 255, 255, .20);
-}
-
-.contact-line-add-friend .line-contact-logo-bubble,
-.contact-line-add-friend .line-contact-logo-text {
-  fill: #ffffff;
+.line-app-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .contact-social-cluster {
@@ -3620,57 +3615,27 @@ html[data-theme="dark"] .auth-google-icon {
   align-items: center;
   gap: 10px;
   width: fit-content;
-  min-height: 44px;
-  padding: 6px 12px 6px 6px;
+  min-height: 52px;
+  padding: 6px 14px 6px 6px;
   background: rgba(255, 255, 255, .06);
   border-radius: var(--radius);
   box-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
 }
 
 .line-contact-link:hover {
-  color: var(--line-on);
-  background: var(--line-green);
+  color: var(--footer-text);
+  background: rgba(6, 199, 85, .12);
+  box-shadow: rgba(6, 199, 85, .36) 0 0 0 1px;
 }
 
 .line-contact-icon {
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   background: transparent;
   border-radius: var(--radius);
-}
-
-.line-contact-logo {
-  display: block;
-  width: 34px;
-  height: 34px;
-}
-
-.line-contact-logo-bg {
-  fill: var(--line-green);
-}
-
-.line-contact-logo-bubble {
-  fill: var(--line-on);
-}
-
-.line-contact-logo-text {
-  fill: var(--line-green);
-  font-family: var(--maliev-font-sans);
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .02em;
-}
-
-.line-contact-link:hover .line-contact-logo-bg {
-  fill: var(--line-on);
-}
-
-.line-contact-link:hover .line-contact-logo-bubble,
-.line-contact-link:hover .line-contact-logo-text {
-  fill: var(--line-green);
 }
 
 .line-contact-copy {
