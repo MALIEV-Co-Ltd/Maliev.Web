@@ -560,6 +560,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("OnPreferencesChanged", component);
         Assert.DoesNotContain("Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
+        Assert.Contains("Icons.Material.Filled.AutoAwesome", component);
+        Assert.Contains("customer-chatbot-profile", component);
+        Assert.Contains("customer-chatbot-gemini-icon", component);
+        Assert.Contains("customer-chatbot-title", component);
         Assert.Contains("aria-label=\"@Text(\"Open customer manufacturing assistant\"", component);
         Assert.DoesNotContain("<span>@Text(\"Mali\", \"น้องมะลิ\")</span>", component);
         Assert.DoesNotContain("<strong>@Text(\"Mali\", \"น้องมะลิ\")</strong>", component);
@@ -593,6 +597,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot", styles);
         Assert.Contains(".customer-chatbot-panel", styles);
         Assert.Contains(".customer-chatbot-popout", styles);
+        Assert.Contains(".customer-chatbot-profile", styles);
+        Assert.Contains(".customer-chatbot-gemini-icon", styles);
+        Assert.Contains(".customer-chatbot-gemini-icon .mud-icon-root", styles);
+        Assert.Contains(".customer-chatbot-title", styles);
         Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-message-rich", styles);
         Assert.Contains(".customer-chatbot-message-rich a", styles);

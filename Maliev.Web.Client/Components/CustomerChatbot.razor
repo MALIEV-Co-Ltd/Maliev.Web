@@ -14,9 +14,14 @@
     {
         <section class="customer-chatbot-panel" aria-live="polite">
             <header class="customer-chatbot-header">
-                <div>
-                    <span>@Text("MALIEV manufacturing assistant", "ผู้ช่วยงานผลิต MALIEV")</span>
-                    <small>@Text("Materials, quotes, orders, and delivery", "วัสดุ ใบเสนอราคา คำสั่งซื้อ และการจัดส่ง")</small>
+                <div class="customer-chatbot-profile">
+                    <span class="customer-chatbot-gemini-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small" />
+                    </span>
+                    <div class="customer-chatbot-title">
+                        <span>@Text("MALIEV manufacturing assistant", "ผู้ช่วยงานผลิต MALIEV")</span>
+                        <small>@Text("Materials, quotes, orders, and delivery", "วัสดุ ใบเสนอราคา คำสั่งซื้อ และการจัดส่ง")</small>
+                    </div>
                 </div>
                 <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpenAsync">
                     <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
