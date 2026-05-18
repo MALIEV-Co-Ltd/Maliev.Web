@@ -1051,6 +1051,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-compare-workbench", source);
         Assert.Contains("material-row-summary", source);
         Assert.Contains("material-row-media", source);
+        Assert.Contains("material-compare-property-label", source);
+        Assert.Contains("material-compare-material-head", source);
+        Assert.Contains("material-compare-head-media", source);
+        Assert.Contains("material-compare-head-copy", source);
+        Assert.Contains("material-compare-head-name", source);
+        Assert.Contains("material-compare-insight", source);
         Assert.Contains("material-mobile-card-visual", source);
         Assert.Contains("material-mobile-card-basic", source);
         Assert.Contains("material-mobile-card-detail", source);
@@ -1077,6 +1083,19 @@ public sealed class HeroLayoutSourceTests
         Assert.True(materialRowCopyIndex >= 0, "material row copy should exist");
         Assert.True(materialRowMediaIndex >= 0, "material row media should exist");
         Assert.True(materialRowCopyIndex < materialRowMediaIndex, "desktop material table should render text before image");
+
+        var materialCompareHeadIndex = source.IndexOf("<strong class=\"material-compare-material-head\">", StringComparison.Ordinal);
+        var materialCompareHeadMediaIndex = source.IndexOf("<span class=\"material-compare-head-media\">", materialCompareHeadIndex, StringComparison.Ordinal);
+        var materialCompareHeadCopyIndex = source.IndexOf("<span class=\"material-compare-head-copy\">", materialCompareHeadIndex, StringComparison.Ordinal);
+        var materialCompareHeadImageIndex = source.IndexOf("<img src=\"@material.ImageUrl\"", materialCompareHeadMediaIndex, StringComparison.Ordinal);
+        var materialCompareHeadNameIndex = source.IndexOf("<span class=\"material-compare-head-name\">@material.Name</span>", materialCompareHeadCopyIndex, StringComparison.Ordinal);
+        Assert.True(materialCompareHeadIndex >= 0, "direct comparison material header should exist");
+        Assert.True(materialCompareHeadMediaIndex >= 0, "direct comparison header should include material imagery");
+        Assert.True(materialCompareHeadImageIndex >= 0, "direct comparison header should render material image");
+        Assert.True(materialCompareHeadCopyIndex >= 0, "direct comparison header should include material copy");
+        Assert.True(materialCompareHeadNameIndex >= 0, "direct comparison header should include material name");
+        Assert.True(materialCompareHeadMediaIndex < materialCompareHeadCopyIndex, "direct comparison header should render image before material copy");
+        Assert.True(materialCompareHeadImageIndex < materialCompareHeadNameIndex, "direct comparison header image should come before the material name");
 
         var materialMobileVisualIndex = source.IndexOf("<div class=\"material-mobile-card-visual\">", StringComparison.Ordinal);
         var materialMobileBasicIndex = source.IndexOf("<div class=\"material-mobile-card-basic\">", StringComparison.Ordinal);
@@ -1110,6 +1129,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-pro-con-line material-pro-con-con", source);
         Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-pro", source);
         Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-con", source);
+        Assert.Contains("@Text(\"Pros / watch\", \"ข้อดี / ระวัง\")", source);
+        Assert.Contains("@Text(\"Advantage\", \"จุดเด่น\")", source);
+        Assert.Contains("@Text(\"Check before use\", \"ควรตรวจ\")", source);
+        Assert.Contains("<span class=\"material-compare-insight\">", source);
         Assert.Contains("Compare material properties before uploading CAD.", source);
         Assert.Contains("เปรียบเทียบคุณสมบัติวัสดุก่อนอัปโหลด CAD", source);
         Assert.DoesNotContain("Compare strength, heat, chemistry, finish, and trade-offs before uploading CAD.", source);
@@ -1152,9 +1175,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("display: grid;", styles);
         Assert.Contains(".material-select-button", styles);
         Assert.Contains(".material-compare-matrix", styles);
+        Assert.Contains(".material-compare-property-label", styles);
+        Assert.Contains(".material-compare-material-head", styles);
+        Assert.Contains(".material-compare-head-media", styles);
+        Assert.Contains(".material-compare-insight", styles);
         Assert.Contains(".material-pro-con-pro", styles);
         Assert.Contains(".material-pro-con-con", styles);
-        Assert.Contains("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
+        Assert.Contains("color-mix(in srgb, #f59e0b 10%, var(--paper))", styles);
+        Assert.Contains("border-left: 4px solid var(--material-tone);", styles);
+        Assert.Contains(".material-pro-con-line strong::before,\n.material-compare-insight strong::before", styles);
+        Assert.DoesNotContain("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
         Assert.Contains(".material-filter", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains(".material-row-summary {\n  display: grid;\n  gap: 12px;", styles);
