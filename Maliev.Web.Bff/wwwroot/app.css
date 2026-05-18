@@ -3739,11 +3739,11 @@ html[data-theme="dark"] .auth-google-icon {
   padding: 24px;
 }
 
-.blog-detail .content-stack {
+.article-detail-layout .content-stack {
   gap: clamp(28px, 4vw, 42px);
 }
 
-.blog-detail .content-stack article {
+.article-detail-layout .content-stack article {
   padding: 0;
   overflow: visible;
   background: transparent;
@@ -3751,7 +3751,7 @@ html[data-theme="dark"] .auth-google-icon {
   box-shadow: none;
 }
 
-.blog-detail .detail-section + .detail-section {
+.article-detail-layout .detail-section + .detail-section {
   padding-top: clamp(24px, 3vw, 34px);
   border-top: 1px solid var(--rule);
 }

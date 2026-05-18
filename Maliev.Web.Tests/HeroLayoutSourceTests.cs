@@ -1195,8 +1195,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("article-detail-layout blog-detail", source);
         Assert.Contains("case-study-detail", source);
         Assert.Contains(".article-detail-layout", styles);
-        Assert.Contains(".blog-detail .content-stack article", styles);
+        Assert.Contains(".article-detail-layout .content-stack", styles);
+        Assert.Contains(".article-detail-layout .content-stack article", styles);
+        Assert.Contains(".article-detail-layout .detail-section + .detail-section", styles);
         Assert.Contains("box-shadow: none", styles);
+        Assert.Contains("background: transparent", styles);
+        Assert.Contains("border-radius: 0", styles);
+        Assert.DoesNotContain(".blog-detail .content-stack article", styles);
+        Assert.DoesNotContain(".case-study-detail .content-stack article", styles);
         Assert.Contains(".detail-sidebar", styles);
         Assert.Contains("detail-sidebar-actions", source);
         Assert.Contains(".detail-sidebar-actions", styles);
