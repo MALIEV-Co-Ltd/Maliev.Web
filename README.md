@@ -84,6 +84,8 @@ When the site runs under Aspire, store the Web-specific client in `Maliev.Aspire
 }
 ```
 
+Direct Web user-secrets take priority over the shared Aspire secrets file. `sharedsecrets.json` is only a Development fallback for missing values, so a customer-facing Web OAuth client cannot be silently replaced by the shared internal app client.
+
 The Google OAuth client must allow these redirect URIs:
 
 ```text

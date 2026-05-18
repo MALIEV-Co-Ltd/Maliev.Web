@@ -15,11 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
 {
-    var sharedSecretsPath = Path.Combine(builder.Environment.ContentRootPath, "..", "..", "Maliev.Aspire", "Maliev.Aspire.AppHost", "sharedsecrets.json");
-    if (File.Exists(sharedSecretsPath))
-    {
-        builder.Configuration.AddJsonFile(sharedSecretsPath, optional: true, reloadOnChange: true);
-    }
+    AddDevelopmentSharedSecretsFallback(builder);
 }
 
 builder.WebHost.UseStaticWebAssets();
@@ -170,6 +166,54 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Maliev.Web.Client._Imports).Assembly);
 
 app.Run();
+
+static void AddDevelopmentSharedSecretsFallback(WebApplicationBuilder builder)
+{
+    var sharedSecretsPath = Path.Combine(
+        builder.Environment.ContentRootPath,
+        "..",
+        "..",
+        "Maliev.Aspire",
+        "Maliev.Aspire.AppHost",
+        "sharedsecrets.json");
+    if (!File.Exists(sharedSecretsPath))
+    {
+        return;
+    }
+
+    var sharedSecrets = new ConfigurationBuilder()
+        .AddJsonFile(sharedSecretsPath, optional: true, reloadOnChange: true)
+        .Build();
+
+    ApplyMissingSharedSecretValues(builder.Configuration, sharedSecrets);
+}
+
+static void ApplyMissingSharedSecretValues(IConfiguration target, IConfiguration fallback)
+{
+    foreach (var section in fallback.GetChildren())
+    {
+        ApplyMissingSharedSecretValue(target, section, section.Key);
+    }
+}
+
+static void ApplyMissingSharedSecretValue(IConfiguration target, IConfigurationSection fallbackSection, string path)
+{
+    var children = fallbackSection.GetChildren().ToArray();
+    if (children.Length > 0)
+    {
+        foreach (var child in children)
+        {
+            ApplyMissingSharedSecretValue(target, child, $"{path}:{child.Key}");
+        }
+
+        return;
+    }
+
+    if (string.IsNullOrWhiteSpace(target[path]) && !string.IsNullOrWhiteSpace(fallbackSection.Value))
+    {
+        target[path] = fallbackSection.Value;
+    }
+}
 
 /// <summary>
 /// Marker program type for WebApplicationFactory-based tests.

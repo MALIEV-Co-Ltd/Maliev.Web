@@ -1252,6 +1252,22 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies direct Web runs do not let shared Aspire secrets override the Web Google OAuth client.
+    /// </summary>
+    [Fact]
+    public void DirectWebGoogleUserSecretsOverrideSharedAspireSecrets()
+    {
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+        var readme = ReadRepoFile("README.md");
+
+        Assert.Contains("AddDevelopmentSharedSecretsFallback(builder);", program);
+        Assert.Contains("ApplyMissingSharedSecretValues(builder.Configuration, sharedSecrets);", program);
+        Assert.Contains("string.IsNullOrWhiteSpace(target[path])", program);
+        Assert.Contains("Direct Web user-secrets take priority", readme);
+        Assert.DoesNotContain("builder.Configuration.AddJsonFile(sharedSecretsPath, optional: true, reloadOnChange: true);", program);
+    }
+
+    /// <summary>
     /// Verifies customer auth pages use the MALIEV logo in the sign-in title and a Google-branded OAuth button.
     /// </summary>
     [Fact]
