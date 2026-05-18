@@ -85,6 +85,50 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies simple customer greetings are conversational and are not rejected as off-topic questions.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_ThaiGreeting_ReturnsNaturalConversationPrompt()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "สวัสดีครับ",
+            Language = "th"
+        }, CancellationToken.None);
+
+        Assert.False(response.IsOutOfScope);
+        Assert.Equal("th", response.Language);
+        Assert.Contains("น้องมะลิ", response.Content, StringComparison.Ordinal);
+        Assert.Contains("ชิ้นงาน", response.Content, StringComparison.Ordinal);
+        Assert.Null(client.InitiateRequest);
+        Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
+    /// Verifies greeting words do not bypass the topic boundary when the customer asks an unrelated question.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_GreetingPlusOffTopicQuestion_ReturnsBoundedRedirect()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "Hi, who won the football match?",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.True(response.IsOutOfScope);
+        Assert.Contains("outside", response.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(client.InitiateRequest);
+        Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
     /// Verifies the topic guard does not treat ordinary words that contain "hi" as greetings.
     /// </summary>
     [Fact]

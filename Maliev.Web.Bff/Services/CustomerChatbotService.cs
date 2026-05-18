@@ -42,10 +42,20 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "hi", "hello", "hey", "good morning", "good afternoon", "good evening", "สวัสดี", "หวัดดี"
     ];
 
+    private static readonly string[] ThanksTerms =
+    [
+        "thanks", "thank you", "ขอบคุณ"
+    ];
+
     public async Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
     {
         var message = request.Message.Trim();
         var language = NormalizeLanguage(request.Language, message);
+
+        if (IsNaturalConversationOnly(message))
+        {
+            return CreateNaturalConversationResponse(request.SessionId, language);
+        }
 
         if (!IsAllowedCustomerTopic(message))
         {
@@ -98,20 +108,64 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         }
 
         var normalized = message.Trim().ToLowerInvariant();
-        if (normalized.Length <= 48 && GreetingTerms.Any(term => IsGreeting(normalized, term)))
-        {
-            return true;
-        }
 
         return AllowedTopicTerms.Any(term => ContainsAllowedTerm(normalized, term));
     }
 
-    private static bool IsGreeting(string normalizedMessage, string greeting)
+    private static bool IsNaturalConversationOnly(string message)
     {
-        return normalizedMessage.Equals(greeting, StringComparison.Ordinal)
-            || normalizedMessage.StartsWith($"{greeting} ", StringComparison.Ordinal)
-            || normalizedMessage.StartsWith($"{greeting},", StringComparison.Ordinal)
-            || normalizedMessage.StartsWith($"{greeting}!", StringComparison.Ordinal);
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return false;
+        }
+
+        var normalized = NormalizeConversationText(message);
+        if (normalized.Length > 64 || normalized.Contains('?') || normalized.Contains('？'))
+        {
+            return false;
+        }
+
+        return GreetingTerms.Any(term => MatchesConversationTerm(normalized, term))
+            || ThanksTerms.Any(term => MatchesConversationTerm(normalized, term));
+    }
+
+    private static string NormalizeConversationText(string message)
+    {
+        return message.Trim()
+            .Trim('.', ',', '!', '?', '？', '!', ' ', '\t', '\r', '\n')
+            .ToLowerInvariant();
+    }
+
+    private static bool MatchesConversationTerm(string normalizedMessage, string term)
+    {
+        if (normalizedMessage.Equals(term, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (term.Any(ch => ch >= '\u0E00' && ch <= '\u0E7F'))
+        {
+            if (!normalizedMessage.StartsWith(term, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var suffix = normalizedMessage[term.Length..].Trim();
+            return string.IsNullOrWhiteSpace(suffix)
+                || suffix is "ครับ" or "ค่ะ" or "คะ" or "จ้า" or "จ้ะ" or "นะ" or "นะครับ" or "นะคะ" or "น้องมะลิ" or "มะลิ";
+        }
+
+        var allowedSuffixes = new[] { "mali", "there", "team", "maliev", "mali team" };
+        foreach (var suffix in allowedSuffixes)
+        {
+            if (normalizedMessage.Equals($"{term} {suffix}", StringComparison.Ordinal)
+                || normalizedMessage.Equals($"{term}, {suffix}", StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool ContainsAllowedTerm(string normalizedMessage, string term)
@@ -187,11 +241,25 @@ Customer message:
         {
             SessionId = sessionId,
             Content = language == "th"
-                ? "น้องมะลิช่วยตอบได้เฉพาะเรื่องบริการของ MALIEV เช่น งานผลิตชิ้นส่วน วัสดุ 3D printing, CNC, 3D scanning, งานหล่อ ใบเสนอราคา คำสั่งซื้อ และการจัดส่งค่ะ"
-                : "Mali can help with MALIEV manufacturing and service-related topics only: custom parts, materials, 3D printing, CNC machining, 3D scanning, molding, quotations, orders, and delivery.",
+                ? "ขอโทษค่ะ เรื่องนี้อยู่นอกขอบเขตที่น้องมะลิช่วยตอบได้ ลองถามเกี่ยวกับชิ้นงาน วัสดุ ไฟล์ CAD ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งของ MALIEV ได้เลยค่ะ"
+                : "Sorry, that is outside what Mali can help with here. Ask me about MALIEV manufacturing services, parts, materials, CAD files, quotes, orders, or delivery.",
             Role = "assistant",
             Language = language,
             IsOutOfScope = true,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+    }
+
+    private static CustomerChatbotResponse CreateNaturalConversationResponse(Guid? sessionId, string language)
+    {
+        return new CustomerChatbotResponse
+        {
+            SessionId = sessionId,
+            Content = language == "th"
+                ? "สวัสดีค่ะ น้องมะลิพร้อมช่วยแล้วค่ะ มีชิ้นงาน วัสดุ ไฟล์ CAD ใบเสนอราคา หรือคำสั่งซื้อเรื่องไหนให้ช่วยดูบ้างคะ"
+                : "Hi, I am here. Tell me what part, material, CAD file, quote, or order you want help with.",
+            Role = "assistant",
+            Language = language,
             CreatedAt = DateTimeOffset.UtcNow
         };
     }
