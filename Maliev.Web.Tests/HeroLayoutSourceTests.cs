@@ -1009,6 +1009,8 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var scrollScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
 
         Assert.Contains("@page \"/materials\"", source);
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
@@ -1049,6 +1051,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("material-comparison-table", source);
         Assert.Contains("material-mobile-list", source);
         Assert.Contains("material-compare-workbench", source);
+        Assert.Contains("class=\"material-compare-workbench\" @ref=\"_materialCompareWorkbench\"", source);
+        Assert.Contains("@inject IJSRuntime JS", source);
+        Assert.Contains("private ElementReference _materialCompareWorkbench;", source);
+        Assert.Contains("private bool _pendingMaterialComparisonScroll;", source);
+        Assert.Contains("protected override async Task OnAfterRenderAsync(bool firstRender)", source);
+        Assert.Contains("await JS.InvokeVoidAsync(\"malievScroll.scrollIntoView\", _materialCompareWorkbench);", source);
+        Assert.Contains("_selectedMaterialNames.Count is >= 2 and <= 3", source);
+        Assert.Contains("_pendingMaterialComparisonScroll = true;", source);
+        Assert.Contains("_pendingMaterialComparisonScroll = false;", source);
         Assert.Contains("material-row-summary", source);
         Assert.Contains("material-row-media", source);
         Assert.Contains("material-compare-property-label", source);
@@ -1145,6 +1156,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("MaterialUseFilters", source);
         Assert.Contains("ImageUrl", source);
         Assert.Contains("ImageAlt", source);
+        Assert.Contains("js/maliev-scroll.js", app);
+        Assert.Contains("window.malievScroll", scrollScript);
+        Assert.Contains("scrollIntoView: function (element, offset)", scrollScript);
+        Assert.Contains("getBoundingClientRect", scrollScript);
+        Assert.Contains("window.scrollTo", scrollScript);
+        Assert.Contains("prefers-reduced-motion: reduce", scrollScript);
+        Assert.Contains("behavior: prefersReducedMotion ? 'auto' : 'smooth'", scrollScript);
         Assert.Contains(".material-category-media", styles);
         Assert.Contains(".material-category-body", styles);
         Assert.DoesNotContain(".blog-hero-logo", styles);
