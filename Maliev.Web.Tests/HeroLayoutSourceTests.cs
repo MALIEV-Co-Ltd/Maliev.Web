@@ -63,6 +63,58 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the service detail page explains quotation readiness instead of rendering shallow spec cards.
+    /// </summary>
+    [Fact]
+    public void ServicePageExplainsSpecificQuotationReadiness()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("SiteContent.GetServiceDetail(Service.Slug)", source);
+        Assert.Contains("service-detail-section", source);
+        Assert.Contains("service-supported-files", source);
+        Assert.Contains("service-material-route-grid", source);
+        Assert.Contains("service-dfm-grid", source);
+        Assert.Contains("service-ordering-grid", source);
+        Assert.Contains("Quote-ready checklist", source);
+        Assert.Contains("How ordering with MALIEV works.", source);
+        Assert.Contains("<MudIcon Icon=\"@DetailIcon(route.IconKey)\"", source);
+        Assert.Contains("Icons.Material.Filled.Straighten", source);
+        Assert.Contains("Icons.Material.Filled.ScreenRotationAlt", source);
+        Assert.DoesNotContain("SpecHelp(", source);
+        Assert.DoesNotContain("<div class=\"service-detail-grid\">", source);
+
+        Assert.Contains("ThreeDimensionalPrintingServiceDetail", content);
+        Assert.Contains("3D printing service details", content);
+        Assert.Contains("Available material routes", source);
+        Assert.Contains("STL", content);
+        Assert.Contains("STEP / STP", content);
+        Assert.Contains("OBJ", content);
+        Assert.Contains("3MF", content);
+        Assert.Contains("IGES / IGS", content);
+        Assert.Contains("PLA, PETG, ABS / ASA, TPU, nylon", content);
+        Assert.Contains("Standard and engineering SLA resin", content);
+        Assert.Contains("PA12 nylon and powder-bed routes", content);
+        Assert.Contains("Wall thickness and unsupported spans", content);
+        Assert.Contains("Tolerances and fit-critical faces", content);
+        Assert.Contains("Orientation and support marks", content);
+        Assert.Contains("Threads, inserts, and hole strategy", content);
+        Assert.Contains("Upload CAD and requirements", content);
+        Assert.Contains("Produce, check, and deliver", content);
+
+        Assert.Contains(".service-brief-grid", styles);
+        Assert.Contains(".service-material-route-grid", styles);
+        Assert.Contains(".service-dfm-grid", styles);
+        Assert.Contains(".service-ordering-grid", styles);
+        Assert.Contains(".service-file-chip", styles);
+        Assert.Contains(".service-detail-icon .mud-icon-root", styles);
+        Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
+        Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
+    }
+
+    /// <summary>
     /// Verifies the home hero routes quote entry through a MudBlazor dropzone CTA.
     /// </summary>
     [Fact]

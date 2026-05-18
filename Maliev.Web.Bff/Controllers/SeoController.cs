@@ -10,37 +10,37 @@ namespace Maliev.Web.Bff.Controllers;
 [AllowAnonymous]
 public sealed class SeoController : ControllerBase
 {
-    private static readonly string[] PublicRoutes =
+    private static readonly SitemapRoute[] PublicRoutes =
     [
-        "/",
-        "/services",
-        "/services/3d-printing",
-        "/services/cnc-machining",
-        "/services/3d-scanning",
-        "/services/3d-design",
-        "/services/silicone-casting",
-        "/services/rapid-prototyping",
-        "/services/deviation-analysis",
-        "/materials",
-        "/industries",
-        "/case-studies",
-        "/case-studies/fixture-turnaround",
-        "/case-studies/prototype-iteration",
-        "/case-studies/scan-to-cad-repair",
-        "/blog",
-        "/blog/design-for-manufacturing",
-        "/blog/choosing-3d-printing-materials",
-        "/blog/instant-part-pricing",
-        "/shop",
-        "/contact",
-        "/faq",
-        "/shipping-returns",
-        "/privacy",
-        "/cookie-policy",
-        "/refund-policy",
-        "/warranty-policy",
-        "/terms",
-        "/quote"
+        new("/"),
+        new("/services"),
+        new("/services/3d-printing", "2026-05-18"),
+        new("/services/cnc-machining"),
+        new("/services/3d-scanning"),
+        new("/services/3d-design"),
+        new("/services/silicone-casting"),
+        new("/services/rapid-prototyping"),
+        new("/services/deviation-analysis"),
+        new("/materials"),
+        new("/industries"),
+        new("/case-studies"),
+        new("/case-studies/fixture-turnaround"),
+        new("/case-studies/prototype-iteration"),
+        new("/case-studies/scan-to-cad-repair"),
+        new("/blog"),
+        new("/blog/design-for-manufacturing"),
+        new("/blog/choosing-3d-printing-materials"),
+        new("/blog/instant-part-pricing"),
+        new("/shop"),
+        new("/contact"),
+        new("/faq"),
+        new("/shipping-returns"),
+        new("/privacy"),
+        new("/cookie-policy"),
+        new("/refund-policy"),
+        new("/warranty-policy"),
+        new("/terms"),
+        new("/quote")
     ];
 
     /// <summary>
@@ -58,10 +58,16 @@ public sealed class SeoController : ControllerBase
     [HttpGet("/sitemap.xml")]
     public ContentResult Sitemap()
     {
-        var urls = PublicRoutes.Select(route => $"  <url><loc>https://www.maliev.com{route}</loc></url>");
+        var urls = PublicRoutes.Select(route =>
+            string.IsNullOrWhiteSpace(route.LastModified)
+                ? $"  <url><loc>https://www.maliev.com{route.Path}</loc></url>"
+                : $"  <url><loc>https://www.maliev.com{route.Path}</loc><lastmod>{route.LastModified}</lastmod></url>");
+
         var xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
             + string.Join("\n", urls)
             + "\n</urlset>\n";
         return Content(xml, "application/xml");
     }
+
+    private sealed record SitemapRoute(string Path, string? LastModified = null);
 }

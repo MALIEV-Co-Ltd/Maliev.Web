@@ -355,6 +355,72 @@ internal static class SiteContent
             ])
     ];
 
+    private static readonly ServiceDetailProfile ThreeDimensionalPrintingServiceDetail = new(
+        Text("3D printing service details", "รายละเอียดบริการพิมพ์ 3 มิติ"),
+        Text(
+            "Use this section to choose the right print route, prepare files for DFM review, and understand how a quote becomes production work.",
+            "ใช้ส่วนนี้เพื่อเลือกเส้นทางพิมพ์ เตรียมไฟล์ให้พร้อมตรวจ DFM และเข้าใจว่าใบเสนอราคาจะต่อไปสู่งานผลิตอย่างไร"),
+        Text(
+            "Prototype, validate, and produce polymer parts with the right print route.",
+            "ทำต้นแบบ ตรวจแบบ และผลิตชิ้นงานโพลีเมอร์ด้วยเส้นทางพิมพ์ที่เหมาะสม"),
+        Text(
+            "MALIEV supports FDM, SLA/resin, MJF/SLS nylon, and engineering polymer conversations for prototypes, jigs, fixtures, housings, display samples, and low-volume parts. We review manufacturability before accepting production so material, orientation, tolerance, finish, and delivery expectations stay realistic.",
+            "MALIEV รองรับงาน FDM, SLA/เรซิน, MJF/SLS ไนลอน และการเลือกโพลีเมอร์วิศวกรรมสำหรับต้นแบบ จิ๊ก ฟิกซ์เจอร์ เคส ตัวอย่างโชว์ และงานจำนวนน้อย เราตรวจความเหมาะสมในการผลิตก่อนรับงาน เพื่อให้วัสดุ ทิศทางพิมพ์ tolerance ผิวงาน และระยะส่งมอบอยู่บนความจริง"),
+        [
+            new(Text("STL", "STL"), Text("mesh for print-focused geometry", "mesh สำหรับงานพิมพ์โดยตรง"), Text("CAD", "CAD"), "file"),
+            new(Text("STEP / STP", "STEP / STP"), Text("preferred when fit, holes, and faces matter", "เหมาะเมื่อผิวประกบ รู และมิติสำคัญ"), Text("CAD", "CAD"), "cad"),
+            new(Text("OBJ", "OBJ"), Text("mesh with surface detail when needed", "mesh พร้อมรายละเอียดผิวเมื่อจำเป็น"), Text("CAD", "CAD"), "file"),
+            new(Text("3MF", "3MF"), Text("print package with units and color data", "แพ็กเกจงานพิมพ์พร้อมหน่วยและสี"), Text("CAD", "CAD"), "file"),
+            new(Text("IGES / IGS", "IGES / IGS"), Text("legacy surface data for review", "ข้อมูลพื้นผิวรุ่นเก่าสำหรับตรวจ"), Text("CAD", "CAD"), "cad"),
+            new(Text("PDF / drawings", "PDF / Drawing"), Text("supporting tolerance, thread, and finish notes", "เอกสารประกอบ tolerance เกลียว และผิวงาน"), Text("Support", "ประกอบ"), "review")
+        ],
+        [
+            new(
+                Text("PLA, PETG, ABS / ASA, TPU, nylon", "PLA, PETG, ABS / ASA, TPU, ไนลอน"),
+                Text("FDM for fast visual and functional checks, jigs, brackets, covers, and fixture trials where layer direction can be controlled.",
+                    "FDM สำหรับตรวจรูปร่างและการใช้งานเร็ว จิ๊ก ขายึด ฝาครอบ และฟิกซ์เจอร์ทดลอง เมื่อต้องควบคุมทิศทางเลเยอร์"),
+                Text("FDM", "FDM"),
+                "thermoplastic"),
+            new(
+                Text("Standard and engineering SLA resin", "เรซิน SLA ทั่วไปและเกรดวิศวกรรม"),
+                Text("High-detail parts, cosmetic prototypes, small features, and fit models where smooth surfaces matter more than impact resistance.",
+                    "ชิ้นงานรายละเอียดสูง ต้นแบบโชว์ ฟีเจอร์เล็ก และโมเดลประกอบ เมื่อผิวเรียบสำคัญกว่าการรับแรงกระแทก"),
+                Text("SLA / resin", "SLA / เรซิน"),
+                "resin"),
+            new(
+                Text("PA12 nylon and powder-bed routes", "PA12 ไนลอนและงานพิมพ์พาวเดอร์"),
+                Text("Durable functional prototypes, snap fits, clips, housings, and low-volume parts that need strength without support scars.",
+                    "ต้นแบบใช้งานจริง คลิป สแนปฟิต เคส และงานจำนวนน้อยที่ต้องการความแข็งแรงโดยไม่มีรอยซัพพอร์ตชัด"),
+                Text("MJF / SLS", "MJF / SLS"),
+                "nylon"),
+            new(
+                Text("Production-grade polymer review", "การเลือกโพลีเมอร์ระดับผลิตจริง"),
+                Text("Heat, UV, chemical, flexibility, and repeated-use requirements are confirmed during quotation before the part moves to production.",
+                    "ยืนยันความต้องการด้านความร้อน UV สารเคมี ความยืดหยุ่น และการใช้งานซ้ำระหว่างเสนอราคา ก่อนเข้าสู่การผลิต"),
+                Text("Engineering options", "ตัวเลือกวิศวกรรม"),
+                "environment")
+        ],
+        [
+            new(Text("Wall thickness and unsupported spans", "ความหนาผนังและช่วงลอยตัว"), Text("Thin walls, long bridges, and tall unsupported features change strength, surface quality, and print success.", "ผนังบาง ช่วงพาดยาว และฟีเจอร์สูงที่ไม่มีซัพพอร์ต มีผลต่อความแข็งแรง ผิวงาน และโอกาสพิมพ์สำเร็จ"), Text("", ""), "wall"),
+            new(Text("Tolerances and fit-critical faces", "Tolerance และผิวประกบสำคัญ"), Text("Holes, sliding fits, press fits, mating faces, and assembly references need notes or drawings, not only a mesh.", "รู ระยะสวม ผิวประกบ และตำแหน่งอ้างอิงการประกอบต้องมีหมายเหตุหรือ Drawing ไม่ใช่มีแค่ mesh"), Text("", ""), "fit"),
+            new(Text("Orientation and support marks", "ทิศทางพิมพ์และรอยซัพพอร์ต"), Text("Orientation controls visible layer lines, support scars, strength direction, and where cosmetic cleanup is needed.", "ทิศทางพิมพ์ควบคุมเส้นเลเยอร์ รอยซัพพอร์ต ทิศทางรับแรง และตำแหน่งที่ต้องเก็บผิว"), Text("", ""), "orientation"),
+            new(Text("Threads, inserts, and hole strategy", "เกลียว Insert และรูปแบบรู"), Text("Call out tapped holes, heat-set inserts, clearance holes, post-machining, or drill-after-print requirements.", "ระบุรูต๊าป Insert ฝังร้อน รูหลวม รูเก็บงานหลังพิมพ์ หรือรูที่ต้องเจาะหลังผลิต"), Text("", ""), "mold"),
+            new(Text("Heat, chemicals, UV, and handling", "ความร้อน สารเคมี UV และการหยิบจับ"), Text("Use environment decides whether PLA is enough or whether PETG, ASA, nylon, TPU, resin, or another route should be reviewed.", "สภาพใช้งานเป็นตัวตัดสินว่า PLA เพียงพอหรือควรตรวจ PETG, ASA, ไนลอน, TPU, เรซิน หรือเส้นทางอื่น"), Text("", ""), "chemical"),
+            new(Text("Quantity and repeatability", "จำนวนและความสม่ำเสมอ"), Text("A single prototype, a small batch, and repeat orders need different orientation, QA, packaging, and lead-time assumptions.", "ต้นแบบหนึ่งชิ้น ล็อตเล็ก และงานสั่งซ้ำ ใช้สมมติฐานทิศทางพิมพ์ QA บรรจุ และระยะเวลาไม่เหมือนกัน"), Text("", ""), "quantity")
+        ],
+        [
+            new(Text("Upload CAD and requirements", "อัปโหลด CAD และข้อกำหนด"), Text("Send files, quantity, deadline, material preference, finish notes, and what the part must prove.", "ส่งไฟล์ จำนวน กำหนดเวลา วัสดุที่ต้องการ หมายเหตุผิวงาน และสิ่งที่ชิ้นงานต้องพิสูจน์"), Text("", ""), "upload"),
+            new(Text("Review DFM and route options", "ตรวจ DFM และเส้นทางผลิต"), Text("MALIEV reviews geometry risks and helps compare FDM, resin, nylon, finish, and lead-time trade-offs.", "MALIEV ตรวจความเสี่ยง Geometry และช่วยเปรียบเทียบ FDM เรซิน ไนลอน ผิวงาน และข้อแลกเปลี่ยนด้านเวลา"), Text("", ""), "review"),
+            new(Text("Confirm quote and production setup", "ยืนยันราคาและการตั้งค่างานผลิต"), Text("Approve the selected process, material, quantity, tolerance notes, and delivery expectation before production starts.", "อนุมัติกระบวนการ วัสดุ จำนวน หมายเหตุ tolerance และระยะส่งมอบก่อนเริ่มผลิต"), Text("", ""), "price"),
+            new(Text("Produce, check, and deliver", "ผลิต ตรวจ และส่งมอบ"), Text("The accepted quote continues into production tracking, QA notes, photos when needed, and delivery coordination.", "ใบเสนอราคาที่อนุมัติจะต่อไปสู่การติดตามผลิต หมายเหตุ QA รูปประกอบเมื่อจำเป็น และการประสานส่งมอบ"), Text("", ""), "delivery")
+        ],
+        [
+            Text("Intended use, load, temperature, chemicals, UV, and indoor or outdoor exposure.", "การใช้งาน แรงที่รับ อุณหภูมิ สารเคมี UV และสภาพในร่มหรือกลางแจ้ง"),
+            Text("Fit-critical dimensions, mating parts, hole types, threads, inserts, and surfaces that must look good.", "มิติประกอบสำคัญ ชิ้นส่วนที่ประกบ ประเภทรู เกลียว Insert และผิวที่ต้องดูดี"),
+            Text("Quantity, target lead time, color, finish, and whether one test piece is needed before a batch.", "จำนวน ระยะเวลาที่ต้องการ สี ผิวงาน และต้องการชิ้นทดสอบก่อนผลิตล็อตหรือไม่"),
+            Text("STEP plus drawings when tolerance, fit, machining, or inspection matters.", "ใช้ STEP พร้อม Drawing เมื่อต้องคุม tolerance งานประกอบ งานกัดต่อ หรือการตรวจรับ")
+        ]);
+
     internal static LocalizedText Text(string en, string th)
     {
         return new LocalizedText { En = en, Th = th };
@@ -382,6 +448,48 @@ internal static class SiteContent
     {
         return Services.FirstOrDefault(service => service.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase)) ?? Services[0];
     }
+
+    internal static ServiceDetailProfile GetServiceDetail(string? slug)
+    {
+        var service = GetService(slug);
+
+        return service.Slug.Equals("3d-printing", StringComparison.OrdinalIgnoreCase)
+            ? ThreeDimensionalPrintingServiceDetail
+            : CreateDefaultServiceDetail(service);
+    }
+
+    private static ServiceDetailProfile CreateDefaultServiceDetail(ServicePageContent service)
+    {
+        return new ServiceDetailProfile(
+            Text($"{service.Title.En} service details", $"รายละเอียดบริการ{service.Title.Th}"),
+            Text(
+                "Prepare process, material, files, quantity, lead time, and acceptance notes before requesting a manufacturing quote.",
+                "เตรียมกระบวนการ วัสดุ ไฟล์ จำนวน ระยะเวลา และหมายเหตุรับงานก่อนขอราคางานผลิต"),
+            service.ProofTitle,
+            service.ProofText,
+            [
+                new(Text("STEP / STP", "STEP / STP"), Text("best for controlled faces and manufacturability review", "เหมาะสำหรับผิวควบคุมและการตรวจผลิต"), Text("CAD", "CAD"), "cad"),
+                new(Text("STL / OBJ / 3MF", "STL / OBJ / 3MF"), Text("mesh data for print-focused or reference geometry", "ข้อมูล mesh สำหรับงานพิมพ์หรืออ้างอิง"), Text("CAD", "CAD"), "file"),
+                new(Text("PDF / drawings", "PDF / Drawing"), Text("tolerance, finish, thread, and inspection notes", "หมายเหตุ tolerance ผิว เกลียว และการตรวจรับ"), Text("Support", "ประกอบ"), "review")
+            ],
+            service.Specs.Select(spec => new ServiceDetailItem(spec, Text("MALIEV confirms the right production route during quotation.", "MALIEV ยืนยันเส้นทางผลิตที่เหมาะสมระหว่างเสนอราคา"), Text("Capability", "ความสามารถ"), "thermoplastic")).ToArray(),
+            [
+                new(Text("Geometry and manufacturability", "Geometry และความเหมาะสมในการผลิต"), Text("Files are checked for features that affect process choice, setup, quality, and cost.", "ตรวจไฟล์จากฟีเจอร์ที่มีผลต่อกระบวนการ การตั้งงาน คุณภาพ และต้นทุน"), Text("", ""), "review"),
+                new(Text("Material and environment", "วัสดุและสภาพใช้งาน"), Text("Use temperature, load, chemicals, surface finish, and quantity to narrow the material route.", "ใช้อุณหภูมิ แรง สารเคมี ผิวงาน และจำนวนเพื่อกรองวัสดุ"), Text("", ""), "environment"),
+                new(Text("Tolerance and acceptance", "Tolerance และเกณฑ์รับงาน"), Text("Critical dimensions and visible surfaces should be called out before the order is accepted.", "ควรระบุมิติสำคัญและผิวโชว์ก่อนรับงาน"), Text("", ""), "fit")
+            ],
+            [
+                new(Text("Upload files", "อัปโหลดไฟล์"), Text("Share CAD, drawings, photos, quantity, and the manufacturing goal.", "ส่ง CAD, Drawing, รูปถ่าย จำนวน และเป้าหมายงานผลิต"), Text("", ""), "upload"),
+                new(Text("Review route", "ตรวจเส้นทางผลิต"), Text("MALIEV checks process, material, DFM risks, and missing requirements.", "MALIEV ตรวจกระบวนการ วัสดุ ความเสี่ยง DFM และข้อมูลที่ขาด"), Text("", ""), "review"),
+                new(Text("Approve quote", "อนุมัติราคา"), Text("Confirm the selected scope, price, and delivery expectation before production.", "ยืนยันขอบเขต ราคา และระยะส่งมอบก่อนผลิต"), Text("", ""), "price"),
+                new(Text("Track production", "ติดตามผลิต"), Text("Accepted work continues into order tracking and delivery coordination.", "งานที่รับแล้วต่อไปสู่การติดตามผลิตและส่งมอบ"), Text("", ""), "delivery")
+            ],
+            [
+                Text("CAD files plus drawings or photos when geometry alone does not explain the requirement.", "ไฟล์ CAD พร้อม Drawing หรือรูปถ่ายเมื่อ Geometry อย่างเดียวอธิบายโจทย์ไม่พอ"),
+                Text("Material preference, quantity, finish, tolerance, deadline, and use environment.", "วัสดุที่ต้องการ จำนวน ผิวงาน tolerance กำหนดเวลา และสภาพใช้งาน"),
+                Text("Critical surfaces, mating parts, and inspection requirements.", "ผิวสำคัญ ชิ้นส่วนที่ประกบ และข้อกำหนดการตรวจรับ")
+            ]);
+    }
 }
 
 internal sealed record MetricItem(LocalizedText Value, LocalizedText Label, int CountTarget, string Suffix = "");
@@ -397,6 +505,23 @@ internal sealed record ServicePageContent(
     string ImageUrl,
     bool Primary,
     IReadOnlyList<LocalizedText> Specs);
+
+internal sealed record ServiceDetailProfile(
+    LocalizedText Title,
+    LocalizedText Intro,
+    LocalizedText BriefTitle,
+    LocalizedText BriefBody,
+    IReadOnlyList<ServiceDetailItem> SupportedFiles,
+    IReadOnlyList<ServiceDetailItem> MaterialRoutes,
+    IReadOnlyList<ServiceDetailItem> DfmGates,
+    IReadOnlyList<ServiceDetailItem> OrderingSteps,
+    IReadOnlyList<LocalizedText> QuoteChecklist);
+
+internal sealed record ServiceDetailItem(
+    LocalizedText Title,
+    LocalizedText Body,
+    LocalizedText Meta,
+    string IconKey);
 
 internal sealed record CaseStudyContent(
     string Slug,

@@ -192,6 +192,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains("Disallow: /account", robots);
         Assert.Contains("Disallow: /cart", robots);
         Assert.Contains("https://www.maliev.com/services", sitemap);
+        Assert.Contains("<loc>https://www.maliev.com/services/3d-printing</loc><lastmod>2026-05-18</lastmod>", sitemap);
         Assert.Contains("https://www.maliev.com/services/silicone-casting", sitemap);
         Assert.Contains("https://www.maliev.com/services/rapid-prototyping", sitemap);
         Assert.Contains("https://www.maliev.com/services/deviation-analysis", sitemap);

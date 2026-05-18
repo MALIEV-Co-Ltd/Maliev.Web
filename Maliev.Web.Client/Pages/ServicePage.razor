@@ -38,23 +38,104 @@
     </div>
 </section>
 
-<section class="section" aria-labelledby="service-specs-title">
-    <div class="section-heading">
+<section class="section service-detail-section" aria-labelledby="service-detail-title">
+    <div class="section-heading service-detail-heading">
         <div>
-            <h2 id="service-specs-title">@Text("What to prepare before quotation.", "สิ่งที่ควรเตรียมก่อนขอราคา")</h2>
+            <h2 id="service-detail-title">@Detail.Title.For(Preferences.Culture)</h2>
+            <p>@Detail.Intro.For(Preferences.Culture)</p>
         </div>
         <a class="section-link" href="@SiteContent.QuoteNewUrl">@Text("Upload files", "อัปโหลดไฟล์")</a>
     </div>
-    <div class="service-detail-grid">
-        @for (var index = 0; index < Service.Specs.Count; index++)
-        {
-            <article class="workflow-step">
-                <span>@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
-                <h2>@Service.Specs[index].For(Preferences.Culture)</h2>
-                <p>@SpecHelp(index)</p>
-            </article>
-        }
+
+    <div class="service-brief-grid">
+        <article class="service-brief-copy">
+            <span class="service-detail-label">@Text("Service brief", "ภาพรวมบริการ")</span>
+            <h3>@Detail.BriefTitle.For(Preferences.Culture)</h3>
+            <p>@Detail.BriefBody.For(Preferences.Culture)</p>
+            <div class="service-supported-files" aria-label="@Text("Supported file formats", "ประเภทไฟล์ที่รองรับ")">
+                @foreach (var file in Detail.SupportedFiles)
+                {
+                    <span class="service-file-chip">
+                        <strong>@file.Title.For(Preferences.Culture)</strong>
+                        <small>@file.Body.For(Preferences.Culture)</small>
+                    </span>
+                }
+            </div>
+        </article>
+
+        <aside class="service-checklist-panel">
+            <span class="service-detail-label">@Text("Quote-ready checklist", "เช็กลิสต์ก่อนขอราคา")</span>
+            <h3>@Text("Send enough context for a real manufacturing answer.", "ส่งบริบทให้พอสำหรับคำตอบงานผลิตจริง")</h3>
+            <ul>
+                @foreach (var item in Detail.QuoteChecklist)
+                {
+                    <li>@item.For(Preferences.Culture)</li>
+                }
+            </ul>
+        </aside>
     </div>
+
+    <section class="service-detail-block" aria-labelledby="service-materials-title">
+        <div class="service-block-heading">
+            <span class="service-detail-label">@Text("Materials and processes", "วัสดุและกระบวนการ")</span>
+            <h3 id="service-materials-title">@Text("Available material routes for this service.", "เส้นทางวัสดุที่ใช้ได้กับบริการนี้")</h3>
+        </div>
+        <div class="service-material-route-grid">
+            @foreach (var route in Detail.MaterialRoutes)
+            {
+                <article class="service-material-route-card">
+                    <div class="service-detail-icon" aria-hidden="true">
+                        <MudIcon Icon="@DetailIcon(route.IconKey)" Size="Size.Medium" />
+                    </div>
+                    <div>
+                        <span>@route.Meta.For(Preferences.Culture)</span>
+                        <h4>@route.Title.For(Preferences.Culture)</h4>
+                        <p>@route.Body.For(Preferences.Culture)</p>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="service-detail-block" aria-labelledby="service-dfm-title">
+        <div class="service-block-heading">
+            <span class="service-detail-label">@Text("DFM gates", "จุดตรวจ DFM")</span>
+            <h3 id="service-dfm-title">@Text("What MALIEV checks before a quotation becomes production work.", "สิ่งที่ MALIEV ตรวจ ก่อนใบเสนอราคากลายเป็นงานผลิต")</h3>
+        </div>
+        <div class="service-dfm-grid">
+            @foreach (var gate in Detail.DfmGates)
+            {
+                <article class="service-dfm-card">
+                    <div class="service-detail-icon" aria-hidden="true">
+                        <MudIcon Icon="@DetailIcon(gate.IconKey)" Size="Size.Medium" />
+                    </div>
+                    <h4>@gate.Title.For(Preferences.Culture)</h4>
+                    <p>@gate.Body.For(Preferences.Culture)</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="service-detail-block service-ordering-block" aria-labelledby="service-ordering-title">
+        <div class="service-block-heading">
+            <span class="service-detail-label">@Text("Ordering workflow", "ขั้นตอนสั่งงาน")</span>
+            <h3 id="service-ordering-title">@Text("How ordering with MALIEV works.", "ขั้นตอนการสั่งงานกับ MALIEV")</h3>
+        </div>
+        <div class="service-ordering-grid">
+            @for (var index = 0; index < Detail.OrderingSteps.Count; index++)
+            {
+                var step = Detail.OrderingSteps[index];
+                <article class="service-ordering-step">
+                    <span>@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
+                    <div class="service-detail-icon" aria-hidden="true">
+                        <MudIcon Icon="@DetailIcon(step.IconKey)" Size="Size.Medium" />
+                    </div>
+                    <h4>@step.Title.For(Preferences.Culture)</h4>
+                    <p>@step.Body.For(Preferences.Culture)</p>
+                </article>
+            }
+        </div>
+    </section>
 </section>
 
 <section class="section final-cta">
@@ -77,6 +158,7 @@
     private PersistingComponentStateSubscription? _persistingSubscription;
     private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private ServicePageContent Service => SiteContent.GetService(Slug);
+    private ServiceDetailProfile Detail => SiteContent.GetServiceDetail(Service.Slug);
     private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
     private string HeroModelStateKey => $"service.hero.model.{Service.Slug}";
 
@@ -96,13 +178,28 @@
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 
-    private string SpecHelp(int index)
+    private static string DetailIcon(string iconKey)
     {
-        return index switch
+        return iconKey switch
         {
-            0 => Text("Use this to choose the best process before spending time on drawings.", "ใช้ข้อมูลนี้เพื่อเลือกกระบวนการก่อนเสียเวลาทำแบบละเอียด"),
-            1 => Text("Lead time depends on file readiness, production load, and review clarity.", "ระยะเวลาขึ้นกับความพร้อมของไฟล์ งานในคิว และความชัดเจนของข้อมูล"),
-            _ => Text("Send the detail with your quote request so MALIEV can price the work correctly.", "แนบรายละเอียดนี้ในคำขอราคาเพื่อให้ MALIEV ประเมินงานได้ถูกต้อง")
+            "cad" => Icons.Material.Filled.ViewInAr,
+            "chemical" => Icons.Material.Filled.Science,
+            "delivery" => Icons.Material.Filled.LocalShipping,
+            "environment" => Icons.Material.Filled.Thermostat,
+            "file" => Icons.Material.Filled.InsertDriveFile,
+            "finish" => Icons.Material.Filled.AutoFixHigh,
+            "fit" => Icons.Material.Filled.FactCheck,
+            "mold" => Icons.Material.Filled.PrecisionManufacturing,
+            "nylon" => Icons.Material.Filled.Inventory2,
+            "orientation" => Icons.Material.Filled.ScreenRotationAlt,
+            "price" => Icons.Material.Filled.PriceChange,
+            "quantity" => Icons.Material.Filled.FormatListNumbered,
+            "resin" => Icons.Material.Filled.WaterDrop,
+            "review" => Icons.Material.Filled.AssignmentTurnedIn,
+            "thermoplastic" => Icons.Material.Filled.Layers,
+            "upload" => Icons.Material.Filled.UploadFile,
+            "wall" => Icons.Material.Filled.Straighten,
+            _ => Icons.Material.Filled.CheckCircle
         };
     }
 
