@@ -446,6 +446,8 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var supportSection = source[
+            source.IndexOf("contact-business-section contact-business-section--support", StringComparison.Ordinal)..source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)];
 
         Assert.Contains("contact-business-panel", source);
         Assert.Contains("contact-business-section contact-business-section--sales", source);
@@ -488,6 +490,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.", source);
         Assert.Contains("&output=embed", source);
         Assert.Contains("Open larger map", source);
+        Assert.DoesNotContain("contact-line-add-friend", supportSection);
+        Assert.DoesNotContain("Message support on LINE", supportSection);
+        Assert.DoesNotContain("คุยกับทีมสนับสนุนทาง LINE", supportSection);
         Assert.DoesNotContain("contact-direct-grid", source);
         Assert.DoesNotContain("contact-direct-card", source);
         Assert.DoesNotContain("contact-map-card", source);
