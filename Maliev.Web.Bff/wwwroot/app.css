@@ -678,7 +678,11 @@ html:lang(th) .h1 {
   grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr);
   gap: 48px;
   align-items: center;
-  min-height: calc(100svh - 66px);
+  /* Bound the hero height so the content doesn't get vertically marooned on
+     tall viewports. Previously `min-height: calc(100svh - 66px)` made the hero
+     fill the entire viewport — combined with `align-items: center` that pushed
+     ~200px of whitespace above and below the headline/copy on 1080p+ screens. */
+  min-height: clamp(620px, calc(100svh - 66px), 760px);
   padding-top: 56px;
   padding-bottom: 72px;
   overflow: hidden;

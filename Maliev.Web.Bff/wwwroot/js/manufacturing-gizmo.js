@@ -423,63 +423,95 @@ function getLandingHeroViewportMetrics(host) {
   const balancedTablet = width >= 640 && width <= 920 && height >= 460;
   const wide = width > 920;
 
+  // `fill` is the fraction of the viewport's smaller half-angle that the
+  // model's silhouette (rotated, scaled, world-space) should occupy. Higher
+  // values pack the model tighter into the canvas; lower values add letterbox.
+  // We bias slightly higher on wide layouts so the hero feels filled, and
+  // pull back on narrow-tall (mobile portrait) so the headline above doesn't
+  // collide with the model.
   return {
     aspect,
-    fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
-    framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16 : balancedTablet ? 1.12 : aspect > 1.55 ? 1.08 : 1.1,
-    tallFrameRadiusScale: 1.38,
-    maxViewportFill: narrowTall ? 0.52 : compact ? 0.58 : balancedTablet ? 0.64 : wide ? 0.68 : 0.64,
-    maxFramingRadiusScale: narrowTall ? 1.16 : compact ? 1.12 : balancedTablet ? 1.18 : wide ? 1.22 : 1.2,
-    positionScale: narrowTall ? 0.5 : compact ? 0.5 : 0.48,
-    minRadius: narrowTall ? 4.2 : compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
-    maxRadius: narrowTall ? 9.6 : compact ? 8.4 : wide ? 9.2 : 8.8,
-    fallbackRadius: narrowTall ? 7.15 : compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
+    fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.48 : wide ? 0.45 : 0.46,
+    fill: narrowTall ? 0.62 : compact ? 0.68 : balancedTablet ? 0.74 : wide ? 0.76 : 0.74,
+    minRadius: narrowTall ? 3.6 : compact ? 2.8 : balancedTablet ? 3.4 : 3.6,
+    maxRadius: narrowTall ? 12 : compact ? 11 : 11,
+    fallbackRadius: narrowTall ? 6.4 : compact ? 5.6 : balancedTablet ? 5.4 : wide ? 5.6 : 5.6,
     targetY: compact ? 0.01 : 0.02
   };
 }
 
-function applyLandingHeroFraming(camera, frame, metrics, BABYLON) {
-  const meshes = frame?.meshes ?? [];
-  camera.useFramingBehavior = true;
-  const framing = camera.framingBehavior;
-  if (!framing) {
-    camera.radius = metrics.fallbackRadius;
-    return;
-  }
+/**
+ * Frame the model using a single deterministic geometric fit against the
+ * pre-rotated world AABB captured at scene init. This replaces a multi-step
+ * pipeline that combined Babylon's FramingBehavior with manual scale
+ * multipliers — the old pipeline used different bounding boxes for different
+ * steps (pre-rotation `frame.size` for fit math, post-rotation behavior for
+ * `zoomOnMeshesHierarchy`), which caused models with non-cube aspect ratios
+ * to either overfill (clip) or underfill (look small).
+ */
+function applyLandingHeroFraming(camera, worldBounds, metrics, BABYLON) {
+  const size = worldBounds.max.subtract(worldBounds.min);
+  const center = worldBounds.min.add(worldBounds.max).scale(0.5);
 
-  framing.mode = BABYLON.FramingBehavior.FitFrustumSidesMode;
-  framing.framingTime = 0;
-  framing.elevationReturnTime = -1;
-  framing.autoCorrectCameraLimitsAndSensibility = false;
-  framing.radiusScale = 1;
-  framing.positionScale = metrics.positionScale;
-  framing.zoomOnMeshesHierarchy(meshes, false);
-  refreshCameraMatrices(camera);
-  const tallFrameRatio = frame?.size
-    ? frame.size.y / Math.max(frame.size.x, frame.size.z, Number.EPSILON)
-    : 1;
-  const modelRadiusScale = tallFrameRatio > 1.45 ? metrics.tallFrameRadiusScale : 1;
-  const fitRadius = computeLandingHeroFitRadius(camera, frame, metrics);
-  const framedRadius = camera.radius * metrics.framingRadiusScale * modelRadiusScale;
-  const boundedRadius = Math.min(framedRadius, fitRadius * metrics.maxFramingRadiusScale);
-  camera.radius = Math.max(boundedRadius, fitRadius, metrics.minRadius);
+  camera.target = new BABYLON.Vector3(center.x, center.y + metrics.targetY, center.z);
+
+  const halfH = Math.max(size.y / 2, 0.0001);
+  const halfW = Math.max(Math.max(size.x, size.z) / 2, 0.0001);
+  const halfD = Math.max(size.z, size.x) / 2;
+
+  const fill = clamp(metrics.fill ?? 0.7, 0.4, 0.9);
+  const verticalFov = Math.max(camera.fov, 0.01);
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(metrics.aspect, 0.01));
+
+  // Distance at which the model's half-extent occupies `fill` fraction of the
+  // viewport's half-angle. Take the larger of the two axes so neither clips.
+  const verticalRadius = halfH / (fill * Math.tan(verticalFov / 2));
+  const horizontalRadius = halfW / (fill * Math.tan(horizontalFov / 2));
+
+  // Add half the model's depth so the *near* face of the model is what gets
+  // fit, not the geometric center. Without this, deep models (assemblies
+  // with thickness along the camera axis) appear larger than the fit target.
+  const radius = Math.max(verticalRadius, horizontalRadius) + halfD;
+
+  camera.radius = clamp(radius, metrics.minRadius, metrics.maxRadius);
   refreshCameraMatrices(camera);
 }
 
-function computeLandingHeroFitRadius(camera, frame, metrics) {
-  const fill = clamp(metrics.maxViewportFill ?? 0.64, 0.42, 0.8);
-  const verticalFov = Math.max(camera.fov, 0.01);
-  const horizontalFov = 2 * Math.atan(Math.tan(camera.fov / 2) * metrics.aspect);
-  const horizontalSpan = Math.max(frame?.size?.x ?? 0, frame?.size?.z ?? 0);
-  const verticalSpan = frame?.size?.y ?? 0;
-  const verticalRadius = verticalSpan / (2 * Math.tan(verticalFov / 2) * fill);
-  const horizontalRadius = horizontalSpan / (2 * Math.tan(Math.max(horizontalFov, 0.01) / 2) * fill);
-  const depthAllowance = (frame?.size?.z ?? 0) * 0.28;
-  const radius = Math.max(verticalRadius, horizontalRadius) + depthAllowance;
+/**
+ * Compute a world-space AABB by forcing every mesh's bounding info to refresh
+ * against its current world matrix. This catches the post-rotation extents,
+ * which is what the camera fit math actually needs to see.
+ */
+function captureWorldAabb(meshes, BABYLON) {
+  let min = new BABYLON.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+  let max = new BABYLON.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+  let found = false;
 
-  return Number.isFinite(radius) && radius > 0
-    ? radius
-    : metrics.fallbackRadius;
+  for (const mesh of meshes) {
+    if (!mesh?.getBoundingInfo) {
+      continue;
+    }
+
+    updateWorldMatrixChain(mesh);
+    const worldMatrix = mesh.getWorldMatrix?.();
+    const info = mesh.getBoundingInfo();
+    if (worldMatrix && info?.update) {
+      info.update(worldMatrix);
+    }
+
+    const vectors = info?.boundingBox?.vectorsWorld;
+    if (!vectors) {
+      continue;
+    }
+
+    for (const vector of vectors) {
+      min = BABYLON.Vector3.Minimize(min, vector);
+      max = BABYLON.Vector3.Maximize(max, vector);
+      found = true;
+    }
+  }
+
+  return found ? { min, max } : null;
 }
 
 function refreshCameraMatrices(camera) {
