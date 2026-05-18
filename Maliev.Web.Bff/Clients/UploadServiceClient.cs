@@ -115,7 +115,8 @@ internal sealed record UploadInitiationRequest(
     string ContentType,
     long TotalSize,
     bool Overwrite,
-    string? Metadata);
+    string? Metadata,
+    string? RetentionPolicyId = null);
 
 internal sealed record UploadInitiationResponse(string UploadId, string SessionUri, DateTime ExpiresAt, long TotalSize);
 

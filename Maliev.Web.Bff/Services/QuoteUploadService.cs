@@ -5,10 +5,12 @@ namespace Maliev.Web.Bff.Services;
 
 internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQuoteUploadService
 {
+    private const string WebTemporaryQuoteRetentionPolicyId = "quote-temp-uploads";
+
     public async Task<WebUploadInitiationResponse> InitiateAsync(WebUploadInitiationRequest request, CancellationToken cancellationToken)
     {
         var safeName = Path.GetFileName(request.FileName).Replace(" ", "-", StringComparison.Ordinal);
-        var storagePath = $"quotes/{request.QuoteSessionId:N}/{request.FileSize}/{safeName}";
+        var storagePath = $"quotes/temp/{request.QuoteSessionId:N}/{request.FileSize}/{safeName}";
         var session = await uploadClient.InitiateResumableUploadAsync(new UploadInitiationRequest(
             Path: storagePath,
             FileName: request.FileName,
@@ -16,7 +18,8 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
             ContentType: request.ContentType,
             TotalSize: request.FileSize,
             Overwrite: true,
-            Metadata: $$"""{"quoteSessionId":"{{request.QuoteSessionId}}","fileSize":{{request.FileSize}}}"""), cancellationToken);
+            Metadata: $$"""{"quoteSessionId":"{{request.QuoteSessionId}}","fileSize":{{request.FileSize}},"uploadScope":"temporary-quote-handoff"}""",
+            RetentionPolicyId: WebTemporaryQuoteRetentionPolicyId), cancellationToken);
 
         return new WebUploadInitiationResponse
         {

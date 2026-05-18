@@ -1,22 +1,38 @@
-<MudButton Href="@Href"
-           Variant="Variant.Text"
-           Color="Color.Inherit"
-           Class="@ButtonClass"
-           aria-label="@AriaLabel">
-    <span class="landing-quote-dropzone-icon" aria-hidden="true">
-        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
-    </span>
-    <span class="landing-quote-dropzone-copy">
-        <strong>@Title</strong>
-        <small>@Description</small>
-    </span>
-    <span class="landing-quote-dropzone-action">
-        <span>@ActionText</span>
-        <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
-    </span>
-</MudButton>
+@inject IJSRuntime Js
+@implements IAsyncDisposable
+
+<div class="@WrapperClass">
+    <input id="@InputId"
+           class="landing-quote-dropzone-input"
+           type="file"
+           multiple
+           accept=".stl,.step,.stp,.obj,.3mf,.iges,.igs" />
+    <button id="@DropzoneId"
+            type="button"
+            class="@ButtonClass"
+            aria-label="@AriaLabel"
+            data-idle-label="@ActionText"
+            data-uploading-label="@UploadingText">
+        <span class="landing-quote-dropzone-inner">
+            <span class="landing-quote-dropzone-icon" aria-hidden="true">
+                <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+            </span>
+            <span class="landing-quote-dropzone-copy">
+                <strong>@Title</strong>
+                <small>@Description</small>
+            </span>
+            <span class="landing-quote-dropzone-action">
+                <span data-quote-dropzone-label>@ActionText</span>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+            </span>
+        </span>
+    </button>
+</div>
 
 @code {
+    private readonly string DropzoneId = $"quote-dropzone-{Guid.NewGuid():N}";
+    private readonly string InputId = $"quote-dropzone-input-{Guid.NewGuid():N}";
+
     [Parameter]
     public string Href { get; set; } = string.Empty;
 
@@ -35,7 +51,35 @@
     [Parameter]
     public string? AriaLabel { get; set; }
 
+    [Parameter]
+    public string UploadingText { get; set; } = "Uploading files";
+
+    private string WrapperClass => string.IsNullOrWhiteSpace(Class)
+        ? "landing-quote-dropzone-shell"
+        : $"landing-quote-dropzone-shell {Class}";
+
     private string ButtonClass => string.IsNullOrWhiteSpace(Class)
         ? "landing-quote-dropzone"
         : $"landing-quote-dropzone {Class}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Js.InvokeVoidAsync("malievQuoteDropzone.register", DropzoneId, InputId, Href);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Js.InvokeVoidAsync("malievQuoteDropzone.unregister", DropzoneId);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
 }

@@ -151,6 +151,28 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies public quote dropzones upload selected or dropped CAD files before handing the workspace to QuoteEngine.
+    /// </summary>
+    [Fact]
+    public void QuoteDropzoneUploadsDroppedFilesBeforeQuoteEngineHandoff()
+    {
+        var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-quote-dropzone.js");
+        var uploadService = ReadRepoFile("Maliev.Web.Bff", "Services", "QuoteUploadService.cs");
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+
+        Assert.Contains("type=\"file\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("malievQuoteDropzone.register", dropzone, StringComparison.Ordinal);
+        Assert.Contains("event.dataTransfer.files", script, StringComparison.Ordinal);
+        Assert.Contains("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
+        Assert.Contains("Content-Range", script, StringComparison.Ordinal);
+        Assert.Contains("handoff", script, StringComparison.Ordinal);
+        Assert.Contains("quotes/temp/", uploadService, StringComparison.Ordinal);
+        Assert.Contains("quote-temp-uploads", uploadService, StringComparison.Ordinal);
+        Assert.Contains("js/maliev-quote-dropzone.js", app, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies the home hero metrics render crawlable final values and enhance them with viewport-triggered count-up motion.
     /// </summary>
     [Fact]
@@ -640,6 +662,7 @@ public sealed class HeroLayoutSourceTests
     public void HeaderUsesMudIconButtonsForCartAndAccount()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("MudIconButton", source);
         Assert.Contains("MudBadge", source);
@@ -647,6 +670,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains(".nav-links a {\n  white-space: nowrap;", styles);
+        Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);
         Assert.DoesNotContain("class=\"icon-link\"", source);
     }
 
@@ -702,6 +727,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("maliev.customerAssistant.session.v1", component);
         Assert.Contains("IsAccountSpecificIntent", component);
         Assert.Contains("BeginChatSignInAsync", component);
+        Assert.Contains("ChatActionSignInGoogle", component);
+        Assert.Contains("ChatActionSignInEmail", component);
+        Assert.Contains("CreateSignInActions", component);
+        Assert.Contains("AddSignInChoiceMessageAsync", component);
+        Assert.Contains("Continue with Google", component);
+        Assert.Contains("Use email and password", component);
+        Assert.Contains("customer-chatbot-auth-google", component);
+        Assert.Contains("customer-chatbot-auth-email", component);
+        Assert.Contains("/auth/google?returnUrl", component);
         Assert.Contains("RefreshIdentityAsync", component);
         Assert.Contains("Sign in to continue", component);
         Assert.Contains("/auth/chatbot-complete", component);
@@ -756,6 +790,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-message-rich", styles);
         Assert.Contains(".customer-chatbot-actions", styles);
+        Assert.Contains(".customer-chatbot-actions:has(.customer-chatbot-auth-google)", styles);
+        Assert.Contains(".customer-chatbot-auth-email", styles);
         Assert.Contains(".customer-chatbot-action.primary", styles);
         Assert.Contains(".customer-chatbot-message-rich a", styles);
         Assert.Contains(".customer-chatbot-message-rich :where(ul, ol)", styles);
