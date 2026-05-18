@@ -3,10 +3,11 @@ const babylonLoadersCdn = "https://cdn.jsdelivr.net/npm/babylonjs-loaders@9.6.0/
 const instances = new WeakMap();
 let babylonRuntime;
 let babylonLoadersRuntime;
+const normalizedHeroModelSize = 2.28;
 
 mountDocumentGizmos();
 
-export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false, modelScale = 1) {
+export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion = false, usePlasticMaterial = false) {
   if (!canvas || instances.has(canvas)) {
     return;
   }
@@ -18,7 +19,6 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     modelUrl: typeof modelUrl === "string" ? modelUrl.trim() : "",
     enableHoverMotion: Boolean(enableHoverMotion),
     usePlasticMaterial: Boolean(usePlasticMaterial),
-    modelScale: normalizeModelScale(modelScale),
     scene: null,
     engine: null,
     disposed: false,
@@ -111,8 +111,7 @@ function mountDocumentGizmos() {
     canvas,
     canvas.dataset.modelUrl ?? "",
     canvas.dataset.enableHoverMotion === "true",
-    canvas.dataset.usePlasticMaterial === "true",
-    canvas.dataset.modelScale ?? "1");
+    canvas.dataset.usePlasticMaterial === "true");
 
   const mount = root => {
     if (root.matches?.("canvas[data-manufacturing-gizmo]")) {
@@ -350,7 +349,7 @@ async function createLandingHeroScene(state, BABYLON) {
     ? applyInjectionMoldedPlasticMaterial(renderMeshes, scene, BABYLON)
     : null;
 
-  state.landingFrame = frameImportedModel(renderMeshes, root, BABYLON, state.modelScale);
+  state.landingFrame = frameImportedModel(renderMeshes, root, BABYLON);
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
@@ -545,33 +544,37 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   return plastic;
 }
 
-function frameImportedModel(meshes, root, BABYLON, modelScale = 1) {
+function frameImportedModel(meshes, root, BABYLON) {
   const bounds = computeMeshBounds(meshes, BABYLON);
   if (!bounds) {
     return null;
   }
 
   const displayBounds = bounds.display ?? bounds;
-  const size = displayBounds.max.subtract(displayBounds.min);
-  const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const targetSize = 2.28 * modelScale;
-  const scale = targetSize / maxDimension;
-  root.scaling.setAll(scale);
-  root.position.copyFrom(displayBounds.center.scale(-scale));
+  const frameMeshes = displayBounds.meshes ?? meshes;
+  const normalizedFrame = normalizeImportedModelDimensions(displayBounds, root, frameMeshes);
 
   return {
-    meshes: displayBounds.meshes ?? meshes,
-    size: size.scale(scale)
+    meshes: frameMeshes,
+    size: normalizedFrame.size
   };
 }
 
-function normalizeModelScale(value) {
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return 1;
+function normalizeImportedModelDimensions(displayBounds, root, frameMeshes) {
+  const size = displayBounds.max.subtract(displayBounds.min);
+  const maxDimension = Math.max(size.x, size.y, size.z) || 1;
+  const scale = normalizedHeroModelSize / maxDimension;
+  root.scaling.setAll(scale);
+  root.position.copyFrom(displayBounds.center.scale(-scale));
+
+  for (const mesh of frameMeshes) {
+    updateWorldMatrixChain(mesh);
   }
 
-  return clamp(parsed, 0.5, 2.4);
+  return {
+    scale,
+    size: size.scale(scale)
+  };
 }
 
 function computeMeshBounds(meshes, BABYLON) {

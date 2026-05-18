@@ -23,6 +23,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("home.hero.model", source);
         Assert.Contains("EnableHoverMotion=\"true\"", source);
         Assert.Contains("UsePlasticMaterial=\"@_heroModel.UsePlasticMaterial\"", source);
+        Assert.DoesNotContain("ModelScale", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("hero-workspace gizmo-workspace", source);
         Assert.DoesNotContain("/models/hero-3d.glb", source);
@@ -63,6 +64,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"manufacturing-gizmo--service\"", servicePage);
         Assert.Contains("@key=\"_heroModel.Key\"", servicePage);
         Assert.Contains(".manufacturing-gizmo--service", styles);
+        Assert.DoesNotContain("ModelScale", home);
+        Assert.DoesNotContain("ModelScale", servicePage);
+        Assert.DoesNotContain("DisplayScale", catalog);
         Assert.DoesNotContain("hero-3d-2.glb", catalog);
         Assert.DoesNotContain("hero-3d.glb", catalog);
     }
@@ -1487,15 +1491,21 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
-        Assert.Contains("DisplayScale", catalog);
         Assert.Contains("\"3d-printing-part-02\"", catalog);
-        Assert.Contains("1.72", catalog);
-        Assert.Contains("ModelScale", component);
-        Assert.Contains("data-model-scale=\"@ModelScale.ToString(CultureInfo.InvariantCulture)\"", component);
+        Assert.DoesNotContain("DisplayScale", catalog);
+        Assert.DoesNotContain("1.72", catalog);
+        Assert.DoesNotContain("1.24", catalog);
+        Assert.DoesNotContain("ModelScale", component);
+        Assert.DoesNotContain("data-model-scale", component);
         Assert.Contains("babylonjs-loaders@9.6.0", source);
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("state.landingFrame = frameImportedModel", source);
+        Assert.Contains("const normalizedHeroModelSize = 2.28;", source);
+        Assert.Contains("normalizeImportedModelDimensions(displayBounds, root, frameMeshes);", source);
+        Assert.Contains("const scale = normalizedHeroModelSize / maxDimension;", source);
+        Assert.Contains("root.scaling.setAll(scale);", source);
+        Assert.Contains("for (const mesh of frameMeshes)", source);
         Assert.Contains("camera.useFramingBehavior = true;", source);
         Assert.Contains("BABYLON.FramingBehavior.FitFrustumSidesMode", source);
         Assert.Contains("framing.zoomOnMeshesHierarchy", source);
@@ -1508,8 +1518,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("updateWorldMatrixChain", source);
         Assert.Contains("state.engine.resize();\n  state.cameraConfigurator?.();", source);
         Assert.Contains("addHoverMotion", source);
-        Assert.Contains("modelScale", source);
-        Assert.Contains("const targetSize = 2.28 * modelScale", source);
+        Assert.DoesNotContain("modelScale", source);
+        Assert.DoesNotContain("const targetSize = 2.28 * modelScale", source);
         Assert.DoesNotContain("wide ? 7.35 : 7.05", source);
         Assert.DoesNotContain("createLandingSurface", source);
         Assert.DoesNotContain("landing-contact-shadow", source);
@@ -1654,7 +1664,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-babylon-frame\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-normalized-models\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

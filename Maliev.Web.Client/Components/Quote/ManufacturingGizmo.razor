@@ -1,5 +1,4 @@
 @implements IAsyncDisposable
-@using System.Globalization
 @inject IJSRuntime JS
 
 <div class="@ContainerClass" aria-label="@AriaLabel">
@@ -7,7 +6,6 @@
             class="manufacturing-gizmo-canvas"
             data-manufacturing-gizmo
             data-model-url="@ModelUrl"
-            data-model-scale="@ModelScale.ToString(CultureInfo.InvariantCulture)"
             data-enable-hover-motion="@EnableHoverMotion.ToString().ToLowerInvariant()"
             data-use-plastic-material="@UsePlasticMaterial.ToString().ToLowerInvariant()"></canvas>
     <div class="manufacturing-gizmo-fallback" aria-hidden="true">
@@ -28,9 +26,6 @@
     public string? ModelUrl { get; set; }
 
     [Parameter]
-    public double ModelScale { get; set; } = 1.0;
-
-    [Parameter]
     public bool EnableHoverMotion { get; set; }
 
     [Parameter]
@@ -38,7 +33,7 @@
 
     private ElementReference _canvas;
     private IJSObjectReference? _module;
-    private const string ModulePath = "/js/manufacturing-gizmo.js?v=20260518-babylon-frame";
+    private const string ModulePath = "/js/manufacturing-gizmo.js?v=20260518-normalized-models";
     private string ContainerClass => string.IsNullOrWhiteSpace(Class)
         ? "manufacturing-gizmo is-loading"
         : $"manufacturing-gizmo is-loading {Class}";
@@ -56,8 +51,7 @@
             _canvas,
             ModelUrl ?? string.Empty,
             EnableHoverMotion,
-            UsePlasticMaterial,
-            ModelScale);
+            UsePlasticMaterial);
     }
 
     public async ValueTask DisposeAsync()
