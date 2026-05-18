@@ -2793,7 +2793,7 @@ html:lang(th) .h1 {
   min-height: 42px;
   gap: 8px;
   padding: 5px 12px 5px 5px;
-  border-radius: 999px;
+  border-radius: var(--radius);
 }
 
 .line-contact-link.contact-line-add-friend .line-contact-icon {

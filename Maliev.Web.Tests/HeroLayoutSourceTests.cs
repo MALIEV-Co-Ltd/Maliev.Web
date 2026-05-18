@@ -539,6 +539,8 @@ public sealed class HeroLayoutSourceTests
             source.IndexOf("contact-business-section contact-business-section--support", StringComparison.Ordinal)..source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)];
         var mapHeading = source[
             source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)..source.IndexOf("<iframe class=\"contact-map-preview\"", StringComparison.Ordinal)];
+        var addFriendLineButtonStyle = styles[
+            styles.IndexOf(".line-contact-link.contact-line-add-friend {", StringComparison.Ordinal)..styles.IndexOf(".line-contact-link.contact-line-add-friend .line-contact-icon", StringComparison.Ordinal)];
 
         Assert.Contains("contact-business-panel", source);
         Assert.Contains("contact-business-section contact-business-section--sales", source);
@@ -633,6 +635,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-info-row", styles);
         Assert.Contains(".line-contact-link.contact-line-add-friend", styles);
         Assert.Contains(".line-contact-link", styles);
+        Assert.Contains("border-radius: var(--radius);", addFriendLineButtonStyle);
+        Assert.DoesNotContain("border-radius: 999px;", addFriendLineButtonStyle);
         Assert.Contains("--line-link-bg", styles);
         Assert.Contains("--line-link-shadow", styles);
         Assert.Contains(".contact-social-icon-row .social-link", styles);
