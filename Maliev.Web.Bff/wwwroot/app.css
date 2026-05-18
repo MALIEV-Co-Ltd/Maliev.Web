@@ -392,7 +392,7 @@ main {
   position: fixed;
   z-index: 900;
   right: clamp(12px, 2vw, 24px);
-  bottom: clamp(16px, 3vw, 32px);
+  bottom: calc(clamp(16px, 2.4vw, 32px) + 76px);
   display: grid;
   gap: 12px;
   width: min(calc(100% - 32px), 408px);
@@ -431,13 +431,12 @@ main {
 }
 
 .cookie-consent-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
+  display: grid;
+  gap: 6px;
 }
 
-.cookie-consent-actions .button {
+.cookie-consent-actions .cookie-consent-accept {
+  width: 100%;
   white-space: nowrap;
 }
 
@@ -452,14 +451,23 @@ main {
 }
 
 .cookie-consent-decline {
+  justify-self: center;
+  padding: 3px 8px;
   color: var(--muted);
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--rule);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  font-size: .78rem;
+  font-weight: 620;
+  line-height: 1.35;
 }
 
 .cookie-consent-decline:hover {
   color: var(--ink-2);
-  background: var(--paper-2);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .accent-blue {
@@ -4975,7 +4983,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .cookie-consent {
-    bottom: 12px;
+    bottom: 74px;
     width: min(calc(100% - 24px), 408px);
     max-height: 46vh;
   }
@@ -5004,7 +5012,7 @@ html[data-theme="dark"] .auth-google-icon {
     padding: 0;
   }
 
-  .cookie-consent-actions .button {
+  .cookie-consent-actions .cookie-consent-accept {
     width: 100%;
   }
 

@@ -143,6 +143,7 @@ public sealed class LocalizationTests
         Assert.Contains("@Text(\"Decline optional\"", component);
         Assert.Contains("cookie-consent-accept", component);
         Assert.Contains("cookie-consent-decline", component);
+        Assert.DoesNotContain("class=\"button cookie-consent-decline\"", component);
         Assert.DoesNotContain("cookie-consent-close", component);
         Assert.Contains("Optional analytics and ads cookies stay off unless you accept them.", component);
         Assert.Contains("href=\"/cookie-policy\"", component);
@@ -161,8 +162,13 @@ public sealed class LocalizationTests
         Assert.Contains("Cookie settings", layout);
         Assert.Contains(".cookie-consent", styles);
         Assert.Contains("right: clamp(12px, 2vw, 24px);", styles);
+        Assert.Contains("bottom: calc(clamp(16px, 2.4vw, 32px) + 76px);", styles);
         Assert.Contains(".cookie-consent-actions .button.primary", styles);
+        Assert.Contains(".cookie-consent-actions .cookie-consent-accept", styles);
         Assert.Contains(".cookie-consent-decline", styles);
+        Assert.Contains("justify-self: center;", styles);
+        Assert.Contains("font-size: .78rem;", styles);
+        Assert.DoesNotContain("box-shadow: inset 0 0 0 1px var(--rule);", styles);
         Assert.DoesNotContain(".cookie-consent-close", styles);
         Assert.DoesNotContain("padding-right: 42px;", styles);
         Assert.DoesNotContain("padding: 18px 46px 18px 18px;", styles);
