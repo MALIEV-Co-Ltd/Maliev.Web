@@ -655,7 +655,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--social-bg", styles);
         Assert.Contains(".contact-map-title", styles);
         Assert.Contains(".contact-map-title-logo", styles);
+        Assert.Matches(@"\.contact-map-title\s*\{[^}]*align-items:\s*center;", styles);
+        Assert.Matches(@"\.contact-map-title-logo\s*\{[^}]*width:\s*4\.4em;", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
+        Assert.DoesNotContain("transform: translateY(.08em);", styles);
         Assert.Contains("font-size: clamp(1.22rem, 1.55vw, 1.52rem);", styles);
         Assert.Contains("font-size: .9rem;", styles);
         Assert.Contains("grid-template-columns: minmax(104px, .28fr) minmax(0, 1fr);", styles);

@@ -2698,17 +2698,16 @@ html:lang(th) .h1 {
 
 .contact-map-title {
   display: inline-flex;
-  align-items: baseline;
-  gap: .42em;
+  align-items: center;
+  gap: .5em;
   flex-wrap: wrap;
 }
 
 .contact-map-title-logo {
   display: inline-block;
-  width: 3em;
+  width: 4.4em;
   height: auto;
   filter: var(--logo-filter);
-  transform: translateY(.08em);
 }
 
 .contact-business-section p,
