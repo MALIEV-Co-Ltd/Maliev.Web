@@ -527,12 +527,15 @@ else if (Path == "contact")
                     </div>
                 </div>
                 <iframe class="contact-map-preview"
-                        src="https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand&output=embed"
+                        src="@MalievMapEmbedUrl"
                         title='@Text("Google Maps location preview for MALIEV", "แผนที่ Google Maps ของ MALIEV")'
                         loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade"></iframe>
                 <div class="contact-map-actions">
-                    <a class="button secondary" href="https://maps.app.goo.gl/DPefucxBN2FTnZQa6" target="_blank" rel="noopener noreferrer">@Text("Open larger map", "เปิดแผนที่ขนาดใหญ่")</a>
+                    <button class="button secondary" type="button" @onclick="OpenContactMapDialog">
+                        <MudIcon Icon="@Icons.Material.Filled.OpenInNew" Size="Size.Small" />
+                        @Text("Open larger map", "เปิดแผนที่ขนาดใหญ่")
+                    </button>
                 </div>
             </article>
         </div>
@@ -591,6 +594,39 @@ else if (Path == "contact")
             <button class="button primary" type="submit" disabled="@_submittingContact">@Text("Send message", "ส่งข้อความ")</button>
         </EditForm>
     </section>
+    @if (_showContactMapDialog)
+    {
+        <div class="contact-map-dialog-backdrop" role="presentation" @onclick="CloseContactMapDialog">
+            <section class="contact-map-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-map-dialog-title" @onclick:stopPropagation>
+                <header class="contact-map-dialog-header">
+                    <div>
+                        <span class="contact-section-icon" aria-hidden="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Map" Size="Size.Medium" />
+                        </span>
+                        <div>
+                            <h2 id="contact-map-dialog-title">@Text("MALIEV location", "ตำแหน่ง MALIEV")</h2>
+                            <p>@Text("Use the larger preview for route planning, pickups, deliveries, and visitor parking.", "ใช้แผนที่ขนาดใหญ่สำหรับวางแผนเส้นทาง รับสินค้า ส่งของ และที่จอดรถผู้มาติดต่อ")</p>
+                        </div>
+                    </div>
+                    <button class="contact-map-dialog-close" type="button" @onclick="CloseContactMapDialog" aria-label='@Text("Close map", "ปิดแผนที่")'>
+                        <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                    </button>
+                </header>
+                <iframe class="contact-map-dialog-frame"
+                        src="@MalievMapEmbedUrl"
+                        title='@Text("Large Google Maps view for MALIEV", "แผนที่ Google Maps ขนาดใหญ่ของ MALIEV")'
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="contact-map-dialog-actions">
+                    <a class="button primary" href="@MalievMapUrl" target="_blank" rel="noopener noreferrer">
+                        <MudIcon Icon="@Icons.Material.Filled.OpenInNew" Size="Size.Small" />
+                        @Text("Open in Google Maps", "เปิดใน Google Maps")
+                    </a>
+                    <button class="button secondary" type="button" @onclick="CloseContactMapDialog">@Text("Close", "ปิด")</button>
+                </div>
+            </section>
+        </div>
+    }
 }
 else
 {
@@ -629,8 +665,11 @@ else
     private const int MaxContactFiles = 5;
     private const long MaxContactFileBytes = 10 * 1024 * 1024;
     private const int MaxContactFileMegabytes = 10;
+    private const string MalievMapUrl = "https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand";
+    private const string MalievMapEmbedUrl = MalievMapUrl + "&output=embed";
     private readonly List<string> _selectedContactFileSummaries = [];
     private bool _submittingContact;
+    private bool _showContactMapDialog;
     private string? _contactStatus;
     private const string AllMaterialsFilter = "all";
     private readonly HashSet<string> _selectedMaterialNames = new(StringComparer.Ordinal);
@@ -1321,6 +1360,16 @@ else
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+    }
+
+    private void OpenContactMapDialog()
+    {
+        _showContactMapDialog = true;
+    }
+
+    private void CloseContactMapDialog()
+    {
+        _showContactMapDialog = false;
     }
 
     private async Task SubmitContactAsync()

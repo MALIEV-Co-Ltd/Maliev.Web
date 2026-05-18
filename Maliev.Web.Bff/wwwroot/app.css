@@ -2500,6 +2500,96 @@ html:lang(th) .h1 {
   justify-content: flex-end;
 }
 
+.contact-map-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vw, 40px);
+  background: rgba(8, 12, 20, .62);
+  backdrop-filter: blur(12px);
+}
+
+.contact-map-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(320px, 1fr) auto;
+  gap: 18px;
+  width: min(980px, 100%);
+  max-height: min(860px, calc(100vh - 32px));
+  padding: clamp(18px, 2.2vw, 28px);
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: rgba(3, 7, 18, .28) 0 28px 72px -28px, var(--shadow-border);
+}
+
+.contact-map-dialog-header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.contact-map-dialog-header > div {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.contact-map-dialog h2,
+.contact-map-dialog p {
+  margin: 0;
+}
+
+.contact-map-dialog h2 {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.contact-map-dialog p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.5;
+}
+
+.contact-map-dialog-close {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  color: var(--muted);
+  background: var(--control-surface);
+  border-radius: 999px;
+  box-shadow: var(--shadow-border);
+  cursor: pointer;
+}
+
+.contact-map-dialog-close:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+.contact-map-dialog-frame {
+  width: 100%;
+  min-height: min(58vh, 560px);
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-border);
+}
+
+.contact-map-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .split-section,
 .manufacturing-section {
   display: grid;
@@ -4748,6 +4838,35 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .contact-map-actions .button {
+    width: 100%;
+  }
+
+  .contact-map-dialog-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .contact-map-dialog {
+    grid-template-rows: auto minmax(300px, 52vh) auto;
+    gap: 14px;
+    max-height: calc(100vh - 24px);
+    padding: 16px;
+  }
+
+  .contact-map-dialog-header,
+  .contact-map-dialog-header > div {
+    gap: 12px;
+  }
+
+  .contact-map-dialog-header > div {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .contact-map-dialog-actions {
+    justify-content: stretch;
+  }
+
+  .contact-map-dialog-actions .button {
     width: 100%;
   }
 
