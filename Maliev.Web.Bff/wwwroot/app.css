@@ -5201,10 +5201,15 @@ html[data-theme="dark"] .auth-google-icon {
     min-height: 320px;
   }
 
-  .manufacturing-gizmo,
+  .manufacturing-gizmo {
+    height: 340px;
+    min-height: 320px;
+  }
+
   .manufacturing-gizmo--landing {
     height: 340px;
     min-height: 320px;
+    overflow: hidden;
   }
 
   .manufacturing-gizmo--service {

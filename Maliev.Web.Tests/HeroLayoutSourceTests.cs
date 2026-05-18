@@ -1450,6 +1450,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("renderRatio", source);
         Assert.Contains("setHardwareScalingLevel", source);
         Assert.Contains("engine.setHardwareScalingLevel(1 / renderRatio)", source);
+        Assert.Contains("resizeRenderRatio: 0", source);
+        Assert.Contains("const renderRatio = getRenderPixelRatio();", source);
+        Assert.Contains("const minimumRatio = mobile ? 1.5 : 1.2;", source);
+        Assert.Contains("state.engine.resize(true);", source);
+        Assert.Contains("resizeScene(state, true);", source);
+        Assert.Contains("canvas.width", source);
+        Assert.Contains("state.resizeRenderRatio === renderRatio", source);
         Assert.Contains("ResizeObserver", source);
         Assert.Contains("powerPreference: \"low-power\"", source);
 
@@ -1516,7 +1523,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("camera.getProjectionMatrix?.(true)", source);
         Assert.Contains("camera.upperRadiusLimit = null", source);
         Assert.Contains("updateWorldMatrixChain", source);
-        Assert.Contains("state.engine.resize();\n  state.cameraConfigurator?.();", source);
+        Assert.Contains("state.engine.resize(true);\n  state.cameraConfigurator?.();", source);
         Assert.Contains("addHoverMotion", source);
         Assert.DoesNotContain("modelScale", source);
         Assert.DoesNotContain("const targetSize = 2.28 * modelScale", source);
@@ -1569,7 +1576,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("framing.zoomOnMeshesHierarchy(meshes, false);", source);
         Assert.Contains("const tallFrameRatio = frame?.size", source);
         Assert.Contains("const modelRadiusScale = tallFrameRatio > 1.45 ? metrics.tallFrameRadiusScale : 1;", source);
-        Assert.Contains("camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, metrics.minRadius);", source);
+        Assert.Contains("const fitRadius = computeLandingHeroFitRadius(camera, frame, metrics);", source);
+        Assert.Contains("const framedRadius = camera.radius * metrics.framingRadiusScale * modelRadiusScale;", source);
+        Assert.Contains("const boundedRadius = Math.min(framedRadius, fitRadius * metrics.maxFramingRadiusScale);", source);
+        Assert.Contains("camera.radius = Math.max(boundedRadius, fitRadius, metrics.minRadius);", source);
+        Assert.Contains("function computeLandingHeroFitRadius(camera, frame, metrics)", source);
+        Assert.Contains("const horizontalFov = 2 * Math.atan(Math.tan(camera.fov / 2) * metrics.aspect);", source);
+        Assert.Contains("maxViewportFill: narrowTall ? 0.52 : compact ? 0.58", source);
+        Assert.Contains("maxFramingRadiusScale: narrowTall ? 1.16 : compact ? 1.12", source);
+        Assert.DoesNotContain("camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, metrics.minRadius);", source);
+        Assert.DoesNotContain("camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, fitRadius, metrics.minRadius);", source);
         Assert.DoesNotContain("clamp(camera.radius, metrics.minRadius, metrics.maxRadius)", source);
         Assert.Contains("framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16", source);
         Assert.Contains("tallFrameRadiusScale: 1.38", source);
@@ -1633,6 +1649,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("min-height: calc(100svh - var(--site-header-height));", styles);
         Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;", styles);
         Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    height: 340px;\n    min-height: 320px;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    justify-content: center;\n    text-align: center;", styles);
         Assert.Contains(".metric-strip div {\n    justify-items: center;", styles);
         Assert.Contains("@media (min-width: 1600px)", styles);
@@ -1664,7 +1681,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-normalized-models\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-mobile-frame\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

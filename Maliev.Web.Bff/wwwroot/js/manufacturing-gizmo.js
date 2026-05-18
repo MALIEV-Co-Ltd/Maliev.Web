@@ -32,6 +32,7 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     resizeWidth: 0,
     resizeHeight: 0,
     resizePixelRatio: 0,
+    resizeRenderRatio: 0,
     visibilityHandler: null,
     pointerEnterHandler: null,
     pointerMoveHandler: null,
@@ -414,9 +415,12 @@ function getLandingHeroViewportMetrics(host) {
   const wide = width > 920;
 
   return {
+    aspect,
     fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
     framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16 : balancedTablet ? 1.12 : aspect > 1.55 ? 1.08 : 1.1,
     tallFrameRadiusScale: 1.38,
+    maxViewportFill: narrowTall ? 0.52 : compact ? 0.58 : balancedTablet ? 0.64 : wide ? 0.68 : 0.64,
+    maxFramingRadiusScale: narrowTall ? 1.16 : compact ? 1.12 : balancedTablet ? 1.18 : wide ? 1.22 : 1.2,
     positionScale: narrowTall ? 0.5 : compact ? 0.5 : 0.48,
     minRadius: narrowTall ? 4.2 : compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
     maxRadius: narrowTall ? 9.6 : compact ? 8.4 : wide ? 9.2 : 8.8,
@@ -446,7 +450,27 @@ function applyLandingHeroFraming(camera, frame, metrics, BABYLON) {
     ? frame.size.y / Math.max(frame.size.x, frame.size.z, Number.EPSILON)
     : 1;
   const modelRadiusScale = tallFrameRatio > 1.45 ? metrics.tallFrameRadiusScale : 1;
-  camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, metrics.minRadius);
+  const fitRadius = computeLandingHeroFitRadius(camera, frame, metrics);
+  const framedRadius = camera.radius * metrics.framingRadiusScale * modelRadiusScale;
+  const boundedRadius = Math.min(framedRadius, fitRadius * metrics.maxFramingRadiusScale);
+  camera.radius = Math.max(boundedRadius, fitRadius, metrics.minRadius);
+  refreshCameraMatrices(camera);
+}
+
+function computeLandingHeroFitRadius(camera, frame, metrics) {
+  const fill = clamp(metrics.maxViewportFill ?? 0.64, 0.42, 0.8);
+  const verticalFov = Math.max(camera.fov, 0.01);
+  const horizontalFov = 2 * Math.atan(Math.tan(camera.fov / 2) * metrics.aspect);
+  const horizontalSpan = Math.max(frame?.size?.x ?? 0, frame?.size?.z ?? 0);
+  const verticalSpan = frame?.size?.y ?? 0;
+  const verticalRadius = verticalSpan / (2 * Math.tan(verticalFov / 2) * fill);
+  const horizontalRadius = horizontalSpan / (2 * Math.tan(Math.max(horizontalFov, 0.01) / 2) * fill);
+  const depthAllowance = (frame?.size?.z ?? 0) * 0.28;
+  const radius = Math.max(verticalRadius, horizontalRadius) + depthAllowance;
+
+  return Number.isFinite(radius) && radius > 0
+    ? radius
+    : metrics.fallbackRadius;
 }
 
 function refreshCameraMatrices(camera) {
@@ -724,14 +748,16 @@ function configureSceneRuntime(state, engine, scene, cameraConfigurator) {
   state.resizeHandler = () => scheduleResizeScene(state);
   window.addEventListener("resize", state.resizeHandler, { passive: true });
 
-  resizeScene(state);
+  resizeScene(state, true);
 }
 
 function markReady(state) {
   state.host?.classList.remove("is-loading");
   state.host?.classList.add("is-ready");
   state.canvas.dataset.ready = "true";
+  resizeScene(state, true);
   state.scene.render();
+  scheduleResizeScene(state, true);
   startRenderLoop(state);
 }
 
@@ -857,16 +883,21 @@ function axisMaterial(scene, BABYLON, name, hex) {
   return material;
 }
 
-function configureHardwareScaling(engine) {
+function getRenderPixelRatio() {
   const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
-  const mobile = window.matchMedia("(max-width: 640px)").matches;
-  const maxRatio = mobile ? 1.35 : 2;
-  const minimumRatio = mobile ? 1.1 : 1.2;
-  const renderRatio = Math.min(maxRatio, Math.max(minimumRatio, deviceRatio));
-  engine.setHardwareScalingLevel(1 / renderRatio);
+  const mobile = window.matchMedia("(max-width: 680px)").matches;
+  const maxRatio = 2;
+  const minimumRatio = mobile ? 1.5 : 1.2;
+
+  return Math.min(maxRatio, Math.max(minimumRatio, deviceRatio));
 }
 
-function resizeScene(state) {
+function configureHardwareScaling(engine, renderRatio = getRenderPixelRatio()) {
+  engine.setHardwareScalingLevel(1 / renderRatio);
+  return renderRatio;
+}
+
+function resizeScene(state, force = false) {
   if (!state.engine) {
     return;
   }
@@ -876,26 +907,38 @@ function resizeScene(state) {
   const width = Math.round(rect.width);
   const height = Math.round(rect.height);
   const pixelRatio = window.devicePixelRatio || 1;
+  const renderRatio = getRenderPixelRatio();
+  const expectedCanvasWidth = Math.round(width * renderRatio);
+  const expectedCanvasHeight = Math.round(height * renderRatio);
+  const canvas = state.canvas;
+  const backingBufferMatches =
+    Math.abs(canvas.width - expectedCanvasWidth) <= 1 &&
+    Math.abs(canvas.height - expectedCanvasHeight) <= 1;
 
   if (!width || !height) {
     return;
   }
 
-  if (state.resizeWidth === width &&
+  if (!force &&
+    state.resizeWidth === width &&
     state.resizeHeight === height &&
-    state.resizePixelRatio === pixelRatio) {
+    state.resizePixelRatio === pixelRatio &&
+    state.resizeRenderRatio === renderRatio &&
+    backingBufferMatches) {
     return;
   }
 
   state.resizeWidth = width;
   state.resizeHeight = height;
   state.resizePixelRatio = pixelRatio;
-  configureHardwareScaling(state.engine);
-  state.engine.resize();
+  state.resizeRenderRatio = renderRatio;
+  configureHardwareScaling(state.engine, renderRatio);
+  state.engine.resize(true);
   state.cameraConfigurator?.();
+  state.scene?.render();
 }
 
-function scheduleResizeScene(state) {
+function scheduleResizeScene(state, force = false) {
   if (state.disposed) {
     return;
   }
@@ -906,7 +949,7 @@ function scheduleResizeScene(state) {
 
   state.resizeFrame = requestAnimationFrame(() => {
     state.resizeFrame = 0;
-    resizeScene(state);
+    resizeScene(state, force);
   });
 }
 
