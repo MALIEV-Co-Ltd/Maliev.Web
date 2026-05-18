@@ -1658,14 +1658,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("min-height: 440px;", styles);
         Assert.Contains("height: min(46vh, 470px);", styles);
         Assert.Contains("@media (max-width: 680px)", styles);
-        Assert.Contains(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);
-        Assert.Contains("align-content: space-between;", styles);
-        Assert.Contains("min-height: calc(100svh - var(--site-header-height));", styles);
-        Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;", styles);
-        Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    height: 340px;\n    min-height: 320px;\n    overflow: hidden;", styles);
-        Assert.Contains(".metric-strip {\n    justify-content: center;\n    text-align: center;", styles);
-        Assert.Contains(".metric-strip div {\n    justify-items: center;", styles);
+        Assert.DoesNotContain(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);
+        Assert.Contains(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"copy\"\n      \"visual\";", styles);
+        Assert.Contains("align-content: start;", styles);
+        Assert.Contains("min-height: auto;", styles);
+        Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
+        Assert.DoesNotContain(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
+        Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
+        Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
+        Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
         Assert.Contains("@media (min-width: 1600px)", styles);
         Assert.Contains("height: min(60vh, 760px);", styles);
         Assert.Contains("@media (min-width: 2400px)", styles);
@@ -1684,6 +1686,28 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("frameLandingHeroCamera", gizmo);
         Assert.DoesNotContain("measureProjectedMeshFrame", gizmo);
         Assert.DoesNotContain("projectedFrameFits", gizmo);
+    }
+
+    /// <summary>
+    /// Verifies the narrow mobile landing hero stays centered and compact instead of stacking a tall canvas above the copy.
+    /// </summary>
+    [Fact]
+    public void HomeHeroUsesCompactCenteredNarrowMobileComposition()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("@media (max-width: 680px)", styles);
+        Assert.Contains(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"copy\"\n      \"visual\";", styles);
+        Assert.Contains("min-height: auto;\n    padding-top: 24px;\n    padding-bottom: 34px;\n    text-align: center;", styles);
+        Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
+        Assert.Contains(".landing-hero-copy > p,\n  .landing-hero-actions {\n    max-width: none;\n    margin-inline: auto;", styles);
+        Assert.Contains(".landing-quote-dropzone-inner {\n    grid-template-columns: 38px minmax(0, 1fr);\n    grid-template-areas:\n      \"icon copy\"\n      \"action action\";", styles);
+        Assert.Contains(".landing-quote-dropzone-action {\n    grid-area: action;\n    width: 100%;", styles);
+        Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
+        Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
+        Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
+        Assert.DoesNotContain("grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);
     }
 
     /// <summary>
