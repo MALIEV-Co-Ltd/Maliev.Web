@@ -172,8 +172,8 @@ public sealed class LocalizationTests
         Assert.DoesNotContain(".cookie-consent-close", styles);
         Assert.DoesNotContain("padding-right: 42px;", styles);
         Assert.DoesNotContain("padding: 18px 46px 18px 18px;", styles);
-        Assert.DoesNotContain("left: 50%;", styles);
-        Assert.DoesNotContain("transform: translateX(-50%);", styles);
+        Assert.DoesNotContain(".cookie-consent {\n  position: fixed;\n  left: 50%;", styles);
+        Assert.DoesNotContain(".cookie-consent {\n  position: fixed;\n  transform: translateX(-50%);", styles);
         Assert.Contains(".footer-link-button", styles);
         Assert.Contains("Cookie settings link in the MALIEV footer", policy);
     }
