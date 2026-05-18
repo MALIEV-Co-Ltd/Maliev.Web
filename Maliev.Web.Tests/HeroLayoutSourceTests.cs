@@ -539,6 +539,8 @@ public sealed class HeroLayoutSourceTests
             source.IndexOf("contact-business-section contact-business-section--support", StringComparison.Ordinal)..source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)];
         var mapHeading = source[
             source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)..source.IndexOf("<iframe class=\"contact-map-preview\"", StringComparison.Ordinal)];
+        var mapDialogHeader = source[
+            source.IndexOf("<header class=\"contact-map-dialog-header\">", StringComparison.Ordinal)..source.IndexOf("<iframe class=\"contact-map-dialog-frame\"", StringComparison.Ordinal)];
         var addFriendLineButtonStyle = styles[
             styles.IndexOf(".line-contact-link.contact-line-add-friend {", StringComparison.Ordinal)..styles.IndexOf(".line-contact-link.contact-line-add-friend .line-contact-icon", StringComparison.Ordinal)];
 
@@ -568,7 +570,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Icons.Material.Filled.AlternateEmail", source);
         Assert.Contains("Icons.Material.Filled.MarkEmailUnread", source);
         Assert.Contains("Icons.Material.Filled.BuildCircle", source);
-        Assert.Contains("Icons.Material.Filled.Map", source);
         Assert.Contains("Icons.Material.Filled.AttachFile", source);
         Assert.Contains("Icons.Material.Filled.InsertDriveFile", source);
         Assert.Contains("36/1 Moo 3", source);
@@ -599,6 +600,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("role=\"dialog\"", source);
         Assert.Contains("contact-map-dialog-backdrop", source);
         Assert.Contains("contact-map-dialog-frame", source);
+        Assert.Contains("contact-map-dialog-copy", mapDialogHeader);
+        Assert.Contains("contact-map-dialog-title", mapDialogHeader);
+        Assert.Contains("contact-map-dialog-logo", mapDialogHeader);
+        Assert.Contains("aria-label='@Text(\"MALIEV location\", \"ตำแหน่ง MALIEV\")'", mapDialogHeader);
+        Assert.Contains("src=\"/images/logo.svg\"", mapDialogHeader);
         Assert.Contains("Open in Google Maps", source);
         Assert.Contains("เปิดใน Google Maps", source);
         Assert.Contains("CloseContactMapDialog", source);
@@ -612,6 +618,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("คุยกับทีมสนับสนุนทาง LINE", supportSection);
         Assert.DoesNotContain("contact-section-icon", mapHeading);
         Assert.DoesNotContain("Icons.Material.Filled.Map", mapHeading);
+        Assert.DoesNotContain("contact-section-icon", mapDialogHeader);
+        Assert.DoesNotContain("Icons.Material.Filled.Map", mapDialogHeader);
         Assert.DoesNotContain("contact-direct-grid", source);
         Assert.DoesNotContain("contact-direct-card", source);
         Assert.DoesNotContain("contact-map-card", source);
@@ -644,6 +652,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-map-actions", styles);
         Assert.Contains(".contact-map-dialog-backdrop", styles);
         Assert.Contains(".contact-map-dialog", styles);
+        Assert.Contains(".contact-map-dialog-copy", styles);
+        Assert.Contains(".contact-map-dialog-title", styles);
+        Assert.Contains(".contact-map-dialog-logo", styles);
         Assert.Contains(".contact-map-dialog-frame", styles);
         Assert.Contains(".contact-map-dialog-actions", styles);
         Assert.Contains(".contact-rfq-notice", styles);
@@ -657,6 +668,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-map-title-logo", styles);
         Assert.Matches(@"\.contact-map-title\s*\{[^}]*align-items:\s*center;", styles);
         Assert.Matches(@"\.contact-map-title-logo\s*\{[^}]*width:\s*4\.4em;", styles);
+        Assert.Matches(@"\.contact-map-dialog-title\s*\{[^}]*align-items:\s*center;", styles);
+        Assert.Matches(@"\.contact-map-dialog-logo\s*\{[^}]*height:\s*\.92em;", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
         Assert.DoesNotContain("transform: translateY(.08em);", styles);
         Assert.Contains("font-size: clamp(1.22rem, 1.55vw, 1.52rem);", styles);

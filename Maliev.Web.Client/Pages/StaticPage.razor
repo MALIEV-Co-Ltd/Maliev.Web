@@ -594,14 +594,20 @@ else if (Path == "contact")
         <div class="contact-map-dialog-backdrop" role="presentation" @onclick="CloseContactMapDialog">
             <section class="contact-map-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-map-dialog-title" @onclick:stopPropagation>
                 <header class="contact-map-dialog-header">
-                    <div>
-                        <span class="contact-section-icon" aria-hidden="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Map" Size="Size.Medium" />
-                        </span>
-                        <div>
-                            <h2 id="contact-map-dialog-title">@Text("MALIEV location", "ตำแหน่ง MALIEV")</h2>
-                            <p>@Text("Use the larger preview for route planning, pickups, deliveries, and visitor parking.", "ใช้แผนที่ขนาดใหญ่สำหรับวางแผนเส้นทาง รับสินค้า ส่งของ และที่จอดรถผู้มาติดต่อ")</p>
-                        </div>
+                    <div class="contact-map-dialog-copy">
+                        <h2 id="contact-map-dialog-title" class="contact-map-dialog-title" aria-label='@Text("MALIEV location", "ตำแหน่ง MALIEV")'>
+                            @if (IsThaiCulture)
+                            {
+                                <span>@Text("location", "ตำแหน่ง")</span>
+                                <img class="contact-map-dialog-logo" src="/images/logo.svg" alt="" aria-hidden="true" />
+                            }
+                            else
+                            {
+                                <img class="contact-map-dialog-logo" src="/images/logo.svg" alt="" aria-hidden="true" />
+                                <span>@Text("location", "ตำแหน่ง")</span>
+                            }
+                        </h2>
+                        <p>@Text("Use the larger preview for route planning, pickups, deliveries, and visitor parking.", "ใช้แผนที่ขนาดใหญ่สำหรับวางแผนเส้นทาง รับสินค้า ส่งของ และที่จอดรถผู้มาติดต่อ")</p>
                     </div>
                     <button class="contact-map-dialog-close" type="button" @onclick="CloseContactMapDialog" aria-label='@Text("Close map", "ปิดแผนที่")'>
                         <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />

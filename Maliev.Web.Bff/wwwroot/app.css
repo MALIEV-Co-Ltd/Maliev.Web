@@ -2920,11 +2920,8 @@ html[data-theme="dark"] .form-status--error {
   justify-content: space-between;
 }
 
-.contact-map-dialog-header > div {
-  display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
+.contact-map-dialog-copy {
+  min-width: 0;
 }
 
 .contact-map-dialog h2,
@@ -2936,6 +2933,20 @@ html[data-theme="dark"] .form-status--error {
   font-size: clamp(1.35rem, 2vw, 1.8rem);
   font-weight: 720;
   line-height: 1.2;
+}
+
+.contact-map-dialog-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .42em;
+  flex-wrap: wrap;
+}
+
+.contact-map-dialog-logo {
+  display: block;
+  width: auto;
+  height: .92em;
+  filter: var(--logo-filter);
 }
 
 .contact-map-dialog p {
@@ -5467,13 +5478,8 @@ html[data-theme="dark"] .auth-google-icon {
     padding: 16px;
   }
 
-  .contact-map-dialog-header,
-  .contact-map-dialog-header > div {
+  .contact-map-dialog-header {
     gap: 12px;
-  }
-
-  .contact-map-dialog-header > div {
-    grid-template-columns: 40px minmax(0, 1fr);
   }
 
   .contact-map-dialog-actions {
