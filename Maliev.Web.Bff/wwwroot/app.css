@@ -2468,6 +2468,8 @@ html[data-theme="dark"] .form-status--error {
 
 .service-answer-card.has-media {
   grid-template-columns: minmax(132px, .42fr) minmax(0, 1fr);
+  align-content: stretch;
+  align-items: stretch;
   gap: 0;
   padding: 0;
   overflow: hidden;
@@ -2480,6 +2482,7 @@ html[data-theme="dark"] .form-status--error {
 .service-answer-card-media {
   display: block;
   align-self: stretch;
+  height: 100%;
   min-height: 164px;
   margin: 0;
   overflow: hidden;
@@ -5437,6 +5440,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .service-answer-card-media {
+    height: auto;
     min-height: 0;
     aspect-ratio: 16 / 9;
   }

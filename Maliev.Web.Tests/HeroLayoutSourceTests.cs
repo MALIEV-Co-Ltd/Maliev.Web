@@ -159,8 +159,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".service-answer-frame", styles);
         Assert.Contains(".service-answer-card-grid--routes", styles);
         Assert.Contains(".service-answer-card.has-media > div", styles);
-        Assert.Contains(".service-answer-card.has-media {\n  grid-template-columns: minmax(132px, .42fr) minmax(0, 1fr);\n  gap: 0;\n  padding: 0;\n  overflow: hidden;", styles);
+        Assert.Contains(".service-answer-card.has-media {\n  grid-template-columns: minmax(132px, .42fr) minmax(0, 1fr);\n  align-content: stretch;\n  align-items: stretch;\n  gap: 0;\n  padding: 0;\n  overflow: hidden;", styles);
+        Assert.Matches(@"\.service-answer-card-media\s*\{[^}]*height:\s*100%;", styles);
         Assert.Contains(".service-answer-card-media img", styles);
+        Assert.Matches(@"\.service-answer-card-media\s*\{[^}]*aspect-ratio:\s*16 / 9;", styles);
         Assert.Contains(".service-answer-card-grid--checks", styles);
         Assert.Contains(".service-answer-steps", styles);
         Assert.Contains(".service-detail-section--cnc-machining", styles);
