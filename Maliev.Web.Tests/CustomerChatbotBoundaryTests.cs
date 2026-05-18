@@ -38,6 +38,49 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies response action type and data from ChatbotService are preserved for the Web component router.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_ServiceQuestion_PreservesSuggestedActionContract()
+    {
+        var client = new CapturingChatbotServiceClient
+        {
+            SuggestedActions =
+            [
+                new ChatbotSuggestedAction
+                {
+                    Text = "View All Services",
+                    Label = "View All Services",
+                    Action = "view_services",
+                    Data = "all"
+                },
+                new ChatbotSuggestedAction
+                {
+                    Text = "Contact Us",
+                    Label = "Contact Us",
+                    Action = "contact",
+                    Data = "general"
+                }
+            ]
+        };
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "What manufacturing services do you offer?",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.Equal(2, response.SuggestedActions.Count);
+        Assert.Equal("View All Services", response.SuggestedActions[0].Label);
+        Assert.Equal("view_services", response.SuggestedActions[0].Action);
+        Assert.Equal("all", response.SuggestedActions[0].Data);
+        Assert.Equal("Contact Us", response.SuggestedActions[1].Label);
+        Assert.Equal("contact", response.SuggestedActions[1].Action);
+        Assert.Equal("general", response.SuggestedActions[1].Data);
+    }
+
+    /// <summary>
     /// Verifies browser/account personalization notes are forwarded as bounded context, not as the topic guard input.
     /// </summary>
     [Fact]
@@ -342,6 +385,8 @@ public sealed class CustomerChatbotBoundaryTests
 
         public Exception? FirstSendException { get; init; }
 
+        public List<ChatbotSuggestedAction> SuggestedActions { get; init; } = [];
+
         public int SendAttempts { get; private set; }
 
         public Task<ChatbotSessionResponse> InitiateSessionAsync(ChatbotInitiateSessionRequest request, CancellationToken cancellationToken)
@@ -371,7 +416,8 @@ public sealed class CustomerChatbotBoundaryTests
                 Content = "PLA is the usual low-cost FDM starting point, while PETG is better for tougher utility parts.",
                 Role = "assistant",
                 Language = "en",
-                CreatedAt = DateTimeOffset.UtcNow
+                CreatedAt = DateTimeOffset.UtcNow,
+                SuggestedActions = SuggestedActions
             });
         }
     }

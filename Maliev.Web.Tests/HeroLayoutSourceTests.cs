@@ -800,6 +800,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("GetSignedInAddressesAsync", component);
         Assert.Contains("GetSignedInOrdersAsync", component);
         Assert.Contains("CreateAccountActions", component);
+        Assert.Contains("ChatActionViewServices", component);
+        Assert.Contains("ChatActionContact", component);
+        Assert.Contains("ChatActionRequestQuote", component);
+        Assert.Contains("ResolveResponseActionHref", component);
+        Assert.Contains("ResolveServicesHref", component);
+        Assert.Contains("ChatActionViewServices => ResolveServicesHref(action.Data)", component);
+        Assert.Contains("ChatActionContact => \"/contact\"", component);
+        Assert.Contains("return \"/services\";", component);
+        Assert.Contains("IsInternalHref(href) ? null : \"_blank\"", component);
+        Assert.Contains("rel=\"@action.Rel\"", component);
         Assert.Contains("customer-chatbot-actions", component);
         Assert.Contains("customer-chatbot-action", component);
         Assert.Contains("customer-chatbot-popout", component);

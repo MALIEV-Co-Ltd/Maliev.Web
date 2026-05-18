@@ -76,7 +76,7 @@
                                         }
                                         else
                                         {
-                                            <a class="@actionClass" href="@action.Href" target="@action.Target" rel="noopener">
+                                            <a class="@actionClass" href="@action.Href" target="@action.Target" rel="@action.Rel">
                                                 <MudIcon Icon="@action.Icon" Size="Size.Small" />
                                                 <span>@action.Label</span>
                                             </a>
@@ -158,6 +158,9 @@
     private const string ChatActionSignInGoogle = "signin-google";
     private const string ChatActionSignInEmail = "signin-email";
     private const string ChatActionLink = "link";
+    private const string ChatActionViewServices = "view_services";
+    private const string ChatActionContact = "contact";
+    private const string ChatActionRequestQuote = "request_quote";
     private const int MaxStoredMessages = 24;
     private const int MaxStoredItems = 6;
     private const int SignInPollAttempts = 60;
@@ -699,11 +702,13 @@
                 ChatActionSignInGoogle,
                 null,
                 null,
+                null,
                 Icons.Material.Filled.Login,
                 true),
             new CustomerChatAction(
                 Text("Use email and password", "ใช้อีเมลและรหัสผ่าน"),
                 ChatActionSignInEmail,
+                null,
                 null,
                 null,
                 Icons.Material.Filled.Email,
@@ -716,6 +721,7 @@
         return new CustomerChatAction(
             Text("Sign in to continue", "เข้าสู่ระบบเพื่อดำเนินการต่อ"),
             ChatActionSignInEmail,
+            null,
             null,
             null,
             Icons.Material.Filled.Login,
@@ -760,7 +766,7 @@
                     return CreateSignInAction();
                 }
 
-                var href = string.IsNullOrWhiteSpace(action.Data) ? null : action.Data;
+                var href = ResolveResponseActionHref(action);
                 return string.IsNullOrWhiteSpace(href)
                     ? null
                     : CreateLinkAction(action.Label, href, Icons.Material.Filled.OpenInNew, false);
@@ -772,7 +778,61 @@
 
     private static CustomerChatAction CreateLinkAction(string label, string href, string icon, bool primary)
     {
-        return new CustomerChatAction(label, ChatActionLink, href, "_blank", icon, primary);
+        var target = IsInternalHref(href) ? null : "_blank";
+        var rel = target is null ? null : "noopener";
+        return new CustomerChatAction(label, ChatActionLink, href, target, rel, icon, primary);
+    }
+
+    private static string? ResolveResponseActionHref(CustomerChatbotActionDto action)
+    {
+        var actionType = CleanOneLine(action.Action, 80)?.ToLowerInvariant() ?? string.Empty;
+        return actionType switch
+        {
+            ChatActionViewServices => ResolveServicesHref(action.Data),
+            ChatActionContact => "/contact",
+            ChatActionRequestQuote => SiteContent.QuoteNewUrl,
+            _ => TryNormalizeExplicitHref(action.Data)
+        };
+    }
+
+    private static string ResolveServicesHref(string? data)
+    {
+        var slug = (CleanOneLine(data, 120) ?? string.Empty)
+            .Replace('_', '-')
+            .ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(slug) || slug is "all" or "general" or "services")
+        {
+            return "/services";
+        }
+
+        return SiteContent.Services.Any(service => service.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase))
+            ? $"/services/{slug}"
+            : "/services";
+    }
+
+    private static string? TryNormalizeExplicitHref(string? href)
+    {
+        var cleaned = CleanOneLine(href, 2048);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return null;
+        }
+
+        if (cleaned.StartsWith("/", StringComparison.Ordinal) && !cleaned.StartsWith("//", StringComparison.Ordinal))
+        {
+            return cleaned;
+        }
+
+        return Uri.TryCreate(cleaned, UriKind.Absolute, out var uri)
+            && uri.Scheme is "http" or "https" or "mailto" or "tel"
+            ? uri.ToString()
+            : null;
+    }
+
+    private static bool IsInternalHref(string href)
+    {
+        return href.StartsWith("/", StringComparison.Ordinal) && !href.StartsWith("//", StringComparison.Ordinal);
     }
 
     private void QueueMessageScroll(bool smooth)
@@ -1586,6 +1646,7 @@
         string Kind,
         string? Href,
         string? Target,
+        string? Rel,
         string Icon,
         bool Primary);
 
