@@ -546,7 +546,9 @@ public sealed class HeroLayoutSourceTests
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
 
         Assert.Contains("<CustomerChatbot />", layout);
-        Assert.Contains("customer manufacturing assistant", component);
+        Assert.Contains("MALIEV manufacturing assistant", component);
+        Assert.Contains("Materials, quotes, orders, and delivery", component);
+        Assert.Contains("Customer manufacturing assistant", component);
         Assert.Contains("Hi, I'm Mali.", component);
         Assert.Contains("How can I help with your MALIEV project today?", component);
         Assert.Contains("น้องมะลิ", component);
@@ -558,7 +560,12 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("OnPreferencesChanged", component);
         Assert.DoesNotContain("Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
-        Assert.Contains("aria-label=\"@Text(\"Open Mali\"", component);
+        Assert.Contains("aria-label=\"@Text(\"Open customer manufacturing assistant\"", component);
+        Assert.DoesNotContain("<span>@Text(\"Mali\", \"น้องมะลิ\")</span>", component);
+        Assert.DoesNotContain("<strong>@Text(\"Mali\", \"น้องมะลิ\")</strong>", component);
+        Assert.DoesNotContain("Ask Mali about materials or quotes", component);
+        Assert.DoesNotContain("Mali replied. Open the chat to continue.", component);
+        Assert.DoesNotContain("unread Mali messages", component);
         Assert.Contains("maliev.chatbot.personalization.v1", component);
         Assert.Contains("localStorage.getItem", component);
         Assert.Contains("localStorage.setItem", component);

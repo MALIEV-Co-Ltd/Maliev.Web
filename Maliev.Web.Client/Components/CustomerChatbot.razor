@@ -9,14 +9,14 @@
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<aside class="customer-chatbot" aria-label="@Text("Mali customer assistant", "ผู้ช่วยลูกค้าน้องมะลิ")">
+<aside class="customer-chatbot" aria-label="@Text("Customer manufacturing assistant", "ผู้ช่วยงานผลิตสำหรับลูกค้า")">
     @if (_isOpen)
     {
         <section class="customer-chatbot-panel" aria-live="polite">
             <header class="customer-chatbot-header">
                 <div>
-                    <span>@Text("Mali", "น้องมะลิ")</span>
-                    <small>@Text("customer manufacturing assistant", "ผู้ช่วยงานผลิตสำหรับลูกค้า")</small>
+                    <span>@Text("MALIEV manufacturing assistant", "ผู้ช่วยงานผลิต MALIEV")</span>
+                    <small>@Text("Materials, quotes, orders, and delivery", "วัสดุ ใบเสนอราคา คำสั่งซื้อ และการจัดส่ง")</small>
                 </div>
                 <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpenAsync">
                     <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
@@ -56,7 +56,7 @@
                 <textarea @ref="_draftInput"
                           rows="1"
                           maxlength="1000"
-                          placeholder="@Text("Ask Mali about materials or quotes", "ถามเรื่องวัสดุ ราคา หรือจัดส่ง")"
+                          placeholder="@Text("Ask about materials, quotes, or delivery", "ถามเรื่องวัสดุ ราคา หรือจัดส่ง")"
                           value="@_draft"
                           @oninput="OnDraftInputAsync"
                           disabled="@_isSending"></textarea>
@@ -69,7 +69,7 @@
     else if (_showPopout)
     {
         <button type="button" class="customer-chatbot-popout" @onclick="OpenFromPopoutAsync">
-            <strong>@Text("Mali", "น้องมะลิ")</strong>
+            <strong>@Text("MALIEV assistant", "ผู้ช่วย MALIEV")</strong>
             <span>@_popoutMessage</span>
         </button>
     }
@@ -77,7 +77,7 @@
     <button type="button"
             class="@ToggleButtonClass"
             aria-expanded="@_isOpen.ToString().ToLowerInvariant()"
-            aria-label="@Text("Open Mali", "เปิดน้องมะลิ")"
+            aria-label="@Text("Open customer manufacturing assistant", "เปิดผู้ช่วยงานผลิตสำหรับลูกค้า")"
             @onclick="ToggleOpenAsync">
         <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Size="Size.Medium" />
         @if (_unreadCount > 0)
@@ -121,7 +121,7 @@
     private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
-    private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread Mali messages", $"{_unreadCount} ข้อความจากน้องมะลิที่ยังไม่ได้อ่าน");
+    private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
 
     private IReadOnlyList<CustomerChatPrompt> SuggestedPrompts =>
     [
@@ -280,7 +280,7 @@
         {
             _unreadCount = Math.Clamp(_unreadCount + 1, 0, 99);
             _memory.UnreadCount = _unreadCount;
-            _ = ShowPopoutTemporarilyAsync(Text("Mali replied. Open the chat to continue.", "น้องมะลิตอบแล้ว เปิดแชทเพื่อคุยต่อได้ค่ะ"));
+            _ = ShowPopoutTemporarilyAsync(Text("The assistant replied. Open the chat to continue.", "ผู้ช่วยตอบแล้ว เปิดแชทเพื่อคุยต่อได้ค่ะ"));
         }
 
         await PersistMemoryAsync();
@@ -313,12 +313,12 @@
     {
         if (_memory.Messages.Count > 0 && !string.IsNullOrWhiteSpace(name))
         {
-            return Text($"Hi {name}, Mali can continue your previous MALIEV chat.", $"สวัสดีค่ะ {name} น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ");
+            return Text($"Hi {name}, the assistant can continue your previous MALIEV chat.", $"สวัสดีค่ะ {name} ผู้ช่วยคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ");
         }
 
         return _memory.Messages.Count > 0
-            ? Text("Mali can continue your previous MALIEV chat.", "น้องมะลิคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
-            : Text("Ask Mali about materials, pricing, lead time, or the right manufacturing process.", "ถามน้องมะลิเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
+            ? Text("The assistant can continue your previous MALIEV chat.", "ผู้ช่วยคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
+            : Text("Ask about materials, pricing, lead time, or the right manufacturing process.", "ถามเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
     }
 
     private async Task<CustomerChatbotIdentity> ResolveIdentityAsync()
