@@ -523,6 +523,43 @@ else if (Path == "contact")
                 <label class="wide">@Text("Subject", "หัวข้อ") <InputText @bind-Value="_contact.Subject" /></label>
                 <label class="wide">@Text("Message", "ข้อความ") <InputTextArea @bind-Value="_contact.Message" /></label>
             </div>
+            <div class="contact-rfq-notice">
+                <span class="contact-rfq-icon" aria-hidden="true">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
+                </span>
+                <div>
+                    <strong>@Text("This form is not the RFQ workspace.", "แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา")</strong>
+                    <p>
+                        @Text("Attach small support references here. For CAD upload, price checks, lead time, and production RFQ, use the", "แนบไฟล์อ้างอิงขนาดเล็กสำหรับงานสนับสนุนที่นี่ หากต้องอัปโหลด CAD เช็กราคา ระยะเวลา หรือขอใบเสนอราคางานผลิต ให้ใช้")
+                        <a href="@SiteContent.QuoteNewUrl">@Text("Quote Engine", "ระบบราคา")</a>.
+                    </p>
+                </div>
+            </div>
+            <label class="contact-upload-panel">
+                <InputFile OnChange="HandleContactFilesAsync"
+                           multiple
+                           accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.zip,.stl,.step,.stp,.obj,.3mf"
+                           disabled="@_submittingContact" />
+                <span class="contact-upload-icon" aria-hidden="true">
+                    <MudIcon Icon="@Icons.Material.Filled.AttachFile" Size="Size.Medium" />
+                </span>
+                <span class="contact-upload-copy">
+                    <strong>@Text("Attach support files", "แนบไฟล์ประกอบ")</strong>
+                    <small>@Text($"Up to {MaxContactFiles} files, {MaxContactFileMegabytes} MB each. Use Quote Engine for RFQ CAD packages.", $"สูงสุด {MaxContactFiles} ไฟล์ ไฟล์ละ {MaxContactFileMegabytes} MB หากเป็นชุดไฟล์ CAD เพื่อขอราคาให้ใช้ระบบราคา")</small>
+                </span>
+            </label>
+            @if (_selectedContactFileSummaries.Count > 0)
+            {
+                <ul class="contact-file-list" aria-label='@Text("Selected support files", "ไฟล์ประกอบที่เลือก")'>
+                    @foreach (var file in _selectedContactFileSummaries)
+                    {
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.InsertDriveFile" Size="Size.Small" />
+                            <span>@file</span>
+                        </li>
+                    }
+                </ul>
+            }
             @if (!string.IsNullOrWhiteSpace(_contactStatus))
             {
                 <p class="form-status">@_contactStatus</p>
@@ -565,6 +602,10 @@ else
         Subject = "Manufacturing inquiry"
     };
 
+    private const int MaxContactFiles = 5;
+    private const long MaxContactFileBytes = 10 * 1024 * 1024;
+    private const int MaxContactFileMegabytes = 10;
+    private readonly List<string> _selectedContactFileSummaries = [];
     private bool _submittingContact;
     private string? _contactStatus;
     private const string AllMaterialsFilter = "all";
@@ -1277,11 +1318,66 @@ else
         }
     }
 
+    private async Task HandleContactFilesAsync(InputFileChangeEventArgs args)
+    {
+        _contactStatus = null;
+        _contact.Files.Clear();
+        _selectedContactFileSummaries.Clear();
+
+        IReadOnlyList<IBrowserFile> files;
+        try
+        {
+            files = args.GetMultipleFiles(MaxContactFiles);
+        }
+        catch (InvalidOperationException)
+        {
+            _contactStatus = Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through the Quote Engine.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่านระบบราคา");
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            if (file.Size > MaxContactFileBytes)
+            {
+                _contactStatus = Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through the Quote Engine.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่านระบบราคา");
+                _contact.Files.Clear();
+                _selectedContactFileSummaries.Clear();
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(MaxContactFileBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            _contact.Files.Add(new ContactAttachmentDto
+            {
+                FileName = file.Name,
+                ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+                Base64Content = Convert.ToBase64String(buffer.ToArray())
+            });
+            _selectedContactFileSummaries.Add($"{file.Name} ({FormatBytes(file.Size)})");
+        }
+    }
+
     private bool IsThaiCulture => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);
 
     private string Text(string en, string th)
     {
         return IsThaiCulture ? th : en;
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes >= 1024 * 1024)
+        {
+            return $"{bytes / 1024d / 1024d:0.#} MB";
+        }
+
+        if (bytes >= 1024)
+        {
+            return $"{bytes / 1024d:0.#} KB";
+        }
+
+        return $"{bytes} B";
     }
 
     private static ContentSection Section(string titleEn, string titleTh, string bodyEn, string bodyTh, params (string En, string Th)[] items)

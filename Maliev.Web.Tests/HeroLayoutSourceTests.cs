@@ -404,6 +404,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Icons.Material.Filled.AlternateEmail", source);
         Assert.Contains("Icons.Material.Filled.Groups", source);
         Assert.Contains("Icons.Material.Filled.Map", source);
+        Assert.Contains("Icons.Material.Filled.AttachFile", source);
+        Assert.Contains("Icons.Material.Filled.InsertDriveFile", source);
         Assert.Contains("36/1 Moo 3", source);
         Assert.Contains("คลองข่อย", source);
         Assert.Contains("mailto:info@maliev.com", source);
@@ -416,11 +418,26 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("https://maps.app.goo.gl/DPefucxBN2FTnZQa6", source);
         Assert.Contains("https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.", source);
         Assert.Contains("&output=embed", source);
+        Assert.Contains("contact-rfq-notice", source);
+        Assert.Contains("This form is not the RFQ workspace.", source);
+        Assert.Contains("แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา", source);
+        Assert.Contains("Quote Engine", source);
+        Assert.Contains("contact-upload-panel", source);
+        Assert.Contains("<InputFile OnChange=\"HandleContactFilesAsync\"", source);
+        Assert.Contains("accept=\".pdf,.png,.jpg,.jpeg,.webp,.txt,.zip,.stl,.step,.stp,.obj,.3mf\"", source);
+        Assert.Contains("MaxContactFiles = 5", source);
+        Assert.Contains("MaxContactFileBytes = 10 * 1024 * 1024", source);
+        Assert.Contains("catch (InvalidOperationException)", source);
+        Assert.Contains("_contact.Files.Add(new ContactAttachmentDto", source);
+        Assert.Contains("Base64Content = Convert.ToBase64String", source);
 
         Assert.Contains(".contact-details", styles);
         Assert.Contains(".contact-direct-grid", styles);
         Assert.Contains(".contact-direct-icon", styles);
         Assert.Contains(".contact-map-preview", styles);
+        Assert.Contains(".contact-rfq-notice", styles);
+        Assert.Contains(".contact-upload-panel", styles);
+        Assert.Contains(".contact-file-list", styles);
         Assert.Contains(".contact-social-link--facebook:hover", styles);
         Assert.Contains(".contact-social-link--youtube:hover", styles);
         Assert.Contains(".contact-social-link--instagram:hover", styles);
