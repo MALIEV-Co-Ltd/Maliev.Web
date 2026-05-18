@@ -615,6 +615,7 @@ public sealed class HeroLayoutSourceTests
     [Fact]
     public void PublicLayoutIncludesCustomerChatbotWidget()
     {
+        var root = FindRepoRoot();
         var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
@@ -636,9 +637,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("OnPreferencesChanged", component);
         Assert.DoesNotContain("Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.", component);
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
-        Assert.Contains("Icons.Material.Filled.AutoAwesome", component);
         Assert.Contains("customer-chatbot-profile", component);
         Assert.Contains("customer-chatbot-gemini-icon", component);
+        Assert.Contains("/images/gemini-icon.svg", component);
+        Assert.DoesNotContain("Icons.Material.Filled.AutoAwesome", component);
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "gemini-icon.svg")));
         Assert.Contains("customer-chatbot-title", component);
         Assert.Contains("customer-chatbot-messages-wrap", component);
         Assert.Contains("@ref=\"_messagesContainer\"", component);
@@ -683,7 +686,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-popout", styles);
         Assert.Contains(".customer-chatbot-profile", styles);
         Assert.Contains(".customer-chatbot-gemini-icon", styles);
-        Assert.Contains(".customer-chatbot-gemini-icon .mud-icon-root", styles);
+        Assert.Contains(".customer-chatbot-gemini-icon img", styles);
+        Assert.DoesNotContain(".customer-chatbot-gemini-icon .mud-icon-root", styles);
+        Assert.DoesNotContain("border: 1px solid color-mix(in srgb, #1a73e8", styles);
+        Assert.Contains("background: transparent;", styles);
         Assert.Contains(".customer-chatbot-title", styles);
         Assert.Contains(".customer-chatbot-messages-wrap", styles);
         Assert.Contains(".customer-chatbot-jump-latest", styles);
