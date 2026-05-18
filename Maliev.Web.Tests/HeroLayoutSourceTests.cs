@@ -1620,6 +1620,20 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies vertical hover motion maps screen-up to model-up instead of using inverted screen Y.
+    /// </summary>
+    [Fact]
+    public void LandingHeroHoverMotionUsesNonInvertedVerticalPointerDirection()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("pointer.targetY = (0.5 - (event.clientY - rect.top) / rect.height) * 2;", source);
+        Assert.Contains("root.rotation.x = baseRotation.x + hoverY * 0.055;", source);
+        Assert.Contains("camera.beta = clamp(baseBeta + hoverY * 0.018, 0.72, 1.36);", source);
+        Assert.DoesNotContain("pointer.targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;", source);
+    }
+
+    /// <summary>
     /// Verifies the landing hero has dedicated tablet composition rules instead of using the narrow mobile stack.
     /// </summary>
     [Fact]
@@ -1681,7 +1695,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-mobile-frame\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-hover-y\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

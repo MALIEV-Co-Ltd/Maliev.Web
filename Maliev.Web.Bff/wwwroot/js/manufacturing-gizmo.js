@@ -496,7 +496,7 @@ function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
 
     pointer.targetStrength = 1;
     pointer.targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-    pointer.targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    pointer.targetY = (0.5 - (event.clientY - rect.top) / rect.height) * 2;
     pointer.targetX = Math.max(-1, Math.min(1, pointer.targetX));
     pointer.targetY = Math.max(-1, Math.min(1, pointer.targetY));
   };
