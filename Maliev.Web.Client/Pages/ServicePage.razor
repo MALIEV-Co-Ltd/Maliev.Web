@@ -83,10 +83,19 @@
         <div class="service-material-route-grid">
             @foreach (var route in Detail.MaterialRoutes)
             {
-                <article class="service-material-route-card">
-                    <div class="service-detail-icon" aria-hidden="true">
-                        <MudIcon Icon="@DetailIcon(route.IconKey)" Size="Size.Medium" />
-                    </div>
+                <article class="@MaterialRouteCardClass(route)">
+                    @if (!string.IsNullOrWhiteSpace(route.ImageUrl))
+                    {
+                        <figure class="service-material-route-media">
+                            <img src="@route.ImageUrl" alt="@MaterialRouteImageAlt(route)" loading="lazy" />
+                        </figure>
+                    }
+                    else
+                    {
+                        <div class="service-detail-icon" aria-hidden="true">
+                            <MudIcon Icon="@DetailIcon(route.IconKey)" Size="Size.Medium" />
+                        </div>
+                    }
                     <div>
                         <span>@route.Meta.For(Preferences.Culture)</span>
                         <h4>@route.Title.For(Preferences.Culture)</h4>
@@ -176,6 +185,18 @@
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private string MaterialRouteImageAlt(ServiceDetailItem route)
+    {
+        return $"{route.Meta.For(Preferences.Culture)} - {route.Title.For(Preferences.Culture)}";
+    }
+
+    private static string MaterialRouteCardClass(ServiceDetailItem route)
+    {
+        return string.IsNullOrWhiteSpace(route.ImageUrl)
+            ? "service-material-route-card"
+            : "service-material-route-card has-media";
     }
 
     private static string DetailIcon(string iconKey)

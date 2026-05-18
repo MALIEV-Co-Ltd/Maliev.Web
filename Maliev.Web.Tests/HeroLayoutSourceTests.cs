@@ -80,7 +80,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("service-ordering-grid", source);
         Assert.Contains("Quote-ready checklist", source);
         Assert.Contains("How ordering with MALIEV works.", source);
-        Assert.Contains("<MudIcon Icon=\"@DetailIcon(route.IconKey)\"", source);
+        Assert.Contains("service-material-route-card has-media", source);
+        Assert.Contains("service-material-route-media", source);
+        Assert.Contains("route.ImageUrl", source);
+        Assert.Contains("MaterialRouteImageAlt(route)", source);
         Assert.Contains("Icons.Material.Filled.Straighten", source);
         Assert.Contains("Icons.Material.Filled.ScreenRotationAlt", source);
         Assert.DoesNotContain("SpecHelp(", source);
@@ -97,6 +100,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("PLA, PETG, ABS / ASA, TPU, nylon", content);
         Assert.Contains("Standard and engineering SLA resin", content);
         Assert.Contains("PA12 nylon and powder-bed routes", content);
+        Assert.Contains("FdmThermoplasticsImageUrl", content);
+        Assert.Contains("SlaResinImageUrl", content);
+        Assert.Contains("PowderBedNylonImageUrl", content);
+        Assert.Contains("EngineeringPolymerReviewImageUrl", content);
         Assert.Contains("Wall thickness and unsupported spans", content);
         Assert.Contains("Tolerances and fit-critical faces", content);
         Assert.Contains("Orientation and support marks", content);
@@ -106,6 +113,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains(".service-brief-grid", styles);
         Assert.Contains(".service-material-route-grid", styles);
+        Assert.Contains(".service-material-route-media img", styles);
         Assert.Contains(".service-dfm-grid", styles);
         Assert.Contains(".service-ordering-grid", styles);
         Assert.Contains(".service-file-chip", styles);
@@ -646,6 +654,7 @@ public sealed class HeroLayoutSourceTests
         var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var bffProject = ReadRepoFile("Maliev.Web.Bff", "Maliev.Web.Bff.csproj");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
 
@@ -695,6 +704,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("JumpToLatestAsync", component);
         Assert.Contains("HtmlSanitizer", component);
         Assert.Contains("Markdown.ToHtml", component);
+        Assert.Contains("<PackageReference Include=\"HtmlSanitizer\"", bffProject);
+        Assert.Contains("<PackageReference Include=\"Markdig\"", bffProject);
         Assert.Contains("MessageHtmlSanitizer.Sanitize(html)", component);
         Assert.Contains("RenderMessageContent(message.Content)", component);
         Assert.Contains("new MarkupString", component);
@@ -829,6 +840,7 @@ public sealed class HeroLayoutSourceTests
     public void StaticPagesCoverCustomerRoutesAndContactBoundary()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("@page \"/materials\"", source);
@@ -879,9 +891,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("string ImageUrl,\n        LocalizedText ImageAlt", source);
         Assert.DoesNotContain("/images/materials/pla.svg", source);
         Assert.DoesNotContain("/images/materials/petg.svg", source);
-        Assert.Contains("https://images.unsplash.com/photo-1742971239045-afabc9f7d744", source);
-        Assert.Contains("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg", source);
-        Assert.Contains("https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg", source);
+        Assert.Contains("SiteContent.FdmThermoplasticsImageUrl", source);
+        Assert.Contains("SiteContent.PowderBedNylonImageUrl", source);
+        Assert.Contains("SiteContent.SlaResinImageUrl", source);
+        Assert.Contains("https://images.unsplash.com/photo-1742971239045-afabc9f7d744", content);
+        Assert.Contains("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg", content);
+        Assert.Contains("https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg", content);
         Assert.Contains("https://images.unsplash.com/photo-1740209475472-aa7d280f7452", source);
 
         var materialRowSummaryIndex = source.IndexOf("<div class=\"material-row-summary\">", StringComparison.Ordinal);

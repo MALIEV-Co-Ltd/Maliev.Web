@@ -15,6 +15,10 @@ internal static class SiteContent
     internal static string QuoteProfileUrl => $"{QuoteEngineUrl}/profile";
 
     internal static string QuoteOrdersUrl => $"{QuoteEngineUrl}/orders";
+    internal const string FdmThermoplasticsImageUrl = "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80";
+    internal const string PowderBedNylonImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg";
+    internal const string SlaResinImageUrl = "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900";
+    internal const string EngineeringPolymerReviewImageUrl = "https://images.unsplash.com/photo-1756723902896-94e2d9332fbd?auto=format&fit=crop&w=900&q=80";
     private const string ThreeDimensionalPrinterImageUrl = "https://images.unsplash.com/photo-1756723902896-94e2d9332fbd?auto=format&fit=crop&w=1200&q=80";
     private const string ThreeDimensionalPrinterOperatorImageUrl = "https://images.unsplash.com/photo-1772566022519-e04921619df2?auto=format&fit=crop&w=1200&q=80";
     private const string MetalWorkshopImageUrl = "https://images.unsplash.com/photo-1764115424737-25aca6f47835?auto=format&fit=crop&w=1200&q=80";
@@ -380,25 +384,29 @@ internal static class SiteContent
                 Text("FDM for fast visual and functional checks, jigs, brackets, covers, and fixture trials where layer direction can be controlled.",
                     "FDM สำหรับตรวจรูปร่างและการใช้งานเร็ว จิ๊ก ขายึด ฝาครอบ และฟิกซ์เจอร์ทดลอง เมื่อต้องควบคุมทิศทางเลเยอร์"),
                 Text("FDM", "FDM"),
-                "thermoplastic"),
+                "thermoplastic",
+                FdmThermoplasticsImageUrl),
             new(
                 Text("Standard and engineering SLA resin", "เรซิน SLA ทั่วไปและเกรดวิศวกรรม"),
                 Text("High-detail parts, cosmetic prototypes, small features, and fit models where smooth surfaces matter more than impact resistance.",
                     "ชิ้นงานรายละเอียดสูง ต้นแบบโชว์ ฟีเจอร์เล็ก และโมเดลประกอบ เมื่อผิวเรียบสำคัญกว่าการรับแรงกระแทก"),
                 Text("SLA / resin", "SLA / เรซิน"),
-                "resin"),
+                "resin",
+                SlaResinImageUrl),
             new(
                 Text("PA12 nylon and powder-bed routes", "PA12 ไนลอนและงานพิมพ์พาวเดอร์"),
                 Text("Durable functional prototypes, snap fits, clips, housings, and low-volume parts that need strength without support scars.",
                     "ต้นแบบใช้งานจริง คลิป สแนปฟิต เคส และงานจำนวนน้อยที่ต้องการความแข็งแรงโดยไม่มีรอยซัพพอร์ตชัด"),
                 Text("MJF / SLS", "MJF / SLS"),
-                "nylon"),
+                "nylon",
+                PowderBedNylonImageUrl),
             new(
                 Text("Production-grade polymer review", "การเลือกโพลีเมอร์ระดับผลิตจริง"),
                 Text("Heat, UV, chemical, flexibility, and repeated-use requirements are confirmed during quotation before the part moves to production.",
                     "ยืนยันความต้องการด้านความร้อน UV สารเคมี ความยืดหยุ่น และการใช้งานซ้ำระหว่างเสนอราคา ก่อนเข้าสู่การผลิต"),
                 Text("Engineering options", "ตัวเลือกวิศวกรรม"),
-                "environment")
+                "environment",
+                EngineeringPolymerReviewImageUrl)
         ],
         [
             new(Text("Wall thickness and unsupported spans", "ความหนาผนังและช่วงลอยตัว"), Text("Thin walls, long bridges, and tall unsupported features change strength, surface quality, and print success.", "ผนังบาง ช่วงพาดยาว และฟีเจอร์สูงที่ไม่มีซัพพอร์ต มีผลต่อความแข็งแรง ผิวงาน และโอกาสพิมพ์สำเร็จ"), Text("", ""), "wall"),
@@ -521,7 +529,8 @@ internal sealed record ServiceDetailItem(
     LocalizedText Title,
     LocalizedText Body,
     LocalizedText Meta,
-    string IconKey);
+    string IconKey,
+    string? ImageUrl = null);
 
 internal sealed record CaseStudyContent(
     string Slug,
