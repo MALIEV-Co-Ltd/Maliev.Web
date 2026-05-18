@@ -1561,6 +1561,22 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies horizontal hover motion rotates the hero model toward the pointer direction.
+    /// </summary>
+    [Fact]
+    public void LandingHeroHoverMotionRotatesTowardPointerDirection()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("root.rotation.y = baseRotation.y - hoverX * 0.12;", source);
+        Assert.Contains("root.rotation.z = baseRotation.z + hoverX * 0.014;", source);
+        Assert.Contains("camera.alpha = baseAlpha - hoverX * 0.026;", source);
+        Assert.DoesNotContain("root.rotation.y = baseRotation.y + hoverX * 0.12;", source);
+        Assert.DoesNotContain("root.rotation.z = baseRotation.z - hoverX * 0.014;", source);
+        Assert.DoesNotContain("camera.alpha = baseAlpha + hoverX * 0.026;", source);
+    }
+
+    /// <summary>
     /// Verifies the landing hero has dedicated tablet composition rules instead of using the narrow mobile stack.
     /// </summary>
     [Fact]

@@ -596,9 +596,9 @@ function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
     const hoverY = pointer.y * pointer.strength;
 
     root.rotation.x = baseRotation.x + hoverY * 0.055;
-    root.rotation.y = baseRotation.y + hoverX * 0.12;
-    root.rotation.z = baseRotation.z - hoverX * 0.014;
-    camera.alpha = baseAlpha + hoverX * 0.026;
+    root.rotation.y = baseRotation.y - hoverX * 0.12;
+    root.rotation.z = baseRotation.z + hoverX * 0.014;
+    camera.alpha = baseAlpha - hoverX * 0.026;
     camera.beta = clamp(baseBeta + hoverY * 0.018, 0.72, 1.36);
   });
 }
