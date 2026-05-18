@@ -23,9 +23,19 @@
                         <small>@Text("Materials, quotes, orders, and delivery", "วัสดุ ใบเสนอราคา คำสั่งซื้อ และการจัดส่ง")</small>
                     </div>
                 </div>
-                <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpenAsync">
-                    <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
-                </button>
+                <div class="customer-chatbot-header-actions">
+                    <button type="button"
+                            class="customer-chatbot-reset"
+                            aria-label="@Text("Reset chat", "รีเซ็ตแชท")"
+                            title="@Text("Reset chat", "รีเซ็ตแชท")"
+                            @onclick="ResetChatAsync"
+                            disabled="@_isSending">
+                        <MudIcon Icon="@Icons.Material.Filled.RestartAlt" Size="Size.Small" />
+                    </button>
+                    <button type="button" class="customer-chatbot-close" aria-label="@Text("Close chat", "ปิดแชท")" @onclick="ToggleOpenAsync">
+                        <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                    </button>
+                </div>
             </header>
 
             <div class="customer-chatbot-messages-wrap">
@@ -113,7 +123,7 @@
                           value="@_draft"
                           @oninput="OnDraftInputAsync"
                           disabled="@_isSending"></textarea>
-                <button type="button" aria-label="@Text("Send message", "ส่งข้อความ")" @onclick="SendDraftAsync" disabled="@(!CanSend)">
+                <button @ref="_sendButton" type="button" aria-label="@Text("Send message", "ส่งข้อความ")" @onclick="SendDraftAsync" disabled="@(!CanSend)">
                     <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" />
                 </button>
             </div>
@@ -192,6 +202,7 @@
     private CustomerChatbotMemory _memory = new();
     private CustomerChatbotIdentity _identity = new(false, null, null, null);
     private ElementReference _draftInput;
+    private ElementReference _sendButton;
     private ElementReference _messagesContainer;
     private Guid? _sessionId;
     private string _draft = string.Empty;
@@ -313,6 +324,7 @@
     {
         try
         {
+            await JS.InvokeVoidAsync("malievChatbot.initComposerKeys", _draftInput, _sendButton);
             await JS.InvokeVoidAsync("malievChatbot.fitComposer", _draftInput);
         }
         catch (InvalidOperationException)
@@ -360,6 +372,24 @@
         _draft = string.Empty;
         await FitComposerAsync();
         await SendAsync(message);
+    }
+
+    private async Task ResetChatAsync()
+    {
+        CancelPopoutTimer();
+        CancelSignInMonitor();
+        _memory = new CustomerChatbotMemory();
+        _sessionId = null;
+        _draft = string.Empty;
+        _unreadCount = 0;
+        _latestUnreadCount = 0;
+        _showJumpToLatest = false;
+        _showPopout = false;
+        _isAwaitingSignIn = false;
+        ResetDisplayedConversation(GetPersonalGreetingName(_identity), false);
+        QueueMessageScroll(false);
+        await ClearStoredChatAsync();
+        await FitComposerAsync();
     }
 
     private Task SendSuggestionAsync(string message)
@@ -1168,6 +1198,23 @@
                     Preferences.Culture,
                     _identity.IsAuthenticated);
             }
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+        }
+    }
+
+    private async Task ClearStoredChatAsync()
+    {
+        if (!_storageReady)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.removeItem", _storageKey);
+            await JS.InvokeVoidAsync("malievChatbot.clearSharedSession", SharedSessionStorageKey);
         }
         catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
         {

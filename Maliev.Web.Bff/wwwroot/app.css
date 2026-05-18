@@ -4204,7 +4204,15 @@ html[data-theme="dark"] .auth-google-icon {
   font-size: .78rem;
 }
 
+.customer-chatbot-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
 .customer-chatbot-close,
+.customer-chatbot-reset,
 .customer-chatbot-toggle,
 .customer-chatbot-jump-latest,
 .customer-chatbot-composer button,
@@ -4213,7 +4221,8 @@ html[data-theme="dark"] .auth-google-icon {
   border-radius: var(--radius);
 }
 
-.customer-chatbot-close {
+.customer-chatbot-close,
+.customer-chatbot-reset {
   width: 36px;
   height: 36px;
   display: inline-grid;
@@ -4223,7 +4232,9 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .customer-chatbot-close:hover,
-.customer-chatbot-close:focus-visible {
+.customer-chatbot-close:focus-visible,
+.customer-chatbot-reset:hover,
+.customer-chatbot-reset:focus-visible {
   color: var(--ink);
   background: var(--paper-3);
 }

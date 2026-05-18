@@ -760,6 +760,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("Icons.Material.Filled.AutoAwesome", component);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "gemini-icon.svg")));
         Assert.Contains("customer-chatbot-title", component);
+        Assert.Contains("customer-chatbot-header-actions", component);
+        Assert.Contains("customer-chatbot-reset", component);
+        Assert.Contains("ResetChatAsync", component);
+        Assert.Contains("Icons.Material.Filled.RestartAlt", component);
         Assert.Contains("customer-chatbot-messages-wrap", component);
         Assert.Contains("@ref=\"_messagesContainer\"", component);
         Assert.Contains("customer-chatbot-jump-latest", component);
@@ -773,6 +777,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("maliev.chatbot.personalization.v1", component);
         Assert.Contains("localStorage.getItem", component);
         Assert.Contains("localStorage.setItem", component);
+        Assert.Contains("localStorage.removeItem", component);
         Assert.Contains("maliev.customerAssistant.session.v1", component);
         Assert.Contains("IsAccountSpecificIntent", component);
         Assert.Contains("BeginChatSignInAsync", component);
@@ -800,7 +805,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("customer-chatbot-popout", component);
         Assert.Contains("customer-chatbot-unread-badge", component);
         Assert.Contains("rows=\"1\"", component);
+        Assert.Contains("@ref=\"_sendButton\"", component);
         Assert.Contains("OnDraftInputAsync", component);
+        Assert.Contains("malievChatbot.initComposerKeys", component);
         Assert.Contains("malievChatbot.fitComposer", component);
         Assert.Contains("malievChatbot.isNearBottom", component);
         Assert.Contains("malievChatbot.scrollToBottom", component);
@@ -827,6 +834,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-panel", styles);
         Assert.Contains(".customer-chatbot-popout", styles);
         Assert.Contains(".customer-chatbot-profile", styles);
+        Assert.Contains(".customer-chatbot-header-actions", styles);
+        Assert.Contains(".customer-chatbot-reset", styles);
         Assert.Contains(".customer-chatbot-gemini-icon", styles);
         Assert.Contains(".customer-chatbot-gemini-icon img", styles);
         Assert.DoesNotContain(".customer-chatbot-gemini-icon .mud-icon-root", styles);
@@ -861,6 +870,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("readSharedSessionId: function (storageKey)", script);
         Assert.Contains("writeSharedSession: function (storageKey, sessionId, userKey, language, isAuthenticated)", script);
         Assert.Contains("maliev_customer_assistant_session", script);
+        Assert.Contains("clearSharedSession: function (storageKey)", script);
+        Assert.Contains("initComposerKeys: function (textarea, sendButton)", script);
+        Assert.Contains("event.key !== 'Enter'", script);
+        Assert.Contains("event.shiftKey", script);
+        Assert.Contains("sendButton.click()", script);
         Assert.Contains("@page \"/auth/chatbot-complete\"", authComplete);
         Assert.Contains("malievChatbot.notifyAuthenticationComplete", authComplete);
     }

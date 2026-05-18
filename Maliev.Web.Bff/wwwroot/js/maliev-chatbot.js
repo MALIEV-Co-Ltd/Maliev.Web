@@ -123,6 +123,44 @@ window.malievChatbot = {
     }
   },
 
+  clearSharedSession: function (storageKey) {
+    const key = storageKey || 'maliev.customerAssistant.session.v1';
+
+    try {
+      localStorage.removeItem(key);
+    } catch {
+    }
+
+    try {
+      const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+      const domain = window.location.hostname.endsWith('.maliev.com') ? '; Domain=.maliev.com' : '';
+      document.cookie = `maliev_customer_assistant_session=; Path=/; Max-Age=0; SameSite=Lax${secure}${domain}`;
+    } catch {
+    }
+  },
+
+  initComposerKeys: function (textarea, sendButton) {
+    if (!textarea || !sendButton) {
+      return;
+    }
+
+    if (textarea.__malievChatbotKeydown) {
+      textarea.removeEventListener('keydown', textarea.__malievChatbotKeydown);
+    }
+
+    textarea.__malievChatbotKeydown = event => {
+      if (event.key !== 'Enter' || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) {
+        return;
+      }
+
+      event.preventDefault();
+      if (!sendButton.disabled) {
+        sendButton.click();
+      }
+    };
+    textarea.addEventListener('keydown', textarea.__malievChatbotKeydown);
+  },
+
   fitComposer: function (textarea) {
     if (!textarea) {
       return;
