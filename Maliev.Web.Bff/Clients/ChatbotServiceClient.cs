@@ -93,9 +93,21 @@ internal sealed class ChatbotServiceClient(HttpClient httpClient) : IChatbotServ
         }
 
         var detail = await ReadFailureContentAsync(response, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.BadRequest && IsSessionUnavailableFailure(detail))
+        {
+            throw new ChatbotSessionUnavailableException($"ChatbotService rejected the session while {operation}.{detail}");
+        }
+
         throw new BackendUnavailableException(
             "ChatbotService",
             $"ChatbotService returned {(int)response.StatusCode} while {operation}.{detail}");
+    }
+
+    private static bool IsSessionUnavailableFailure(string detail)
+    {
+        return detail.Contains("session", StringComparison.OrdinalIgnoreCase)
+            && (detail.Contains("not found", StringComparison.OrdinalIgnoreCase)
+                || detail.Contains("expired", StringComparison.OrdinalIgnoreCase));
     }
 
     private static async Task<string> ReadFailureContentAsync(HttpResponseMessage response, CancellationToken cancellationToken)

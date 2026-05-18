@@ -34,3 +34,11 @@ internal sealed class ChatbotRateLimitException : Exception
     {
     }
 }
+
+internal sealed class ChatbotSessionUnavailableException : Exception
+{
+    internal ChatbotSessionUnavailableException(string message)
+        : base(message)
+    {
+    }
+}

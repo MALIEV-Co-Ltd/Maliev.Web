@@ -79,22 +79,26 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         }
 
         var sessionId = request.SessionId;
-        if (!sessionId.HasValue || sessionId.Value == Guid.Empty)
+        if (!IsUsableSession(sessionId))
         {
-            var session = await chatbotClient.InitiateSessionAsync(new ChatbotInitiateSessionRequest
-            {
-                Channel = "website",
-                Language = language
-            }, cancellationToken);
+            var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
             sessionId = session.SessionId;
             language = NormalizeLanguage(session.Language, message);
         }
 
-        var chatbotResponse = await chatbotClient.SendMessageAsync(new ChatbotSendMessageRequest
+        var content = ComposeMessageContent(message, request.CustomerContext);
+        ChatbotMessageResponse chatbotResponse;
+        try
         {
-            SessionId = sessionId.Value,
-            Content = ComposeMessageContent(message, request.CustomerContext)
-        }, cancellationToken);
+            chatbotResponse = await SendMessageAsync(sessionId!.Value, content, cancellationToken);
+        }
+        catch (ChatbotSessionUnavailableException) when (request.SessionId.HasValue && request.SessionId.Value != Guid.Empty)
+        {
+            var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+            sessionId = session.SessionId;
+            language = NormalizeLanguage(session.Language, message);
+            chatbotResponse = await SendMessageAsync(sessionId.Value, content, cancellationToken);
+        }
 
         return new CustomerChatbotResponse
         {
@@ -114,6 +118,29 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
                 .Where(action => !string.IsNullOrWhiteSpace(action.Label))
                 .ToList()
         };
+    }
+
+    private static bool IsUsableSession(Guid? sessionId)
+    {
+        return sessionId.HasValue && sessionId.Value != Guid.Empty;
+    }
+
+    private Task<ChatbotSessionResponse> InitiateWebsiteSessionAsync(string language, CancellationToken cancellationToken)
+    {
+        return chatbotClient.InitiateSessionAsync(new ChatbotInitiateSessionRequest
+        {
+            Channel = "website",
+            Language = language
+        }, cancellationToken);
+    }
+
+    private Task<ChatbotMessageResponse> SendMessageAsync(Guid sessionId, string content, CancellationToken cancellationToken)
+    {
+        return chatbotClient.SendMessageAsync(new ChatbotSendMessageRequest
+        {
+            SessionId = sessionId,
+            Content = content
+        }, cancellationToken);
     }
 
     private static bool IsAllowedCustomerTopic(string message)

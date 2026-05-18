@@ -131,6 +131,34 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies stale persisted website sessions are replaced instead of surfacing as assistant downtime.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_StaleWebsiteSession_ReinitiatesAndRoutesMessage()
+    {
+        var staleSessionId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var client = new CapturingChatbotServiceClient
+        {
+            FirstSendException = new ChatbotSessionUnavailableException("Session not found")
+        };
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            SessionId = staleSessionId,
+            Message = "Can I get a price for 3D printing?",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.Equal(client.SessionId, response.SessionId);
+        Assert.Equal(2, client.SendAttempts);
+        Assert.NotNull(client.InitiateRequest);
+        Assert.NotNull(client.MessageRequest);
+        Assert.Equal(client.SessionId, client.MessageRequest.SessionId);
+        Assert.Equal("Can I get a price for 3D printing?", client.MessageRequest.Content);
+    }
+
+    /// <summary>
     /// Verifies simple customer greetings are conversational and are not rejected as off-topic questions.
     /// </summary>
     [Fact]
@@ -235,6 +263,54 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies stale-session responses from ChatbotService are distinguishable from service downtime.
+    /// </summary>
+    [Fact]
+    public async Task ChatbotServiceClient_BadRequestSessionNotFound_ThrowsSessionUnavailableException()
+    {
+        using var httpClient = new HttpClient(new StubHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
+        {
+            Content = JsonContent.Create(new { error = "Session 00000000-0000-0000-0000-000000000001 not found" })
+        })))
+        {
+            BaseAddress = new Uri("http://chatbot.test")
+        };
+        var client = new ChatbotServiceClient(httpClient);
+
+        var exception = await Assert.ThrowsAsync<ChatbotSessionUnavailableException>(() => client.SendMessageAsync(new ChatbotSendMessageRequest
+        {
+            SessionId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            Content = "Can you help with FDM?"
+        }, CancellationToken.None));
+
+        Assert.Contains("not found", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Verifies expired-session responses from ChatbotService are distinguishable from service downtime.
+    /// </summary>
+    [Fact]
+    public async Task ChatbotServiceClient_BadRequestSessionExpired_ThrowsSessionUnavailableException()
+    {
+        using var httpClient = new HttpClient(new StubHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
+        {
+            Content = JsonContent.Create(new { error = "Session 00000000-0000-0000-0000-000000000001 has expired" })
+        })))
+        {
+            BaseAddress = new Uri("http://chatbot.test")
+        };
+        var client = new ChatbotServiceClient(httpClient);
+
+        var exception = await Assert.ThrowsAsync<ChatbotSessionUnavailableException>(() => client.SendMessageAsync(new ChatbotSendMessageRequest
+        {
+            SessionId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            Content = "Can you help with FDM?"
+        }, CancellationToken.None));
+
+        Assert.Contains("expired", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Verifies transport failures are converted into the BFF's customer-safe backend unavailable boundary.
     /// </summary>
     [Fact]
@@ -264,6 +340,10 @@ public sealed class CustomerChatbotBoundaryTests
 
         public ChatbotSendMessageRequest? MessageRequest { get; private set; }
 
+        public Exception? FirstSendException { get; init; }
+
+        public int SendAttempts { get; private set; }
+
         public Task<ChatbotSessionResponse> InitiateSessionAsync(ChatbotInitiateSessionRequest request, CancellationToken cancellationToken)
         {
             InitiateRequest = request;
@@ -278,6 +358,12 @@ public sealed class CustomerChatbotBoundaryTests
 
         public Task<ChatbotMessageResponse> SendMessageAsync(ChatbotSendMessageRequest request, CancellationToken cancellationToken)
         {
+            SendAttempts++;
+            if (SendAttempts == 1 && FirstSendException is not null)
+            {
+                return Task.FromException<ChatbotMessageResponse>(FirstSendException);
+            }
+
             MessageRequest = request;
             return Task.FromResult(new ChatbotMessageResponse
             {
