@@ -4684,16 +4684,18 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-hero {
-    min-height: 780px;
+    /* Cap height growth so headline + copy + dropzone stay close to vertical
+       center on large monitors instead of being centered in a 100svh stripe. */
+    min-height: clamp(680px, calc(100svh - 80px), 820px);
   }
 
   .landing-hero-visual {
-    min-height: clamp(620px, 48vh, 760px);
+    min-height: clamp(560px, 44vh, 720px);
   }
 
   .manufacturing-gizmo--landing {
-    height: min(60vh, 760px);
-    min-height: 620px;
+    height: clamp(560px, 52vh, 720px);
+    min-height: 560px;
   }
 }
 
@@ -4711,16 +4713,16 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-hero {
-    min-height: 860px;
+    min-height: clamp(740px, calc(100svh - 96px), 900px);
   }
 
   .landing-hero-visual {
-    min-height: clamp(700px, 46vh, 860px);
+    min-height: clamp(640px, 44vh, 820px);
   }
 
   .manufacturing-gizmo--landing {
-    height: min(58vh, 860px);
-    min-height: 700px;
+    height: clamp(640px, 50vh, 820px);
+    min-height: 640px;
   }
 }
 
