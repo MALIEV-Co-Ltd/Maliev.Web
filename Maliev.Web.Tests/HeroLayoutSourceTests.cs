@@ -451,8 +451,12 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var salesSection = source[
+            source.IndexOf("contact-business-section contact-business-section--sales", StringComparison.Ordinal)..source.IndexOf("contact-business-section contact-business-section--support", StringComparison.Ordinal)];
         var supportSection = source[
             source.IndexOf("contact-business-section contact-business-section--support", StringComparison.Ordinal)..source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)];
+        var mapHeading = source[
+            source.IndexOf("<article class=\"contact-map-section\">", StringComparison.Ordinal)..source.IndexOf("<iframe class=\"contact-map-preview\"", StringComparison.Ordinal)];
 
         Assert.Contains("contact-business-panel", source);
         Assert.Contains("contact-business-section contact-business-section--sales", source);
@@ -475,8 +479,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Icons.Material.Filled.LocationOn", source);
         Assert.Contains("Icons.Material.Filled.Schedule", source);
         Assert.Contains("Icons.Material.Filled.AlternateEmail", source);
-        Assert.Contains("Icons.Material.Filled.RequestQuote", source);
-        Assert.Contains("Icons.Material.Filled.SupportAgent", source);
         Assert.Contains("Icons.Material.Filled.MarkEmailUnread", source);
         Assert.Contains("Icons.Material.Filled.BuildCircle", source);
         Assert.Contains("Icons.Material.Filled.Map", source);
@@ -514,9 +516,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("เปิดใน Google Maps", source);
         Assert.Contains("CloseContactMapDialog", source);
         Assert.DoesNotContain("href=\"https://maps.app.goo.gl/DPefucxBN2FTnZQa6\"", source);
+        Assert.DoesNotContain("contact-section-icon", salesSection);
+        Assert.DoesNotContain("Icons.Material.Filled.RequestQuote", salesSection);
         Assert.DoesNotContain("contact-line-add-friend", supportSection);
+        Assert.DoesNotContain("contact-section-icon", supportSection);
+        Assert.DoesNotContain("Icons.Material.Filled.SupportAgent", supportSection);
         Assert.DoesNotContain("Message support on LINE", supportSection);
         Assert.DoesNotContain("คุยกับทีมสนับสนุนทาง LINE", supportSection);
+        Assert.DoesNotContain("contact-section-icon", mapHeading);
+        Assert.DoesNotContain("Icons.Material.Filled.Map", mapHeading);
         Assert.DoesNotContain("contact-direct-grid", source);
         Assert.DoesNotContain("contact-direct-card", source);
         Assert.DoesNotContain("contact-map-card", source);
@@ -555,7 +563,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-map-title", styles);
         Assert.Contains(".contact-map-title-logo", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
-        Assert.Contains("grid-template-columns: 46px minmax(0, 1fr);", styles);
+        Assert.Matches(@"\.contact-section-head,\s*\.contact-map-heading\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);", styles);
         Assert.DoesNotContain(".contact-direct-grid", styles);
         Assert.DoesNotContain(".contact-direct-card", styles);
     }
