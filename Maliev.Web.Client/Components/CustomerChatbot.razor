@@ -276,9 +276,9 @@
         ResetDisplayedConversation(greetingName, _memory.Messages.Count > 0);
         await PersistMemoryAsync();
 
-        if (!_isOpen)
+        if (!_isOpen && _unreadCount > 0)
         {
-            _ = ShowPopoutTemporarilyAsync(CreatePopoutMessage(greetingName));
+            _ = ShowPopoutTemporarilyAsync(CreateUnreadPopoutMessage(greetingName));
         }
 
         StateHasChanged();
@@ -802,16 +802,14 @@
             "สวัสดีค่ะ น้องมะลิอยู่ตรงนี้แล้วค่ะ วันนี้ให้ช่วยเรื่องโปรเจกต์ของ MALIEV ด้านไหนดีคะ");
     }
 
-    private string CreatePopoutMessage(string? name)
+    private string CreateUnreadPopoutMessage(string? name)
     {
-        if (_memory.Messages.Count > 0 && !string.IsNullOrWhiteSpace(name))
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            return Text($"Hi {name}, the assistant can continue your previous MALIEV chat.", $"สวัสดีค่ะ {name} ผู้ช่วยคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ");
+            return Text($"Hi {name}, you have unread messages from the MALIEV assistant.", $"สวัสดีค่ะ {name} มีข้อความที่ยังไม่ได้อ่านจากผู้ช่วย MALIEV ค่ะ");
         }
 
-        return _memory.Messages.Count > 0
-            ? Text("The assistant can continue your previous MALIEV chat.", "ผู้ช่วยคุยเรื่อง MALIEV ต่อจากครั้งก่อนได้ค่ะ")
-            : Text("Ask about materials, pricing, lead time, or the right manufacturing process.", "ถามเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
+        return Text("You have unread messages from the MALIEV assistant.", "มีข้อความที่ยังไม่ได้อ่านจากผู้ช่วย MALIEV ค่ะ");
     }
 
     private string CreateSignInRequiredMessage()

@@ -740,7 +740,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("น้องมะลิ", component);
         Assert.Contains("วันนี้ให้ช่วยเรื่องโปรเจกต์ของ MALIEV", component);
         Assert.Contains("ResetDisplayedConversation(greetingName", component);
-        Assert.Contains("CreatePopoutMessage(greetingName)", component);
+        Assert.Contains("if (!_isOpen && _unreadCount > 0)", component);
+        Assert.Contains("CreateUnreadPopoutMessage(greetingName)", component);
+        Assert.Contains("The assistant replied. Open the chat to continue.", component);
+        Assert.DoesNotContain("CreatePopoutMessage", component);
+        Assert.DoesNotContain("Ask about materials, pricing, lead time, or the right manufacturing process.", component);
         Assert.Contains("IsGeneratedGreeting", component);
         Assert.Contains("Where(message => !IsGeneratedGreeting(message))", component);
         Assert.DoesNotContain("OnPreferencesChanged", component);
