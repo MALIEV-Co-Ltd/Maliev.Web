@@ -472,7 +472,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("contact-section-head", source);
         Assert.Contains("contact-info-rows", source);
         Assert.Contains("contact-section-actions", source);
-        Assert.Contains("contact-line-add-friend", source);
+        Assert.Contains("line-contact-link contact-line-add-friend", source);
+        Assert.Contains("line-contact-icon", source);
+        Assert.Contains("line-contact-copy", source);
         Assert.Contains("contact-social-icon-row footer-social", source);
         Assert.Contains("class=\"social-link social-link--facebook\"", source);
         Assert.Contains("class=\"social-link social-link--youtube\"", source);
@@ -547,7 +549,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-business-section", styles);
         Assert.Contains(".contact-section-icon", styles);
         Assert.Contains(".contact-info-row", styles);
-        Assert.Contains(".contact-line-add-friend", styles);
+        Assert.Contains(".line-contact-link.contact-line-add-friend", styles);
+        Assert.Contains(".line-contact-link", styles);
+        Assert.Contains("--line-link-bg", styles);
+        Assert.Contains("--line-link-shadow", styles);
         Assert.Contains(".contact-social-icon-row .social-link", styles);
         Assert.Contains(".contact-map-preview", styles);
         Assert.Contains(".contact-map-actions", styles);

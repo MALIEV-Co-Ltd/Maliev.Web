@@ -447,13 +447,18 @@ else if (Path == "contact")
                     <div class="contact-section-actions">
                         <a class="button primary" href="mailto:info@maliev.com">@Text("Email sales", "อีเมลฝ่ายขาย")</a>
                         <a class="button secondary" href="tel:+66818030404">+66 81 803 0404</a>
-                        <a class="contact-line-add-friend"
+                        <a class="line-contact-link contact-line-add-friend"
                            href="https://page.line.me/maliev"
                            target="_blank"
                            rel="noopener noreferrer"
                            aria-label="@Text("Add MALIEV on LINE Official Account @maliev", "เพิ่มเพื่อน MALIEV ทาง LINE Official Account @maliev")">
-                            <img class="line-app-icon" src="/images/line-app-icon.png" alt="" aria-hidden="true" />
-                            <span>@Text("Add friend on LINE", "เพิ่มเพื่อนทาง LINE")</span>
+                            <span class="line-contact-icon" aria-hidden="true">
+                                <img class="line-app-icon" src="/images/line-app-icon.png" alt="" />
+                            </span>
+                            <span class="line-contact-copy">
+                                <strong>@Text("Add friend on LINE", "เพิ่มเพื่อนทาง LINE")</strong>
+                                <small>Official Account @@maliev</small>
+                            </span>
                         </a>
                     </div>
                     <div class="contact-social-cluster">

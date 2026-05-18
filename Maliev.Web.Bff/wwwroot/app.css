@@ -2411,25 +2411,16 @@ html:lang(th) .h1 {
   align-items: center;
 }
 
-.contact-line-add-friend {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 50px;
-  padding: 5px 15px 5px 5px;
-  color: var(--line-green);
-  background: var(--paper);
-  border: 1px solid color-mix(in srgb, var(--line-green) 34%, var(--rule));
-  border-radius: 999px;
-  box-shadow: rgba(6, 199, 85, .24) 0 10px 22px -14px, var(--shadow-border);
-  font-size: .9rem;
-  font-weight: 760;
-  line-height: 1;
-}
-
-.contact-line-add-friend:hover {
-  color: #049d44;
-  background: color-mix(in srgb, var(--line-green) 8%, var(--paper));
+.line-contact-link.contact-line-add-friend {
+  --line-link-bg: var(--paper);
+  --line-link-ring: color-mix(in srgb, var(--line-green) 28%, var(--rule)) 0 0 0 1px;
+  --line-link-shadow: rgba(6, 199, 85, .22) 0 10px 22px -16px, var(--line-link-ring);
+  --line-link-hover-bg: color-mix(in srgb, var(--line-green) 8%, var(--paper));
+  --line-link-hover-shadow: rgba(6, 199, 85, .38) 0 0 0 1px, rgba(6, 199, 85, .22) 0 12px 24px -18px;
+  --line-link-title: var(--line-green);
+  --line-link-caption: color-mix(in srgb, var(--line-green) 72%, var(--ink-2));
+  --line-link-hover-title: #049d44;
+  --line-link-hover-caption: #049d44;
 }
 
 .line-app-icon {
@@ -3597,21 +3588,30 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .line-contact-link {
+  --line-link-bg: rgba(255, 255, 255, .06);
+  --line-link-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
+  --line-link-hover-bg: rgba(6, 199, 85, .12);
+  --line-link-hover-shadow: rgba(6, 199, 85, .36) 0 0 0 1px;
+  --line-link-title: var(--footer-text);
+  --line-link-caption: var(--footer-muted);
+  --line-link-hover-title: var(--line-on);
+  --line-link-hover-caption: var(--line-on);
+
   display: inline-flex;
   align-items: center;
   gap: 10px;
   width: fit-content;
   min-height: 52px;
   padding: 6px 14px 6px 6px;
-  background: rgba(255, 255, 255, .06);
+  background: var(--line-link-bg);
   border-radius: var(--radius);
-  box-shadow: rgba(255, 255, 255, .12) 0 0 0 1px;
+  box-shadow: var(--line-link-shadow);
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 .line-contact-link:hover {
-  color: var(--footer-text);
-  background: rgba(6, 199, 85, .12);
-  box-shadow: rgba(6, 199, 85, .36) 0 0 0 1px;
+  background: var(--line-link-hover-bg);
+  box-shadow: var(--line-link-hover-shadow);
 }
 
 .line-contact-icon {
@@ -3632,19 +3632,23 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .line-contact-copy strong {
-  color: var(--footer-text);
+  color: var(--line-link-title);
   font-size: .88rem;
   font-weight: 600;
 }
 
 .line-contact-copy small {
-  color: var(--footer-muted);
+  color: var(--line-link-caption);
   font-size: .78rem;
 }
 
 .line-contact-link:hover .line-contact-copy strong,
 .line-contact-link:hover .line-contact-copy small {
-  color: var(--line-on);
+  color: var(--line-link-hover-title);
+}
+
+.line-contact-link:hover .line-contact-copy small {
+  color: var(--line-link-hover-caption);
 }
 
 .footer-social {
