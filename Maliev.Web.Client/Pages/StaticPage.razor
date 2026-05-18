@@ -421,23 +421,96 @@ else if (CurrentBlogPost is { } blogPost)
 else if (Path == "contact")
 {
     <section class="section contact-layout">
-        <div class="content-stack">
-            @foreach (var item in Sections)
-            {
-                <article>
-                    <h2>@item.Title.For(Preferences.Culture)</h2>
-                    <p>@item.Body.For(Preferences.Culture)</p>
-                    @if (item.Items.Count > 0)
-                    {
-                        <ul>
-                            @foreach (var point in item.Items)
-                            {
-                                <li>@point.For(Preferences.Culture)</li>
-                            }
-                        </ul>
-                    }
+        <div class="contact-details">
+            <div class="content-stack">
+                @foreach (var item in Sections)
+                {
+                    <article>
+                        <h2>@item.Title.For(Preferences.Culture)</h2>
+                        <p>@item.Body.For(Preferences.Culture)</p>
+                        @if (item.Items.Count > 0)
+                        {
+                            <ul>
+                                @foreach (var point in item.Items)
+                                {
+                                    <li>@point.For(Preferences.Culture)</li>
+                                }
+                            </ul>
+                        }
+                    </article>
+                }
+            </div>
+            <div class="contact-direct-grid" aria-label='@Text("MALIEV direct contact channels", "ช่องทางติดต่อ MALIEV โดยตรง")'>
+                <article class="contact-direct-card">
+                    <span class="contact-direct-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Medium" />
+                    </span>
+                    <div>
+                        <h3>@Text("Company address", "ที่อยู่บริษัท")</h3>
+                        <p>
+                            <strong>@Text("MALIEV Co., Ltd.", "บริษัท มาลีฟ จำกัด")</strong>
+                            <span>@Text("36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand", "36/1 หมู่ 3 ตำบลคลองข่อย อำเภอปากเกร็ด จังหวัดนนทบุรี 11120 ประเทศไทย")</span>
+                        </p>
+                        <a class="contact-inline-link" href="https://maps.app.goo.gl/DPefucxBN2FTnZQa6" target="_blank" rel="noopener noreferrer">@Text("Open in Google Maps", "เปิดใน Google Maps")</a>
+                    </div>
                 </article>
-            }
+                <article class="contact-direct-card">
+                    <span class="contact-direct-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Medium" />
+                    </span>
+                    <div>
+                        <h3>@Text("Opening hours", "เวลาทำการ")</h3>
+                        <p>
+                            <strong>@Text("Weekdays", "วันจันทร์-ศุกร์")</strong>
+                            <span>@Text("10:00-18:00, excluding public holidays", "10:00-18:00 น. ยกเว้นวันหยุดนักขัตฤกษ์")</span>
+                        </p>
+                    </div>
+                </article>
+                <article class="contact-direct-card contact-direct-card--wide">
+                    <span class="contact-direct-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.AlternateEmail" Size="Size.Medium" />
+                    </span>
+                    <div>
+                        <h3>@Text("Sales and quotations", "ฝ่ายขายและใบเสนอราคา")</h3>
+                        <p>@Text("Send drawings, 3D files, order questions, or machine support requests through the channel that fits your workflow.", "ส่ง Drawing ไฟล์ 3D คำถามคำสั่งซื้อ หรือคำขอสนับสนุนเครื่องจักรผ่านช่องทางที่สะดวก")</p>
+                        <div class="contact-link-list">
+                            <a class="contact-link-pill" href="mailto:info@maliev.com">info@maliev.com</a>
+                            <a class="contact-link-pill" href="tel:+66818030404">+66 81 803 0404</a>
+                            <a class="contact-link-pill contact-link-pill--line" href="https://page.line.me/maliev" target="_blank" rel="noopener noreferrer">@Text("LINE @maliev", "LINE @maliev")</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="contact-direct-card contact-direct-card--wide">
+                    <span class="contact-direct-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Medium" />
+                    </span>
+                    <div>
+                        <h3>@Text("Social channels", "ช่องทางโซเชียล")</h3>
+                        <p>@Text("Follow MALIEV manufacturing updates, product launches, and workshop activity.", "ติดตามข่าวงานผลิต สินค้าใหม่ และกิจกรรมเวิร์กช็อปของ MALIEV")</p>
+                        <div class="contact-social-links">
+                            <a class="contact-social-link contact-social-link--facebook" href="https://www.facebook.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer">Facebook</a>
+                            <a class="contact-social-link contact-social-link--youtube" href="https://www.youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig" target="_blank" rel="noopener noreferrer">YouTube</a>
+                            <a class="contact-social-link contact-social-link--instagram" href="https://www.instagram.com/maliev.manufacturing/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <article class="contact-map-card">
+                <div class="contact-map-heading">
+                    <span class="contact-direct-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Map" Size="Size.Medium" />
+                    </span>
+                    <div>
+                        <h3>@Text("Google Maps location preview", "ตัวอย่างตำแหน่งบน Google Maps")</h3>
+                        <p>@Text("Use the map preview to confirm route, parking, and delivery access before visiting.", "ใช้แผนที่เพื่อตรวจเส้นทาง ที่จอดรถ และทางเข้าส่งของก่อนเข้ามา")</p>
+                    </div>
+                </div>
+                <iframe class="contact-map-preview"
+                        src="https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand&output=embed"
+                        title='@Text("Google Maps location preview for MALIEV", "แผนที่ Google Maps ของ MALIEV")'
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </article>
         </div>
         <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
             <DataAnnotationsValidator />

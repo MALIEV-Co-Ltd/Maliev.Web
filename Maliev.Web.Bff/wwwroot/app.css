@@ -2047,6 +2047,137 @@ html:lang(th) .h1 {
   align-items: start;
 }
 
+.contact-details {
+  display: grid;
+  gap: 22px;
+}
+
+.contact-direct-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.contact-direct-card,
+.contact-map-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.contact-direct-card {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.contact-direct-card--wide {
+  grid-column: 1 / -1;
+}
+
+.contact-direct-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-border);
+}
+
+.contact-direct-card h3,
+.contact-map-card h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.contact-direct-card p,
+.contact-map-card p {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: .94rem;
+  line-height: 1.55;
+}
+
+.contact-inline-link {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  color: var(--blue-ink);
+  font-size: .9rem;
+  font-weight: 650;
+}
+
+.contact-link-list,
+.contact-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.contact-link-pill,
+.contact-social-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--control-surface);
+  border-radius: 999px;
+  box-shadow: var(--shadow-border);
+  font-size: .88rem;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.contact-link-pill:hover,
+.contact-social-link:hover {
+  background: var(--control-hover);
+}
+
+.contact-link-pill--line {
+  color: var(--line-green);
+}
+
+.contact-social-link--facebook:hover {
+  color: #ffffff;
+  background: #1877f2;
+}
+
+.contact-social-link--youtube:hover {
+  color: #ffffff;
+  background: #ff0000;
+}
+
+.contact-social-link--instagram:hover {
+  color: #ffffff;
+  background: #833ab4;
+}
+
+.contact-map-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.contact-map-preview {
+  width: 100%;
+  min-height: 260px;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-border);
+}
+
 .split-section,
 .manufacturing-section {
   display: grid;
@@ -2822,6 +2953,7 @@ html[data-theme="dark"] .auth-google-icon {
   display: grid;
   gap: 18px;
   padding: 24px;
+  background: var(--paper);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
@@ -3940,10 +4072,29 @@ html[data-theme="dark"] .auth-google-icon {
   .machine-stat-grid,
   .service-stat-strip,
   .form-grid,
+  .contact-direct-grid,
   .account-action-grid,
   .preference-grid,
   .address-grid {
     grid-template-columns: 1fr;
+  }
+
+  .contact-direct-card--wide {
+    grid-column: auto;
+  }
+
+  .contact-direct-card,
+  .contact-map-heading {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .contact-direct-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .contact-map-preview {
+    min-height: 220px;
   }
 
   .form-grid.two,

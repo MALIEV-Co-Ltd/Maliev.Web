@@ -387,6 +387,47 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the contact page exposes the business channels customers need before submitting a form.
+    /// </summary>
+    [Fact]
+    public void ContactPageShowsBusinessChannelsMapAndHours()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("contact-direct-grid", source);
+        Assert.Contains("contact-direct-card", source);
+        Assert.Contains("contact-map-card", source);
+        Assert.Contains("contact-map-preview", source);
+        Assert.Contains("Icons.Material.Filled.LocationOn", source);
+        Assert.Contains("Icons.Material.Filled.Schedule", source);
+        Assert.Contains("Icons.Material.Filled.AlternateEmail", source);
+        Assert.Contains("Icons.Material.Filled.Groups", source);
+        Assert.Contains("Icons.Material.Filled.Map", source);
+        Assert.Contains("36/1 Moo 3", source);
+        Assert.Contains("คลองข่อย", source);
+        Assert.Contains("mailto:info@maliev.com", source);
+        Assert.Contains("tel:+66818030404", source);
+        Assert.Contains("page.line.me/maliev", source);
+        Assert.Contains("facebook.com/maliev.manufacturing", source);
+        Assert.Contains("youtube.com/channel/UCCosquPSUed6UPlMcRCq0Ig", source);
+        Assert.Contains("instagram.com/maliev.manufacturing", source);
+        Assert.Contains("10:00-18:00", source);
+        Assert.Contains("https://maps.app.goo.gl/DPefucxBN2FTnZQa6", source);
+        Assert.Contains("https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.", source);
+        Assert.Contains("&output=embed", source);
+
+        Assert.Contains(".contact-details", styles);
+        Assert.Contains(".contact-direct-grid", styles);
+        Assert.Contains(".contact-direct-icon", styles);
+        Assert.Contains(".contact-map-preview", styles);
+        Assert.Contains(".contact-social-link--facebook:hover", styles);
+        Assert.Contains(".contact-social-link--youtube:hover", styles);
+        Assert.Contains(".contact-social-link--instagram:hover", styles);
+        Assert.Contains("grid-template-columns: 38px minmax(0, 1fr);", styles);
+    }
+
+    /// <summary>
     /// Verifies shared page action rows keep visible spacing between adjacent buttons.
     /// </summary>
     [Fact]
