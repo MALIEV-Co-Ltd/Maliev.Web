@@ -22,7 +22,14 @@ internal static class HeroModelCatalog
             "/models/hero-3d-printing-part-02.glb",
             SiteContent.Text("3D printed functional part preview", "ตัวอย่างชิ้นงานใช้งานจากงานพิมพ์ 3 มิติ"),
             true,
-            1.72)
+            1.72),
+        new(
+            "3d-scanning-part-01",
+            "3d-scanning",
+            "/models/hero-3d-scanning-part-01.glb",
+            SiteContent.Text("3D scanning reference part preview", "ตัวอย่างชิ้นงานอ้างอิงสำหรับงานสแกน 3 มิติ"),
+            false,
+            1.24)
     ];
 
     private static readonly IReadOnlyDictionary<string, HeroModelAsset> AssetsByKey = Assets.ToDictionary(

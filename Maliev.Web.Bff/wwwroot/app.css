@@ -2189,6 +2189,282 @@ html:lang(th) .h1 {
   font-weight: 700;
 }
 
+.service-detail-section {
+  --service-accent: var(--blue);
+  --service-accent-ink: var(--blue-ink);
+  --service-soft: var(--blue-soft);
+}
+
+.service-detail-section--cnc-machining {
+  --service-accent: #0f766e;
+  --service-accent-ink: #115e59;
+  --service-soft: #e6fffb;
+}
+
+.service-detail-section--3d-scanning {
+  --service-accent: #7c3aed;
+  --service-accent-ink: #5b21b6;
+  --service-soft: #f3e8ff;
+}
+
+.service-detail-section--3d-design {
+  --service-accent: #be123c;
+  --service-accent-ink: #9f1239;
+  --service-soft: #ffe4e6;
+}
+
+.service-detail-section--silicone-casting {
+  --service-accent: #b45309;
+  --service-accent-ink: #92400e;
+  --service-soft: #ffedd5;
+}
+
+.service-detail-section--rapid-prototyping {
+  --service-accent: #16a34a;
+  --service-accent-ink: #166534;
+  --service-soft: #dcfce7;
+}
+
+.service-detail-section--deviation-analysis {
+  --service-accent: #475569;
+  --service-accent-ink: #334155;
+  --service-soft: #e2e8f0;
+}
+
+.service-answer-hero {
+  display: flex;
+  gap: 24px;
+  align-items: end;
+  justify-content: space-between;
+  padding-bottom: clamp(22px, 3vw, 36px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.service-answer-hero-copy {
+  max-width: 850px;
+}
+
+.service-answer-hero h2,
+.service-answer-lead h3,
+.service-answer-block-copy h3 {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.service-answer-hero h2 {
+  margin-top: 8px;
+  font-size: clamp(2.1rem, 4.4vw, 4.6rem);
+}
+
+.service-answer-hero p,
+.service-answer-lead p,
+.service-answer-block-copy p,
+.service-answer-card p,
+.service-answer-step p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.66;
+}
+
+.service-answer-hero p {
+  max-width: 760px;
+  margin-top: 14px;
+  font-size: clamp(1rem, 1.35vw, 1.16rem);
+}
+
+.service-answer-frame {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(360px, 1.1fr);
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: rgba(17, 24, 39, .08) 0 24px 70px -48px;
+}
+
+.service-answer-lead {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  min-height: 330px;
+  padding: clamp(26px, 4vw, 48px);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--service-soft) 78%, transparent), transparent 66%),
+    linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(255, 255, 255, .72));
+  border-right: 1px solid var(--rule);
+}
+
+.service-answer-lead h3 {
+  max-width: 620px;
+  font-size: clamp(1.85rem, 3vw, 3.15rem);
+}
+
+.service-answer-prep {
+  display: grid;
+  gap: 18px;
+  align-content: center;
+  padding: clamp(24px, 3vw, 38px);
+}
+
+.service-answer-checklist {
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.service-answer-checklist li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--ink-2);
+  line-height: 1.58;
+}
+
+.service-answer-checklist li::before {
+  content: "";
+  position: absolute;
+  top: .58em;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  background: var(--service-accent);
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--service-accent) 13%, transparent);
+}
+
+.service-answer-block {
+  display: grid;
+  gap: clamp(18px, 2.8vw, 32px);
+  padding-top: clamp(28px, 4vw, 48px);
+  border-top: 1px solid var(--rule);
+}
+
+.service-answer-block--routes {
+  grid-template-columns: minmax(260px, .34fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.service-answer-block-copy {
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.service-answer-block-copy h3 {
+  font-size: clamp(1.55rem, 2.4vw, 2.45rem);
+}
+
+.service-answer-card-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.service-answer-card-grid--routes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.service-answer-card-grid--checks {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.service-answer-card {
+  display: grid;
+  gap: 13px;
+  align-content: start;
+  min-width: 0;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: rgba(17, 24, 39, .07) 0 18px 48px -38px;
+}
+
+.service-answer-card.has-media {
+  grid-template-columns: minmax(132px, .42fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.service-answer-card-media {
+  display: block;
+  align-self: stretch;
+  min-height: 164px;
+  margin: 0;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--service-soft) 70%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--service-accent) 16%, var(--rule));
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.service-answer-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-answer-card h4,
+.service-answer-step h4 {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.18;
+}
+
+.service-answer-meta {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 5px 9px;
+  color: var(--service-accent-ink);
+  background: color-mix(in srgb, var(--service-soft) 78%, white);
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.service-answer-card .service-detail-icon,
+.service-answer-step .service-detail-icon {
+  color: var(--service-accent);
+  background: color-mix(in srgb, var(--service-soft) 76%, var(--paper));
+  border-color: color-mix(in srgb, var(--service-accent) 16%, var(--rule));
+}
+
+.service-answer-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: service-step;
+}
+
+.service-answer-step {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-height: 270px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--service-soft) 44%, transparent), transparent 52%),
+    var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.service-answer-step-number {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: color-mix(in srgb, var(--service-accent) 80%, var(--muted));
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
 .case-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -4647,6 +4923,26 @@ html[data-theme="dark"] .auth-google-icon {
     grid-template-columns: 1fr;
   }
 
+  .service-answer-hero {
+    align-items: start;
+  }
+
+  .service-answer-frame,
+  .service-answer-block--routes {
+    grid-template-columns: 1fr;
+  }
+
+  .service-answer-lead {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .service-answer-card-grid--checks,
+  .service-answer-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .service-material-route-grid,
   .service-dfm-grid,
   .service-ordering-grid {
@@ -4926,6 +5222,9 @@ html[data-theme="dark"] .auth-google-icon {
   .blog-grid,
   .product-grid,
   .material-category-grid,
+  .service-answer-card-grid--routes,
+  .service-answer-card-grid--checks,
+  .service-answer-steps,
   .service-material-route-grid,
   .service-dfm-grid,
   .service-ordering-grid,
@@ -4939,6 +5238,55 @@ html[data-theme="dark"] .auth-google-icon {
   .preference-grid,
   .address-grid {
     grid-template-columns: 1fr;
+  }
+
+  .service-answer-hero {
+    display: grid;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .service-answer-hero h2 {
+    font-size: 2.2rem;
+  }
+
+  .service-answer-frame {
+    grid-template-columns: 1fr;
+    border-radius: var(--radius);
+  }
+
+  .service-answer-lead {
+    min-height: auto;
+    padding: 22px;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .service-answer-lead h3,
+  .service-answer-block-copy h3 {
+    font-size: 1.65rem;
+  }
+
+  .service-answer-prep {
+    padding: 22px;
+  }
+
+  .service-answer-block--routes {
+    grid-template-columns: 1fr;
+  }
+
+  .service-answer-card,
+  .service-answer-card.has-media {
+    grid-template-columns: 1fr;
+  }
+
+  .service-answer-card-media {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .service-answer-step {
+    min-height: auto;
   }
 
   .service-material-route-card {

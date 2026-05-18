@@ -38,21 +38,26 @@
     </div>
 </section>
 
-<section class="section service-detail-section" aria-labelledby="service-detail-title">
-    <div class="section-heading service-detail-heading">
-        <div>
+<section class="@ServiceDetailSectionClass" aria-labelledby="service-detail-title">
+    <div class="service-answer-hero">
+        <div class="service-answer-hero-copy">
+            <span class="service-detail-label">@Text("Manufacturing answer path", "เส้นทางคำตอบงานผลิต")</span>
             <h2 id="service-detail-title">@Detail.Title.For(Preferences.Culture)</h2>
             <p>@Detail.Intro.For(Preferences.Culture)</p>
         </div>
         <a class="section-link" href="@SiteContent.QuoteNewUrl">@Text("Upload files", "อัปโหลดไฟล์")</a>
     </div>
 
-    <div class="service-brief-grid">
-        <article class="service-brief-copy">
-            <span class="service-detail-label">@Text("Service brief", "ภาพรวมบริการ")</span>
+    <div class="service-answer-frame">
+        <article class="service-answer-lead">
+            <span class="service-detail-label">@Text("Start here", "เริ่มจากตรงนี้")</span>
             <h3>@Detail.BriefTitle.For(Preferences.Culture)</h3>
             <p>@Detail.BriefBody.For(Preferences.Culture)</p>
-            <div class="service-supported-files" aria-label="@Text("Supported file formats", "ประเภทไฟล์ที่รองรับ")">
+        </article>
+
+        <aside class="service-answer-prep">
+            <span class="service-detail-label">@Text("Send this context", "ส่งบริบทนี้")</span>
+            <div class="service-supported-files" aria-label="@Text("Supported file formats and reference inputs", "ประเภทไฟล์และข้อมูลอ้างอิงที่รองรับ")">
                 @foreach (var file in Detail.SupportedFiles)
                 {
                     <span class="service-file-chip">
@@ -61,12 +66,7 @@
                     </span>
                 }
             </div>
-        </article>
-
-        <aside class="service-checklist-panel">
-            <span class="service-detail-label">@Text("Quote-ready checklist", "เช็กลิสต์ก่อนขอราคา")</span>
-            <h3>@Text("Send enough context for a real manufacturing answer.", "ส่งบริบทให้พอสำหรับคำตอบงานผลิตจริง")</h3>
-            <ul>
+            <ul class="service-answer-checklist">
                 @foreach (var item in Detail.QuoteChecklist)
                 {
                     <li>@item.For(Preferences.Culture)</li>
@@ -75,19 +75,20 @@
         </aside>
     </div>
 
-    <section class="service-detail-block" aria-labelledby="service-materials-title">
-        <div class="service-block-heading">
-            <span class="service-detail-label">@Text("Materials and processes", "วัสดุและกระบวนการ")</span>
-            <h3 id="service-materials-title">@Text("Available material routes for this service.", "เส้นทางวัสดุที่ใช้ได้กับบริการนี้")</h3>
+    <section class="service-answer-block service-answer-block--routes" aria-labelledby="service-routes-title">
+        <div class="service-answer-block-copy">
+            <span class="service-detail-label">@Text("Route selection", "การเลือกเส้นทางผลิต")</span>
+            <h3 id="service-routes-title">@Text("MALIEV narrows the process from the part's job, not from a generic menu.", "MALIEV เลือกกระบวนการจากหน้าที่ของชิ้นงาน ไม่ใช่เมนูทั่วไป")</h3>
+            <p>@Text("These are the routes customers usually compare before quotation. The final choice still depends on geometry, quantity, finish, tolerance, and risk.", "นี่คือเส้นทางที่ลูกค้ามักเปรียบเทียบก่อนเสนอราคา การเลือกสุดท้ายยังขึ้นกับ Geometry จำนวน ผิวงาน tolerance และความเสี่ยง")</p>
         </div>
-        <div class="service-material-route-grid">
+        <div class="service-answer-card-grid service-answer-card-grid--routes">
             @foreach (var route in Detail.MaterialRoutes)
             {
-                <article class="@MaterialRouteCardClass(route)">
+                <article class="@AnswerCardClass(route)">
                     @if (!string.IsNullOrWhiteSpace(route.ImageUrl))
                     {
-                        <figure class="service-material-route-media">
-                            <img src="@route.ImageUrl" alt="@MaterialRouteImageAlt(route)" loading="lazy" />
+                        <figure class="service-answer-card-media">
+                            <img src="@route.ImageUrl" alt="@DetailItemImageAlt(route)" loading="lazy" />
                         </figure>
                     }
                     else
@@ -97,7 +98,7 @@
                         </div>
                     }
                     <div>
-                        <span>@route.Meta.For(Preferences.Culture)</span>
+                        <span class="service-answer-meta">@route.Meta.For(Preferences.Culture)</span>
                         <h4>@route.Title.For(Preferences.Culture)</h4>
                         <p>@route.Body.For(Preferences.Culture)</p>
                     </div>
@@ -106,15 +107,15 @@
         </div>
     </section>
 
-    <section class="service-detail-block" aria-labelledby="service-dfm-title">
-        <div class="service-block-heading">
-            <span class="service-detail-label">@Text("DFM gates", "จุดตรวจ DFM")</span>
-            <h3 id="service-dfm-title">@Text("What MALIEV checks before a quotation becomes production work.", "สิ่งที่ MALIEV ตรวจ ก่อนใบเสนอราคากลายเป็นงานผลิต")</h3>
+    <section class="service-answer-block service-answer-block--checks" aria-labelledby="service-checks-title">
+        <div class="service-answer-block-copy">
+            <span class="service-detail-label">@Text("Before quotation", "ก่อนเสนอราคา")</span>
+            <h3 id="service-checks-title">@Text("The review explains what can be made, what must change, and what needs customer confirmation.", "การตรวจจะบอกว่าสิ่งใดผลิตได้ สิ่งใดควรแก้ และสิ่งใดต้องให้ลูกค้ายืนยัน")</h3>
         </div>
-        <div class="service-dfm-grid">
+        <div class="service-answer-card-grid service-answer-card-grid--checks">
             @foreach (var gate in Detail.DfmGates)
             {
-                <article class="service-dfm-card">
+                <article class="service-answer-card service-answer-card--check">
                     <div class="service-detail-icon" aria-hidden="true">
                         <MudIcon Icon="@DetailIcon(gate.IconKey)" Size="Size.Medium" />
                     </div>
@@ -125,25 +126,27 @@
         </div>
     </section>
 
-    <section class="service-detail-block service-ordering-block" aria-labelledby="service-ordering-title">
-        <div class="service-block-heading">
-            <span class="service-detail-label">@Text("Ordering workflow", "ขั้นตอนสั่งงาน")</span>
-            <h3 id="service-ordering-title">@Text("How ordering with MALIEV works.", "ขั้นตอนการสั่งงานกับ MALIEV")</h3>
+    <section class="service-answer-block service-answer-block--steps" aria-labelledby="service-steps-title">
+        <div class="service-answer-block-copy">
+            <span class="service-detail-label">@Text("From file to order", "จากไฟล์สู่งานสั่งผลิต")</span>
+            <h3 id="service-steps-title">@Text("Customers can follow the path without guessing what happens after upload.", "ลูกค้าตามขั้นตอนได้โดยไม่ต้องเดาว่าหลังอัปโหลดเกิดอะไรขึ้น")</h3>
         </div>
-        <div class="service-ordering-grid">
+        <ol class="service-answer-steps">
             @for (var index = 0; index < Detail.OrderingSteps.Count; index++)
             {
                 var step = Detail.OrderingSteps[index];
-                <article class="service-ordering-step">
-                    <span>@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
+                <li class="service-answer-step">
+                    <span class="service-answer-step-number">@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
                     <div class="service-detail-icon" aria-hidden="true">
                         <MudIcon Icon="@DetailIcon(step.IconKey)" Size="Size.Medium" />
                     </div>
-                    <h4>@step.Title.For(Preferences.Culture)</h4>
-                    <p>@step.Body.For(Preferences.Culture)</p>
-                </article>
+                    <div>
+                        <h4>@step.Title.For(Preferences.Culture)</h4>
+                        <p>@step.Body.For(Preferences.Culture)</p>
+                    </div>
+                </li>
             }
-        </div>
+        </ol>
     </section>
 </section>
 
@@ -170,6 +173,7 @@
     private ServiceDetailProfile Detail => SiteContent.GetServiceDetail(Service.Slug);
     private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
     private string HeroModelStateKey => $"service.hero.model.{Service.Slug}";
+    private string ServiceDetailSectionClass => $"section service-detail-section service-detail-section--{Service.Slug}";
 
     protected override async Task OnInitializedAsync()
     {
@@ -187,16 +191,16 @@
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 
-    private string MaterialRouteImageAlt(ServiceDetailItem route)
+    private string DetailItemImageAlt(ServiceDetailItem route)
     {
         return $"{route.Meta.For(Preferences.Culture)} - {route.Title.For(Preferences.Culture)}";
     }
 
-    private static string MaterialRouteCardClass(ServiceDetailItem route)
+    private static string AnswerCardClass(ServiceDetailItem route)
     {
         return string.IsNullOrWhiteSpace(route.ImageUrl)
-            ? "service-material-route-card"
-            : "service-material-route-card has-media";
+            ? "service-answer-card"
+            : "service-answer-card has-media";
     }
 
     private static string DetailIcon(string iconKey)
