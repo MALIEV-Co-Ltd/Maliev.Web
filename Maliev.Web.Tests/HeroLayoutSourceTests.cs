@@ -659,6 +659,7 @@ public sealed class HeroLayoutSourceTests
         var root = FindRepoRoot();
         var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var authComplete = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthChatbotComplete.razor");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
         var bffProject = ReadRepoFile("Maliev.Web.Bff", "Maliev.Web.Bff.csproj");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
@@ -698,7 +699,21 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("maliev.chatbot.personalization.v1", component);
         Assert.Contains("localStorage.getItem", component);
         Assert.Contains("localStorage.setItem", component);
+        Assert.Contains("maliev.customerAssistant.session.v1", component);
+        Assert.Contains("IsAccountSpecificIntent", component);
+        Assert.Contains("BeginChatSignInAsync", component);
+        Assert.Contains("RefreshIdentityAsync", component);
+        Assert.Contains("Sign in to continue", component);
+        Assert.Contains("/auth/chatbot-complete", component);
         Assert.Contains("CustomerContext = BuildCustomerContext()", component);
+        Assert.Contains("AddContextPart(parts, \"Authentication\"", component);
+        Assert.Contains("Assistant session", component);
+        Assert.Contains("GetSignedInProfileAsync", component);
+        Assert.Contains("GetSignedInAddressesAsync", component);
+        Assert.Contains("GetSignedInOrdersAsync", component);
+        Assert.Contains("CreateAccountActions", component);
+        Assert.Contains("customer-chatbot-actions", component);
+        Assert.Contains("customer-chatbot-action", component);
         Assert.Contains("customer-chatbot-popout", component);
         Assert.Contains("customer-chatbot-unread-badge", component);
         Assert.Contains("rows=\"1\"", component);
@@ -740,6 +755,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-jump-badge", styles);
         Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-message-rich", styles);
+        Assert.Contains(".customer-chatbot-actions", styles);
+        Assert.Contains(".customer-chatbot-action.primary", styles);
         Assert.Contains(".customer-chatbot-message-rich a", styles);
         Assert.Contains(".customer-chatbot-message-rich :where(ul, ol)", styles);
         Assert.Contains(".customer-chatbot-message-rich pre", styles);
@@ -753,6 +770,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("isNearBottom: function (container)", script);
         Assert.Contains("scrollToBottom: function (container, smooth)", script);
         Assert.Contains("container.scrollTo({", script);
+        Assert.Contains("getJson: async function (path)", script);
+        Assert.Contains("openSignInPopup: function (url)", script);
+        Assert.Contains("notifyAuthenticationComplete: function ()", script);
+        Assert.Contains("readSharedSessionId: function (storageKey)", script);
+        Assert.Contains("writeSharedSession: function (storageKey, sessionId, userKey, language, isAuthenticated)", script);
+        Assert.Contains("maliev_customer_assistant_session", script);
+        Assert.Contains("@page \"/auth/chatbot-complete\"", authComplete);
+        Assert.Contains("malievChatbot.notifyAuthenticationComplete", authComplete);
     }
 
     /// <summary>

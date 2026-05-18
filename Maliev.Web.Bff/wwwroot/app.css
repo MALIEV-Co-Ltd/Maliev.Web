@@ -2803,6 +2803,11 @@ html:lang(th) .h1 {
   line-height: .98;
 }
 
+.auth-panel-compact {
+  width: min(100%, 460px);
+  text-align: center;
+}
+
 .auth-title {
   display: flex;
   flex-wrap: wrap;
@@ -4068,6 +4073,47 @@ html[data-theme="dark"] .auth-google-icon {
   color: var(--blue-on);
   background: var(--blue);
   border-radius: var(--radius);
+}
+
+.customer-chatbot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.customer-chatbot-action {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: var(--shadow-border);
+}
+
+.customer-chatbot-action.primary {
+  color: var(--blue-on);
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.customer-chatbot-action:hover,
+.customer-chatbot-action:focus-visible {
+  color: var(--blue-on);
+  background: var(--blue-hover);
+  border-color: var(--blue-hover);
+}
+
+.customer-chatbot-action .mud-icon-root {
+  font-size: 1rem;
 }
 
 .customer-chatbot-message.pending {

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using Maliev.Web.Bff.Services;
+using Maliev.Web.Shared.Account;
 using Maliev.Web.Shared.Chatbot;
 using Maliev.Web.Shared.Commerce;
 using Maliev.Web.Shared.Contact;
@@ -155,6 +156,22 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal("assistant", chat.Role);
         Assert.False(chat.IsOutOfScope);
         Assert.Contains("CNC", chat.Content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Verifies the account session endpoint can be polled by the chatbot before login without redirecting the active page.
+    /// </summary>
+    [Fact]
+    public async Task GET_AccountSession_Anonymous_ReturnsUnauthenticatedSession()
+    {
+        using var client = _factory.CreateClient();
+
+        var session = await client.GetFromJsonAsync<CustomerAccountSessionDto>("/web/v1/account/session");
+
+        Assert.NotNull(session);
+        Assert.False(session.IsAuthenticated);
+        Assert.Null(session.CustomerId);
+        Assert.Equal(string.Empty, session.Email);
     }
 
     /// <summary>

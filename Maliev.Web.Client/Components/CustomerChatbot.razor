@@ -36,6 +36,29 @@
                             <div class="customer-chatbot-message-rich">
                                 @RenderMessageContent(message.Content)
                             </div>
+                            @if (message.Actions.Count > 0)
+                            {
+                                <div class="customer-chatbot-actions">
+                                    @foreach (var action in message.Actions)
+                                    {
+                                        var actionClass = ActionClass(action);
+                                        if (string.Equals(action.Kind, ChatActionSignIn, StringComparison.Ordinal))
+                                        {
+                                            <button type="button" class="@actionClass" @onclick="BeginChatSignInAsync" disabled="@_isAwaitingSignIn">
+                                                <MudIcon Icon="@action.Icon" Size="Size.Small" />
+                                                <span>@action.Label</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a class="@actionClass" href="@action.Href" target="@action.Target" rel="noopener">
+                                                <MudIcon Icon="@action.Icon" Size="Size.Small" />
+                                                <span>@action.Label</span>
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                            }
                         </div>
                     }
 
@@ -104,8 +127,14 @@
 
 @code {
     private const string PersonalizationStoragePrefix = "maliev.chatbot.personalization.v1";
+    private const string SharedSessionStorageKey = "maliev.customerAssistant.session.v1";
+    private const string ChatbotCompleteReturnUrl = "/auth/chatbot-complete";
+    private const string ChatActionSignIn = "signin";
+    private const string ChatActionLink = "link";
     private const int MaxStoredMessages = 24;
     private const int MaxStoredItems = 6;
+    private const int SignInPollAttempts = 60;
+    private static readonly TimeSpan SignInPollInterval = TimeSpan.FromSeconds(2);
     private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
     private static readonly Regex DangerousHtmlBlockPattern = new(
         @"<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>",
@@ -117,9 +146,34 @@
         .UseAdvancedExtensions()
         .Build();
     private static readonly HtmlSanitizer MessageHtmlSanitizer = CreateMessageHtmlSanitizer();
+    private static readonly string[] AccountSensitiveTerms =
+    [
+        "my order", "my orders", "order status", "track order", "my quote", "my quotes", "quote status",
+        "receipt", "invoice", "tax invoice", "payment", "profile", "my profile", "personal information",
+        "personal info", "my account", "address book", "my address", "shipping address", "billing address",
+        "update address", "change address", "delivery address", "คำสั่งซื้อของฉัน", "คำสั่งซื้อ", "ติดตามงาน",
+        "ใบเสนอราคาของฉัน", "ใบเสนอราคา", "ใบเสร็จ", "ใบกำกับภาษี", "บัญชีของฉัน", "โปรไฟล์",
+        "ข้อมูลส่วนตัว", "ที่อยู่ของฉัน", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่", "ที่อยู่จัดส่ง", "ที่อยู่ออกบิล"
+    ];
+    private static readonly string[] ProfileIntentTerms =
+    [
+        "profile", "personal information", "personal info", "my account", "email", "phone", "company",
+        "โปรไฟล์", "ข้อมูลส่วนตัว", "บัญชีของฉัน", "อีเมล", "โทร", "บริษัท"
+    ];
+    private static readonly string[] AddressIntentTerms =
+    [
+        "address", "address book", "shipping address", "billing address", "update address", "change address",
+        "delivery address", "ที่อยู่", "ที่อยู่จัดส่ง", "ที่อยู่ออกบิล", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่"
+    ];
+    private static readonly string[] OrderIntentTerms =
+    [
+        "order", "orders", "order status", "track order", "receipt", "invoice", "tax invoice", "payment",
+        "quote", "quotes", "quotation", "คำสั่งซื้อ", "ติดตามงาน", "ใบเสร็จ", "ใบกำกับภาษี", "ใบเสนอราคา", "การชำระเงิน"
+    ];
 
     private readonly List<CustomerChatMessage> _messages = [];
     private CustomerChatbotMemory _memory = new();
+    private CustomerChatbotIdentity _identity = new(false, null, null, null);
     private ElementReference _draftInput;
     private ElementReference _messagesContainer;
     private Guid? _sessionId;
@@ -134,9 +188,11 @@
     private bool _messageScrollPending;
     private bool _messageScrollSmooth;
     private bool _showJumpToLatest;
+    private bool _isAwaitingSignIn;
     private int _unreadCount;
     private int _latestUnreadCount;
     private CancellationTokenSource? _popoutCts;
+    private CancellationTokenSource? _signInPollCts;
 
     private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
@@ -148,7 +204,8 @@
     [
         new(Localized("Materials", "วัสดุ"), Localized("Which material should I use for a heat-resistant prototype?", "ควรใช้วัสดุอะไรสำหรับต้นแบบที่ทนความร้อน")),
         new(Localized("Lead time", "ระยะเวลา"), Localized("What lead time should I expect for 3D printed parts?", "งานพิมพ์ 3D ใช้เวลาประมาณกี่วัน")),
-        new(Localized("Molding", "เครื่องฉีด"), Localized("What is the difference between the 30g and 50g machine variants?", "รุ่น 30g และ 50g ต่างกันอย่างไร"))
+        new(Localized("Molding", "เครื่องฉีด"), Localized("What is the difference between the 30g and 50g machine variants?", "รุ่น 30g และ 50g ต่างกันอย่างไร")),
+        new(Localized("My orders", "คำสั่งซื้อของฉัน"), Localized("Can you help me check my quotes and orders?", "ช่วยตรวจใบเสนอราคาและคำสั่งซื้อของฉันได้ไหม"))
     ];
 
     protected override void OnInitialized()
@@ -181,7 +238,8 @@
     private async Task InitializePersonalizationAsync()
     {
         await Preferences.InitializeAsync();
-        var identity = await ResolveIdentityAsync();
+        var identity = await ResolveFreshIdentityAsync();
+        _identity = identity;
         _storageKey = BuildStorageKey(identity);
 
         var storedMemory = await ReadMemoryAsync(_storageKey);
@@ -194,7 +252,7 @@
         ApplyIdentityToMemory(identity);
         await EnrichMemoryFromAccountAsync(identity);
 
-        _sessionId = _memory.LastSessionId;
+        _sessionId = _memory.LastSessionId ?? await ReadSharedSessionIdAsync();
         _unreadCount = Math.Clamp(_memory.UnreadCount, 0, 99);
         _storageReady = true;
         var greetingName = GetPersonalGreetingName(identity);
@@ -311,6 +369,22 @@
 
         try
         {
+            if (IsAccountSpecificIntent(trimmed))
+            {
+                var identity = await RefreshIdentityAsync();
+                if (!identity.IsAuthenticated)
+                {
+                    await AddAssistantMessageAsync(
+                        "assistant",
+                        CreateSignInRequiredMessage(),
+                        [CreateSignInAction()]);
+                    return;
+                }
+
+                await AddAuthenticatedAccountResponseAsync(trimmed, identity);
+                return;
+            }
+
             var response = await ApiClient.SendChatbotMessageAsync(new CustomerChatbotRequest
             {
                 SessionId = _sessionId,
@@ -319,7 +393,7 @@
                 Language = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en"
             });
             _sessionId = response.SessionId ?? _sessionId;
-            await AddAssistantMessageAsync(response.Role, response.Content);
+            await AddAssistantMessageAsync(response.Role, response.Content, MapResponseActions(response.SuggestedActions));
         }
         catch (MalievApiException ex)
         {
@@ -337,10 +411,10 @@
         }
     }
 
-    private async Task AddAssistantMessageAsync(string role, string content)
+    private async Task AddAssistantMessageAsync(string role, string content, IReadOnlyList<CustomerChatAction>? actions = null)
     {
         var shouldAutoScroll = _isOpen && await IsMessagesNearBottomAsync();
-        _messages.Add(new CustomerChatMessage(role, content));
+        _messages.Add(new CustomerChatMessage(role, content) { Actions = actions ?? [] });
         if (!_isOpen)
         {
             _unreadCount = Math.Clamp(_unreadCount + 1, 0, 99);
@@ -360,6 +434,245 @@
         }
 
         await PersistMemoryAsync();
+    }
+
+    private async Task AddAuthenticatedAccountResponseAsync(string message, CustomerChatbotIdentity identity)
+    {
+        var normalized = message.ToLowerInvariant();
+        var profile = await GetSignedInProfileAsync();
+        var displayName = FirstNonEmpty(profile?.DisplayName, JoinName(profile?.FirstName ?? string.Empty, profile?.LastName ?? string.Empty), identity.DisplayName, identity.Email);
+        var actions = CreateAccountActions(normalized);
+
+        if (ContainsAnyTerm(normalized, AddressIntentTerms))
+        {
+            var addresses = await GetSignedInAddressesAsync();
+            var addressSummary = addresses.Count == 0
+                ? Text("I do not see a saved address in this Web account yet.", "ยังไม่พบที่อยู่ที่บันทึกไว้ในบัญชี Web นี้ค่ะ")
+                : Text(
+                    $"I found {addresses.Count} saved address{(addresses.Count == 1 ? string.Empty : "es")}. {FormatAddressPreview(addresses)}",
+                    $"พบที่อยู่ที่บันทึกไว้ {addresses.Count} รายการค่ะ {FormatAddressPreview(addresses)}");
+
+            await AddAssistantMessageAsync(
+                "assistant",
+                Text(
+                    $"Hi {displayName ?? "there"}, I can help with your address book after sign-in.\n\n{addressSummary}\n\nFor security, address changes still need confirmation in the account address page.",
+                    $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} น้องมะลิช่วยดูสมุดที่อยู่หลังยืนยันตัวตนได้ค่ะ\n\n{addressSummary}\n\nเพื่อความปลอดภัย การแก้ไขที่อยู่ยังต้องยืนยันในหน้าสมุดที่อยู่ของบัญชีค่ะ"),
+                actions);
+            return;
+        }
+
+        if (ContainsAnyTerm(normalized, ProfileIntentTerms))
+        {
+            var profileSummary = profile is null
+                ? Text("Your profile service is temporarily unavailable, but your signed-in session is active.", "ระบบโปรไฟล์ยังไม่พร้อมใช้งานชั่วคราว แต่สถานะเข้าสู่ระบบของคุณใช้งานอยู่ค่ะ")
+                : BuildProfileSummary(profile);
+
+            await AddAssistantMessageAsync(
+                "assistant",
+                Text(
+                    $"Hi {displayName ?? "there"}, I can help with your MALIEV customer profile.\n\n{profileSummary}\n\nOpen the profile page when you want to update contact, company, or language details.",
+                    $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} น้องมะลิช่วยดูโปรไฟล์ลูกค้า MALIEV ได้ค่ะ\n\n{profileSummary}\n\nเปิดหน้าโปรไฟล์เมื่อต้องการแก้ไขข้อมูลติดต่อ บริษัท หรือภาษาที่ใช้ค่ะ"),
+                actions);
+            return;
+        }
+
+        if (ContainsAnyTerm(normalized, OrderIntentTerms))
+        {
+            var orders = await GetSignedInOrdersAsync();
+            var orderSummary = BuildOrderSummary(orders);
+            await AddAssistantMessageAsync(
+                "assistant",
+                Text(
+                    $"Hi {displayName ?? "there"}, I can help with quote, order, receipt, and delivery questions tied to your signed-in customer account.\n\n{orderSummary}\n\nManufacturing quotes and production orders continue in the Quote Engine using the same customer identity.",
+                    $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} น้องมะลิช่วยเรื่องใบเสนอราคา คำสั่งซื้อ ใบเสร็จ และการจัดส่งที่ผูกกับบัญชีลูกค้าได้ค่ะ\n\n{orderSummary}\n\nงานใบเสนอราคาและคำสั่งผลิตจะต่อในระบบราคาโดยใช้ตัวตนลูกค้าเดียวกันค่ะ"),
+                actions);
+            return;
+        }
+
+        await AddAssistantMessageAsync(
+            "assistant",
+            Text(
+                $"Hi {displayName ?? "there"}, you are signed in. I can help with your MALIEV account, profile, addresses, quotes, orders, receipts, and delivery status.",
+                $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} ตอนนี้คุณเข้าสู่ระบบแล้ว น้องมะลิช่วยเรื่องบัญชี โปรไฟล์ ที่อยู่ ใบเสนอราคา คำสั่งซื้อ ใบเสร็จ และสถานะจัดส่งของ MALIEV ได้ค่ะ"),
+            actions);
+    }
+
+    private async Task BeginChatSignInAsync()
+    {
+        if (_isAwaitingSignIn)
+        {
+            return;
+        }
+
+        _isAwaitingSignIn = true;
+        CancelSignInMonitor();
+        var signInUrl = $"/auth/sign-in?returnUrl={Uri.EscapeDataString(ChatbotCompleteReturnUrl)}";
+        var popupOpened = false;
+
+        try
+        {
+            popupOpened = await JS.InvokeAsync<bool>("malievChatbot.openSignInPopup", signInUrl);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+            popupOpened = false;
+        }
+
+        await AddAssistantMessageAsync(
+            "assistant",
+            popupOpened
+                ? Text(
+                    "I opened a secure sign-in window. Keep this page open; I will continue the same conversation here after your identity is verified.",
+                    "น้องมะลิเปิดหน้าต่างเข้าสู่ระบบที่ปลอดภัยแล้วค่ะ เปิดหน้านี้ค้างไว้ได้เลย หลังยืนยันตัวตนแล้วจะคุยต่อในแชทเดิมค่ะ")
+                : Text(
+                    "The browser blocked the sign-in window. Open sign-in in a new tab, then return here and I will reconnect automatically.",
+                    "เบราว์เซอร์บล็อกหน้าต่างเข้าสู่ระบบค่ะ เปิดการเข้าสู่ระบบในแท็บใหม่ แล้วกลับมาหน้านี้ น้องมะลิจะเชื่อมต่อให้อัตโนมัติค่ะ"),
+            popupOpened ? [] : [CreateSignInAction()]);
+
+        _signInPollCts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        _ = MonitorSignInAsync(_signInPollCts.Token);
+    }
+
+    private async Task MonitorSignInAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (var attempt = 0; attempt < SignInPollAttempts; attempt++)
+            {
+                await Task.Delay(SignInPollInterval, cancellationToken);
+                CustomerChatbotIdentity? identity = null;
+                await InvokeAsync(async () => { identity = await RefreshIdentityAsync(); });
+                if (identity?.IsAuthenticated != true)
+                {
+                    continue;
+                }
+
+                _isAwaitingSignIn = false;
+                await InvokeAsync(async () =>
+                {
+                    await AddAssistantMessageAsync(
+                        "assistant",
+                        Text(
+                            $"Signed in as {GetPersonalGreetingName(identity) ?? identity.Email ?? "your MALIEV account"}. We can continue here without leaving this page.",
+                            $"เข้าสู่ระบบเป็น {GetPersonalGreetingName(identity) ?? identity.Email ?? "บัญชี MALIEV ของคุณ"} แล้วค่ะ เราคุยต่อในหน้านี้ได้เลยโดยไม่ต้องออกจากหน้านี้"),
+                        CreateAccountActions(string.Empty));
+                    StateHasChanged();
+                });
+                return;
+            }
+
+            _isAwaitingSignIn = false;
+            await InvokeAsync(async () =>
+            {
+                await AddAssistantMessageAsync(
+                    "assistant",
+                    Text(
+                        "I did not see a completed sign-in yet. You can try again when you are ready.",
+                        "น้องมะลิยังไม่เห็นสถานะเข้าสู่ระบบสำเร็จค่ะ กดเข้าสู่ระบบอีกครั้งได้เมื่อพร้อมค่ะ"),
+                    [CreateSignInAction()]);
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+    }
+
+    private async Task<CustomerChatbotIdentity> RefreshIdentityAsync()
+    {
+        var identity = await ResolveFreshIdentityAsync();
+        _identity = identity;
+        if (identity.IsAuthenticated)
+        {
+            ApplyIdentityToMemory(identity);
+            await EnrichMemoryFromAccountAsync(identity);
+        }
+
+        var nextKey = BuildStorageKey(identity);
+        if (!string.Equals(nextKey, _storageKey, StringComparison.Ordinal))
+        {
+            _storageKey = nextKey;
+            await PersistMemoryAsync();
+        }
+
+        return identity;
+    }
+
+    private static bool IsAccountSpecificIntent(string message)
+    {
+        return ContainsAnyTerm(message.ToLowerInvariant(), AccountSensitiveTerms);
+    }
+
+    private static bool ContainsAnyTerm(string normalizedMessage, IEnumerable<string> terms)
+    {
+        return terms.Any(term => normalizedMessage.Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private CustomerChatAction CreateSignInAction()
+    {
+        return new CustomerChatAction(
+            Text("Sign in to continue", "เข้าสู่ระบบเพื่อดำเนินการต่อ"),
+            ChatActionSignIn,
+            null,
+            null,
+            Icons.Material.Filled.Login,
+            true);
+    }
+
+    private IReadOnlyList<CustomerChatAction> CreateAccountActions(string normalizedMessage)
+    {
+        var actions = new List<CustomerChatAction>();
+        if (ContainsAnyTerm(normalizedMessage, AddressIntentTerms))
+        {
+            actions.Add(CreateLinkAction(Text("Open address book", "เปิดสมุดที่อยู่"), "/account/addresses", Icons.Material.Filled.LocationOn, true));
+        }
+        else if (ContainsAnyTerm(normalizedMessage, ProfileIntentTerms))
+        {
+            actions.Add(CreateLinkAction(Text("Open profile", "เปิดโปรไฟล์"), "/account/profile", Icons.Material.Filled.AccountCircle, true));
+        }
+        else
+        {
+            actions.Add(CreateLinkAction(Text("Open orders", "เปิดคำสั่งซื้อ"), "/account/orders", Icons.Material.Filled.ReceiptLong, true));
+        }
+
+        actions.Add(CreateLinkAction(Text("Quote Engine", "ระบบราคา"), SiteContent.QuoteOrdersUrl, Icons.Material.Filled.OpenInNew, true));
+        actions.Add(ContainsAnyTerm(normalizedMessage, ProfileIntentTerms)
+            ? CreateLinkAction(Text("Addresses", "สมุดที่อยู่"), "/account/addresses", Icons.Material.Filled.LocationOn, false)
+            : CreateLinkAction(Text("Profile", "โปรไฟล์"), "/account/profile", Icons.Material.Filled.Person, false));
+        return actions;
+    }
+
+    private IReadOnlyList<CustomerChatAction> MapResponseActions(IReadOnlyList<CustomerChatbotActionDto> actions)
+    {
+        if (actions.Count == 0)
+        {
+            return [];
+        }
+
+        return actions
+            .Select(action =>
+            {
+                if (string.Equals(action.Action, ChatActionSignIn, StringComparison.OrdinalIgnoreCase))
+                {
+                    return CreateSignInAction();
+                }
+
+                var href = string.IsNullOrWhiteSpace(action.Data) ? null : action.Data;
+                return string.IsNullOrWhiteSpace(href)
+                    ? null
+                    : CreateLinkAction(action.Label, href, Icons.Material.Filled.OpenInNew, false);
+            })
+            .Where(action => action is not null)
+            .Select(action => action!)
+            .ToList();
+    }
+
+    private static CustomerChatAction CreateLinkAction(string label, string href, string icon, bool primary)
+    {
+        return new CustomerChatAction(label, ChatActionLink, href, "_blank", icon, primary);
     }
 
     private void QueueMessageScroll(bool smooth)
@@ -431,6 +744,37 @@
             : Text("Ask about materials, pricing, lead time, or the right manufacturing process.", "ถามเรื่องวัสดุ ราคา ระยะเวลา หรือกระบวนการผลิตที่เหมาะได้ค่ะ");
     }
 
+    private string CreateSignInRequiredMessage()
+    {
+        return Text(
+            "I can help with quotes, orders, receipts, profile, and address details after identity verification. Sign in in a secure popup and I will continue this same conversation here.",
+            "น้องมะลิช่วยเรื่องใบเสนอราคา คำสั่งซื้อ ใบเสร็จ โปรไฟล์ และที่อยู่ได้หลังยืนยันตัวตนค่ะ เข้าสู่ระบบในหน้าต่างปลอดภัย แล้วน้องมะลิจะคุยต่อในแชทเดิมตรงนี้ค่ะ");
+    }
+
+    private async Task<CustomerChatbotIdentity> ResolveFreshIdentityAsync()
+    {
+        var browserIdentity = await ResolveBrowserSessionIdentityAsync();
+        return browserIdentity.IsAuthenticated ? browserIdentity : await ResolveIdentityAsync();
+    }
+
+    private async Task<CustomerChatbotIdentity> ResolveBrowserSessionIdentityAsync()
+    {
+        var session = await ReadBrowserJsonAsync<CustomerAccountSessionDto>("/web/v1/account/session");
+        if (session?.IsAuthenticated != true)
+        {
+            return new CustomerChatbotIdentity(false, null, null, null);
+        }
+
+        var key = session.CustomerId?.ToString("D")
+            ?? session.PrincipalId?.ToString("D")
+            ?? session.Email;
+        return new CustomerChatbotIdentity(
+            true,
+            CleanOneLine(key, 140),
+            CleanOneLine(session.DisplayName, 80),
+            CleanOneLine(session.Email, 120));
+    }
+
     private async Task<CustomerChatbotIdentity> ResolveIdentityAsync()
     {
         try
@@ -462,6 +806,72 @@
         }
     }
 
+    private async Task<CustomerAccountProfileDto?> GetSignedInProfileAsync()
+    {
+        var profile = await ReadBrowserJsonAsync<CustomerAccountProfileDto>("/web/v1/account/profile");
+        if (profile is not null)
+        {
+            return profile;
+        }
+
+        try
+        {
+            return await ApiClient.GetAccountProfileAsync();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private async Task<IReadOnlyList<CustomerAddressDto>> GetSignedInAddressesAsync()
+    {
+        var addresses = await ReadBrowserJsonAsync<List<CustomerAddressDto>>("/web/v1/account/addresses");
+        if (addresses is not null)
+        {
+            return addresses;
+        }
+
+        try
+        {
+            return await ApiClient.GetAccountAddressesAsync();
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+    }
+
+    private async Task<CustomerOrdersResponse?> GetSignedInOrdersAsync()
+    {
+        var orders = await ReadBrowserJsonAsync<CustomerOrdersResponse>("/web/v1/account/orders");
+        if (orders is not null)
+        {
+            return orders;
+        }
+
+        try
+        {
+            return await ApiClient.GetAccountOrdersAsync();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private async Task<T?> ReadBrowserJsonAsync<T>(string path)
+    {
+        try
+        {
+            return await JS.InvokeAsync<T?>("malievChatbot.getJson", path);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException or JsonException)
+        {
+            return default;
+        }
+    }
+
     private async Task EnrichMemoryFromAccountAsync(CustomerChatbotIdentity identity)
     {
         if (!identity.IsAuthenticated)
@@ -471,7 +881,13 @@
 
         try
         {
-            var profile = await ApiClient.GetAccountProfileAsync();
+            var profile = await GetSignedInProfileAsync();
+            if (profile is null)
+            {
+                ApplyIdentityToMemory(identity);
+                return;
+            }
+
             var displayName = FirstNonEmpty(profile.DisplayName, JoinName(profile.FirstName, profile.LastName), profile.Email, identity.DisplayName);
             if (!string.IsNullOrWhiteSpace(displayName))
             {
@@ -495,7 +911,7 @@
 
         try
         {
-            var addresses = await ApiClient.GetAccountAddressesAsync();
+            var addresses = await GetSignedInAddressesAsync();
             foreach (var address in addresses.Select(FormatAddress).Where(value => !string.IsNullOrWhiteSpace(value)))
             {
                 AddDistinct(_memory.Addresses, address, MaxStoredItems, 180);
@@ -527,6 +943,8 @@
     private string? BuildCustomerContext()
     {
         var parts = new List<string>();
+        AddContextPart(parts, "Authentication", _identity.IsAuthenticated ? "signed-in customer session" : "anonymous browser session");
+        AddContextPart(parts, "Assistant session", _sessionId?.ToString("D"));
         AddContextPart(parts, "Name", _memory.Name);
         AddContextPart(parts, "Email", _memory.Email);
         AddContextPart(parts, "Company", _memory.Company);
@@ -639,6 +1057,19 @@
         }
     }
 
+    private async Task<Guid?> ReadSharedSessionIdAsync()
+    {
+        try
+        {
+            var value = await JS.InvokeAsync<string?>("malievChatbot.readSharedSessionId", SharedSessionStorageKey);
+            return Guid.TryParse(value, out var sessionId) ? sessionId : null;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+            return null;
+        }
+    }
+
     private async Task PersistMemoryAsync()
     {
         if (!_storageReady)
@@ -659,8 +1090,18 @@
         {
             var json = JsonSerializer.Serialize(_memory, StorageJson);
             await JS.InvokeVoidAsync("localStorage.setItem", _storageKey, json);
+            if (_sessionId.HasValue)
+            {
+                await JS.InvokeVoidAsync(
+                    "malievChatbot.writeSharedSession",
+                    SharedSessionStorageKey,
+                    _sessionId.Value.ToString("D"),
+                    _identity.UserKey,
+                    Preferences.Culture,
+                    _identity.IsAuthenticated);
+            }
         }
-        catch (Exception ex) when (ex is InvalidOperationException or JSException)
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
         {
         }
     }
@@ -700,6 +1141,13 @@
         _popoutCts?.Cancel();
         _popoutCts?.Dispose();
         _popoutCts = null;
+    }
+
+    private void CancelSignInMonitor()
+    {
+        _signInPollCts?.Cancel();
+        _signInPollCts?.Dispose();
+        _signInPollCts = null;
     }
 
     private static CustomerChatbotMemory NormalizeMemory(CustomerChatbotMemory memory)
@@ -804,6 +1252,73 @@
         }.Where(value => !string.IsNullOrWhiteSpace(value)));
     }
 
+    private string FormatAddressPreview(IReadOnlyList<CustomerAddressDto> addresses)
+    {
+        var defaults = addresses
+            .Where(address => address.IsDefault)
+            .Select(address => $"{address.Type}: {FormatAddress(address)}")
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Take(2)
+            .ToList();
+        if (defaults.Count > 0)
+        {
+            return Text(
+                $"Default address preview: {string.Join(" / ", defaults)}",
+                $"ตัวอย่างที่อยู่หลัก: {string.Join(" / ", defaults)}");
+        }
+
+        var first = FormatAddress(addresses[0]);
+        return string.IsNullOrWhiteSpace(first)
+            ? string.Empty
+            : Text($"First saved address: {first}", $"ที่อยู่รายการแรก: {first}");
+    }
+
+    private string BuildProfileSummary(CustomerAccountProfileDto profile)
+    {
+        var lines = new List<string>();
+        AddMarkdownLine(lines, Text("Name", "ชื่อ"), FirstNonEmpty(profile.DisplayName, JoinName(profile.FirstName, profile.LastName)));
+        AddMarkdownLine(lines, Text("Email", "อีเมล"), profile.Email);
+        AddMarkdownLine(lines, Text("Phone", "โทรศัพท์"), profile.Mobile);
+        AddMarkdownLine(lines, Text("Company", "บริษัท"), profile.CompanyName);
+        AddMarkdownLine(lines, Text("Preferred language", "ภาษาที่ใช้"), profile.PreferredLanguage);
+        return lines.Count == 0
+            ? Text("No profile details are available yet.", "ยังไม่มีรายละเอียดโปรไฟล์ค่ะ")
+            : string.Join("\n", lines);
+    }
+
+    private string BuildOrderSummary(CustomerOrdersResponse? orders)
+    {
+        if (orders is null)
+        {
+            return Text(
+                "Account order data is temporarily unavailable. You can still open the account area or Quote Engine.",
+                "ข้อมูลคำสั่งซื้อยังไม่พร้อมใช้งานชั่วคราว แต่ยังเปิดหน้าบัญชีหรือระบบราคาได้ค่ะ");
+        }
+
+        if (orders.ShopOrders.Count == 0)
+        {
+            return Text(
+                "I do not see storefront shop orders in this Web account yet. Manufacturing quotes, receipts, and production orders are available from the Quote Engine.",
+                "ยังไม่พบคำสั่งซื้อร้านค้าในบัญชี Web นี้ค่ะ ใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ในระบบราคาค่ะ");
+        }
+
+        var latest = orders.ShopOrders
+            .OrderByDescending(order => order.CreatedAt)
+            .First();
+        return Text(
+            $"I found {orders.ShopOrders.Count} storefront order{(orders.ShopOrders.Count == 1 ? string.Empty : "s")}. Latest: **{latest.OrderNumber}** ({latest.Status}). Manufacturing quotes, receipts, and production orders stay in the Quote Engine.",
+            $"พบคำสั่งซื้อร้านค้า {orders.ShopOrders.Count} รายการค่ะ ล่าสุด: **{latest.OrderNumber}** ({latest.Status}) ส่วนใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ในระบบราคาค่ะ");
+    }
+
+    private static void AddMarkdownLine(List<string> lines, string label, string? value)
+    {
+        var cleaned = CleanOneLine(value, 180);
+        if (!string.IsNullOrWhiteSpace(cleaned))
+        {
+            lines.Add($"- **{label}:** {cleaned}");
+        }
+    }
+
     private static void AddContextPart(List<string> parts, string label, string? value)
     {
         var cleaned = CleanOneLine(value, 220);
@@ -848,6 +1363,13 @@
         return string.Equals(role, "user", StringComparison.OrdinalIgnoreCase)
             ? "customer-chatbot-message user"
             : "customer-chatbot-message assistant";
+    }
+
+    private static string ActionClass(CustomerChatAction action)
+    {
+        return action.Primary
+            ? "customer-chatbot-action primary"
+            : "customer-chatbot-action";
     }
 
     private static MarkupString RenderMessageContent(string? content)
@@ -936,9 +1458,21 @@
     public void Dispose()
     {
         CancelPopoutTimer();
+        CancelSignInMonitor();
     }
 
-    private sealed record CustomerChatMessage(string Role, string Content, bool Persist = true);
+    private sealed record CustomerChatMessage(string Role, string Content, bool Persist = true)
+    {
+        public IReadOnlyList<CustomerChatAction> Actions { get; init; } = [];
+    }
+
+    private sealed record CustomerChatAction(
+        string Label,
+        string Kind,
+        string? Href,
+        string? Target,
+        string Icon,
+        bool Primary);
 
     private sealed record CustomerChatPrompt(LocalizedText Label, LocalizedText Value);
 

@@ -20,6 +20,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 {
     /// <summary>Gets the current browser customer session.</summary>
     [HttpGet("session")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(CustomerAccountSessionDto), StatusCodes.Status200OK)]
     public ActionResult<CustomerAccountSessionDto> GetSession()
     {

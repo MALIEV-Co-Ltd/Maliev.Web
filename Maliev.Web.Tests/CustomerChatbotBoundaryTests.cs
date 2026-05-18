@@ -85,6 +85,52 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Verifies account-specific questions require an authenticated customer context before reaching ChatbotService.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_AccountSpecificQuestionWithoutSignedInContext_ReturnsSignInAction()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "Can you check my order status and receipt?",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.False(response.IsOutOfScope);
+        Assert.Contains("identity verification", response.Content, StringComparison.OrdinalIgnoreCase);
+        var action = Assert.Single(response.SuggestedActions);
+        Assert.Equal("sign-in", action.Action);
+        Assert.Contains("/auth/sign-in", action.Data, StringComparison.Ordinal);
+        Assert.Null(client.InitiateRequest);
+        Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
+    /// Verifies signed-in account questions can continue through the chatbot boundary with account context attached.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_AccountSpecificQuestionWithSignedInContext_RoutesMessage()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "Can you check my order status and receipt?",
+            CustomerContext = "Authentication: signed-in customer session\nName: Website Customer",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.Equal(client.SessionId, response.SessionId);
+        Assert.NotNull(client.MessageRequest);
+        Assert.Contains("Authentication: signed-in customer session", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.Contains("Customer message:\nCan you check my order status and receipt?", client.MessageRequest.Content, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies simple customer greetings are conversational and are not rejected as off-topic questions.
     /// </summary>
     [Fact]

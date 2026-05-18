@@ -28,13 +28,15 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "tooling", "mold", "mould", "molding", "injection", "pneumatic", "silicone", "urethane", "casting",
         "material", "pla", "petg", "abs", "asa", "nylon", "pa12", "tpu", "pp", "pc", "peek",
         "quote", "quotation", "price", "pricing", "cost", "order", "checkout", "lead time", "delivery",
-        "shipping", "refund", "warranty", "file", "stl", "step", "stp", "iges", "obj", "3mf",
+        "shipping", "receipt", "invoice", "tax invoice", "payment", "profile", "account", "personal information",
+        "address book", "shipping address", "billing address", "refund", "warranty", "file", "stl", "step", "stp", "iges", "obj", "3mf",
         "tolerance", "finish", "surface", "strength", "heat", "chemical", "contact", "phone", "address",
         "name", "my name", "company", "preference", "preferences", "email",
         "line official", "service", "shop", "machine", "pimm", "mali", "what can you do", "who are you", "your name",
         "ผลิต", "พิมพ์", "ปริ้น", "ซีเอ็นซี", "กัด", "กลึง", "สแกน", "ออกแบบ", "วัสดุ", "ต้นแบบ",
         "ชิ้นงาน", "อะไหล่", "แม่พิมพ์", "หล่อ", "ซิลิโคน", "ยูรีเทน", "เครื่องฉีด", "ลม", "ราคา",
-        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์", "ชื่อ", "บริษัท", "มะลิ", "น้องมะลิ"
+        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "ใบเสร็จ", "ใบกำกับภาษี", "ชำระเงิน", "โปรไฟล์", "บัญชี",
+        "ข้อมูลส่วนตัว", "สมุดที่อยู่", "ที่อยู่จัดส่ง", "ที่อยู่ออกบิล", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์", "ชื่อ", "บริษัท", "มะลิ", "น้องมะลิ"
     ];
 
     private static readonly string[] GreetingTerms =
@@ -47,6 +49,15 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "thanks", "thank you", "ขอบคุณ"
     ];
 
+    private static readonly string[] AccountSpecificTerms =
+    [
+        "my order", "my orders", "order status", "track order", "my quote", "my quotes", "quote status",
+        "receipt", "invoice", "tax invoice", "profile", "my account", "personal information", "personal info",
+        "address book", "my address", "shipping address", "billing address", "update address", "change address",
+        "คำสั่งซื้อของฉัน", "ติดตามงาน", "ใบเสนอราคาของฉัน", "ใบเสร็จ", "ใบกำกับภาษี", "บัญชีของฉัน",
+        "โปรไฟล์", "ข้อมูลส่วนตัว", "ที่อยู่ของฉัน", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่"
+    ];
+
     public async Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
     {
         var message = request.Message.Trim();
@@ -55,6 +66,11 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         if (IsNaturalConversationOnly(message))
         {
             return CreateNaturalConversationResponse(request.SessionId, language);
+        }
+
+        if (IsAccountSpecificTopic(message) && !HasSignedInCustomerContext(request.CustomerContext))
+        {
+            return CreateSignInRequiredResponse(request.SessionId, language);
         }
 
         if (!IsAllowedCustomerTopic(message))
@@ -127,6 +143,18 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
 
         return GreetingTerms.Any(term => MatchesConversationTerm(normalized, term))
             || ThanksTerms.Any(term => MatchesConversationTerm(normalized, term));
+    }
+
+    private static bool IsAccountSpecificTopic(string message)
+    {
+        var normalized = message.Trim().ToLowerInvariant();
+        return AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool HasSignedInCustomerContext(string? customerContext)
+    {
+        return !string.IsNullOrWhiteSpace(customerContext)
+            && customerContext.Contains("Authentication: signed-in customer session", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeConversationText(string message)
@@ -247,6 +275,29 @@ Customer message:
             Language = language,
             IsOutOfScope = true,
             CreatedAt = DateTimeOffset.UtcNow
+        };
+    }
+
+    private static CustomerChatbotResponse CreateSignInRequiredResponse(Guid? sessionId, string language)
+    {
+        return new CustomerChatbotResponse
+        {
+            SessionId = sessionId,
+            Content = language == "th"
+                ? "น้องมะลิช่วยเรื่องบัญชี ใบเสนอราคา คำสั่งซื้อ ใบเสร็จ โปรไฟล์ และที่อยู่ได้หลังจากยืนยันตัวตนค่ะ กรุณาเข้าสู่ระบบก่อน แล้วเราจะคุยต่อจากบทสนทนาเดิมได้เลยค่ะ"
+                : "Mali can help with account-specific quotes, orders, receipts, profile, and address questions after identity verification. Please sign in first, then we can continue this same conversation.",
+            Role = "assistant",
+            Language = language,
+            CreatedAt = DateTimeOffset.UtcNow,
+            SuggestedActions =
+            [
+                new CustomerChatbotActionDto
+                {
+                    Label = language == "th" ? "เข้าสู่ระบบเพื่อดำเนินการต่อ" : "Sign in to continue",
+                    Action = "sign-in",
+                    Data = "/auth/sign-in?returnUrl=%2Fauth%2Fchatbot-complete"
+                }
+            ]
         };
     }
 
