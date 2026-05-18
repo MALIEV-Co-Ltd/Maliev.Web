@@ -70,7 +70,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
 
         if (IsAccountSpecificTopic(message) && !HasSignedInCustomerContext(request.CustomerContext))
         {
-            return CreateSignInRequiredResponse(request.SessionId, language);
+            return CreateSignInRequiredResponse(request.SessionId ?? Guid.NewGuid(), language);
         }
 
         if (!IsAllowedCustomerTopic(message))

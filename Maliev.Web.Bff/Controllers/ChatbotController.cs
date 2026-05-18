@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Asp.Versioning;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Chatbot;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +15,9 @@ namespace Maliev.Web.Bff.Controllers;
 [ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/chatbot")]
 [AllowAnonymous]
-public sealed class ChatbotController(ICustomerChatbotService chatbotService) : ControllerBase
+public sealed class ChatbotController(
+    ICustomerChatbotService chatbotService,
+    CustomerAssistantHandoffCookie handoffCookie) : ControllerBase
 {
     /// <summary>
     /// Sends a public website customer message to the MALIEV assistant.
@@ -31,7 +35,19 @@ public sealed class ChatbotController(ICustomerChatbotService chatbotService) : 
 
         try
         {
-            return Ok(await chatbotService.SendAsync(request, cancellationToken));
+            var response = await chatbotService.SendAsync(request, cancellationToken);
+            if (response.SessionId.HasValue)
+            {
+                handoffCookie.Append(
+                    Request,
+                    Response,
+                    response.SessionId.Value,
+                    ResolveUserKey(),
+                    response.Language,
+                    User.Identity?.IsAuthenticated == true);
+            }
+
+            return Ok(response);
         }
         catch (ChatbotRateLimitException ex)
         {
@@ -49,5 +65,14 @@ public sealed class ChatbotController(ICustomerChatbotService chatbotService) : 
                 detail: "The MALIEV assistant is temporarily unavailable. Please try again or contact info@maliev.com.",
                 statusCode: StatusCodes.Status503ServiceUnavailable);
         }
+    }
+
+    private string? ResolveUserKey()
+    {
+        return User.FindFirstValue("customer_id")
+            ?? User.FindFirstValue("customerId")
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(ClaimTypes.Email)
+            ?? User.Identity?.Name;
     }
 }

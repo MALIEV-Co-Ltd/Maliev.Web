@@ -156,6 +156,10 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal("assistant", chat.Role);
         Assert.False(chat.IsOutOfScope);
         Assert.Contains("CNC", chat.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            response.Headers.GetValues("Set-Cookie"),
+            value => value.Contains("maliev_customer_assistant_handoff=", StringComparison.Ordinal)
+                && value.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

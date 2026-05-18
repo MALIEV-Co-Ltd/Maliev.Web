@@ -2,6 +2,7 @@ using Maliev.Aspire.ServiceDefaults;
 using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Components;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
@@ -132,6 +133,7 @@ builder.Services.AddScoped<IQuoteUploadService, QuoteUploadService>();
 builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
+builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
 
 var app = builder.Build();
 
