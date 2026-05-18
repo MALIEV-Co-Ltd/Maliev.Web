@@ -578,6 +578,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-map-title", styles);
         Assert.Contains(".contact-map-title-logo", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
+        Assert.Contains("font-size: clamp(1.22rem, 1.55vw, 1.52rem);", styles);
+        Assert.Contains("font-size: .9rem;", styles);
+        Assert.Contains("grid-template-columns: minmax(104px, .28fr) minmax(0, 1fr);", styles);
+        Assert.Contains("font-size: .72rem;", styles);
+        Assert.Contains(".contact-info-row dt .mud-icon-root", styles);
+        Assert.Contains(".line-contact-link.contact-line-add-friend .line-contact-copy strong", styles);
         Assert.Matches(@"\.contact-section-head,\s*\.contact-map-heading\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);", styles);
         Assert.DoesNotContain(".contact-direct-grid", styles);
         Assert.DoesNotContain(".contact-direct-card", styles);

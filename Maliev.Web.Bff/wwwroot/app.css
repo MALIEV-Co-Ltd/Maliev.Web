@@ -2328,12 +2328,12 @@ html:lang(th) .h1 {
 
 .contact-business-section {
   display: grid;
-  gap: 18px;
-  padding-bottom: 24px;
+  gap: 14px;
+  padding-bottom: 20px;
 }
 
 .contact-business-section + .contact-business-section {
-  padding-top: 24px;
+  padding-top: 20px;
   border-top: 1px solid var(--rule);
 }
 
@@ -2364,9 +2364,9 @@ html:lang(th) .h1 {
 .contact-map-section h2 {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-size: clamp(1.22rem, 1.55vw, 1.52rem);
   font-weight: 720;
-  line-height: 1.18;
+  line-height: 1.14;
 }
 
 .contact-map-title {
@@ -2378,7 +2378,7 @@ html:lang(th) .h1 {
 
 .contact-map-title-logo {
   display: inline-block;
-  width: 3.25em;
+  width: 3em;
   height: auto;
   filter: var(--logo-filter);
   transform: translateY(.08em);
@@ -2386,10 +2386,10 @@ html:lang(th) .h1 {
 
 .contact-business-section p,
 .contact-map-section p {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   color: var(--muted);
-  font-size: .98rem;
-  line-height: 1.55;
+  font-size: .9rem;
+  line-height: 1.46;
 }
 
 .contact-info-rows {
@@ -2400,9 +2400,9 @@ html:lang(th) .h1 {
 
 .contact-info-row {
   display: grid;
-  grid-template-columns: minmax(132px, .34fr) minmax(0, 1fr);
-  gap: 18px;
-  padding: 13px 0;
+  grid-template-columns: minmax(104px, .28fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 10px 0;
   border-top: 1px solid var(--rule-soft);
 }
 
@@ -2414,19 +2414,24 @@ html:lang(th) .h1 {
 .contact-info-row dt {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--muted);
-  font-size: .82rem;
+  font-size: .72rem;
   font-weight: 760;
   letter-spacing: 0;
   line-height: 1.35;
   text-transform: uppercase;
 }
 
+.contact-info-row dt .mud-icon-root {
+  width: 16px;
+  height: 16px;
+}
+
 .contact-info-row dd {
   color: var(--ink);
-  font-size: .95rem;
-  line-height: 1.55;
+  font-size: .9rem;
+  line-height: 1.46;
 }
 
 .contact-info-row a {
@@ -2437,8 +2442,14 @@ html:lang(th) .h1 {
 .contact-section-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+}
+
+.contact-section-actions .button {
+  min-height: 38px;
+  padding: 9px 13px;
+  font-size: .88rem;
 }
 
 .line-contact-link.contact-line-add-friend {
@@ -2451,6 +2462,17 @@ html:lang(th) .h1 {
   --line-link-caption: color-mix(in srgb, var(--line-green) 72%, var(--ink-2));
   --line-link-hover-title: #049d44;
   --line-link-hover-caption: #049d44;
+
+  min-height: 42px;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 999px;
+}
+
+.line-contact-link.contact-line-add-friend .line-contact-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
 }
 
 .line-app-icon {
@@ -2461,15 +2483,28 @@ html:lang(th) .h1 {
   object-fit: contain;
 }
 
+.line-contact-link.contact-line-add-friend .line-app-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.line-contact-link.contact-line-add-friend .line-contact-copy strong {
+  font-size: .82rem;
+}
+
+.line-contact-link.contact-line-add-friend .line-contact-copy small {
+  font-size: .7rem;
+}
+
 .contact-social-cluster {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
   padding-top: 4px;
   color: var(--muted);
-  font-size: .9rem;
+  font-size: .84rem;
   font-weight: 650;
 }
 
