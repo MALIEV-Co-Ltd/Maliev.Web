@@ -1496,17 +1496,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("state.landingFrame = frameImportedModel", source);
-        Assert.Contains("frameLandingHeroCamera", source);
-        Assert.Contains("measureProjectedMeshFrame", source);
-        Assert.Contains("targetFill", source);
-        Assert.Contains("safeInset", source);
+        Assert.Contains("camera.useFramingBehavior = true;", source);
+        Assert.Contains("BABYLON.FramingBehavior.FitFrustumSidesMode", source);
+        Assert.Contains("framing.zoomOnMeshesHierarchy", source);
+        Assert.Contains("applyLandingHeroFraming(camera, frame, metrics, BABYLON);", source);
+        Assert.Contains("configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);", source);
         Assert.Contains("camera.getViewMatrix(true)", source);
         Assert.Contains("refreshCameraMatrices", source);
         Assert.Contains("camera.getProjectionMatrix?.(true)", source);
-        Assert.Contains("projectedFrameFits", source);
-        Assert.Contains("high *= 1.24", source);
-        Assert.Contains("getModelAwareHeroMetrics", source);
-        Assert.Contains("radiusFloor", source);
         Assert.Contains("camera.upperRadiusLimit = null", source);
         Assert.Contains("updateWorldMatrixChain", source);
         Assert.Contains("state.engine.resize();\n  state.cameraConfigurator?.();", source);
@@ -1534,13 +1531,18 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("Math.sin(elapsed * 0.0012) * 0.055", source);
         Assert.DoesNotContain("* 0.24", source);
         Assert.DoesNotContain("* 0.11", source);
+        Assert.DoesNotContain("frameLandingHeroCamera", source);
+        Assert.DoesNotContain("measureProjectedMeshFrame", source);
+        Assert.DoesNotContain("projectedFrameFits", source);
+        Assert.DoesNotContain("BABYLON.Vector3.Project", source);
+        Assert.DoesNotContain("getModelAwareHeroMetrics", source);
     }
 
     /// <summary>
-    /// Verifies the landing hero model stays prominent on narrow desktop canvases and resize reframing is coalesced.
+    /// Verifies the landing hero model uses camera framing instead of CSS canvas scaling, and resize reframing is coalesced.
     /// </summary>
     [Fact]
-    public void LandingHeroModelStaysLargeAndResizeDebounced()
+    public void LandingHeroModelUsesBabylonFramingAndResizeDebounced()
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
@@ -1549,8 +1551,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("scheduleResizeScene(state)", source);
         Assert.Contains("ResizeObserver(() => scheduleResizeScene(state))", source);
         Assert.Contains("state.resizeHandler = () => scheduleResizeScene(state);", source);
-        Assert.Contains("targetFill: narrowTall ? 0.86 : compact ? 0.78", source);
-        Assert.Contains("safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045", source);
+        Assert.Contains("camera.useFramingBehavior = true;", source);
+        Assert.Contains("framing.mode = BABYLON.FramingBehavior.FitFrustumSidesMode;", source);
+        Assert.Contains("framing.framingTime = 0;", source);
+        Assert.Contains("framing.elevationReturnTime = -1;", source);
+        Assert.Contains("framing.radiusScale = 1;", source);
+        Assert.Contains("framing.zoomOnMeshesHierarchy(meshes, false);", source);
+        Assert.Contains("const tallFrameRatio = frame?.size", source);
+        Assert.Contains("const modelRadiusScale = tallFrameRatio > 1.45 ? metrics.tallFrameRadiusScale : 1;", source);
+        Assert.Contains("camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, metrics.minRadius);", source);
+        Assert.DoesNotContain("clamp(camera.radius, metrics.minRadius, metrics.maxRadius)", source);
+        Assert.Contains("framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16", source);
+        Assert.Contains("tallFrameRadiusScale: 1.38", source);
         Assert.Contains("selectDominantModelFrame(entries, aggregate, BABYLON) ?? aggregate", source);
         Assert.Contains("const sparseAssemblyRatio = aggregateSpan / Math.max(largestMeshSpan, 0.0001);", source);
         Assert.Contains("sparseAssemblyRatio < 18", source);
@@ -1558,10 +1570,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("node.getBoundingInfo().update(worldMatrix);", source);
         Assert.Contains(".manufacturing-gizmo--landing .manufacturing-gizmo-canvas", styles);
         Assert.Contains("pointer-events: none;", styles);
-        Assert.Contains("transform: scale(4.25);", styles);
-        Assert.Contains("transform-origin: 50% 52%;", styles);
-        Assert.DoesNotContain("targetFill: narrowTall ? 0.72", source);
-        Assert.DoesNotContain("safeInset: narrowTall ? 0.12", source);
+        Assert.DoesNotContain("transform: scale(4.25);", styles);
+        Assert.DoesNotContain("transform-origin: 50% 52%;", styles);
+        Assert.DoesNotContain("will-change: transform;", styles);
+        Assert.DoesNotContain("targetFill", source);
+        Assert.DoesNotContain("safeInset", source);
     }
 
     /// <summary>
@@ -1618,15 +1631,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("height: min(58vh, 860px);", styles);
         Assert.Contains("justify-content: center;", styles);
         Assert.Contains("const narrowTall = width < 700 && height >= 500 && aspect < 1.12;", gizmo);
-        Assert.Contains("narrowTall ? 0.86 : compact ? 0.78", gizmo);
-        Assert.Contains("safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045", gizmo);
+        Assert.Contains("framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16", gizmo);
+        Assert.Contains("tallFrameRadiusScale: 1.38", gizmo);
+        Assert.Contains("positionScale: narrowTall ? 0.5 : compact ? 0.5 : 0.48", gizmo);
         Assert.Contains("fallbackRadius: narrowTall ? 7.15", gizmo);
         Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
         Assert.Contains("balancedTablet ? 0.46 : wide ? 0.43 : 0.45", gizmo);
-        Assert.Contains("frameLandingHeroCamera", gizmo);
-        Assert.Contains("measureProjectedMeshFrame", gizmo);
-        Assert.Contains("projectedFrameFits", gizmo);
-        Assert.Contains("high *= 1.24", gizmo);
+        Assert.Contains("applyLandingHeroFraming", gizmo);
+        Assert.Contains("framing.zoomOnMeshesHierarchy", gizmo);
+        Assert.Contains("BABYLON.FramingBehavior.FitFrustumSidesMode", gizmo);
+        Assert.DoesNotContain("frameLandingHeroCamera", gizmo);
+        Assert.DoesNotContain("measureProjectedMeshFrame", gizmo);
+        Assert.DoesNotContain("projectedFrameFits", gizmo);
     }
 
     /// <summary>
@@ -1638,7 +1654,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-hero-fit\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-babylon-frame\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

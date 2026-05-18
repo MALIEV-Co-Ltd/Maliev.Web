@@ -903,9 +903,6 @@ html:lang(th) .h1 {
 
 .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {
   pointer-events: none;
-  transform: scale(4.25);
-  transform-origin: 50% 52%;
-  will-change: transform;
 }
 
 .manufacturing-gizmo-canvas:focus,

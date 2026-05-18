@@ -361,6 +361,7 @@ async function createLandingHeroScene(state, BABYLON) {
 
   const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02);
   root.rotation.copyFrom(baseRotation);
+  configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reducedMotion) {
@@ -395,7 +396,7 @@ function configureLandingHeroCamera(camera, host, BABYLON, frame) {
   camera.upperRadiusLimit = null;
 
   if (frame?.meshes?.length) {
-    frameLandingHeroCamera(camera, frame.meshes, getModelAwareHeroMetrics(metrics, frame), BABYLON);
+    applyLandingHeroFraming(camera, frame, metrics, BABYLON);
   } else {
     camera.radius = metrics.fallbackRadius;
   }
@@ -415,8 +416,9 @@ function getLandingHeroViewportMetrics(host) {
 
   return {
     fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
-    targetFill: narrowTall ? 0.86 : compact ? 0.78 : balancedTablet ? 0.84 : aspect > 1.55 ? 0.88 : 0.86,
-    safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045,
+    framingRadiusScale: narrowTall ? 1.06 : compact ? 1.16 : balancedTablet ? 1.12 : aspect > 1.55 ? 1.08 : 1.1,
+    tallFrameRadiusScale: 1.38,
+    positionScale: narrowTall ? 0.5 : compact ? 0.5 : 0.48,
     minRadius: narrowTall ? 4.2 : compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
     maxRadius: narrowTall ? 9.6 : compact ? 8.4 : wide ? 9.2 : 8.8,
     fallbackRadius: narrowTall ? 7.15 : compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
@@ -424,131 +426,33 @@ function getLandingHeroViewportMetrics(host) {
   };
 }
 
-function getModelAwareHeroMetrics(metrics, frame) {
-  const frameSize = frame?.size;
-  const frameSpan = Math.max(frameSize?.x ?? 0, frameSize?.y ?? 0, frameSize?.z ?? 0);
-  if (!Number.isFinite(frameSpan) || frameSpan <= 0) {
-    return metrics;
-  }
-
-  const radiusFloor = frameSpan / (2 * Math.tan(metrics.fov / 2) * metrics.targetFill);
-  if (!Number.isFinite(radiusFloor)) {
-    return metrics;
-  }
-
-  return {
-    ...metrics,
-    minRadius: Math.max(metrics.minRadius, radiusFloor),
-    maxRadius: Math.max(metrics.maxRadius, radiusFloor * 1.6),
-    fallbackRadius: Math.max(metrics.fallbackRadius, radiusFloor)
-  };
-}
-
-function frameLandingHeroCamera(camera, meshes, metrics, BABYLON) {
-  let low = metrics.minRadius;
-  let high = metrics.maxRadius;
-  let best = high;
-  let highFits = false;
-
-  for (let i = 0; i < 8; i += 1) {
-    camera.radius = high;
-    refreshCameraMatrices(camera);
-
-    if (projectedFrameFits(measureProjectedMeshFrame(camera, meshes, BABYLON), metrics)) {
-      highFits = true;
-      break;
-    }
-
-    low = high;
-    high *= 1.24;
-  }
-
-  if (!highFits) {
-    camera.radius = high;
+function applyLandingHeroFraming(camera, frame, metrics, BABYLON) {
+  const meshes = frame?.meshes ?? [];
+  camera.useFramingBehavior = true;
+  const framing = camera.framingBehavior;
+  if (!framing) {
+    camera.radius = metrics.fallbackRadius;
     return;
   }
 
-  low = metrics.minRadius;
-
-  for (let i = 0; i < 16; i += 1) {
-    const radius = (low + high) / 2;
-    camera.radius = radius;
-    refreshCameraMatrices(camera);
-
-    const projected = measureProjectedMeshFrame(camera, meshes, BABYLON);
-    if (!projectedFrameFits(projected, metrics)) {
-      low = radius;
-      continue;
-    }
-
-    best = radius;
-    high = radius;
-  }
-
-  camera.radius = best;
+  framing.mode = BABYLON.FramingBehavior.FitFrustumSidesMode;
+  framing.framingTime = 0;
+  framing.elevationReturnTime = -1;
+  framing.autoCorrectCameraLimitsAndSensibility = false;
+  framing.radiusScale = 1;
+  framing.positionScale = metrics.positionScale;
+  framing.zoomOnMeshesHierarchy(meshes, false);
+  refreshCameraMatrices(camera);
+  const tallFrameRatio = frame?.size
+    ? frame.size.y / Math.max(frame.size.x, frame.size.z, Number.EPSILON)
+    : 1;
+  const modelRadiusScale = tallFrameRatio > 1.45 ? metrics.tallFrameRadiusScale : 1;
+  camera.radius = Math.max(camera.radius * metrics.framingRadiusScale * modelRadiusScale, metrics.minRadius);
 }
 
 function refreshCameraMatrices(camera) {
   camera.getViewMatrix(true);
   camera.getProjectionMatrix?.(true);
-}
-
-function projectedFrameFits(projected, metrics) {
-  return Boolean(projected) &&
-    !projected.clipped &&
-    projected.maxSpan <= metrics.targetFill &&
-    projected.minInset >= metrics.safeInset;
-}
-
-function measureProjectedMeshFrame(camera, meshes, BABYLON) {
-  const scene = camera.getScene();
-  const engine = scene.getEngine();
-  const viewport = camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
-  const transform = scene.getTransformMatrix();
-  const world = BABYLON.Matrix.Identity();
-
-  if (!viewport.width || !viewport.height) {
-    return null;
-  }
-
-  let minX = Number.POSITIVE_INFINITY;
-  let maxX = Number.NEGATIVE_INFINITY;
-  let minY = Number.POSITIVE_INFINITY;
-  let maxY = Number.NEGATIVE_INFINITY;
-  let projectedCount = 0;
-
-  for (const mesh of meshes) {
-    if (!mesh.getBoundingInfo) {
-      continue;
-    }
-
-    updateWorldMatrixChain(mesh);
-    const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
-    for (const vector of vectors) {
-      const point = BABYLON.Vector3.Project(vector, world, transform, viewport);
-      if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
-        continue;
-      }
-
-      projectedCount += 1;
-      const normalizedX = (point.x - viewport.x) / viewport.width;
-      const normalizedY = (point.y - viewport.y) / viewport.height;
-      minX = Math.min(minX, normalizedX);
-      maxX = Math.max(maxX, normalizedX);
-      minY = Math.min(minY, normalizedY);
-      maxY = Math.max(maxY, normalizedY);
-    }
-  }
-
-  if (!projectedCount) {
-    return null;
-  }
-
-  return {
-    maxSpan: Math.max(maxX - minX, maxY - minY),
-    minInset: Math.min(minX, minY, 1 - maxX, 1 - maxY),
-    clipped: minX < 0 || minY < 0 || maxX > 1 || maxY > 1
-  };
 }
 
 function addHoverMotion(state, scene, camera, root, baseRotation, BABYLON) {
