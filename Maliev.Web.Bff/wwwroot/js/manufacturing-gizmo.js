@@ -28,6 +28,10 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     observer: null,
     resizeObserver: null,
     resizeHandler: null,
+    resizeFrame: 0,
+    resizeWidth: 0,
+    resizeHeight: 0,
+    resizePixelRatio: 0,
     visibilityHandler: null,
     pointerEnterHandler: null,
     pointerMoveHandler: null,
@@ -155,6 +159,11 @@ export function disposeManufacturingGizmo(canvas) {
   stopRenderLoop(state);
   state.observer?.disconnect();
   state.resizeObserver?.disconnect();
+
+  if (state.resizeFrame) {
+    cancelAnimationFrame(state.resizeFrame);
+    state.resizeFrame = 0;
+  }
 
   if (state.resizeHandler) {
     window.removeEventListener("resize", state.resizeHandler);
@@ -406,8 +415,8 @@ function getLandingHeroViewportMetrics(host) {
 
   return {
     fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.46 : wide ? 0.43 : 0.45,
-    targetFill: narrowTall ? 0.72 : compact ? 0.76 : balancedTablet ? 0.82 : aspect > 1.55 ? 0.86 : 0.84,
-    safeInset: narrowTall ? 0.12 : compact ? 0.07 : 0.055,
+    targetFill: narrowTall ? 0.86 : compact ? 0.78 : balancedTablet ? 0.84 : aspect > 1.55 ? 0.88 : 0.86,
+    safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045,
     minRadius: narrowTall ? 4.2 : compact ? 3.2 : balancedTablet ? 3.8 : 4.1,
     maxRadius: narrowTall ? 9.6 : compact ? 8.4 : wide ? 9.2 : 8.8,
     fallbackRadius: narrowTall ? 7.15 : compact ? 6.5 : balancedTablet ? 6.25 : wide ? 6.85 : 6.6,
@@ -638,15 +647,16 @@ function frameImportedModel(meshes, root, BABYLON, modelScale = 1) {
     return null;
   }
 
-  const size = bounds.max.subtract(bounds.min);
+  const displayBounds = bounds.display ?? bounds;
+  const size = displayBounds.max.subtract(displayBounds.min);
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
   const targetSize = 2.28 * modelScale;
   const scale = targetSize / maxDimension;
   root.scaling.setAll(scale);
-  root.position.copyFrom(bounds.center.scale(-scale));
+  root.position.copyFrom(displayBounds.center.scale(-scale));
 
   return {
-    meshes,
+    meshes: displayBounds.meshes ?? meshes,
     size: size.scale(scale)
   };
 }
@@ -668,20 +678,75 @@ function computeMeshBounds(meshes, BABYLON) {
 
   let min = new BABYLON.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
   let max = new BABYLON.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+  const entries = [];
 
   for (const mesh of renderMeshes) {
     updateWorldMatrixChain(mesh);
     const vectors = mesh.getBoundingInfo().boundingBox.vectorsWorld;
+    let meshMin = new BABYLON.Vector3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+    let meshMax = new BABYLON.Vector3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+
     for (const vector of vectors) {
       min = BABYLON.Vector3.Minimize(min, vector);
       max = BABYLON.Vector3.Maximize(max, vector);
+      meshMin = BABYLON.Vector3.Minimize(meshMin, vector);
+      meshMax = BABYLON.Vector3.Maximize(meshMax, vector);
+    }
+
+    const meshSize = meshMax.subtract(meshMin);
+    const meshSpan = Math.max(meshSize.x, meshSize.y, meshSize.z);
+    if (Number.isFinite(meshSpan) && meshSpan > 0) {
+      entries.push({
+        mesh,
+        min: meshMin,
+        max: meshMax,
+        center: meshMin.add(meshMax).scale(0.5),
+        span: meshSpan,
+        vertices: mesh.getTotalVertices?.() ?? 0
+      });
     }
   }
 
-  return {
+  const aggregate = {
     min,
     max,
-    center: min.add(max).scale(0.5)
+    center: min.add(max).scale(0.5),
+    meshes: renderMeshes
+  };
+
+  return {
+    ...aggregate,
+    display: selectDominantModelFrame(entries, aggregate, BABYLON) ?? aggregate
+  };
+}
+
+function selectDominantModelFrame(entries, aggregate, BABYLON) {
+  if (entries.length < 2) {
+    return null;
+  }
+
+  const aggregateSize = aggregate.max.subtract(aggregate.min);
+  const aggregateSpan = Math.max(aggregateSize.x, aggregateSize.y, aggregateSize.z);
+  const largestMeshSpan = entries.reduce((span, entry) => Math.max(span, entry.span), 0);
+  const sparseAssemblyRatio = aggregateSpan / Math.max(largestMeshSpan, 0.0001);
+
+  if (!Number.isFinite(sparseAssemblyRatio) || sparseAssemblyRatio < 18) {
+    return null;
+  }
+
+  const dominant = entries
+    .slice()
+    .sort((left, right) => (right.vertices * right.span) - (left.vertices * left.span))[0];
+
+  if (!dominant) {
+    return null;
+  }
+
+  return {
+    min: dominant.min,
+    max: dominant.max,
+    center: dominant.center,
+    meshes: [dominant.mesh]
   };
 }
 
@@ -694,7 +759,10 @@ function updateWorldMatrixChain(node) {
     updateWorldMatrixChain(node.parent);
   }
 
-  node.computeWorldMatrix?.(true);
+  const worldMatrix = node.computeWorldMatrix?.(true);
+  if (worldMatrix && node.getBoundingInfo) {
+    node.getBoundingInfo().update(worldMatrix);
+  }
 }
 
 function observeDocumentTheme(state) {
@@ -742,11 +810,11 @@ function configureSceneRuntime(state, engine, scene, cameraConfigurator) {
   document.addEventListener("visibilitychange", state.visibilityHandler);
 
   if ("ResizeObserver" in window) {
-    state.resizeObserver = new ResizeObserver(() => resizeScene(state));
+    state.resizeObserver = new ResizeObserver(() => scheduleResizeScene(state));
     state.resizeObserver.observe(state.host ?? state.canvas);
   }
 
-  state.resizeHandler = () => resizeScene(state);
+  state.resizeHandler = () => scheduleResizeScene(state);
   window.addEventListener("resize", state.resizeHandler, { passive: true });
 
   resizeScene(state);
@@ -896,9 +964,43 @@ function resizeScene(state) {
     return;
   }
 
+  const host = state.host ?? state.canvas;
+  const rect = host.getBoundingClientRect();
+  const width = Math.round(rect.width);
+  const height = Math.round(rect.height);
+  const pixelRatio = window.devicePixelRatio || 1;
+
+  if (!width || !height) {
+    return;
+  }
+
+  if (state.resizeWidth === width &&
+    state.resizeHeight === height &&
+    state.resizePixelRatio === pixelRatio) {
+    return;
+  }
+
+  state.resizeWidth = width;
+  state.resizeHeight = height;
+  state.resizePixelRatio = pixelRatio;
   configureHardwareScaling(state.engine);
   state.engine.resize();
   state.cameraConfigurator?.();
+}
+
+function scheduleResizeScene(state) {
+  if (state.disposed) {
+    return;
+  }
+
+  if (state.resizeFrame) {
+    cancelAnimationFrame(state.resizeFrame);
+  }
+
+  state.resizeFrame = requestAnimationFrame(() => {
+    state.resizeFrame = 0;
+    resizeScene(state);
+  });
 }
 
 function startRenderLoop(state) {

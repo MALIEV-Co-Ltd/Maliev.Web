@@ -901,6 +901,13 @@ html:lang(th) .h1 {
   outline: none;
 }
 
+.manufacturing-gizmo--landing .manufacturing-gizmo-canvas {
+  pointer-events: none;
+  transform: scale(4.25);
+  transform-origin: 50% 52%;
+  will-change: transform;
+}
+
 .manufacturing-gizmo-canvas:focus,
 .manufacturing-gizmo-canvas:focus-visible {
   outline: none;

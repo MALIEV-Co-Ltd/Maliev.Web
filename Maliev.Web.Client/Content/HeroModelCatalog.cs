@@ -7,12 +7,13 @@ namespace Maliev.Web.Client.Content;
 internal static class HeroModelCatalog
 {
     internal const string DefaultServiceSlug = "3d-printing";
+    private const string LegacyFixtureServiceSlug = "3d-printing-legacy";
 
     private static readonly IReadOnlyList<HeroModelAsset> Assets =
     [
         new(
             "3d-printing-part-01",
-            DefaultServiceSlug,
+            LegacyFixtureServiceSlug,
             "/models/hero-3d-printing-part-01.glb",
             SiteContent.Text("3D printed production fixture preview", "ตัวอย่างชิ้นงานฟิกซ์เจอร์จากงานพิมพ์ 3 มิติ"),
             true),
@@ -36,7 +37,7 @@ internal static class HeroModelCatalog
         asset => asset.Key,
         StringComparer.OrdinalIgnoreCase);
 
-    internal static HeroModelAsset Default => Assets[0];
+    internal static HeroModelAsset Default => ResolveForService(DefaultServiceSlug)[0];
 
     internal static IReadOnlyList<HeroModelAsset> All => Assets;
 

@@ -1,3 +1,5 @@
+using Maliev.Web.Client.Content;
+
 namespace Maliev.Web.Tests;
 
 /// <summary>
@@ -63,6 +65,19 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo--service", styles);
         Assert.DoesNotContain("hero-3d-2.glb", catalog);
         Assert.DoesNotContain("hero-3d.glb", catalog);
+    }
+
+    /// <summary>
+    /// Verifies the undersized legacy fixture model is kept out of the default 3D-printing hero rotation.
+    /// </summary>
+    [Fact]
+    public void HeroModelCatalogExcludesLegacyFixtureFromDefaultPrintingRotation()
+    {
+        var candidates = HeroModelCatalog.ResolveForService(HeroModelCatalog.DefaultServiceSlug);
+
+        Assert.Equal("3d-printing-part-02", HeroModelCatalog.Default.Key);
+        Assert.Contains(candidates, asset => asset.Key == "3d-printing-part-02");
+        Assert.DoesNotContain(candidates, asset => asset.Key == "3d-printing-part-01");
     }
 
     /// <summary>
@@ -1518,6 +1533,34 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the landing hero model stays prominent on narrow desktop canvases and resize reframing is coalesced.
+    /// </summary>
+    [Fact]
+    public void LandingHeroModelStaysLargeAndResizeDebounced()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("resizeFrame: 0", source);
+        Assert.Contains("scheduleResizeScene(state)", source);
+        Assert.Contains("ResizeObserver(() => scheduleResizeScene(state))", source);
+        Assert.Contains("state.resizeHandler = () => scheduleResizeScene(state);", source);
+        Assert.Contains("targetFill: narrowTall ? 0.86 : compact ? 0.78", source);
+        Assert.Contains("safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045", source);
+        Assert.Contains("selectDominantModelFrame(entries, aggregate, BABYLON) ?? aggregate", source);
+        Assert.Contains("const sparseAssemblyRatio = aggregateSpan / Math.max(largestMeshSpan, 0.0001);", source);
+        Assert.Contains("sparseAssemblyRatio < 18", source);
+        Assert.Contains("meshes: [dominant.mesh]", source);
+        Assert.Contains("node.getBoundingInfo().update(worldMatrix);", source);
+        Assert.Contains(".manufacturing-gizmo--landing .manufacturing-gizmo-canvas", styles);
+        Assert.Contains("pointer-events: none;", styles);
+        Assert.Contains("transform: scale(4.25);", styles);
+        Assert.Contains("transform-origin: 50% 52%;", styles);
+        Assert.DoesNotContain("targetFill: narrowTall ? 0.72", source);
+        Assert.DoesNotContain("safeInset: narrowTall ? 0.12", source);
+    }
+
+    /// <summary>
     /// Verifies the landing hero has dedicated tablet composition rules instead of using the narrow mobile stack.
     /// </summary>
     [Fact]
@@ -1555,8 +1598,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("height: min(58vh, 860px);", styles);
         Assert.Contains("justify-content: center;", styles);
         Assert.Contains("const narrowTall = width < 700 && height >= 500 && aspect < 1.12;", gizmo);
-        Assert.Contains("narrowTall ? 0.72 : compact ? 0.76", gizmo);
-        Assert.Contains("safeInset: narrowTall ? 0.12 : compact ? 0.07 : 0.055", gizmo);
+        Assert.Contains("narrowTall ? 0.86 : compact ? 0.78", gizmo);
+        Assert.Contains("safeInset: narrowTall ? 0.06 : compact ? 0.06 : 0.045", gizmo);
         Assert.Contains("fallbackRadius: narrowTall ? 7.15", gizmo);
         Assert.Contains("const balancedTablet = width >= 640 && width <= 920 && height >= 460;", gizmo);
         Assert.Contains("balancedTablet ? 0.46 : wide ? 0.43 : 0.45", gizmo);
@@ -1575,7 +1618,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260517-hero-fit\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-hero-fit\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
