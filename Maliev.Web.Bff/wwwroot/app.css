@@ -2271,7 +2271,7 @@ html:lang(th) .h1 {
 }
 
 .final-dropzone {
-  align-self: stretch;
+  align-self: center;
 }
 
 .contact-layout {
