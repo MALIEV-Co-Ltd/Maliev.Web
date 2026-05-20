@@ -1330,6 +1330,30 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the shared static-page contact CTA uses the MALIEV logo as the visible brand mark.
+    /// </summary>
+    [Fact]
+    public void StaticPageSecondaryContactCtaUsesLogoMark()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var buttonLogoStyle = styles[
+            styles.IndexOf(".button-logo-mark {", StringComparison.Ordinal)..styles.IndexOf(".button.danger {", StringComparison.Ordinal)];
+
+        Assert.Contains("aria-label=\"@SecondaryAction\"", source);
+        Assert.Contains("@if (SecondaryActionUsesLogo)", source);
+        Assert.Contains("<span>@SecondaryActionPrefix</span>", source);
+        Assert.Contains("<img class=\"button-logo-mark\" src=\"/images/logo.svg\" alt=\"\" aria-hidden=\"true\" />", source);
+        Assert.Contains("private bool SecondaryActionUsesLogo => string.Equals(SecondaryHref, \"/contact\", StringComparison.Ordinal);", source);
+        Assert.Contains("private string SecondaryActionPrefix => Text(\"Contact\", \"ติดต่อ\");", source);
+        Assert.DoesNotContain("<a class=\"button secondary\" href=\"@SecondaryHref\">@SecondaryAction</a>", source);
+        Assert.Contains(".button-logo-mark {", styles);
+        Assert.Contains("display: inline-block;", buttonLogoStyle);
+        Assert.Contains("height: .9em;", buttonLogoStyle);
+        Assert.Contains("filter: var(--logo-filter);", buttonLogoStyle);
+    }
+
+    /// <summary>
     /// Verifies the public account area uses local authenticated routes backed by the Web BFF.
     /// </summary>
     [Fact]

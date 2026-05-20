@@ -388,6 +388,14 @@ main {
   background: var(--paper-2);
 }
 
+.button-logo-mark {
+  display: inline-block;
+  width: auto;
+  height: .9em;
+  filter: var(--logo-filter);
+  transform: translateY(.03em);
+}
+
 .button.danger {
   color: var(--danger-surface);
 }

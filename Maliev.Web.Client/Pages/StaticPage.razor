@@ -40,7 +40,17 @@
     <p>@Body</p>
     <div class="quote-actions">
         <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
-        <a class="button secondary" href="@SecondaryHref">@SecondaryAction</a>
+        <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
+            @if (SecondaryActionUsesLogo)
+            {
+                <span>@SecondaryActionPrefix</span>
+                <img class="button-logo-mark" src="/images/logo.svg" alt="" aria-hidden="true" />
+            }
+            else
+            {
+                @SecondaryAction
+            }
+        </a>
     </div>
 </section>
 
@@ -1406,6 +1416,10 @@ else
         var path when IsPolicyPage(path) => "/faq",
         _ => "/contact"
     };
+
+    private bool SecondaryActionUsesLogo => string.Equals(SecondaryHref, "/contact", StringComparison.Ordinal);
+
+    private string SecondaryActionPrefix => Text("Contact", "ติดต่อ");
 
     private static bool IsPolicyPage(string path)
     {
