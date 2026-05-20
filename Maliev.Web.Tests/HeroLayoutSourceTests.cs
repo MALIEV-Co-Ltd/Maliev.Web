@@ -481,6 +481,42 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the pneumatic injection machine fade follows the active light or dark theme.
+    /// </summary>
+    [Fact]
+    public void HomeMachineFeatureFadeUsesThemeAwareColors()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var machineStylesStart = styles.IndexOf(".machine-feature {", StringComparison.Ordinal);
+        var processStylesStart = styles.IndexOf(".process-grid", machineStylesStart, StringComparison.Ordinal);
+
+        Assert.True(machineStylesStart >= 0);
+        Assert.True(processStylesStart > machineStylesStart);
+
+        var machineStyles = styles[machineStylesStart..processStylesStart];
+
+        Assert.Contains("--machine-feature-surface-rgb: 247 248 251;", styles);
+        Assert.Contains("--machine-feature-surface-rgb: 13 16 21;", styles);
+        Assert.Contains("--machine-feature-grid-rgb: 23 23 23;", styles);
+        Assert.Contains("--machine-feature-grid-rgb: 244 246 248;", styles);
+        Assert.Contains("--machine-feature-panel-rgb: 255 255 255;", styles);
+        Assert.Contains("--machine-feature-panel-rgb: 20 25 32;", styles);
+        Assert.Contains("--machine-feature-active-bg: var(--active-pill-bg);", styles);
+        Assert.Contains("--machine-feature-active-text: var(--active-pill-text);", styles);
+        Assert.Contains("background: rgb(var(--machine-feature-surface-rgb));", machineStyles);
+        Assert.Contains("rgb(var(--machine-feature-grid-rgb) / .045)", machineStyles);
+        Assert.Contains("rgb(var(--machine-feature-surface-rgb) / .68) 46%", styles);
+        Assert.Contains("rgb(var(--machine-feature-surface-rgb) / .76) 58%", styles);
+        Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .72);", machineStyles);
+        Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .74);", machineStyles);
+        Assert.Contains("background: var(--machine-feature-active-bg);", machineStyles);
+        Assert.Contains("color: var(--machine-feature-active-text);", machineStyles);
+        Assert.DoesNotContain("background: #f7f8fb;", machineStyles);
+        Assert.DoesNotContain("rgba(247, 248, 251", styles);
+        Assert.DoesNotContain("rgba(var(--machine-feature", styles);
+    }
+
+    /// <summary>
     /// Verifies the annotated home-section eyebrow labels are removed from the landing page.
     /// </summary>
     [Fact]

@@ -41,6 +41,12 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
+  --machine-feature-surface-rgb: 247 248 251;
+  --machine-feature-grid-rgb: 23 23 23;
+  --machine-feature-panel-rgb: 255 255 255;
+  --machine-feature-border-rgb: 23 23 23;
+  --machine-feature-active-bg: var(--active-pill-bg);
+  --machine-feature-active-text: var(--active-pill-text);
   --media-shell: #111419;
   --success-surface: #e9f8ef;
   --success-text: #0d6b32;
@@ -101,6 +107,12 @@ html[data-theme="dark"] {
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .16) 0%, rgba(91, 167, 255, .06) 34%, transparent 66%);
+  --machine-feature-surface-rgb: 13 16 21;
+  --machine-feature-grid-rgb: 244 246 248;
+  --machine-feature-panel-rgb: 20 25 32;
+  --machine-feature-border-rgb: 244 246 248;
+  --machine-feature-active-bg: var(--active-pill-bg);
+  --machine-feature-active-text: var(--active-pill-text);
   --media-shell: #090c10;
   --success-surface: #102819;
   --success-text: #a8f0bf;
@@ -1809,7 +1821,7 @@ html[data-theme="dark"] .form-status--error {
   grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);
   align-items: center;
   gap: clamp(20px, 3vw, 48px);
-  background: #f7f8fb;
+  background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
@@ -1822,8 +1834,8 @@ html[data-theme="dark"] .form-status--error {
   z-index: 1;
   opacity: .32;
   background:
-    linear-gradient(90deg, rgba(23, 23, 23, .045) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(23, 23, 23, .04) 1px, transparent 1px);
+    linear-gradient(90deg, rgb(var(--machine-feature-grid-rgb) / .045) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(var(--machine-feature-grid-rgb) / .04) 1px, transparent 1px);
   background-size: 88px 88px;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
@@ -1834,7 +1846,7 @@ html[data-theme="dark"] .form-status--error {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(90deg, rgba(247, 248, 251, .04) 0%, rgba(247, 248, 251, .68) 46%, rgba(247, 248, 251, .98) 66%, #f7f8fb 100%);
+  background: linear-gradient(90deg, rgb(var(--machine-feature-surface-rgb) / .04) 0%, rgb(var(--machine-feature-surface-rgb) / .68) 46%, rgb(var(--machine-feature-surface-rgb) / .98) 66%, rgb(var(--machine-feature-surface-rgb)) 100%);
   pointer-events: none;
 }
 
@@ -1902,8 +1914,8 @@ html:lang(th) .machine-feature-title-lead {
   gap: 5px;
   min-width: 0;
   padding: 16px;
-  background: rgba(255, 255, 255, .72);
-  border: 1px solid rgba(23, 23, 23, .08);
+  background: rgb(var(--machine-feature-panel-rgb) / .72);
+  border: 1px solid rgb(var(--machine-feature-border-rgb) / .08);
   border-radius: var(--radius);
   box-shadow: rgba(17, 24, 39, .08) 0 14px 36px -30px;
 }
@@ -1935,8 +1947,8 @@ html:lang(th) .machine-feature-title-lead {
   font: inherit;
   color: var(--ink-2);
   text-decoration: none;
-  background: rgba(255, 255, 255, .74);
-  border: 1px solid rgba(23, 23, 23, .08);
+  background: rgb(var(--machine-feature-panel-rgb) / .74);
+  border: 1px solid rgb(var(--machine-feature-border-rgb) / .08);
   border-radius: var(--radius);
   font-size: .84rem;
   font-weight: 600;
@@ -1946,9 +1958,9 @@ html:lang(th) .machine-feature-title-lead {
 
 .machine-feature-point-button:is(:hover, :focus-visible),
 .machine-feature-point-button.is-active {
-  color: var(--inverse-text);
-  background: var(--ink);
-  border-color: var(--ink);
+  color: var(--machine-feature-active-text);
+  background: var(--machine-feature-active-bg);
+  border-color: var(--machine-feature-active-bg);
   box-shadow: rgba(17, 24, 39, .18) 0 14px 32px -24px;
   transform: translateY(-1px);
   outline: none;
@@ -5220,7 +5232,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .machine-feature::after {
-    background: linear-gradient(180deg, rgba(247, 248, 251, .08) 0%, rgba(247, 248, 251, .76) 58%, #f7f8fb 100%);
+    background: linear-gradient(180deg, rgb(var(--machine-feature-surface-rgb) / .08) 0%, rgb(var(--machine-feature-surface-rgb) / .76) 58%, rgb(var(--machine-feature-surface-rgb)) 100%);
   }
 
   .machine-feature-copy {
