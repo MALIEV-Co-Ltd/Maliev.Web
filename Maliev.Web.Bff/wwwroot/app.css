@@ -1973,7 +1973,7 @@ html:lang(th) .machine-feature-title-lead {
   position: absolute;
   inset: auto 32px 0 32px;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(10, 114, 239, .24) 18%, rgba(222, 29, 141, .18) 82%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(52, 64, 84, .18) 22%, rgba(120, 113, 108, .16) 78%, transparent 100%);
   pointer-events: none;
 }
 
@@ -1985,6 +1985,11 @@ html:lang(th) .machine-feature-title-lead {
 }
 
 .workflow-step {
+  --workflow-accent: #315f72;
+  --workflow-accent-soft: #f0f5f7;
+  --workflow-accent-border: rgba(49, 95, 114, .24);
+  --workflow-accent-ring: rgba(49, 95, 114, .14);
+
   position: relative;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -1995,40 +2000,42 @@ html:lang(th) .machine-feature-title-lead {
   color: inherit;
   text-align: left;
   text-decoration: none;
-  background: var(--paper);
-  border: 1px solid rgba(23, 23, 23, .08);
+  background: linear-gradient(180deg, #fff 0%, #fbfbfa 100%);
+  border: 1px solid rgba(52, 64, 84, .12);
   box-shadow: rgba(17, 24, 39, .08) 0 18px 50px -34px;
   cursor: pointer;
   transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .workflow-step:is(:hover, :focus-visible) {
-  border-color: rgba(10, 114, 239, .26);
-  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px;
+  border-color: var(--workflow-accent-border);
+  box-shadow:
+    var(--workflow-accent-ring) 0 0 0 1px,
+    rgba(17, 24, 39, .16) 0 22px 58px -34px;
   transform: translateY(-3px);
   outline: none;
 }
 
 .workflow-step.is-active {
-  border-color: rgba(10, 114, 239, .42);
+  border-color: var(--workflow-accent-border);
   box-shadow:
-    rgba(10, 114, 239, .13) 0 0 0 1px,
+    var(--workflow-accent-ring) 0 0 0 1px,
     rgba(17, 24, 39, .16) 0 22px 58px -34px;
 }
 
 .workflow-step.is-active .workflow-step-number {
   color: var(--inverse-text);
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--workflow-accent);
+  border-color: var(--workflow-accent);
 }
 
 .workflow-step::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 4px;
-  background: linear-gradient(90deg, rgba(10, 114, 239, .94), rgba(222, 29, 141, .74));
-  opacity: .84;
+  height: 3px;
+  background: var(--workflow-accent);
+  opacity: .78;
 }
 
 .workflow-step-number {
@@ -2058,11 +2065,9 @@ html:lang(th) .machine-feature-title-lead {
   width: 96px;
   height: 96px;
   margin-bottom: 4px;
-  color: var(--blue-ink);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(238, 245, 255, .92)),
-    var(--blue-soft);
-  border: 1px solid rgba(10, 114, 239, .16);
+  color: var(--workflow-accent);
+  background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);
+  border: 1px solid var(--workflow-accent-border);
   border-radius: 8px;
 }
 
@@ -2079,22 +2084,45 @@ html:lang(th) .machine-feature-title-lead {
   line-height: 1.55;
 }
 
-.workflow-step--dfm .workflow-step-visual {
-  color: #166534;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(230, 248, 237, .96));
-  border-color: rgba(22, 101, 52, .16);
+.workflow-step--upload {
+  --workflow-accent: #315f72;
+  --workflow-accent-soft: #eef4f6;
+  --workflow-accent-border: rgba(49, 95, 114, .26);
+  --workflow-accent-ring: rgba(49, 95, 114, .14);
 }
 
-.workflow-step--price .workflow-step-visual {
-  color: #7c3aed;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(244, 238, 255, .96));
-  border-color: rgba(124, 58, 237, .16);
+.workflow-step--dfm {
+  --workflow-accent: #3f6f62;
+  --workflow-accent-soft: #f0f5f2;
+  --workflow-accent-border: rgba(63, 111, 98, .27);
+  --workflow-accent-ring: rgba(63, 111, 98, .14);
 }
 
+.workflow-step--price {
+  --workflow-accent: #8a6a2d;
+  --workflow-accent-soft: #f7f3ea;
+  --workflow-accent-border: rgba(138, 106, 45, .28);
+  --workflow-accent-ring: rgba(138, 106, 45, .14);
+}
+
+.workflow-step--order {
+  --workflow-accent: #743f3f;
+  --workflow-accent-soft: #f6efee;
+  --workflow-accent-border: rgba(116, 63, 63, .28);
+  --workflow-accent-ring: rgba(116, 63, 63, .14);
+}
+
+.workflow-step--dfm .workflow-step-visual,
+.workflow-step--price .workflow-step-visual,
 .workflow-step--order .workflow-step-visual {
-  color: #be123c;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(255, 238, 242, .96));
-  border-color: rgba(190, 18, 60, .16);
+  color: var(--workflow-accent);
+  background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);
+  border-color: var(--workflow-accent-border);
+}
+
+.workflow-step--price .workflow-step-visual,
+.workflow-step--order .workflow-step-visual {
+  color: var(--workflow-accent);
 }
 
 .service-detail-section {

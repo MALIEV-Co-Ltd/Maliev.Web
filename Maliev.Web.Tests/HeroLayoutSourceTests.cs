@@ -338,6 +338,17 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".process-section", styles);
         Assert.Contains(".process-section::after", styles);
         Assert.DoesNotContain(".process-section::before", styles);
+        var processStylesStart = styles.IndexOf(".process-grid", StringComparison.Ordinal);
+        var processStylesEnd = styles.IndexOf(".service-detail-section", StringComparison.Ordinal);
+        Assert.True(processStylesStart >= 0 && processStylesEnd > processStylesStart);
+        var processStyles = styles[processStylesStart..processStylesEnd];
+        Assert.DoesNotContain("rgba(222, 29, 141", processStyles);
+        Assert.DoesNotContain("#7c3aed", processStyles);
+        Assert.DoesNotContain("#be123c", processStyles);
+        Assert.Contains("--workflow-accent: #315f72;", processStyles);
+        Assert.Contains("--workflow-accent: #3f6f62;", processStyles);
+        Assert.Contains("--workflow-accent: #8a6a2d;", processStyles);
+        Assert.Contains("--workflow-accent: #743f3f;", processStyles);
         Assert.DoesNotContain(".process-kicker", styles);
         Assert.Contains(".workflow-step-number", styles);
         Assert.Contains(".workflow-step-visual .mud-icon-root", styles);
