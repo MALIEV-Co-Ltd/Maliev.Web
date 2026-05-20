@@ -4,60 +4,73 @@
 
 <PageTitle>Shop - MALIEV</PageTitle>
 
-<section class="page-hero compact shop-hero">
-    <div>
-        <h1>@Text("Machines, spares, tooling, and printed products", "เครื่องจักร อะไหล่ ทูลลิ่ง และสินค้าพิมพ์สามมิติ")</h1>
-        <p>@Text("Buy production-ready items directly, or upload CAD to see live pricing when the part needs custom manufacturing.", "เลือกซื้อสินค้าพร้อมใช้งาน หรืออัปโหลด CAD เพื่อดูราคาทันทีเมื่องานต้องผลิตเฉพาะแบบ")</p>
+<section class="shop-masthead" aria-labelledby="shop-title">
+    <div class="shop-masthead-copy">
+        <span class="shop-masthead-rule" aria-hidden="true"></span>
+        <h1 id="shop-title">@Text("Shop", "ร้านค้า")</h1>
     </div>
-    @if (FeaturedProduct is not null)
-    {
-        <a class="shop-hero-card" href="/shop/@FeaturedProduct.Handle" aria-label="View @FeaturedProduct.Title.For(Preferences.Culture)">
-            <img src="@FeaturedProduct.ImageUrl" alt="@FeaturedProduct.Title.For(Preferences.Culture)" />
-            <span>@Text("Featured product", "สินค้าแนะนำ")</span>
-            <strong>@FeaturedProduct.Title.For(Preferences.Culture)</strong>
-            <small>@Price(FeaturedProduct) · @InventoryStatus(FeaturedProduct.InventoryStatus)</small>
-        </a>
-    }
+    <label class="shop-search">
+        <span class="sr-only">@Text("Search products", "ค้นหาสินค้า")</span>
+        <input type="search" @bind="_searchTerm" @bind:event="oninput" placeholder="@Text("Search product", "ค้นหาสินค้า")" />
+    </label>
 </section>
 
-<section class="section">
-    <div class="shop-toolbar">
-        <label>
-            <span>@Text("Search products", "ค้นหาสินค้า")</span>
-            <input type="search" @bind="_searchTerm" @bind:event="oninput" placeholder="@Text("Machine, spare, fixture...", "เครื่องจักร อะไหล่ ฟิกซ์เจอร์...")" />
-        </label>
-    </div>
+@if (FeaturedProduct is not null)
+{
+    <section class="shop-feature-band" aria-labelledby="shop-feature-title">
+        <div class="shop-feature-copy">
+            <span class="shop-feature-kicker">@Text("Featured · Bestseller", "สินค้าแนะนำ · ขายดี")</span>
+            <h2 id="shop-feature-title">@FeaturedProduct.Title.For(Preferences.Culture)</h2>
+            <p>@FeaturedProduct.Summary.For(Preferences.Culture)</p>
+        </div>
+        <a class="button primary shop-feature-action" href="/shop/@FeaturedProduct.Handle">
+            <span>@Text("View product", "ดูสินค้า")</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+    </section>
+}
 
-    <div class="filters">
-        <button class="@CollectionClass(null)" type="button" @onclick="() => SelectCollectionAsync(null)">@Text("All", "ทั้งหมด")</button>
-        @foreach (var collection in _collections)
-        {
-            <button class="@CollectionClass(collection.Slug)" type="button" @onclick="() => SelectCollectionAsync(collection.Slug)">
-                @collection.Name.For(Preferences.Culture)
-            </button>
-        }
-    </div>
+<section class="section shop-section" aria-label="@Text("Shop catalog", "แค็ตตาล็อกร้านค้า")">
+    <aside class="shop-category-rail" aria-label="@Text("Product categories", "หมวดหมู่สินค้า")">
+        <span class="shop-category-label">@Text("Category", "หมวดหมู่")</span>
+        <div class="shop-category-list">
+            <button class="@CollectionClass(null)" type="button" @onclick="() => SelectCollectionAsync(null)">@Text("All products", "สินค้าทั้งหมด")</button>
+            @foreach (var collection in _collections)
+            {
+                <button class="@CollectionClass(collection.Slug)" type="button" @onclick="() => SelectCollectionAsync(collection.Slug)">
+                    @collection.Name.For(Preferences.Culture)
+                </button>
+            }
+        </div>
+    </aside>
 
-    @if (!string.IsNullOrWhiteSpace(_loadError))
-    {
-        <p class="load-message">@_loadError</p>
-    }
-    else
-    {
-        var visibleProducts = FilteredProducts.ToList();
-        @if (visibleProducts.Count == 0)
+    <div class="shop-catalog-stage">
+        <div class="shop-catalog-intro">
+            <h2>@Text("Ready-made workshop catalog", "แค็ตตาล็อกสินค้าพร้อมขาย")</h2>
+            <p>@Text("Published machines, spare parts, tooling blanks, samples, and consumables appear here when inventory is ready.", "เครื่องจักร อะไหล่ ทูลลิ่ง ตัวอย่างวัสดุ และวัสดุสิ้นเปลืองจะแสดงเมื่อสินค้าพร้อมขาย")</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_loadError))
         {
-            <div class="empty-state">
-                <h2>@Text("No products listed yet", "ยังไม่มีสินค้า")</h2>
-                <p>@Text("New items will appear here after they are published. For custom parts, upload a model and request a manufacturing quote.", "สินค้าจะปรากฏที่นี่เมื่อพร้อมจำหน่าย หากเป็นชิ้นงานเฉพาะแบบ ให้อัปโหลดโมเดลเพื่อขอใบเสนอราคา")</p>
-                <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
-            </div>
+            <p class="load-message">@_loadError</p>
         }
         else
         {
-            <ProductGrid Products="@visibleProducts" />
+            var visibleProducts = FilteredProducts.ToList();
+            @if (visibleProducts.Count == 0)
+            {
+                <div class="empty-state shop-empty-state">
+                    <h2>@Text("No products listed yet", "ยังไม่มีสินค้า")</h2>
+                    <p>@Text("New items will appear here after they are published. For custom parts, upload a model and request a manufacturing quote.", "สินค้าจะปรากฏที่นี่เมื่อพร้อมจำหน่าย หากเป็นชิ้นงานเฉพาะแบบ ให้อัปโหลดโมเดลเพื่อขอใบเสนอราคา")</p>
+                    <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+                </div>
+            }
+            else
+            {
+                <ProductGrid Products="@visibleProducts" FeaturedHandle="@FeaturedProduct?.Handle" />
+            }
         }
-    }
+    </div>
 </section>
 
 @code {

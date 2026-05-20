@@ -1803,6 +1803,37 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the shop page uses the editorial marketplace layout.
+    /// </summary>
+    [Fact]
+    public void ShopUsesEditorialMarketplaceLayout()
+    {
+        var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
+        var grid = ReadRepoFile("Maliev.Web.Client", "Components", "Commerce", "ProductGrid.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("class=\"shop-masthead\"", shop);
+        Assert.Contains("class=\"shop-search\"", shop);
+        Assert.Contains("class=\"shop-feature-band\"", shop);
+        Assert.Contains("class=\"shop-category-rail\"", shop);
+        Assert.Contains("class=\"shop-catalog-stage\"", shop);
+        Assert.Contains("class=\"empty-state shop-empty-state\"", shop);
+        Assert.Contains("ProductGrid Products=\"@visibleProducts\" FeaturedHandle=\"@FeaturedProduct?.Handle\"", shop);
+        Assert.Contains("@ProductCardClass(product)", grid);
+        Assert.Contains("ProductCategory(product)", grid);
+        Assert.Contains("public string? FeaturedHandle { get; set; }", grid);
+        Assert.Contains(".shop-masthead", styles);
+        Assert.Contains(".shop-feature-band", styles);
+        Assert.Contains(".shop-category-rail", styles);
+        Assert.Contains(".shop-catalog-stage", styles);
+        Assert.Contains(".product-card-featured", styles);
+        Assert.Contains(".shop-empty-state", styles);
+        Assert.Contains(".shop-search::before", styles);
+        Assert.DoesNotContain("page-hero compact shop-hero", shop);
+        Assert.DoesNotContain("shop-toolbar", shop);
+    }
+
+    /// <summary>
     /// Verifies public shop catalog calls fail fast when CommerceService is unavailable.
     /// </summary>
     [Fact]

@@ -4,7 +4,7 @@
 <div class="product-grid">
     @foreach (var product in Products)
     {
-        <article class="product-card">
+        <article class="@ProductCardClass(product)">
             <a href="/shop/@product.Handle" class="product-media">
                 @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
                 {
@@ -12,6 +12,7 @@
                 }
             </a>
             <div class="product-body">
+                <span class="product-category">@ProductCategory(product)</span>
                 <a href="/shop/@product.Handle">
                     <h3>@product.Title.For(Preferences.Culture)</h3>
                 </a>
@@ -37,6 +38,9 @@
     [Parameter]
     public IReadOnlyList<ProductSummaryDto> Products { get; set; } = [];
 
+    [Parameter]
+    public string? FeaturedHandle { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await Cart.InitializeAsync();
@@ -56,6 +60,18 @@
     private static bool CanBuy(ProductSummaryDto product)
     {
         return product.PriceThb > 0 && product.IsPublished && product.AvailableQuantity.GetValueOrDefault(1) > 0;
+    }
+
+    private string ProductCardClass(ProductSummaryDto product)
+    {
+        return string.Equals(product.Handle, FeaturedHandle, StringComparison.OrdinalIgnoreCase)
+            ? "product-card product-card-featured"
+            : "product-card";
+    }
+
+    private static string ProductCategory(ProductSummaryDto product)
+    {
+        return product.CollectionSlug.Replace("-", " ", StringComparison.Ordinal);
     }
 
     private string Text(string en, string th)
