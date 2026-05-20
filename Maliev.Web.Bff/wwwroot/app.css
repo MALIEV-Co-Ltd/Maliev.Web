@@ -1929,6 +1929,18 @@ html:lang(th) .machine-feature-title-lead {
   transition: opacity .24s ease, transform .34s ease;
 }
 
+.machine-feature-backdrop--dark {
+  display: none;
+}
+
+html[data-theme="dark"] .machine-feature-backdrop--light {
+  display: none;
+}
+
+html[data-theme="dark"] .machine-feature-backdrop--dark {
+  display: block;
+}
+
 .machine-stat-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

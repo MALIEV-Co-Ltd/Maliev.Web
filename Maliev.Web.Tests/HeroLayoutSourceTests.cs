@@ -375,12 +375,17 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("id=\"machine-feature-preview\"", source);
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
         Assert.Contains("machine-feature-backdrop", source);
+        Assert.Contains("machine-feature-backdrop--light", source);
+        Assert.Contains("machine-feature-backdrop--dark", source);
         Assert.Contains("@key=\"SelectedMachineFeature.Accent\"", source);
         Assert.Contains("src=\"@SelectedMachineFeature.FeatureImageUrl\"", source);
+        Assert.Contains("src=\"@SelectedMachineFeature.DarkFeatureImageUrl\"", source);
         Assert.Contains("alt=\"@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)\"", source);
         Assert.Contains("@SelectedMachineFeature.Body.For(Preferences.Culture)", source);
         Assert.Contains("/images/products/pneumatic-injection-molding-machines.png", source);
+        Assert.Contains("/images/products/pneumatic-injection-molding-machines-dark.png", source);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines.png")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines-dark.png")));
         Assert.Contains("SiteContent.CaliperInspectionImageUrl", source);
         Assert.Contains("SiteContent.DesignPlanningImageUrl", source);
         Assert.Contains("SiteContent.InjectionMoldingLineImageUrl", source);
@@ -398,7 +403,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SelectWorkflowStepAsync(step, _machineFeaturePreview)", source);
         Assert.Contains("malievScroll.scrollIntoView", source);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        string Icon,\n        LocalizedText Title,\n        LocalizedText Body);", source);
-        Assert.Contains("private sealed record MachineFeature(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineFeatureStat> Stats);", source);
+        Assert.Contains("private sealed record MachineFeature(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineFeatureStat> Stats);", source);
         Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
         Assert.DoesNotContain("machine-feature-kicker", source);
         Assert.DoesNotContain("PIMM-30 / PIMM-50", source);
@@ -463,6 +468,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", machineSection);
         Assert.Contains("@key=\"SelectedMachineFeature.Accent\"", machineSection);
         Assert.Contains("src=\"@SelectedMachineFeature.FeatureImageUrl\"", machineSection);
+        Assert.Contains("src=\"@SelectedMachineFeature.DarkFeatureImageUrl\"", machineSection);
         Assert.Contains("alt=\"@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)\"", machineSection);
         Assert.Contains("@SelectedMachineFeature.Body.For(Preferences.Culture)", machineSection);
         Assert.Contains("@foreach (var stat in SelectedMachineFeature.Stats)", machineSection);
@@ -524,6 +530,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .74);", machineStyles);
         Assert.Contains("background: var(--machine-feature-active-bg);", machineStyles);
         Assert.Contains("color: var(--machine-feature-active-text);", machineStyles);
+        Assert.Contains(".machine-feature-backdrop--dark", machineStyles);
+        Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light", machineStyles);
+        Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark", machineStyles);
         Assert.DoesNotContain("background: #f7f8fb;", machineStyles);
         Assert.DoesNotContain("rgba(247, 248, 251", styles);
         Assert.DoesNotContain("rgba(var(--machine-feature", styles);

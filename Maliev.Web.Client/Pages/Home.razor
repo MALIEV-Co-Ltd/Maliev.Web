@@ -88,9 +88,13 @@
          class="feature-band machine-feature"
          aria-labelledby="imm-title"
          data-selected-feature="@SelectedMachineFeature.Accent">
-    <img class="machine-feature-backdrop"
+    <img class="machine-feature-backdrop machine-feature-backdrop--light"
          @key="SelectedMachineFeature.Accent"
          src="@SelectedMachineFeature.FeatureImageUrl"
+         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
+         loading="lazy" />
+    <img class="machine-feature-backdrop machine-feature-backdrop--dark"
+         src="@SelectedMachineFeature.DarkFeatureImageUrl"
          alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
          loading="lazy" />
     <div class="machine-feature-copy">
@@ -252,6 +256,7 @@
             SiteContent.Text("30g trials", "ทดลอง 30g"),
             SiteContent.Text("Use the 30g pneumatic machine for first thermoplastic trials, small inserts, and compact parts before moving to paid small-batch runs.", "ใช้เครื่องระบบลมรุ่น 30g สำหรับทดลองเทอร์โมพลาสติกครั้งแรก ชิ้นเล็ก และอินเสิร์ตก่อนขยับไปผลิตล็อตสั้น"),
             "/images/products/pneumatic-injection-molding-machines.png",
+            "/images/products/pneumatic-injection-molding-machines-dark.png",
             SiteContent.Text("MALIEV 30g and 50g pneumatic injection molding machine variants", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g และ 50g"),
             [
                 new(SiteContent.Text("30g", "30g"), SiteContent.Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")),
@@ -264,6 +269,7 @@
             "capacity",
             SiteContent.Text("50g small batches", "ล็อตเล็ก 50g"),
             SiteContent.Text("Switch to the 50g machine when the part needs more shot volume or a hotter melt window, while keeping the run suitable for small-batch validation.", "เลือกเครื่อง 50g เมื่อชิ้นงานต้องการปริมาตรฉีดมากขึ้นหรืออุณหภูมิหลอมสูงขึ้น โดยยังเหมาะกับการตรวจล็อตเล็ก"),
+            SiteContent.InjectionMoldingLineImageUrl,
             SiteContent.InjectionMoldingLineImageUrl,
             SiteContent.Text("Small-batch injection molding production setup", "การตั้งค่างานฉีดพลาสติกลอตเล็ก"),
             [
@@ -278,6 +284,7 @@
             SiteContent.Text("Tooling setup", "ตั้งค่าทูลลิ่ง"),
             SiteContent.Text("We review simple mold strategy, gating, clamp access, and trial-shot assumptions so the pneumatic machine setup matches the material and geometry.", "ทีมตรวจแนวทางแม่พิมพ์ จุดเข้าเนื้อ การจับยึด และสมมติฐานทดลองฉีด เพื่อให้การตั้งเครื่องระบบลมตรงกับวัสดุและรูปทรง"),
             SiteContent.DesignPlanningImageUrl,
+            SiteContent.DesignPlanningImageUrl,
             SiteContent.Text("Injection molding tooling and setup planning", "การวางแผนทูลลิ่งและการตั้งค่าเครื่องฉีด"),
             [
                 new(SiteContent.Text("Gate", "Gate"), SiteContent.Text("flow review", "ตรวจทางไหล")),
@@ -290,6 +297,7 @@
             "tuning",
             SiteContent.Text("Run and tune", "ฉีดและจูน"),
             SiteContent.Text("During trials we tune air pressure, temperature, feed amount, and cycle timing, then repeat stable shots for samples or a controlled small run.", "ระหว่างทดลอง ทีมจูนแรงดันลม อุณหภูมิ ปริมาณเนื้อ และจังหวะรอบงาน จากนั้นฉีดซ้ำเพื่อทำตัวอย่างหรือล็อตควบคุม"),
+            SiteContent.CaliperInspectionImageUrl,
             SiteContent.CaliperInspectionImageUrl,
             SiteContent.Text("Trial-shot inspection and pneumatic injection tuning", "การตรวจตัวอย่างทดลองฉีดและการจูนเครื่องระบบลม"),
             [
@@ -545,6 +553,7 @@
         LocalizedText Title,
         LocalizedText Body,
         string FeatureImageUrl,
+        string DarkFeatureImageUrl,
         LocalizedText FeatureImageAlt,
         IReadOnlyList<MachineFeatureStat> Stats);
 
