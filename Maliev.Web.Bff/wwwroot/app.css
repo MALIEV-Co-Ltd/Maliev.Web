@@ -1796,6 +1796,7 @@ html[data-theme="dark"] .form-status--error {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
   min-height: clamp(560px, 52vw, 760px);
   grid-template-columns: minmax(0, .9fr) minmax(540px, .82fr);
   align-items: center;
@@ -1857,6 +1858,7 @@ html[data-theme="dark"] .form-status--error {
   height: 100%;
   object-fit: cover;
   object-position: -160px bottom;
+  transition: opacity .24s ease, transform .34s ease;
 }
 
 .machine-stat-grid {
@@ -1894,14 +1896,39 @@ html[data-theme="dark"] .form-status--error {
   gap: 8px;
 }
 
-.machine-feature-points span {
+.machine-feature-point-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
   padding: 8px 10px;
+  font: inherit;
   color: var(--ink-2);
+  text-decoration: none;
   background: rgba(255, 255, 255, .74);
   border: 1px solid rgba(23, 23, 23, .08);
   border-radius: var(--radius);
   font-size: .84rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.machine-feature-point-button:is(:hover, :focus-visible),
+.machine-feature-point-button.is-active {
+  color: var(--inverse-text);
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: rgba(17, 24, 39, .18) 0 14px 32px -24px;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.machine-feature-point-number {
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .04em;
 }
 
 .machine-actions {
@@ -1916,6 +1943,7 @@ html[data-theme="dark"] .form-status--error {
 
 .process-section {
   position: relative;
+  scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
 }
 
 .process-section::after {
@@ -1941,8 +1969,35 @@ html[data-theme="dark"] .form-status--error {
   gap: 14px;
   min-height: 300px;
   padding: 22px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  background: var(--paper);
   border: 1px solid rgba(23, 23, 23, .08);
   box-shadow: rgba(17, 24, 39, .08) 0 18px 50px -34px;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.workflow-step:is(:hover, :focus-visible) {
+  border-color: rgba(10, 114, 239, .26);
+  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px;
+  transform: translateY(-3px);
+  outline: none;
+}
+
+.workflow-step.is-active {
+  border-color: rgba(10, 114, 239, .42);
+  box-shadow:
+    rgba(10, 114, 239, .13) 0 0 0 1px,
+    rgba(17, 24, 39, .16) 0 22px 58px -34px;
+}
+
+.workflow-step.is-active .workflow-step-number {
+  color: var(--inverse-text);
+  background: var(--ink);
+  border-color: var(--ink);
 }
 
 .workflow-step::before {

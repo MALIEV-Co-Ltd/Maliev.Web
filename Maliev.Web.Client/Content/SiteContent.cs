@@ -24,9 +24,9 @@ internal static class SiteContent
     private const string MetalWorkshopImageUrl = "https://images.unsplash.com/photo-1764115424737-25aca6f47835?auto=format&fit=crop&w=1200&q=80";
     private const string PipeMachiningImageUrl = "https://images.unsplash.com/photo-1747999610489-de5c0ad00e56?auto=format&fit=crop&w=1200&q=80";
     private const string ThreeDimensionalScannerImageUrl = "https://images.unsplash.com/photo-1752056012968-5b094676afa9?auto=format&fit=crop&w=1200&q=80";
-    private const string CaliperInspectionImageUrl = "https://images.unsplash.com/photo-1758873263563-5ba4aa330799?auto=format&fit=crop&w=1200&q=80";
-    private const string DesignPlanningImageUrl = "https://images.unsplash.com/photo-1761864293839-95dcd7d2a6b3?auto=format&fit=crop&w=1200&q=80";
-    private const string InjectionMoldingLineImageUrl = "https://images.unsplash.com/photo-1730705788367-dbd288c40ee7?auto=format&fit=crop&w=1200&q=80";
+    internal const string CaliperInspectionImageUrl = "https://images.unsplash.com/photo-1758873263563-5ba4aa330799?auto=format&fit=crop&w=1200&q=80";
+    internal const string DesignPlanningImageUrl = "https://images.unsplash.com/photo-1761864293839-95dcd7d2a6b3?auto=format&fit=crop&w=1200&q=80";
+    internal const string InjectionMoldingLineImageUrl = "https://images.unsplash.com/photo-1730705788367-dbd288c40ee7?auto=format&fit=crop&w=1200&q=80";
     private const string FactoryPipeProductionImageUrl = "https://images.unsplash.com/photo-1699799678681-3c156c3c5553?auto=format&fit=crop&w=1200&q=80";
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =

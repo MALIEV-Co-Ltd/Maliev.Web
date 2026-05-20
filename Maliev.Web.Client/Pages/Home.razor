@@ -2,6 +2,7 @@
 @inherits PreferenceAwareComponentBase
 @inject PersistentComponentState ApplicationState
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>MALIEV - Rapid manufacturing and workshop-made products</PageTitle>
 <HeadContent>
@@ -82,10 +83,15 @@
     </div>
 </section>
 
-<section class="feature-band machine-feature" aria-labelledby="imm-title">
+<section id="machine-feature-preview"
+         @ref="_machineFeaturePreview"
+         class="feature-band machine-feature"
+         aria-labelledby="imm-title"
+         data-selected-feature="@SelectedWorkflowStep.Accent">
     <img class="machine-feature-backdrop"
-         src="/images/products/pneumatic-injection-molding-machines.png"
-         alt="@Text("MALIEV 30g and 50g pneumatic injection molding machine variants", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g และ 50g")"
+         @key="SelectedWorkflowStep.Accent"
+         src="@SelectedWorkflowStep.FeatureImageUrl"
+         alt="@SelectedWorkflowStep.FeatureImageAlt.For(Preferences.Culture)"
          loading="lazy" />
     <div class="machine-feature-copy">
         <h2 id="imm-title" class="h-display">
@@ -101,9 +107,17 @@
             <div><strong>@Text("30 days", "30 วัน")</strong><small>@Text("lead time", "ระยะเวลา")</small></div>
         </div>
         <div class="machine-feature-points" aria-label="@Text("Machine fit", "ความเหมาะสมของเครื่อง")">
-            <span>@Text("30g and 50g machine range", "เครื่องสองขนาด 30g และ 50g")</span>
-            <span>@Text("Mold trial and setup support", "ช่วยทดลองแม่พิมพ์และตั้งเครื่อง")</span>
-            <span>@Text("Built for workshop production", "พร้อมสำหรับผลิตในเวิร์กช็อป")</span>
+            @foreach (var step in ProcessSteps)
+            {
+                <button class="@MachineFeaturePointClass(step)"
+                        type="button"
+                        data-workflow-accent="@step.Accent"
+                        aria-current="@WorkflowAriaCurrent(step)"
+                        @onclick="() => SelectWorkflowStepAsync(step, _workflowCarousel)">
+                    <span class="machine-feature-point-number">@step.Number</span>
+                    <span>@step.Title.For(Preferences.Culture)</span>
+                </button>
+            }
         </div>
         <div class="quote-actions machine-actions">
             <a class="button primary" href="/shop/pneumatic-injection-molding-machine">@Text("Configure machine", "ตั้งค่าเครื่อง")</a>
@@ -112,22 +126,29 @@
     </div>
 </section>
 
-<section class="section process-section" aria-labelledby="process-title">
+<section id="workflow-carousel"
+         @ref="_workflowCarousel"
+         class="section process-section"
+         aria-labelledby="process-title">
     <div class="section-lede process-lede">
         <h2 id="process-title">@Text("From CAD file to production order, in one workspace.", "จากไฟล์ CAD สู่คำสั่งผลิตในพื้นที่เดียว")</h2>
         <p>@Text("Visual checks, DFM feedback, pricing choices, and production tracking stay connected so teams can move faster with fewer handoffs.", "การตรวจไฟล์ DFM ตัวเลือกราคา และการติดตามผลิตอยู่ในขั้นตอนเดียว ทีมจึงเดินงานได้เร็วขึ้นและส่งต่อน้อยลง")</p>
     </div>
-    <div class="process-grid">
+    <div class="process-grid" aria-label="@Text("Production workflow carousel", "คารูเซลขั้นตอนการผลิต")">
         @foreach (var step in ProcessSteps)
         {
-            <article class="workflow-step workflow-step--@step.Accent">
+            <button class="@WorkflowStepClass(step)"
+                    type="button"
+                    data-workflow-accent="@step.Accent"
+                    aria-current="@WorkflowAriaCurrent(step)"
+                    @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
                 <span class="workflow-step-number">@step.Number</span>
                 <div class="workflow-step-visual" aria-hidden="true">
                     <MudIcon Icon="@step.Icon" Size="Size.Large" />
                 </div>
                 <h2>@step.Title.For(Preferences.Culture)</h2>
                 <p>@step.Body.For(Preferences.Culture)</p>
-            </article>
+            </button>
         }
     </div>
 </section>
@@ -215,13 +236,48 @@
     private string _highlightServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
     private bool _hasExplicitHeroTarget;
     private int _heroVariantIndex;
+    private string _selectedWorkflowAccent = "upload";
+    private ElementReference _machineFeaturePreview;
+    private ElementReference _workflowCarousel;
+
+    private ProcessStep SelectedWorkflowStep => ProcessSteps.FirstOrDefault(
+        step => string.Equals(step.Accent, _selectedWorkflowAccent, StringComparison.OrdinalIgnoreCase))
+        ?? ProcessSteps[0];
 
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
     [
-        new("01", "upload", Icons.Material.Filled.UploadFile, SiteContent.Text("Upload your file", "อัปโหลดไฟล์"), SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
-        new("02", "dfm", Icons.Material.Filled.FactCheck, SiteContent.Text("Review DFM", "ตรวจ DFM"), SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
-        new("03", "price", Icons.Material.Filled.PriceChange, SiteContent.Text("Adjust price", "ปรับราคา"), SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
-        new("04", "order", Icons.Material.Filled.Inventory2, SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"), SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
+        new(
+            "01",
+            "upload",
+            Icons.Material.Filled.UploadFile,
+            SiteContent.Text("Upload your file", "อัปโหลดไฟล์"),
+            SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง"),
+            "/images/products/pneumatic-injection-molding-machines.png",
+            SiteContent.Text("MALIEV 30g and 50g pneumatic injection molding machine variants", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g และ 50g")),
+        new(
+            "02",
+            "dfm",
+            Icons.Material.Filled.FactCheck,
+            SiteContent.Text("Review DFM", "ตรวจ DFM"),
+            SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต"),
+            SiteContent.CaliperInspectionImageUrl,
+            SiteContent.Text("Caliper inspection for DFM and dimensional review", "การตรวจวัดด้วยเวอร์เนียร์สำหรับ DFM และมิติสำคัญ")),
+        new(
+            "03",
+            "price",
+            Icons.Material.Filled.PriceChange,
+            SiteContent.Text("Adjust price", "ปรับราคา"),
+            SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์"),
+            SiteContent.DesignPlanningImageUrl,
+            SiteContent.Text("Manufacturing planning workspace for pricing decisions", "พื้นที่วางแผนการผลิตสำหรับตัดสินใจด้านราคา")),
+        new(
+            "04",
+            "order",
+            Icons.Material.Filled.Inventory2,
+            SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"),
+            SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"),
+            SiteContent.InjectionMoldingLineImageUrl,
+            SiteContent.Text("Production line ready for tracked manufacturing orders", "ไลน์ผลิตที่พร้อมสำหรับคำสั่งผลิตและการติดตามงาน"))
     ];
 
     protected override async Task OnInitializedAsync()
@@ -254,6 +310,33 @@
     private bool IsPrimaryService(ServicePageContent service)
     {
         return string.Equals(service.Slug, _highlightServiceSlug, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task SelectWorkflowStepAsync(ProcessStep step, ElementReference scrollTarget)
+    {
+        _selectedWorkflowAccent = step.Accent;
+        await JS.InvokeVoidAsync("malievScroll.scrollIntoView", scrollTarget);
+    }
+
+    private bool IsSelectedWorkflowStep(ProcessStep step)
+    {
+        return string.Equals(step.Accent, _selectedWorkflowAccent, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string? WorkflowAriaCurrent(ProcessStep step)
+    {
+        return IsSelectedWorkflowStep(step) ? "step" : null;
+    }
+
+    private string MachineFeaturePointClass(ProcessStep step)
+    {
+        return IsSelectedWorkflowStep(step) ? "machine-feature-point-button is-active" : "machine-feature-point-button";
+    }
+
+    private string WorkflowStepClass(ProcessStep step)
+    {
+        var classes = $"workflow-step workflow-step--{step.Accent}";
+        return IsSelectedWorkflowStep(step) ? $"{classes} is-active" : classes;
     }
 
     private void InitializeRandomizedHomeContent()
@@ -386,7 +469,14 @@
         _persistingSubscription?.Dispose();
     }
 
-    private sealed record ProcessStep(string Number, string Accent, string Icon, LocalizedText Title, LocalizedText Body);
+    private sealed record ProcessStep(
+        string Number,
+        string Accent,
+        string Icon,
+        LocalizedText Title,
+        LocalizedText Body,
+        string FeatureImageUrl,
+        LocalizedText FeatureImageAlt);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 
