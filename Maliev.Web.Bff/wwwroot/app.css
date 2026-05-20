@@ -1169,6 +1169,11 @@ html:lang(th) .h1 {
   align-items: start;
 }
 
+.material-comparison-section .section-heading p {
+  margin: 0;
+  max-width: 62ch;
+}
+
 .material-comparison-panel {
   display: grid;
   width: 100%;
@@ -5059,6 +5064,11 @@ html[data-theme="dark"] .auth-google-icon {
   .material-comparison-section {
     padding-left: 24px;
     padding-right: 24px;
+  }
+
+  .material-comparison-section .section-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .material-mobile-list {

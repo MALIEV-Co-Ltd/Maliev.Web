@@ -1386,6 +1386,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-row-media", styles);
         Assert.Contains(".material-mobile-card-media", styles);
         Assert.Contains(".material-comparison-section .section-heading", styles);
+        Assert.Contains(".material-comparison-section .section-heading p {\n  margin: 0;\n  max-width: 62ch;", styles);
         Assert.Contains(".material-comparison-section {\n  max-width: none;\n  padding-left: clamp(24px, 4vw, 72px);\n  padding-right: clamp(24px, 4vw, 72px);", styles);
         Assert.Contains(".material-comparison-panel {\n  display: grid;\n  width: 100%;", styles);
         Assert.Contains(".material-table-shell {\n  width: 100%;", styles);
@@ -1398,6 +1399,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".material-mobile-card {\n    grid-template-columns: minmax(260px, .38fr) minmax(0, 1fr);", styles);
         Assert.Contains("grid-template-areas:\n      \"visual basic\"\n      \"visual detail\";", styles);
         Assert.Contains(".material-comparison-section {\n    padding-left: 24px;\n    padding-right: 24px;", styles);
+        Assert.Contains(".material-comparison-section .section-heading {\n    grid-template-columns: minmax(0, 1fr);\n    gap: 14px;", styles);
         Assert.Contains("@media (max-width: 680px)", styles);
         Assert.Contains(".material-comparison-section {\n    padding-left: 18px;\n    padding-right: 18px;", styles);
         Assert.Contains("display: none;", styles);
