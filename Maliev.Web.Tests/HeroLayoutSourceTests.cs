@@ -349,6 +349,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--workflow-accent: #3f6f62;", processStyles);
         Assert.Contains("--workflow-accent: #8a6a2d;", processStyles);
         Assert.Contains("--workflow-accent: #743f3f;", processStyles);
+        Assert.Contains("--workflow-step-surface: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);", styles);
+        Assert.Contains("--workflow-step-surface: linear-gradient(180deg, #161c24 0%, #111720 100%);", styles);
+        Assert.Contains("--workflow-step-visual-bg: linear-gradient(180deg, #ffffff 0%, var(--workflow-accent-soft) 100%);", styles);
+        Assert.Contains("--workflow-step-visual-bg: linear-gradient(180deg, rgba(244, 246, 248, .06) 0%, var(--workflow-accent-soft) 100%);", styles);
+        Assert.Contains("html[data-theme=\"dark\"] .workflow-step--upload", styles);
+        Assert.Contains("--workflow-accent: #8fbccc;", styles);
+        Assert.Contains("background: var(--workflow-step-surface);", processStyles);
+        Assert.Contains("background: var(--workflow-step-number-bg);", processStyles);
+        Assert.Contains("background: var(--workflow-step-visual-bg);", processStyles);
+        Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, #fbfbfa 100%);", processStyles);
+        Assert.DoesNotContain("background: rgba(255, 255, 255, .9);", processStyles);
+        Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);", processStyles);
         Assert.DoesNotContain(".process-kicker", styles);
         Assert.Contains(".workflow-step-number", styles);
         Assert.Contains(".workflow-step-visual .mud-icon-root", styles);

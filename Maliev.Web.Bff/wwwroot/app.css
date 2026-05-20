@@ -47,6 +47,13 @@
   --machine-feature-border-rgb: 23 23 23;
   --machine-feature-active-bg: var(--active-pill-bg);
   --machine-feature-active-text: var(--active-pill-text);
+  --workflow-step-surface: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+  --workflow-step-border: rgba(52, 64, 84, .12);
+  --workflow-step-shadow: rgba(17, 24, 39, .08) 0 18px 50px -34px;
+  --workflow-step-hover-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px;
+  --workflow-step-number-bg: rgba(255, 255, 255, .92);
+  --workflow-step-number-border: rgba(23, 23, 23, .08);
+  --workflow-step-visual-bg: linear-gradient(180deg, #ffffff 0%, var(--workflow-accent-soft) 100%);
   --media-shell: #111419;
   --success-surface: #e9f8ef;
   --success-text: #0d6b32;
@@ -113,6 +120,13 @@ html[data-theme="dark"] {
   --machine-feature-border-rgb: 244 246 248;
   --machine-feature-active-bg: var(--active-pill-bg);
   --machine-feature-active-text: var(--active-pill-text);
+  --workflow-step-surface: linear-gradient(180deg, #161c24 0%, #111720 100%);
+  --workflow-step-border: rgba(244, 246, 248, .12);
+  --workflow-step-shadow: rgba(0, 0, 0, .34) 0 18px 50px -32px;
+  --workflow-step-hover-shadow: rgba(0, 0, 0, .46) 0 22px 62px -30px;
+  --workflow-step-number-bg: rgba(20, 25, 32, .92);
+  --workflow-step-number-border: rgba(244, 246, 248, .12);
+  --workflow-step-visual-bg: linear-gradient(180deg, rgba(244, 246, 248, .06) 0%, var(--workflow-accent-soft) 100%);
   --media-shell: #090c10;
   --success-surface: #102819;
   --success-text: #a8f0bf;
@@ -2020,7 +2034,7 @@ html:lang(th) .machine-feature-title-lead {
 
 .workflow-step {
   --workflow-accent: #315f72;
-  --workflow-accent-soft: #f0f5f7;
+  --workflow-accent-soft: color-mix(in srgb, var(--workflow-accent) 10%, var(--paper));
   --workflow-accent-border: rgba(49, 95, 114, .24);
   --workflow-accent-ring: rgba(49, 95, 114, .14);
 
@@ -2034,9 +2048,9 @@ html:lang(th) .machine-feature-title-lead {
   color: inherit;
   text-align: left;
   text-decoration: none;
-  background: linear-gradient(180deg, #fff 0%, #fbfbfa 100%);
-  border: 1px solid rgba(52, 64, 84, .12);
-  box-shadow: rgba(17, 24, 39, .08) 0 18px 50px -34px;
+  background: var(--workflow-step-surface);
+  border: 1px solid var(--workflow-step-border);
+  box-shadow: var(--workflow-step-shadow);
   cursor: pointer;
   transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
@@ -2045,7 +2059,7 @@ html:lang(th) .machine-feature-title-lead {
   border-color: var(--workflow-accent-border);
   box-shadow:
     var(--workflow-accent-ring) 0 0 0 1px,
-    rgba(17, 24, 39, .16) 0 22px 58px -34px;
+    var(--workflow-step-hover-shadow);
   transform: translateY(-3px);
   outline: none;
 }
@@ -2054,7 +2068,7 @@ html:lang(th) .machine-feature-title-lead {
   border-color: var(--workflow-accent-border);
   box-shadow:
     var(--workflow-accent-ring) 0 0 0 1px,
-    rgba(17, 24, 39, .16) 0 22px 58px -34px;
+    var(--workflow-step-hover-shadow);
 }
 
 .workflow-step.is-active .workflow-step-number {
@@ -2083,8 +2097,8 @@ html:lang(th) .machine-feature-title-lead {
   height: 42px;
   padding: 0 10px;
   color: var(--ink);
-  background: rgba(255, 255, 255, .9);
-  border: 1px solid rgba(23, 23, 23, .08);
+  background: var(--workflow-step-number-bg);
+  border: 1px solid var(--workflow-step-number-border);
   border-radius: 999px;
   box-shadow: rgba(17, 24, 39, .09) 0 12px 28px -18px;
   font-family: var(--font-mono);
@@ -2100,7 +2114,7 @@ html:lang(th) .machine-feature-title-lead {
   height: 96px;
   margin-bottom: 4px;
   color: var(--workflow-accent);
-  background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);
+  background: var(--workflow-step-visual-bg);
   border: 1px solid var(--workflow-accent-border);
   border-radius: 8px;
 }
@@ -2120,37 +2134,61 @@ html:lang(th) .machine-feature-title-lead {
 
 .workflow-step--upload {
   --workflow-accent: #315f72;
-  --workflow-accent-soft: #eef4f6;
+  --workflow-accent-soft: color-mix(in srgb, var(--workflow-accent) 10%, var(--paper));
   --workflow-accent-border: rgba(49, 95, 114, .26);
   --workflow-accent-ring: rgba(49, 95, 114, .14);
 }
 
 .workflow-step--dfm {
   --workflow-accent: #3f6f62;
-  --workflow-accent-soft: #f0f5f2;
+  --workflow-accent-soft: color-mix(in srgb, var(--workflow-accent) 10%, var(--paper));
   --workflow-accent-border: rgba(63, 111, 98, .27);
   --workflow-accent-ring: rgba(63, 111, 98, .14);
 }
 
 .workflow-step--price {
   --workflow-accent: #8a6a2d;
-  --workflow-accent-soft: #f7f3ea;
+  --workflow-accent-soft: color-mix(in srgb, var(--workflow-accent) 10%, var(--paper));
   --workflow-accent-border: rgba(138, 106, 45, .28);
   --workflow-accent-ring: rgba(138, 106, 45, .14);
 }
 
 .workflow-step--order {
   --workflow-accent: #743f3f;
-  --workflow-accent-soft: #f6efee;
+  --workflow-accent-soft: color-mix(in srgb, var(--workflow-accent) 10%, var(--paper));
   --workflow-accent-border: rgba(116, 63, 63, .28);
   --workflow-accent-ring: rgba(116, 63, 63, .14);
+}
+
+html[data-theme="dark"] .workflow-step--upload {
+  --workflow-accent: #8fbccc;
+  --workflow-accent-border: rgba(143, 188, 204, .34);
+  --workflow-accent-ring: rgba(143, 188, 204, .20);
+}
+
+html[data-theme="dark"] .workflow-step--dfm {
+  --workflow-accent: #92c9b9;
+  --workflow-accent-border: rgba(146, 201, 185, .34);
+  --workflow-accent-ring: rgba(146, 201, 185, .20);
+}
+
+html[data-theme="dark"] .workflow-step--price {
+  --workflow-accent: #d7b66d;
+  --workflow-accent-border: rgba(215, 182, 109, .36);
+  --workflow-accent-ring: rgba(215, 182, 109, .20);
+}
+
+html[data-theme="dark"] .workflow-step--order {
+  --workflow-accent: #d39a9a;
+  --workflow-accent-border: rgba(211, 154, 154, .34);
+  --workflow-accent-ring: rgba(211, 154, 154, .20);
 }
 
 .workflow-step--dfm .workflow-step-visual,
 .workflow-step--price .workflow-step-visual,
 .workflow-step--order .workflow-step-visual {
   color: var(--workflow-accent);
-  background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);
+  background: var(--workflow-step-visual-bg);
   border-color: var(--workflow-accent-border);
 }
 
