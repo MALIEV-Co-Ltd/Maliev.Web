@@ -87,34 +87,34 @@
          @ref="_machineFeaturePreview"
          class="feature-band machine-feature"
          aria-labelledby="imm-title"
-         data-selected-feature="@SelectedWorkflowStep.Accent">
+         data-selected-feature="@SelectedMachineFeature.Accent">
     <img class="machine-feature-backdrop"
-         @key="SelectedWorkflowStep.Accent"
-         src="@SelectedWorkflowStep.FeatureImageUrl"
-         alt="@SelectedWorkflowStep.FeatureImageAlt.For(Preferences.Culture)"
+         @key="SelectedMachineFeature.Accent"
+         src="@SelectedMachineFeature.FeatureImageUrl"
+         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
          loading="lazy" />
     <div class="machine-feature-copy">
         <h2 id="imm-title" class="h-display machine-feature-title">
             <span class="machine-feature-title-line machine-feature-title-lead">@Text("Pneumatic injection", "เครื่องฉีดระบบลม")</span>
             <span class="machine-feature-title-line accent-blue">@Text("machines.", "สำหรับล็อตเล็ก")</span>
         </h2>
-        <p class="lede">@Text("Two pneumatic machines we built for in-house thermoplastic trials and paid small-batch runs: the 30g variant reaches 300°C, the 50g variant reaches 350°C, and both run from 7 bar shop air.", "เครื่องฉีดระบบลมที่เราผลิตเองสำหรับทดลองเทอร์โมพลาสติกและผลิตล็อตเล็ก: รุ่น 30g สูงสุด 300°C, รุ่น 50g สูงสุด 350°C และทั้งสองรุ่นใช้ลมโรงงาน 7 bar")</p>
+        <p class="lede">@SelectedMachineFeature.Body.For(Preferences.Culture)</p>
         <div class="machine-stat-grid">
-            <div><strong>30g/50g</strong><small>@Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")</small></div>
-            <div><strong>300/350°C</strong><small>@Text("max melt", "อุณหภูมิสูงสุด")</small></div>
-            <div><strong>7 bar</strong><small>@Text("air supply", "แรงดันลม")</small></div>
-            <div><strong>@Text("30 days", "30 วัน")</strong><small>@Text("lead time", "ระยะเวลา")</small></div>
+            @foreach (var stat in SelectedMachineFeature.Stats)
+            {
+                <div><strong>@stat.Value.For(Preferences.Culture)</strong><small>@stat.Label.For(Preferences.Culture)</small></div>
+            }
         </div>
         <div class="machine-feature-points" aria-label="@Text("Machine fit", "ความเหมาะสมของเครื่อง")">
-            @foreach (var step in ProcessSteps)
+            @foreach (var feature in MachineFeatures)
             {
-                <button class="@MachineFeaturePointClass(step)"
+                <button class="@MachineFeatureButtonClass(feature)"
                         type="button"
-                        data-workflow-accent="@step.Accent"
-                        aria-current="@WorkflowAriaCurrent(step)"
-                        @onclick="() => SelectWorkflowStepAsync(step, _workflowCarousel)">
-                    <span class="machine-feature-point-number">@step.Number</span>
-                    <span>@step.Title.For(Preferences.Culture)</span>
+                        data-machine-feature="@feature.Accent"
+                        aria-current="@MachineFeatureAriaCurrent(feature)"
+                        @onclick="() => SelectMachineFeature(feature)">
+                    <span class="machine-feature-point-number">@feature.Number</span>
+                    <span>@feature.Title.For(Preferences.Culture)</span>
                 </button>
             }
         </div>
@@ -236,12 +236,69 @@
     private bool _hasExplicitHeroTarget;
     private int _heroVariantIndex;
     private string _selectedWorkflowAccent = "upload";
+    private string _selectedMachineFeatureAccent = "overview";
     private ElementReference _machineFeaturePreview;
     private ElementReference _workflowCarousel;
 
-    private ProcessStep SelectedWorkflowStep => ProcessSteps.FirstOrDefault(
-        step => string.Equals(step.Accent, _selectedWorkflowAccent, StringComparison.OrdinalIgnoreCase))
-        ?? ProcessSteps[0];
+    private MachineFeature SelectedMachineFeature => MachineFeatures.FirstOrDefault(
+        feature => string.Equals(feature.Accent, _selectedMachineFeatureAccent, StringComparison.OrdinalIgnoreCase))
+        ?? MachineFeatures[0];
+
+    private readonly IReadOnlyList<MachineFeature> MachineFeatures =
+    [
+        new(
+            "01",
+            "overview",
+            SiteContent.Text("30g trials", "ทดลอง 30g"),
+            SiteContent.Text("Use the 30g pneumatic machine for first thermoplastic trials, small inserts, and compact parts before moving to paid small-batch runs.", "ใช้เครื่องระบบลมรุ่น 30g สำหรับทดลองเทอร์โมพลาสติกครั้งแรก ชิ้นเล็ก และอินเสิร์ตก่อนขยับไปผลิตล็อตสั้น"),
+            "/images/products/pneumatic-injection-molding-machines.png",
+            SiteContent.Text("MALIEV 30g and 50g pneumatic injection molding machine variants", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g และ 50g"),
+            [
+                new(SiteContent.Text("30g", "30g"), SiteContent.Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")),
+                new(SiteContent.Text("300°C", "300°C"), SiteContent.Text("max melt", "อุณหภูมิสูงสุด")),
+                new(SiteContent.Text("7 bar", "7 bar"), SiteContent.Text("air supply", "แรงดันลม")),
+                new(SiteContent.Text("30 days", "30 วัน"), SiteContent.Text("lead time", "ระยะเวลา"))
+            ]),
+        new(
+            "02",
+            "capacity",
+            SiteContent.Text("50g small batches", "ล็อตเล็ก 50g"),
+            SiteContent.Text("Switch to the 50g machine when the part needs more shot volume or a hotter melt window, while keeping the run suitable for small-batch validation.", "เลือกเครื่อง 50g เมื่อชิ้นงานต้องการปริมาตรฉีดมากขึ้นหรืออุณหภูมิหลอมสูงขึ้น โดยยังเหมาะกับการตรวจล็อตเล็ก"),
+            SiteContent.InjectionMoldingLineImageUrl,
+            SiteContent.Text("Small-batch injection molding production setup", "การตั้งค่างานฉีดพลาสติกลอตเล็ก"),
+            [
+                new(SiteContent.Text("50g", "50g"), SiteContent.Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")),
+                new(SiteContent.Text("350°C", "350°C"), SiteContent.Text("max melt", "อุณหภูมิสูงสุด")),
+                new(SiteContent.Text("7 bar", "7 bar"), SiteContent.Text("air supply", "แรงดันลม")),
+                new(SiteContent.Text("30 days", "30 วัน"), SiteContent.Text("lead time", "ระยะเวลา"))
+            ]),
+        new(
+            "03",
+            "tooling",
+            SiteContent.Text("Tooling setup", "ตั้งค่าทูลลิ่ง"),
+            SiteContent.Text("We review simple mold strategy, gating, clamp access, and trial-shot assumptions so the pneumatic machine setup matches the material and geometry.", "ทีมตรวจแนวทางแม่พิมพ์ จุดเข้าเนื้อ การจับยึด และสมมติฐานทดลองฉีด เพื่อให้การตั้งเครื่องระบบลมตรงกับวัสดุและรูปทรง"),
+            SiteContent.DesignPlanningImageUrl,
+            SiteContent.Text("Injection molding tooling and setup planning", "การวางแผนทูลลิ่งและการตั้งค่าเครื่องฉีด"),
+            [
+                new(SiteContent.Text("Gate", "Gate"), SiteContent.Text("flow review", "ตรวจทางไหล")),
+                new(SiteContent.Text("Clamp", "Clamp"), SiteContent.Text("fixture access", "ทางจับยึด")),
+                new(SiteContent.Text("Trial", "Trial"), SiteContent.Text("shot plan", "แผนทดลองฉีด")),
+                new(SiteContent.Text("30 days", "30 วัน"), SiteContent.Text("lead time", "ระยะเวลา"))
+            ]),
+        new(
+            "04",
+            "tuning",
+            SiteContent.Text("Run and tune", "ฉีดและจูน"),
+            SiteContent.Text("During trials we tune air pressure, temperature, feed amount, and cycle timing, then repeat stable shots for samples or a controlled small run.", "ระหว่างทดลอง ทีมจูนแรงดันลม อุณหภูมิ ปริมาณเนื้อ และจังหวะรอบงาน จากนั้นฉีดซ้ำเพื่อทำตัวอย่างหรือล็อตควบคุม"),
+            SiteContent.CaliperInspectionImageUrl,
+            SiteContent.Text("Trial-shot inspection and pneumatic injection tuning", "การตรวจตัวอย่างทดลองฉีดและการจูนเครื่องระบบลม"),
+            [
+                new(SiteContent.Text("7 bar", "7 bar"), SiteContent.Text("air tuning", "จูนแรงดันลม")),
+                new(SiteContent.Text("300/350°C", "300/350°C"), SiteContent.Text("melt window", "ช่วงอุณหภูมิ")),
+                new(SiteContent.Text("Stable", "เสถียร"), SiteContent.Text("repeat shots", "ฉีดซ้ำได้")),
+                new(SiteContent.Text("30 days", "30 วัน"), SiteContent.Text("lead time", "ระยะเวลา"))
+            ])
+    ];
 
     private readonly IReadOnlyList<ProcessStep> ProcessSteps =
     [
@@ -250,33 +307,25 @@
             "upload",
             Icons.Material.Filled.UploadFile,
             SiteContent.Text("Upload your file", "อัปโหลดไฟล์"),
-            SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง"),
-            "/images/products/pneumatic-injection-molding-machines.png",
-            SiteContent.Text("MALIEV 30g and 50g pneumatic injection molding machine variants", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g และ 50g")),
+            SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
         new(
             "02",
             "dfm",
             Icons.Material.Filled.FactCheck,
             SiteContent.Text("Review DFM", "ตรวจ DFM"),
-            SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต"),
-            SiteContent.CaliperInspectionImageUrl,
-            SiteContent.Text("Caliper inspection for DFM and dimensional review", "การตรวจวัดด้วยเวอร์เนียร์สำหรับ DFM และมิติสำคัญ")),
+            SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
         new(
             "03",
             "price",
             Icons.Material.Filled.PriceChange,
             SiteContent.Text("Adjust price", "ปรับราคา"),
-            SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์"),
-            SiteContent.DesignPlanningImageUrl,
-            SiteContent.Text("Manufacturing planning workspace for pricing decisions", "พื้นที่วางแผนการผลิตสำหรับตัดสินใจด้านราคา")),
+            SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
         new(
             "04",
             "order",
             Icons.Material.Filled.Inventory2,
             SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"),
-            SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"),
-            SiteContent.InjectionMoldingLineImageUrl,
-            SiteContent.Text("Production line ready for tracked manufacturing orders", "ไลน์ผลิตที่พร้อมสำหรับคำสั่งผลิตและการติดตามงาน"))
+            SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
     ];
 
     protected override async Task OnInitializedAsync()
@@ -317,9 +366,19 @@
         await JS.InvokeVoidAsync("malievScroll.scrollIntoView", scrollTarget);
     }
 
+    private void SelectMachineFeature(MachineFeature feature)
+    {
+        _selectedMachineFeatureAccent = feature.Accent;
+    }
+
     private bool IsSelectedWorkflowStep(ProcessStep step)
     {
         return string.Equals(step.Accent, _selectedWorkflowAccent, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsSelectedMachineFeature(MachineFeature feature)
+    {
+        return string.Equals(feature.Accent, _selectedMachineFeatureAccent, StringComparison.OrdinalIgnoreCase);
     }
 
     private string? WorkflowAriaCurrent(ProcessStep step)
@@ -327,9 +386,14 @@
         return IsSelectedWorkflowStep(step) ? "step" : null;
     }
 
-    private string MachineFeaturePointClass(ProcessStep step)
+    private string? MachineFeatureAriaCurrent(MachineFeature feature)
     {
-        return IsSelectedWorkflowStep(step) ? "machine-feature-point-button is-active" : "machine-feature-point-button";
+        return IsSelectedMachineFeature(feature) ? "step" : null;
+    }
+
+    private string MachineFeatureButtonClass(MachineFeature feature)
+    {
+        return IsSelectedMachineFeature(feature) ? "machine-feature-point-button is-active" : "machine-feature-point-button";
     }
 
     private string WorkflowStepClass(ProcessStep step)
@@ -473,9 +537,20 @@
         string Accent,
         string Icon,
         LocalizedText Title,
+        LocalizedText Body);
+
+    private sealed record MachineFeature(
+        string Number,
+        string Accent,
+        LocalizedText Title,
         LocalizedText Body,
         string FeatureImageUrl,
-        LocalizedText FeatureImageAlt);
+        LocalizedText FeatureImageAlt,
+        IReadOnlyList<MachineFeatureStat> Stats);
+
+    private sealed record MachineFeatureStat(
+        LocalizedText Value,
+        LocalizedText Label);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 
