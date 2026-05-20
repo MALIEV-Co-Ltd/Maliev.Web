@@ -363,7 +363,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("<div><strong>180°C</strong><small>@Text(\"max melt\", \"อุณหภูมิสูงสุด\")</small></div>", source);
         Assert.Contains("<div><strong>7 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>6 bar</strong><small>@Text(\"air supply\", \"แรงดันลม\")</small></div>", source);
-        Assert.Contains("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
+        Assert.Contains("<div><strong>@Text(\"30 days\", \"30 วัน\")</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
+        Assert.DoesNotContain("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
         Assert.Contains("grid-template-columns: minmax(0, .9fr) minmax(540px, .82fr);", styles);
