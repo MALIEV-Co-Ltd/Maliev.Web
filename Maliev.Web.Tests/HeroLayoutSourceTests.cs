@@ -376,6 +376,9 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".machine-feature-kicker", styles);
         Assert.DoesNotContain("PIMM-30", source);
         Assert.DoesNotContain("PIMM-50", source);
+        Assert.Contains("h-display machine-feature-title", source);
+        Assert.Contains("machine-feature-title-line machine-feature-title-lead", source);
+        Assert.DoesNotContain("<br />\n            <span class=\"accent-blue\">@Text(\"machines.\", \"สำหรับล็อตเล็ก\")</span>", source);
         Assert.Contains("the 30g variant reaches 300°C, the 50g variant reaches 350°C", source);
         Assert.Contains("machine-stat-grid", source);
         Assert.Contains("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
@@ -389,12 +392,16 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
         Assert.Contains("scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);", styles);
-        Assert.Contains("grid-template-columns: minmax(0, .9fr) minmax(540px, .82fr);", styles);
+        Assert.Contains("grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature-point-button.is-active", styles);
         Assert.Contains(".machine-feature .h-display", styles);
+        Assert.Contains(".machine-feature-title", styles);
+        Assert.Contains("html:lang(th) .machine-feature-title-lead", styles);
+        Assert.Contains("white-space: nowrap;", styles);
+        Assert.Contains("word-break: keep-all;", styles);
         Assert.Contains(".machine-stat-grid", styles);
         Assert.Contains(".workflow-step:is(:hover, :focus-visible)", styles);
         Assert.Contains(".workflow-step.is-active", styles);

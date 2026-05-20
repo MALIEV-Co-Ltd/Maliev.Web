@@ -1798,9 +1798,9 @@ html[data-theme="dark"] .form-status--error {
   overflow: hidden;
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
   min-height: clamp(560px, 52vw, 760px);
-  grid-template-columns: minmax(0, .9fr) minmax(540px, .82fr);
+  grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);
   align-items: center;
-  gap: clamp(24px, 4vw, 60px);
+  gap: clamp(20px, 3vw, 48px);
   background: #f7f8fb;
   color: var(--ink);
   border-top: 1px solid var(--rule);
@@ -1832,6 +1832,28 @@ html[data-theme="dark"] .form-status--error {
 
 .machine-feature .h-display {
   color: var(--ink);
+}
+
+.machine-feature-title {
+  max-width: 720px;
+  font-size: clamp(3.8rem, 4.85vw, 4.65rem);
+  line-height: .98;
+}
+
+.machine-feature-title-line {
+  display: block;
+  min-width: 0;
+}
+
+html:lang(th) .machine-feature-title {
+  font-size: clamp(3.65rem, 4.55vw, 4.35rem);
+  line-height: 1.06;
+}
+
+html:lang(th) .machine-feature-title-lead {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .machine-feature p,
@@ -4907,6 +4929,18 @@ html[data-theme="dark"] .auth-google-icon {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .machine-feature {
+    grid-template-columns: minmax(0, .76fr) minmax(520px, 1fr);
+  }
+
+  .machine-feature-title {
+    font-size: clamp(3.35rem, 5.1vw, 4rem);
+  }
+
+  html:lang(th) .machine-feature-title {
+    font-size: clamp(3.2rem, 4.85vw, 3.75rem);
+  }
+
   .material-table-shell {
     display: none;
   }
@@ -5155,6 +5189,10 @@ html[data-theme="dark"] .auth-google-icon {
   .machine-feature-copy {
     grid-column: 1;
     justify-self: start;
+    max-width: 760px;
+  }
+
+  .machine-feature-title {
     max-width: 760px;
   }
 
@@ -5733,6 +5771,14 @@ html[data-theme="dark"] .auth-google-icon {
   .machine-feature {
     padding-top: 56px;
     padding-bottom: 64px;
+  }
+
+  .machine-feature-title {
+    font-size: clamp(2.7rem, 10.5vw, 3.45rem);
+  }
+
+  html:lang(th) .machine-feature-title {
+    font-size: clamp(2.5rem, 10vw, 3.15rem);
   }
 
   .machine-feature-backdrop {
