@@ -136,7 +136,6 @@
                 {
                     <div class="material-compare-matrix" style="@CompareMatrixStyle">
                         <div class="material-compare-row material-compare-head">
-                            <span class="material-compare-property-label">@Text("Property", "คุณสมบัติ")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
                                 <strong class="material-compare-material-head">
@@ -151,60 +150,80 @@
                             }
                         </div>
                         <div class="material-compare-row">
-                            <span class="material-compare-label">@Text("Best fit", "เหมาะกับ")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>@material.BestFor.For(Preferences.Culture)</span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Best fit", "เหมาะกับ")</span>
+                                    <span>@material.BestFor.For(Preferences.Culture)</span>
+                                </span>
                             }
                         </div>
                         <div class="material-compare-row">
-                            <span class="material-compare-label">@Text("Mechanical", "เชิงกล")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>@material.Mechanical.For(Preferences.Culture)</span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Mechanical", "เชิงกล")</span>
+                                    <span>@material.Mechanical.For(Preferences.Culture)</span>
+                                </span>
                             }
                         </div>
                         <div class="material-compare-row">
-                            <span class="material-compare-label">@Text("Heat", "ความร้อน")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>@material.Heat.For(Preferences.Culture)</span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Heat", "ความร้อน")</span>
+                                    <span>@material.Heat.For(Preferences.Culture)</span>
+                                </span>
                             }
                         </div>
                         <div class="material-compare-row">
-                            <span class="material-compare-label">@Text("Chemical", "สารเคมี")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>@material.Chemical.For(Preferences.Culture)</span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Chemical", "สารเคมี")</span>
+                                    <span>@material.Chemical.For(Preferences.Culture)</span>
+                                </span>
                             }
                         </div>
                         <div class="material-compare-row">
-                            <span class="material-compare-label">@Text("Finish", "ผิวงาน")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>@material.Finish.For(Preferences.Culture)</span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Finish", "ผิวงาน")</span>
+                                    <span>@material.Finish.For(Preferences.Culture)</span>
+                                </span>
                             }
                         </div>
                         <div class="material-compare-row material-compare-tone-row material-pro-con-pro">
-                            <span class="material-compare-label">@Text("Pros", "ข้อดี")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Pros", "ข้อดี")</span>
                                     <span class="material-compare-insight">
-                                        <strong>@Text("Advantage", "จุดเด่น")</strong>
-                                        <span>@material.Pros.For(Preferences.Culture)</span>
+                                        <span class="material-insight-heading">
+                                            <span class="material-insight-icon">
+                                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                                            </span>
+                                            <strong>@Text("Advantage", "จุดเด่น")</strong>
+                                        </span>
+                                        <span class="material-insight-copy">@material.Pros.For(Preferences.Culture)</span>
                                     </span>
                                 </span>
                             }
                         </div>
                         <div class="material-compare-row material-compare-tone-row material-pro-con-con">
-                            <span class="material-compare-label">@Text("Watch", "ระวัง")</span>
                             @foreach (var material in SelectedMaterialComparisons)
                             {
-                                <span>
+                                <span class="material-compare-cell">
+                                    <span class="material-compare-cell-label">@Text("Watch", "ระวัง")</span>
                                     <span class="material-compare-insight">
-                                        <strong>@Text("Check before use", "ควรตรวจ")</strong>
-                                        <span>@material.Cons.For(Preferences.Culture)</span>
+                                        <span class="material-insight-heading">
+                                            <span class="material-insight-icon">
+                                                <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
+                                            </span>
+                                            <strong>@Text("Check before use", "ควรตรวจ")</strong>
+                                        </span>
+                                        <span class="material-insight-copy">@material.Cons.For(Preferences.Culture)</span>
                                     </span>
                                 </span>
                             }
@@ -303,12 +322,22 @@
                                 <td>
                                     <div class="material-pro-con">
                                         <span class="material-pro-con-line material-pro-con-pro">
-                                            <strong>@Text("Advantage", "จุดเด่น")</strong>
-                                            <span>@material.Pros.For(Preferences.Culture)</span>
+                                            <span class="material-insight-heading">
+                                                <span class="material-insight-icon">
+                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                                                </span>
+                                                <strong>@Text("Advantage", "จุดเด่น")</strong>
+                                            </span>
+                                            <span class="material-insight-copy">@material.Pros.For(Preferences.Culture)</span>
                                         </span>
                                         <span class="material-pro-con-line material-pro-con-con">
-                                            <strong>@Text("Check before use", "ควรตรวจ")</strong>
-                                            <span>@material.Cons.For(Preferences.Culture)</span>
+                                            <span class="material-insight-heading">
+                                                <span class="material-insight-icon">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
+                                                </span>
+                                                <strong>@Text("Check before use", "ควรตรวจ")</strong>
+                                            </span>
+                                            <span class="material-insight-copy">@material.Cons.For(Preferences.Culture)</span>
                                         </span>
                                     </div>
                                 </td>

@@ -1156,6 +1156,34 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies material direct comparison removes the property column and uses status icons for insight cards.
+    /// </summary>
+    [Fact]
+    public void MaterialsDirectComparisonUsesInlinePropertyLabelsAndInsightIcons()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.DoesNotContain("material-compare-property-label", source);
+        Assert.DoesNotContain("@Text(\"Property\", \"คุณสมบัติ\")", source);
+        Assert.DoesNotContain("grid-template-columns: 140px repeat(var(--compare-columns), minmax(0, 1fr));", styles);
+        Assert.Contains("grid-template-columns: repeat(var(--compare-columns), minmax(0, 1fr));", styles);
+        Assert.Contains("material-compare-cell", source);
+        Assert.Contains("material-compare-cell-label", source);
+        Assert.Contains("material-insight-heading", source);
+        Assert.Contains("material-insight-icon", source);
+        Assert.Contains("<MudIcon Icon=\"@Icons.Material.Filled.CheckCircle\" Size=\"Size.Small\" />", source);
+        Assert.Contains("<MudIcon Icon=\"@Icons.Material.Filled.Warning\" Size=\"Size.Small\" />", source);
+        Assert.Contains(".material-insight-heading", styles);
+        Assert.Contains(".material-insight-icon", styles);
+        Assert.Contains("overflow-x: auto;", styles);
+        Assert.Contains("grid-template-columns: repeat(var(--compare-columns), minmax(240px, 1fr));", styles);
+        Assert.DoesNotContain(".material-compare-row {\n    grid-template-columns: 1fr;", styles);
+        Assert.DoesNotContain(".material-pro-con-line strong::before", styles);
+        Assert.DoesNotContain(".material-compare-insight strong::before", styles);
+    }
+
+    /// <summary>
     /// Verifies static customer pages are real routes and keep contact wired through the BFF.
     /// </summary>
     [Fact]
@@ -1217,12 +1245,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("_pendingMaterialComparisonScroll = false;", source);
         Assert.Contains("material-row-summary", source);
         Assert.Contains("material-row-media", source);
-        Assert.Contains("material-compare-property-label", source);
+        Assert.DoesNotContain("material-compare-property-label", source);
+        Assert.Contains("material-compare-cell-label", source);
         Assert.Contains("material-compare-material-head", source);
         Assert.Contains("material-compare-head-media", source);
         Assert.Contains("material-compare-head-copy", source);
         Assert.Contains("material-compare-head-name", source);
         Assert.Contains("material-compare-insight", source);
+        Assert.Contains("material-insight-heading", source);
+        Assert.Contains("material-insight-icon", source);
         Assert.Contains("material-mobile-card-visual", source);
         Assert.Contains("material-mobile-card-basic", source);
         Assert.Contains("material-mobile-card-detail", source);
@@ -1298,6 +1329,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@Text(\"Pros / watch\", \"ข้อดี / ระวัง\")", source);
         Assert.Contains("@Text(\"Advantage\", \"จุดเด่น\")", source);
         Assert.Contains("@Text(\"Check before use\", \"ควรตรวจ\")", source);
+        Assert.Contains("Icons.Material.Filled.CheckCircle", source);
+        Assert.Contains("Icons.Material.Filled.Warning", source);
         Assert.Contains("<span class=\"material-compare-insight\">", source);
         Assert.Contains("Compare material properties before uploading CAD.", source);
         Assert.Contains("เปรียบเทียบคุณสมบัติวัสดุก่อนอัปโหลด CAD", source);
@@ -1348,15 +1381,19 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("display: grid;", styles);
         Assert.Contains(".material-select-button", styles);
         Assert.Contains(".material-compare-matrix", styles);
-        Assert.Contains(".material-compare-property-label", styles);
+        Assert.DoesNotContain(".material-compare-property-label", styles);
+        Assert.Contains(".material-compare-cell-label", styles);
         Assert.Contains(".material-compare-material-head", styles);
         Assert.Contains(".material-compare-head-media", styles);
         Assert.Contains(".material-compare-insight", styles);
+        Assert.Contains(".material-insight-heading", styles);
+        Assert.Contains(".material-insight-icon", styles);
         Assert.Contains(".material-pro-con-pro", styles);
         Assert.Contains(".material-pro-con-con", styles);
         Assert.Contains("color-mix(in srgb, #f59e0b 10%, var(--paper))", styles);
         Assert.Contains("border-left: 4px solid var(--material-tone);", styles);
-        Assert.Contains(".material-pro-con-line strong::before,\n.material-compare-insight strong::before", styles);
+        Assert.DoesNotContain(".material-pro-con-line strong::before", styles);
+        Assert.DoesNotContain(".material-compare-insight strong::before", styles);
         Assert.DoesNotContain("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
         Assert.Contains(".material-filter", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
