@@ -2901,6 +2901,7 @@ html:lang(th) .machine-feature-title-lead {
   width: 4.4em;
   height: auto;
   filter: var(--logo-filter);
+  transform: translateY(-.06em);
 }
 
 .contact-business-section p,

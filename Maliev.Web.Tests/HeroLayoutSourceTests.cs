@@ -724,6 +724,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-map-title-logo", styles);
         Assert.Matches(@"\.contact-map-title\s*\{[^}]*align-items:\s*center;", styles);
         Assert.Matches(@"\.contact-map-title-logo\s*\{[^}]*width:\s*4\.4em;", styles);
+        Assert.Matches(@"\.contact-map-title-logo\s*\{[^}]*transform:\s*translateY\(-\.06em\);", styles);
         Assert.Matches(@"\.contact-map-dialog-title\s*\{[^}]*align-items:\s*center;", styles);
         Assert.Matches(@"\.contact-map-dialog-logo\s*\{[^}]*height:\s*\.92em;", styles);
         Assert.Contains("filter: var(--logo-filter);", styles);
