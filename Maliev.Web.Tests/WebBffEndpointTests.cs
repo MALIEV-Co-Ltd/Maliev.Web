@@ -187,6 +187,31 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies opening the customer chatbot starts a verified website assistant session.
+    /// </summary>
+    [Fact]
+    public async Task POST_ChatbotSession_StartsChatbotBoundarySession()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/chatbot/sessions", new CustomerChatbotStartRequest
+        {
+            Language = "en"
+        });
+        var chat = await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(chat);
+        Assert.Equal(Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"), chat.SessionId);
+        Assert.Equal("assistant", chat.Role);
+        Assert.Contains("connected", chat.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            response.Headers.GetValues("Set-Cookie"),
+            value => value.Contains("maliev_customer_assistant_handoff=", StringComparison.Ordinal)
+                && value.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
     /// Verifies the account session endpoint can be polled by the chatbot before login without redirecting the active page.
     /// </summary>
     [Fact]
@@ -388,6 +413,19 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
     private sealed class FakeCustomerChatbotService : ICustomerChatbotService
     {
+        public Task<CustomerChatbotResponse> StartSessionAsync(CustomerChatbotStartRequest request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("en", request.Language);
+            return Task.FromResult(new CustomerChatbotResponse
+            {
+                SessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
+                Content = "Hi, Mali here. I am connected and ready to help with MALIEV manufacturing.",
+                Role = "assistant",
+                Language = "en",
+                CreatedAt = DateTimeOffset.Parse("2026-05-17T00:00:00+07:00")
+            });
+        }
+
         public Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
         {
             Assert.Equal("Can MALIEV help with CNC aluminum parts?", request.Message);

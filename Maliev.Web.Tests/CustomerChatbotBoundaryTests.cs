@@ -12,6 +12,30 @@ namespace Maliev.Web.Tests;
 public sealed class CustomerChatbotBoundaryTests
 {
     /// <summary>
+    /// Verifies opening the website assistant creates a ChatbotService session before any message is sent.
+    /// </summary>
+    [Fact]
+    public async Task StartSessionAsync_InitiatesWebsiteSessionAndReturnsGreeting()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.StartSessionAsync(new CustomerChatbotStartRequest
+        {
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.Equal(client.SessionId, response.SessionId);
+        Assert.Equal("assistant", response.Role);
+        Assert.Equal("en", response.Language);
+        Assert.Contains("Mali", response.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(client.InitiateRequest);
+        Assert.Equal("website", client.InitiateRequest.Channel);
+        Assert.Equal("en", client.InitiateRequest.Language);
+        Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
     /// Verifies website manufacturing questions create a website session and route through ChatbotService.
     /// </summary>
     [Fact]
@@ -303,6 +327,47 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Contains("\"session_id\":\"8d7d1778-f352-4701-8803-2305ca7bb9f2\"", requestBody, StringComparison.Ordinal);
         Assert.Contains("\"content\":\"Can you help with FDM?\"", requestBody, StringComparison.Ordinal);
         Assert.DoesNotContain("sessionId", requestBody, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies the ChatbotService client sends snake_case JSON when initiating website sessions.
+    /// </summary>
+    [Fact]
+    public async Task ChatbotServiceClient_SendsSnakeCaseSessionContract()
+    {
+        string? requestBody = null;
+        using var httpClient = new HttpClient(new StubHttpMessageHandler(async request =>
+        {
+            requestBody = request.Content is null ? null : await request.Content.ReadAsStringAsync();
+            Assert.Equal("/chatbot/v1/sessions/initiate", request.RequestUri?.AbsolutePath);
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(new
+                {
+                    session_id = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
+                    welcome_message = "Hello from MALIEV.",
+                    language = "en",
+                    expires_at = DateTimeOffset.Parse("2026-05-17T00:00:00+07:00")
+                })
+            };
+        }))
+        {
+            BaseAddress = new Uri("http://chatbot.test")
+        };
+        var client = new ChatbotServiceClient(httpClient);
+
+        await client.InitiateSessionAsync(new ChatbotInitiateSessionRequest
+        {
+            Channel = "website",
+            ExternalUserId = "customer-123",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotNull(requestBody);
+        Assert.Contains("\"channel\":\"website\"", requestBody, StringComparison.Ordinal);
+        Assert.Contains("\"external_user_id\":\"customer-123\"", requestBody, StringComparison.Ordinal);
+        Assert.Contains("\"language\":\"en\"", requestBody, StringComparison.Ordinal);
+        Assert.DoesNotContain("externalUserId", requestBody, StringComparison.Ordinal);
     }
 
     /// <summary>

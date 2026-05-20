@@ -141,6 +141,13 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>(cancellationToken) ?? new CustomerChatbotResponse();
     }
 
+    internal async Task<CustomerChatbotResponse> StartChatbotSessionAsync(CustomerChatbotStartRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/chatbot/sessions", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>(cancellationToken) ?? new CustomerChatbotResponse();
+    }
+
     private async Task<T?> GetJsonAsync<T>(string path, CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync(path, cancellationToken);

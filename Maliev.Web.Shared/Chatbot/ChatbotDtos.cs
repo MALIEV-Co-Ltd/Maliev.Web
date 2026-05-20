@@ -25,6 +25,16 @@ public sealed class CustomerChatbotRequest
 }
 
 /// <summary>
+/// Customer-facing chatbot session start request.
+/// </summary>
+public sealed class CustomerChatbotStartRequest
+{
+    /// <summary>Gets or sets the preferred language code, either en or th.</summary>
+    [RegularExpression("^(en|th)?$", ErrorMessage = "Language must be 'en' or 'th'.")]
+    public string? Language { get; set; }
+}
+
+/// <summary>
 /// Customer-facing chatbot response.
 /// </summary>
 public sealed class CustomerChatbotResponse

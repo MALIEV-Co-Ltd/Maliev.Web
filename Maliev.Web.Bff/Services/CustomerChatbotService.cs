@@ -9,6 +9,14 @@ namespace Maliev.Web.Bff.Services;
 public interface ICustomerChatbotService
 {
     /// <summary>
+    /// Starts a customer chatbot session.
+    /// </summary>
+    /// <param name="request">The customer chatbot session request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The assistant session greeting.</returns>
+    Task<CustomerChatbotResponse> StartSessionAsync(CustomerChatbotStartRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sends a customer chatbot message.
     /// </summary>
     /// <param name="request">The customer chatbot request.</param>
@@ -57,6 +65,36 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "คำสั่งซื้อของฉัน", "ติดตามงาน", "ใบเสนอราคาของฉัน", "ใบเสร็จ", "ใบกำกับภาษี", "บัญชีของฉัน",
         "โปรไฟล์", "ข้อมูลส่วนตัว", "ที่อยู่ของฉัน", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่"
     ];
+
+    private static readonly string[] EnglishSessionGreetings =
+    [
+        "Hi, Mali here. I am connected and ready to help with materials, CAD files, quotes, orders, or delivery.",
+        "Hello, you are connected to Mali. Tell me what you are making and I will help route the next manufacturing step.",
+        "Hi, I am Mali. I can help with MALIEV manufacturing questions, quote prep, and order follow-up."
+    ];
+
+    private static readonly string[] ThaiSessionGreetings =
+    [
+        "สวัสดีค่ะ น้องมะลิเชื่อมต่อแล้ว พร้อมช่วยเรื่องวัสดุ ไฟล์ CAD ใบเสนอราคา คำสั่งซื้อ หรือการจัดส่งค่ะ",
+        "สวัสดีค่ะ น้องมะลิพร้อมช่วยแล้วค่ะ บอกได้เลยว่ากำลังทำชิ้นงานแบบไหน เดี๋ยวช่วยแนะนำขั้นตอนถัดไปค่ะ",
+        "น้องมะลิเชื่อมต่อเรียบร้อยค่ะ ช่วยตอบเรื่องงานผลิตของ MALIEV เตรียมใบเสนอราคา และติดตามคำสั่งซื้อได้ค่ะ"
+    ];
+
+    public async Task<CustomerChatbotResponse> StartSessionAsync(CustomerChatbotStartRequest request, CancellationToken cancellationToken)
+    {
+        var language = NormalizeLanguage(request.Language, string.Empty);
+        var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+        language = NormalizeLanguage(session.Language, string.Empty);
+
+        return new CustomerChatbotResponse
+        {
+            SessionId = session.SessionId,
+            Content = CreateSessionGreeting(session, language),
+            Role = "assistant",
+            Language = language,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+    }
 
     public async Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
     {
@@ -283,6 +321,13 @@ Customer message:
         }
 
         return ContainsThai(message) ? "th" : "en";
+    }
+
+    private static string CreateSessionGreeting(ChatbotSessionResponse session, string language)
+    {
+        var variants = language == "th" ? ThaiSessionGreetings : EnglishSessionGreetings;
+        var index = (int)((uint)session.SessionId.GetHashCode() % (uint)variants.Length);
+        return variants[index];
     }
 
     private static bool ContainsThai(string text)

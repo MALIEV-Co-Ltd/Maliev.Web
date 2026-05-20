@@ -109,7 +109,7 @@
             <div class="customer-chatbot-prompts" aria-label="@Text("Suggested topics", "หัวข้อแนะนำ")">
                 @foreach (var prompt in SuggestedPrompts)
                 {
-                    <button type="button" @onclick="() => SendSuggestionAsync(prompt.Value.For(Preferences.Culture))" disabled="@_isSending">
+                    <button type="button" @onclick="() => SendSuggestionAsync(prompt.Value.For(Preferences.Culture))" disabled="@(!CanInteract)">
                         @prompt.Label.For(Preferences.Culture)
                     </button>
                 }
@@ -122,7 +122,7 @@
                           placeholder="@Text("Ask about materials, quotes, or delivery", "ถามเรื่องวัสดุ ราคา หรือจัดส่ง")"
                           value="@_draft"
                           @oninput="OnDraftInputAsync"
-                          disabled="@_isSending"></textarea>
+                          disabled="@(!CanInteract)"></textarea>
                 <button @ref="_sendButton" type="button" aria-label="@Text("Send message", "ส่งข้อความ")" @onclick="SendDraftAsync" disabled="@(!CanSend)">
                     <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" />
                 </button>
@@ -225,7 +225,8 @@
     private CancellationTokenSource? _popoutCts;
     private CancellationTokenSource? _signInPollCts;
 
-    private bool CanSend => !_isSending && !string.IsNullOrWhiteSpace(_draft);
+    private bool CanInteract => !_isSending && _sessionId.HasValue;
+    private bool CanSend => CanInteract && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
@@ -238,11 +239,6 @@
         new(Localized("Molding", "เครื่องฉีด"), Localized("What is the difference between the 30g and 50g machine variants?", "รุ่น 30g และ 50g ต่างกันอย่างไร")),
         new(Localized("My orders", "คำสั่งซื้อของฉัน"), Localized("Can you help me check my quotes and orders?", "ช่วยตรวจใบเสนอราคาและคำสั่งซื้อของฉันได้ไหม"))
     ];
-
-    protected override void OnInitialized()
-    {
-        ResetDisplayedConversation(null, false);
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -280,20 +276,18 @@
         }
 
         _memory = NormalizeMemory(storedMemory ?? new CustomerChatbotMemory());
+        _memory.Messages.Clear();
+        _memory.LastSessionId = null;
+        _memory.UnreadCount = 0;
         ApplyIdentityToMemory(identity);
         await EnrichMemoryFromAccountAsync(identity);
 
-        _sessionId = _memory.LastSessionId ?? await ReadSharedSessionIdAsync();
-        _unreadCount = Math.Clamp(_memory.UnreadCount, 0, 99);
+        _sessionId = null;
+        _unreadCount = 0;
         _storageReady = true;
-        var greetingName = GetPersonalGreetingName(identity);
-        ResetDisplayedConversation(greetingName, _memory.Messages.Count > 0);
+        ResetDisplayedConversation();
+        await ClearSharedSessionAsync();
         await PersistMemoryAsync();
-
-        if (!_isOpen && _unreadCount > 0)
-        {
-            _ = ShowPopoutTemporarilyAsync(CreateUnreadPopoutMessage(greetingName));
-        }
 
         StateHasChanged();
     }
@@ -312,6 +306,7 @@
             _unreadCount = 0;
             _memory.UnreadCount = 0;
             await PersistMemoryAsync();
+            await EnsureChatSessionStartedAsync();
         }
     }
 
@@ -389,10 +384,14 @@
         _showJumpToLatest = false;
         _showPopout = false;
         _isAwaitingSignIn = false;
-        ResetDisplayedConversation(GetPersonalGreetingName(_identity), false);
+        ResetDisplayedConversation();
         QueueMessageScroll(false);
         await ClearStoredChatAsync();
         await FitComposerAsync();
+        if (_isOpen)
+        {
+            await EnsureChatSessionStartedAsync(forceNew: true);
+        }
     }
 
     private Task SendSuggestionAsync(string message)
@@ -400,11 +399,75 @@
         return SendAsync(message);
     }
 
+    private async Task EnsureChatSessionStartedAsync(bool forceNew = false)
+    {
+        if (_isSending || (!forceNew && _sessionId.HasValue))
+        {
+            return;
+        }
+
+        _isSending = true;
+        _showJumpToLatest = false;
+        _latestUnreadCount = 0;
+        QueueMessageScroll(false);
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var response = await ApiClient.StartChatbotSessionAsync(new CustomerChatbotStartRequest
+            {
+                Language = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en"
+            });
+
+            if (!response.SessionId.HasValue || response.SessionId.Value == Guid.Empty)
+            {
+                await AddAssistantMessageAsync(
+                    "assistant",
+                    Text(
+                        "The MALIEV assistant could not open a verified session yet. Please try again in a moment.",
+                        "ผู้ช่วย MALIEV ยังเปิดเซสชันที่ยืนยันแล้วไม่ได้ค่ะ กรุณาลองอีกครั้งในอีกสักครู่"));
+                return;
+            }
+
+            _sessionId = response.SessionId;
+            var content = string.IsNullOrWhiteSpace(response.Content)
+                ? Text(
+                    "Hi, Mali here. I am connected and ready to help with your MALIEV project.",
+                    "สวัสดีค่ะ น้องมะลิเชื่อมต่อแล้ว พร้อมช่วยเรื่องโปรเจกต์ MALIEV ค่ะ")
+                : response.Content;
+            await AddAssistantMessageAsync(response.Role, content, MapResponseActions(response.SuggestedActions));
+        }
+        catch (MalievApiException ex)
+        {
+            await AddAssistantMessageAsync("assistant", ex.Message);
+        }
+        finally
+        {
+            _isSending = false;
+            if (_isOpen && !_showJumpToLatest)
+            {
+                QueueMessageScroll(true);
+            }
+
+            await PersistMemoryAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task SendAsync(string message)
     {
         if (string.IsNullOrWhiteSpace(message) || _isSending)
         {
             return;
+        }
+
+        if (!_sessionId.HasValue)
+        {
+            await EnsureChatSessionStartedAsync();
+            if (!_sessionId.HasValue)
+            {
+                return;
+            }
         }
 
         var trimmed = message.Trim();
@@ -869,37 +932,9 @@
         }
     }
 
-    private void ResetDisplayedConversation(string? name, bool hasPreviousMessages)
+    private void ResetDisplayedConversation()
     {
         _messages.Clear();
-        _messages.Add(new CustomerChatMessage("assistant", CreateGreeting(name, hasPreviousMessages), false));
-        _messages.AddRange(_memory.Messages
-            .Where(message => !IsGeneratedGreeting(message))
-            .Select(message => new CustomerChatMessage(message.Role, message.Content)));
-    }
-
-    private string CreateGreeting(string? name, bool hasPreviousMessages)
-    {
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            return hasPreviousMessages
-                ? Text($"Hi {name}, I'm Mali. I saved your previous MALIEV chat so we can continue from there.", $"สวัสดีค่ะ {name} น้องมะลิบันทึกบทสนทนาเรื่อง MALIEV ไว้และคุยต่อได้ค่ะ")
-                : Text($"Hi {name}, I'm Mali. How can I help with your MALIEV project today?", $"สวัสดีค่ะ {name} น้องมะลิอยู่ตรงนี้แล้วค่ะ วันนี้ให้ช่วยเรื่องโปรเจกต์ของ MALIEV ด้านไหนดีคะ");
-        }
-
-        return Text(
-            "Hi, I'm Mali. How can I help with your MALIEV project today?",
-            "สวัสดีค่ะ น้องมะลิอยู่ตรงนี้แล้วค่ะ วันนี้ให้ช่วยเรื่องโปรเจกต์ของ MALIEV ด้านไหนดีคะ");
-    }
-
-    private string CreateUnreadPopoutMessage(string? name)
-    {
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            return Text($"Hi {name}, you have unread messages from the MALIEV assistant.", $"สวัสดีค่ะ {name} มีข้อความที่ยังไม่ได้อ่านจากผู้ช่วย MALIEV ค่ะ");
-        }
-
-        return Text("You have unread messages from the MALIEV assistant.", "มีข้อความที่ยังไม่ได้อ่านจากผู้ช่วย MALIEV ค่ะ");
     }
 
     private string CreateSignInRequiredMessage()
@@ -1215,19 +1250,6 @@
         }
     }
 
-    private async Task<Guid?> ReadSharedSessionIdAsync()
-    {
-        try
-        {
-            var value = await JS.InvokeAsync<string?>("malievChatbot.readSharedSessionId", SharedSessionStorageKey);
-            return Guid.TryParse(value, out var sessionId) ? sessionId : null;
-        }
-        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
-        {
-            return null;
-        }
-    }
-
     private async Task PersistMemoryAsync()
     {
         if (!_storageReady)
@@ -1235,13 +1257,9 @@
             return;
         }
 
-        _memory.LastSessionId = _sessionId;
-        _memory.Messages = _messages
-            .Where(message => message.Persist && !IsGeneratedGreeting(message))
-            .TakeLast(MaxStoredMessages)
-            .Select(message => new StoredChatMessage { Role = message.Role, Content = message.Content })
-            .ToList();
-        _memory.UnreadCount = _unreadCount;
+        _memory.LastSessionId = null;
+        _memory.Messages = [];
+        _memory.UnreadCount = 0;
         _memory.LastUpdatedAt = DateTimeOffset.UtcNow;
 
         try
@@ -1274,6 +1292,17 @@
         try
         {
             await JS.InvokeVoidAsync("localStorage.removeItem", _storageKey);
+            await ClearSharedSessionAsync();
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+        }
+    }
+
+    private async Task ClearSharedSessionAsync()
+    {
+        try
+        {
             await JS.InvokeVoidAsync("malievChatbot.clearSharedSession", SharedSessionStorageKey);
         }
         catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
@@ -1588,11 +1617,6 @@
         sanitizer.AllowedSchemes.Add("tel");
 
         return sanitizer;
-    }
-
-    private static bool IsGeneratedGreeting(CustomerChatMessage message)
-    {
-        return IsGeneratedGreeting(message.Role, message.Content);
     }
 
     private static bool IsGeneratedGreeting(StoredChatMessage message)
