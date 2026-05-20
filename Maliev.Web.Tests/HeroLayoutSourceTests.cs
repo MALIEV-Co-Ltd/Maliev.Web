@@ -1496,9 +1496,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("private string SecondaryActionPrefix => Text(\"Contact\", \"ติดต่อ\");", source);
         Assert.DoesNotContain("<a class=\"button secondary\" href=\"@SecondaryHref\">@SecondaryAction</a>", source);
         Assert.Contains(".button-logo-mark {", styles);
-        Assert.Contains("display: inline-block;", buttonLogoStyle);
+        Assert.Contains("display: block;", buttonLogoStyle);
+        Assert.Contains("align-self: center;", buttonLogoStyle);
+        Assert.Contains("flex: 0 0 auto;", buttonLogoStyle);
         Assert.Contains("height: .9em;", buttonLogoStyle);
         Assert.Contains("filter: var(--logo-filter);", buttonLogoStyle);
+        Assert.Contains("transform: none;", buttonLogoStyle);
+        Assert.DoesNotContain("transform: translateY(.03em);", buttonLogoStyle);
     }
 
     /// <summary>
