@@ -190,8 +190,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone", dropzone);
         Assert.Contains("Icons.Material.Filled.CloudUpload", dropzone);
         Assert.Contains("Icons.Material.Filled.ArrowForward", dropzone);
+        Assert.Contains("landing-quote-dropzone-primary", dropzone);
+        Assert.Contains("landing-quote-dropzone-divider", dropzone);
+        Assert.Contains("landing-quote-dropzone-browse", dropzone);
+        Assert.Contains("landing-quote-dropzone-or", dropzone);
         Assert.Contains("landing-quote-dropzone-icon", dropzone);
         Assert.Contains("landing-quote-dropzone-action", dropzone);
+        Assert.Contains("Drop 3D files for instant quote", source);
+        Assert.Contains("Browse files", source);
+        Assert.Contains("Ready when you are.", source);
         Assert.DoesNotContain("StartIcon=", dropzone);
         Assert.DoesNotContain("EndIcon=", dropzone);
         Assert.DoesNotContain("class=\"quote-dropzone final-dropzone\"", source);
@@ -213,6 +220,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("type=\"file\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("data-opening-label=\"@OpeningText\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("OrText", dropzone, StringComparison.Ordinal);
         Assert.Contains("malievQuoteDropzone.register", dropzone, StringComparison.Ordinal);
         Assert.Contains("event.dataTransfer.files", script, StringComparison.Ordinal);
         Assert.Contains("routeToQuoteEngine(Array.from(input.files), dropzone, quoteEngineUrl, state)", script, StringComparison.Ordinal);
@@ -220,6 +228,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("window.location.assign(url.toString())", script, StringComparison.Ordinal);
         Assert.Contains("Opening quote engine", script, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-divider", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-browse", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-or", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Content-Range", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Uploading ", script, StringComparison.Ordinal);
@@ -2105,8 +2116,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("min-height: auto;\n    padding-top: 24px;\n    padding-bottom: 34px;\n    text-align: center;", styles);
         Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
         Assert.Contains(".landing-hero-copy > p,\n  .landing-hero-actions {\n    max-width: none;\n    margin-inline: auto;", styles);
-        Assert.Contains(".landing-quote-dropzone-inner {\n    grid-template-columns: 38px minmax(0, 1fr);\n    grid-template-areas:\n      \"icon copy\"\n      \"action action\";", styles);
-        Assert.Contains(".landing-quote-dropzone-action {\n    grid-area: action;\n    width: 100%;", styles);
+        Assert.Contains(".landing-quote-dropzone-primary {\n    grid-template-columns: 38px minmax(0, 1fr);\n    gap: 10px;", styles);
+        Assert.Contains(".landing-quote-dropzone-browse {\n    grid-template-columns: minmax(0, 1fr);", styles);
+        Assert.Contains(".landing-quote-dropzone-action {\n    width: 100%;", styles);
         Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
         Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);

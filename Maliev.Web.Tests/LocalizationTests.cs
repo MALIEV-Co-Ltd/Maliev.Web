@@ -112,7 +112,7 @@ public sealed class LocalizationTests
         Assert.False(home.Contains("L[\"", StringComparison.Ordinal));
         Assert.Contains("@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", layout);
         Assert.Contains("ActionText=\"@QuoteDropzoneAction\"", home);
-        Assert.Contains("private string QuoteDropzoneAction => Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", home);
+        Assert.Contains("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
     }
 
     /// <summary>

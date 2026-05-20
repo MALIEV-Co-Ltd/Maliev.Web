@@ -212,8 +212,8 @@
 
 <section class="section final-cta" aria-labelledby="final-cta-title">
     <div>
-        <h2 id="final-cta-title" class="h-display">@Text("Ready when your CAD is.", "พร้อมเมื่อไฟล์ CAD ของคุณพร้อม")</h2>
-        <p class="lede">@Text("Send geometry to the quote engine, then configure process, material, finish, quantity, tolerance, and delivery expectations.", "ส่ง Geometry เข้าระบบราคา แล้วเลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และความคาดหวังเรื่องจัดส่ง")</p>
+        <h2 id="final-cta-title" class="h-display">@Text("Ready when you are.", "พร้อมเมื่อคุณพร้อม")</h2>
+        <p class="lede">@Text("Configure tolerances, finishes, and quantities. See pricing update live. Ship to your door.", "ตั้งค่า tolerance ผิวงาน และจำนวน ดูราคาอัปเดตสด และจัดส่งถึงปลายทาง")</p>
     </div>
     <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
                    Class="final-dropzone"
@@ -351,13 +351,13 @@
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 
-    private string QuoteDropzoneTitle => Text("Upload CAD to price your part", "อัปโหลด CAD เพื่อดูราคาชิ้นงาน");
+    private string QuoteDropzoneTitle => Text("Drop 3D files for instant quote", "วางไฟล์ 3D เพื่อขอราคาทันที");
 
     private string QuoteDropzoneDescription => Text(
-        "STL, STEP, STP, OBJ, 3MF. Review DFM, live pricing, and order when ready.",
-        "รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้");
+        "STL, STEP, STP, IGES, OBJ, 3MF - up to 200 MB. Configure material, finish and quantity at quote.maliev.com.",
+        "รองรับ STL, STEP, STP, IGES, OBJ, 3MF สูงสุด 200 MB ตั้งค่าวัสดุ ผิวงาน และจำนวนที่ quote.maliev.com");
 
-    private string QuoteDropzoneAction => Text("Get part price", "ดูราคาชิ้นงาน");
+    private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
 
     private string ServiceCardClass(ServicePageContent service)
     {

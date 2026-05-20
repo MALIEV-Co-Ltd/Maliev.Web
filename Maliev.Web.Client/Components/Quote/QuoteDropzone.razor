@@ -14,16 +14,22 @@
             data-idle-label="@ActionText"
             data-opening-label="@OpeningText">
         <span class="landing-quote-dropzone-inner">
-            <span class="landing-quote-dropzone-icon" aria-hidden="true">
-                <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+            <span class="landing-quote-dropzone-primary">
+                <span class="landing-quote-dropzone-icon" aria-hidden="true">
+                    <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Medium" />
+                </span>
+                <span class="landing-quote-dropzone-copy">
+                    <strong>@Title</strong>
+                    <small>@Description</small>
+                </span>
             </span>
-            <span class="landing-quote-dropzone-copy">
-                <strong>@Title</strong>
-                <small>@Description</small>
-            </span>
-            <span class="landing-quote-dropzone-action">
-                <span data-quote-dropzone-label>@ActionText</span>
-                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+            <span class="landing-quote-dropzone-divider" aria-hidden="true"></span>
+            <span class="landing-quote-dropzone-browse">
+                <span class="landing-quote-dropzone-or">@OrText</span>
+                <span class="landing-quote-dropzone-action">
+                    <span data-quote-dropzone-label>@ActionText</span>
+                    <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" />
+                </span>
             </span>
         </span>
     </button>
@@ -47,6 +53,9 @@
 
     [Parameter]
     public string ActionText { get; set; } = string.Empty;
+
+    [Parameter]
+    public string OrText { get; set; } = "OR";
 
     [Parameter]
     public string? AriaLabel { get; set; }
