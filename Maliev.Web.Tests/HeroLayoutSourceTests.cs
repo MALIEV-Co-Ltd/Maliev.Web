@@ -332,7 +332,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("align-items: stretch;", styles);
         Assert.Contains("height: 100%;", styles);
         Assert.Contains(".service-card.primary {\n  color: var(--inverse-text);", styles);
-        Assert.Contains(".service-card.primary .service-card-media {\n  aspect-ratio: 4 / 2.6;", styles);
+        Assert.Contains(".service-card-media {\n  height: clamp(190px, 18vw, 236px);", styles);
+        Assert.DoesNotContain(".service-card.primary .service-card-media", styles);
         Assert.DoesNotContain("grid-row: span 2;", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
@@ -618,7 +619,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("internal static string ResolveServiceSlug(string? targetKey)", content);
         Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto;", styles);
         Assert.Contains("grid-auto-rows: minmax(320px, 1fr);", styles);
-        Assert.Contains(".service-card.primary .service-card-media {\n  aspect-ratio: 4 / 2.6;", styles);
+        Assert.Contains(".service-card-media {\n  height: clamp(190px, 18vw, 236px);", styles);
+        Assert.DoesNotContain(".service-card.primary .service-card-media", styles);
         Assert.DoesNotContain("grid-row: span 2;", styles);
         Assert.DoesNotContain("<span class=\"card-meta\">@service.Number</span>", source);
         Assert.DoesNotContain("return service.Primary ? \"service-card primary\" : \"service-card\";", source);

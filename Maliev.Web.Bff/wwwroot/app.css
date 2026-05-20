@@ -1094,11 +1094,7 @@ html:lang(th) .h1 {
 }
 
 .service-card-media {
-  aspect-ratio: 4 / 2.6;
-}
-
-.service-card.primary .service-card-media {
-  aspect-ratio: 4 / 2.6;
+  height: clamp(190px, 18vw, 236px);
 }
 
 .material-category-media {
