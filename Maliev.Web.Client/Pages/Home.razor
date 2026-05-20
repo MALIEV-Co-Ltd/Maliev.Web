@@ -156,20 +156,18 @@
     </div>
 </section>
 
-<section class="section" aria-labelledby="cases-title">
-    <div class="section-heading">
-        <div>
-            <h2 id="cases-title" class="logo-heading">
-                <span>@Text("Recent work from", "ผลงานล่าสุดจาก")</span>
-                <img src="/images/logo.svg" alt="MALIEV" />
-            </h2>
-        </div>
-        <a class="section-link" href="/case-studies">@Text("All case studies", "ดูผลงานทั้งหมด")</a>
+<section class="section home-work-section" aria-labelledby="cases-title">
+    <div class="section-heading home-work-heading">
+        <h2 id="cases-title">@Text("What we've made lately", "ผลงานล่าสุดที่เราสร้าง")</h2>
+        <a class="home-work-link" href="/case-studies">
+            <span>@Text("All case studies", "ดูผลงานทั้งหมด")</span>
+            <span aria-hidden="true">&rarr;</span>
+        </a>
     </div>
     <div class="case-grid">
         @foreach (var caseStudy in _caseStudies)
         {
-            <a class="case-card" href="/case-studies/@caseStudy.Slug">
+            <a class="case-card home-work-card" href="/case-studies/@caseStudy.Slug">
                 <div class="case-card-media">
                     <img src="@caseStudy.ImageUrl" alt="@caseStudy.Title.For(Preferences.Culture)" loading="lazy" />
                 </div>
@@ -177,7 +175,10 @@
                     <span class="card-meta">@caseStudy.Meta</span>
                     <h3>@caseStudy.Title.For(Preferences.Culture)</h3>
                     <p>@caseStudy.Summary.For(Preferences.Culture)</p>
-                    <span class="card-link">@caseStudy.Stat</span>
+                    <span class="card-link">
+                        <span>@caseStudy.Stat</span>
+                        <span aria-hidden="true">&rarr;</span>
+                    </span>
                 </div>
             </a>
         }

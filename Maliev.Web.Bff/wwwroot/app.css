@@ -47,6 +47,10 @@
   --machine-feature-border-rgb: 23 23 23;
   --machine-feature-active-bg: var(--active-pill-bg);
   --machine-feature-active-text: var(--active-pill-text);
+  --home-work-surface: #f2f3f5;
+  --home-work-card: #ffffff;
+  --home-work-rule: #dcdfe4;
+  --home-work-button: #f7f8fa;
   --workflow-step-surface: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
   --workflow-step-border: rgba(52, 64, 84, .12);
   --workflow-step-shadow: rgba(17, 24, 39, .08) 0 18px 50px -34px;
@@ -120,6 +124,10 @@ html[data-theme="dark"] {
   --machine-feature-border-rgb: 244 246 248;
   --machine-feature-active-bg: var(--active-pill-bg);
   --machine-feature-active-text: var(--active-pill-text);
+  --home-work-surface: #11161d;
+  --home-work-card: #171c24;
+  --home-work-rule: #2a313b;
+  --home-work-button: #141920;
   --workflow-step-surface: linear-gradient(180deg, #161c24 0%, #111720 100%);
   --workflow-step-border: rgba(244, 246, 248, .12);
   --workflow-step-shadow: rgba(0, 0, 0, .34) 0 18px 50px -32px;
@@ -2753,6 +2761,74 @@ html[data-theme="dark"] .workflow-step--order {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.home-work-section {
+  max-width: none;
+  padding: clamp(84px, 8vw, 128px) clamp(20px, 4vw, 72px);
+  background: var(--home-work-surface);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.home-work-heading {
+  width: min(100%, var(--container));
+  margin-inline: auto;
+  margin-bottom: clamp(28px, 3.6vw, 48px);
+  align-items: center;
+  gap: 24px;
+}
+
+.home-work-heading h2 {
+  font-size: clamp(3rem, 5vw, 4.25rem);
+  line-height: 1.02;
+}
+
+.home-work-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  color: var(--ink);
+  background: var(--home-work-button);
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-work-section .case-grid {
+  width: min(100%, var(--container));
+  margin-inline: auto;
+  gap: clamp(16px, 1.7vw, 24px);
+}
+
+.home-work-card {
+  background: var(--home-work-card);
+  border: 1px solid var(--home-work-rule);
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.home-work-card .case-card-media {
+  aspect-ratio: 4 / 3;
+}
+
+.home-work-card .case-card-body {
+  gap: 8px;
+  padding: 22px 24px 24px;
+}
+
+.home-work-card .card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  color: var(--ink);
+}
+
 .case-card-media,
 .blog-card-media {
   aspect-ratio: 4 / 3;
@@ -5351,6 +5427,10 @@ html[data-theme="dark"] .auth-google-icon {
     grid-row: auto;
   }
 
+  .home-work-heading {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .product-detail-copy,
   .cart-summary,
   .account-nav-card {
@@ -5655,6 +5735,20 @@ html[data-theme="dark"] .auth-google-icon {
 
   .service-answer-prep {
     padding: 22px;
+  }
+
+  .home-work-section {
+    padding: 64px 18px;
+  }
+
+  .home-work-heading {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    justify-items: start;
+  }
+
+  .home-work-heading h2 {
+    font-size: clamp(2.65rem, 12vw, 3.35rem);
   }
 
   .service-answer-block--routes {
