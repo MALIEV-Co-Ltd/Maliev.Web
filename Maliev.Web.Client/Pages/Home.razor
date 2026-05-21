@@ -15,19 +15,7 @@
         <h1>
             @_heroCopy.HeadlineLead.For(Preferences.Culture)
             <br />
-            <span class="accent-blue hero-typewriter"
-                  data-hero-typewriter
-                  data-typewriter-interval="5000"
-                  data-typewriter-speed="26"
-                  data-typewriter-erase-speed="16">
-                <span class="hero-typewriter-text" data-typewriter-text>@_heroCopy.HeadlineAccent.For(Preferences.Culture)</span><span class="hero-typewriter-cursor" aria-hidden="true"></span>
-                <span hidden>
-                    @foreach (var accent in HeroTypewriterAccents)
-                    {
-                        <span data-typewriter-option>@accent</span>
-                    }
-                </span>
-            </span>
+            <span class="accent-blue">@_heroCopy.HeadlineAccent.For(Preferences.Culture)</span>
         </h1>
         <p>@_heroCopy.Body.For(Preferences.Culture)</p>
         <div class="landing-hero-actions">
@@ -387,27 +375,6 @@
     private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
 
     private string PrimaryServiceBadgeText => Text("Recommended", "แนะนำ");
-
-    private IReadOnlyList<string> HeroTypewriterAccents
-    {
-        get
-        {
-            var currentAccent = _heroCopy.HeadlineAccent.For(Preferences.Culture);
-            var accents = new List<string> { currentAccent };
-
-            foreach (var variant in HeroCopyCatalog.GetVariants(_heroTargetKey))
-            {
-                var accent = variant.HeadlineAccent.For(Preferences.Culture);
-                if (!string.IsNullOrWhiteSpace(accent) &&
-                    !accents.Contains(accent, StringComparer.Ordinal))
-                {
-                    accents.Add(accent);
-                }
-            }
-
-            return accents;
-        }
-    }
 
     private string ServiceCardClass(ServicePageContent service)
     {

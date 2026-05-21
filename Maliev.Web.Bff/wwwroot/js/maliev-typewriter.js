@@ -32,10 +32,6 @@
   };
 
   const initializeTypewriter = root => {
-    if (root.dataset.typewriterReady === "true") {
-      return;
-    }
-
     const target = root.querySelector("[data-typewriter-text]");
     const options = Array.from(root.querySelectorAll("[data-typewriter-option]"))
       .map(option => option.textContent?.trim() ?? "")
@@ -45,8 +41,18 @@
       return;
     }
 
-    root.dataset.typewriterReady = "true";
     const uniqueOptions = [...new Set(options)];
+    const signature = uniqueOptions.join("\u001f");
+    if (root.dataset.typewriterReady === "true" && root.dataset.typewriterSignature === signature) {
+      return;
+    }
+
+    if (root._malievTypewriterToken) {
+      root._malievTypewriterToken.cancelled = true;
+    }
+
+    root.dataset.typewriterReady = "true";
+    root.dataset.typewriterSignature = signature;
     target.textContent = uniqueOptions[0];
 
     if (uniqueOptions.length === 1 || reduceMotion()) {
@@ -88,7 +94,7 @@
   };
 
   const initializeAll = () => {
-    document.querySelectorAll("[data-hero-typewriter]").forEach(initializeTypewriter);
+    document.querySelectorAll("[data-maliev-typewriter]").forEach(initializeTypewriter);
   };
 
   const scheduleInitialize = delay => {

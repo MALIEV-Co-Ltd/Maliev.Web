@@ -154,7 +154,22 @@
             </div>
         </div>
         <div class="footer-legal">
-            <span class="footer-legal-copy">@CopyrightText <span>@RotatingManufacturingLine</span></span>
+            <span class="footer-legal-copy">
+                @CopyrightText
+                <span class="footer-typewriter"
+                      data-maliev-typewriter
+                      data-typewriter-interval="5000"
+                      data-typewriter-speed="22"
+                      data-typewriter-erase-speed="14">
+                    <span class="footer-typewriter-text" data-typewriter-text>@ManufacturingFooterLines[0].For(Preferences.Culture)</span><span class="footer-typewriter-cursor" aria-hidden="true"></span>
+                    <span hidden>
+                        @foreach (var line in ManufacturingFooterLines)
+                        {
+                            <span data-typewriter-option>@line.For(Preferences.Culture)</span>
+                        }
+                    </span>
+                </span>
+            </span>
             <nav class="footer-legal-links" aria-label="@Text("Legal links", "ลิงก์กฎหมาย")">
                 <NavLink href="/privacy">@Text("Privacy", "ความเป็นส่วนตัว")</NavLink>
                 <NavLink href="/terms">@Text("Terms", "เงื่อนไข")</NavLink>
@@ -258,8 +273,6 @@
     private string _selectedTheme = PreferenceService.LightTheme;
     private CookieConsentBanner? _cookieConsent;
     private bool _mobileNavOpen;
-    private int _footerLineIndex;
-    private CancellationTokenSource? _footerLineRotationCancellation;
     private const int FoundingYear = 2018;
     private bool HasCartItems => Cart.Count > 0;
     private string CartBadgeAriaLabel => $"{Text("Cart", "ตะกร้า")}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
@@ -267,7 +280,6 @@
     private string CopyrightText => Text(
         $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} MALIEV Co., Ltd.",
         $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} บริษัท มาลีฟ จำกัด");
-    private string RotatingManufacturingLine => ManufacturingFooterLines[_footerLineIndex % ManufacturingFooterLines.Length].For(Preferences.Culture);
     private string MobileNavClass => _mobileNavOpen ? "mobile-nav open" : "mobile-nav";
     private bool IsDarkMode => _selectedTheme.Equals(PreferenceService.DarkTheme, StringComparison.OrdinalIgnoreCase);
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
@@ -283,8 +295,6 @@
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
         _selectedTheme = Preferences.Theme;
-        _footerLineRotationCancellation = new CancellationTokenSource();
-        _ = RotateFooterLineAsync(_footerLineRotationCancellation.Token);
     }
 
     private async Task ChangeCultureAsync(string culture)
@@ -330,28 +340,10 @@
         return _cookieConsent?.ShowPreferencesAsync() ?? Task.CompletedTask;
     }
 
-    private async Task RotateFooterLineAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(6), cancellationToken);
-                _footerLineIndex = (_footerLineIndex + 1) % ManufacturingFooterLines.Length;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
     public void Dispose()
     {
         Cart.Changed -= StateHasChanged;
         Preferences.Changed -= OnPreferencesChanged;
-        _footerLineRotationCancellation?.Cancel();
-        _footerLineRotationCancellation?.Dispose();
     }
 
     private sealed record LocalizedText(string English, string Thai)

@@ -789,43 +789,6 @@ main {
   line-height: 1.02;
 }
 
-.hero-typewriter {
-  display: inline;
-}
-
-.hero-typewriter-text {
-  display: inline;
-}
-
-.hero-typewriter-cursor {
-  display: inline-block;
-  width: 0.075em;
-  height: 0.9em;
-  margin-left: 0.08em;
-  background: currentColor;
-  transform: translateY(0.08em);
-  animation: hero-typewriter-cursor 0.85s steps(1, end) infinite;
-}
-
-@keyframes hero-typewriter-cursor {
-  0%,
-  45% {
-    opacity: 1;
-  }
-
-  46%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-typewriter-cursor {
-    animation: none;
-    opacity: 0.75;
-  }
-}
-
 .h-display {
   font-size: 4.75rem;
   line-height: 1;
@@ -5782,6 +5745,44 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
 .footer-legal-copy span {
   color: var(--footer-text);
+}
+
+.footer-typewriter {
+  display: inline;
+  color: var(--footer-text);
+}
+
+.footer-typewriter-text {
+  display: inline;
+}
+
+.footer-typewriter-cursor {
+  display: inline-block;
+  width: 0.075em;
+  height: 0.9em;
+  margin-left: 0.08em;
+  background: currentColor;
+  transform: translateY(0.08em);
+  animation: footer-typewriter-cursor 0.85s steps(1, end) infinite;
+}
+
+@keyframes footer-typewriter-cursor {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-typewriter-cursor {
+    animation: none;
+    opacity: 0.75;
+  }
 }
 
 .footer-legal-links {

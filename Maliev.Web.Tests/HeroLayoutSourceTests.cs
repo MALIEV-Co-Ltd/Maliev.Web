@@ -719,11 +719,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("home.hero.copy", source);
         Assert.Contains("@_heroCopy.HeadlineLead.For(Preferences.Culture)", source);
         Assert.Contains("@_heroCopy.HeadlineAccent.For(Preferences.Culture)", source);
-        Assert.Contains("data-hero-typewriter", source);
-        Assert.Contains("data-typewriter-interval=\"5000\"", source);
-        Assert.Contains("HeroTypewriterAccents", source);
-        Assert.Contains("HeroCopyCatalog.GetVariants(_heroTargetKey)", source);
-        Assert.Contains("data-typewriter-option", source);
+        Assert.DoesNotContain("data-hero-typewriter", source);
+        Assert.DoesNotContain("HeroTypewriterAccents", source);
         Assert.Contains("@_heroCopy.Body.For(Preferences.Culture)", source);
         Assert.Contains("@_heroCopy.MetaDescription.For(Preferences.Culture)", source);
         Assert.Contains("\"service\"", content);
@@ -738,17 +735,24 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the home hero typewriter has a fast five-second rotation and a blinking cursor.
+    /// Verifies the footer manufacturing line has a localized fast five-second typewriter rotation.
     /// </summary>
     [Fact]
-    public void HomeHeroTypewriterUsesFastFiveSecondRotation()
+    public void FooterManufacturingLineUsesLocalizedTypewriterRotation()
     {
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-typewriter.js");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("js/maliev-typewriter.js", app);
-        Assert.Contains("[data-hero-typewriter]", script);
+        Assert.Contains("data-maliev-typewriter", layout);
+        Assert.Contains("data-typewriter-interval=\"5000\"", layout);
+        Assert.Contains("ManufacturingFooterLines[0].For(Preferences.Culture)", layout);
+        Assert.Contains("line.For(Preferences.Culture)", layout);
+        Assert.Contains("[data-maliev-typewriter]", script);
+        Assert.Contains("typewriterSignature", script);
+        Assert.Contains("root._malievTypewriterToken.cancelled = true", script);
         Assert.Contains("root.dataset.typewriterInterval ?? \"5000\"", script);
         Assert.Contains("root.dataset.typewriterSpeed ?? \"26\"", script);
         Assert.Contains("root.dataset.typewriterEraseSpeed ?? \"16\"", script);
@@ -757,9 +761,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("prefers-reduced-motion: reduce", script);
         Assert.Contains("new MutationObserver", script);
         Assert.Contains("scheduleInitialize(1000)", script);
-        Assert.Contains(".hero-typewriter-cursor", styles);
-        Assert.Contains("@keyframes hero-typewriter-cursor", styles);
-        Assert.Contains("animation: hero-typewriter-cursor 0.85s steps(1, end) infinite;", styles);
+        Assert.Contains(".footer-typewriter-cursor", styles);
+        Assert.Contains("@keyframes footer-typewriter-cursor", styles);
+        Assert.Contains("animation: footer-typewriter-cursor 0.85s steps(1, end) infinite;", styles);
+        Assert.DoesNotContain(".hero-typewriter", styles);
     }
 
     /// <summary>
@@ -847,9 +852,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("aria-label=\"@Text(\"Legal links\", \"ลิงก์กฎหมาย\")\"", source);
         Assert.Contains("href=\"/terms\"", source);
         Assert.Contains("OpenCookieSettingsAsync", source);
-        Assert.Contains("RotatingManufacturingLine", source);
         Assert.Contains("ManufacturingFooterLines", source);
-        Assert.Contains("Task.Delay(TimeSpan.FromSeconds(6)", source);
+        Assert.Contains("data-maliev-typewriter", source);
+        Assert.Contains("footer-typewriter", source);
+        Assert.Contains("footer-typewriter-text", source);
+        Assert.Contains("footer-typewriter-cursor", source);
+        Assert.DoesNotContain("RotatingManufacturingLine", source);
+        Assert.DoesNotContain("Task.Delay(TimeSpan.FromSeconds(6)", source);
         Assert.Contains("Measure twice. Print once. Ship with confidence.", source);
         Assert.Contains("Manufacturing is momentum with evidence.", source);
         Assert.Contains("วัดให้ชัด พิมพ์ให้แม่น ส่งมอบอย่างมั่นใจ", source);
