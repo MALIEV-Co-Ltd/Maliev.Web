@@ -24,6 +24,13 @@ public sealed class AuthController(
 {
     private const string ExternalScheme = "MalievExternal";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly string[] CustomerAccountPermissions =
+    [
+        "customer.profile.read",
+        "customer.profile.write",
+        "customer.addresses.manage",
+        "order.orders.read"
+    ];
 
     /// <summary>
     /// Starts customer Google sign-in.
@@ -198,11 +205,14 @@ public sealed class AuthController(
     /// Signs the current customer out.
     /// </summary>
     [HttpPost("sign-out")]
-    [Authorize]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SignOutCustomer()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (User.Identity is { IsAuthenticated: true })
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
         return Redirect("/");
     }
 
@@ -229,6 +239,11 @@ public sealed class AuthController(
         if (!string.IsNullOrWhiteSpace(user.Name))
         {
             claims.Add(new Claim(ClaimTypes.Name, user.Name));
+        }
+
+        foreach (var permission in CustomerAccountPermissions)
+        {
+            claims.Add(new Claim("permission", permission));
         }
 
         await HttpContext.SignInAsync(

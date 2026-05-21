@@ -964,7 +964,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Materials, quotes, orders, and delivery", component);
         Assert.Contains("Customer manufacturing assistant", component);
         Assert.Contains("EnsureChatSessionStartedAsync", component);
+        Assert.Contains("StartChatbotSessionForBrowserAsync", component);
+        Assert.Contains("malievChatbot.postJson", component);
         Assert.Contains("StartChatbotSessionAsync", ReadRepoFile("Maliev.Web.Client", "Services", "MalievApiClient.cs"));
+        Assert.Contains("postJson: async function", script);
+        Assert.Contains("method: 'POST'", script);
+        Assert.Contains("credentials: 'include'", script);
         Assert.Contains("CanInteract", component);
         Assert.Contains("The MALIEV assistant could not open a verified session yet.", component);
         Assert.DoesNotContain("How can I help with your MALIEV project today?", component);

@@ -90,5 +90,11 @@
         catch (JSDisconnectedException)
         {
         }
+        catch (InvalidOperationException ex) when (IsJsInteropUnavailable(ex))
+        {
+        }
     }
+
+    private static bool IsJsInteropUnavailable(InvalidOperationException exception)
+        => exception.Message.Contains("JavaScript interop calls cannot be issued", StringComparison.OrdinalIgnoreCase);
 }

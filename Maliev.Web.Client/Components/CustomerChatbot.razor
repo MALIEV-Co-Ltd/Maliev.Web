@@ -1,5 +1,6 @@
 @using Ganss.Xss
 @using Markdig
+@using System.Net
 @using System.Security.Claims
 @using System.Text.Json
 @using System.Text.RegularExpressions
@@ -414,7 +415,7 @@
 
         try
         {
-            var response = await ApiClient.StartChatbotSessionAsync(new CustomerChatbotStartRequest
+            var response = await StartChatbotSessionForBrowserAsync(new CustomerChatbotStartRequest
             {
                 Language = Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en"
             });
@@ -495,7 +496,7 @@
                 return;
             }
 
-            var response = await ApiClient.SendChatbotMessageAsync(new CustomerChatbotRequest
+            var response = await SendChatbotMessageForBrowserAsync(new CustomerChatbotRequest
             {
                 SessionId = _sessionId,
                 Message = trimmed,
@@ -544,6 +545,85 @@
         }
 
         await PersistMemoryAsync();
+    }
+
+    private Task<CustomerChatbotResponse> StartChatbotSessionForBrowserAsync(CustomerChatbotStartRequest request)
+    {
+        return PostChatbotJsonAsync("web/v1/chatbot/sessions", request);
+    }
+
+    private Task<CustomerChatbotResponse> SendChatbotMessageForBrowserAsync(CustomerChatbotRequest request)
+    {
+        return PostChatbotJsonAsync("web/v1/chatbot/messages", request);
+    }
+
+    private async Task<CustomerChatbotResponse> PostChatbotJsonAsync<TRequest>(string path, TRequest request)
+    {
+        BrowserJsonResponse? envelope;
+        try
+        {
+            var rawEnvelope = await JS.InvokeAsync<string>("malievChatbot.postJson", $"/{path.TrimStart('/')}", request);
+            envelope = string.IsNullOrWhiteSpace(rawEnvelope)
+                ? null
+                : JsonSerializer.Deserialize<BrowserJsonResponse>(rawEnvelope, StorageJson);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException or JsonException)
+        {
+            throw new MalievApiException(HttpStatusCode.ServiceUnavailable, Text(
+                "The MALIEV assistant could not reach the website service. Please try again in a moment.",
+                "ผู้ช่วย MALIEV ยังเชื่อมต่อบริการเว็บไซต์ไม่ได้ค่ะ กรุณาลองใหม่อีกครั้ง"));
+        }
+
+        if (envelope is null)
+        {
+            throw new MalievApiException(HttpStatusCode.ServiceUnavailable, Text(
+                "The MALIEV assistant received an unreadable response. Please try again in a moment.",
+                "ผู้ช่วย MALIEV ได้รับคำตอบที่อ่านไม่ได้ค่ะ กรุณาลองใหม่อีกครั้ง"));
+        }
+
+        if (!envelope.Ok)
+        {
+            var statusCode = envelope.Status > 0
+                ? (HttpStatusCode)envelope.Status
+                : HttpStatusCode.ServiceUnavailable;
+            var detail = ReadProblemDetail(envelope.Body)
+                ?? envelope.Error
+                ?? Text(
+                    "The MALIEV assistant could not complete the request. Please try again in a moment.",
+                    "ผู้ช่วย MALIEV ยังทำรายการไม่สำเร็จค่ะ กรุณาลองใหม่อีกครั้ง");
+            throw new MalievApiException(statusCode, detail);
+        }
+
+        try
+        {
+            return string.IsNullOrWhiteSpace(envelope.Body)
+                ? new CustomerChatbotResponse()
+                : JsonSerializer.Deserialize<CustomerChatbotResponse>(envelope.Body, StorageJson) ?? new CustomerChatbotResponse();
+        }
+        catch (JsonException)
+        {
+            throw new MalievApiException(HttpStatusCode.ServiceUnavailable, Text(
+                "The MALIEV assistant received an unreadable response. Please try again in a moment.",
+                "ผู้ช่วย MALIEV ได้รับคำตอบที่อ่านไม่ได้ค่ะ กรุณาลองใหม่อีกครั้ง"));
+        }
+    }
+
+    private static string? ReadProblemDetail(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            var problem = JsonSerializer.Deserialize<BrowserProblemDetails>(json, StorageJson);
+            return problem?.Detail ?? problem?.Title;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     private async Task AddSignInRequiredMessagesAsync()
@@ -1677,6 +1757,24 @@
     private sealed record CustomerChatPrompt(LocalizedText Label, LocalizedText Value);
 
     private sealed record CustomerChatbotIdentity(bool IsAuthenticated, string? UserKey, string? DisplayName, string? Email);
+
+    private sealed class BrowserJsonResponse
+    {
+        public bool Ok { get; set; }
+
+        public int Status { get; set; }
+
+        public string? Body { get; set; }
+
+        public string? Error { get; set; }
+    }
+
+    private sealed class BrowserProblemDetails
+    {
+        public string? Title { get; set; }
+
+        public string? Detail { get; set; }
+    }
 
     private sealed class CustomerChatbotMemory
     {

@@ -67,7 +67,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         };
     });
 }
-builder.Services.AddAuthorization();
+builder.Services.AddPermissionAuthorization();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

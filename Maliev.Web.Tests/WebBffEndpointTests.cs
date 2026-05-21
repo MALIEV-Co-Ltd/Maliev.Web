@@ -183,6 +183,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains(
             response.Headers.GetValues("Set-Cookie"),
             value => value.Contains("maliev_customer_assistant_handoff=", StringComparison.Ordinal)
+                && value.Contains("path=/", StringComparison.OrdinalIgnoreCase)
                 && value.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
     }
 
@@ -208,6 +209,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains(
             response.Headers.GetValues("Set-Cookie"),
             value => value.Contains("maliev_customer_assistant_handoff=", StringComparison.Ordinal)
+                && value.Contains("path=/", StringComparison.OrdinalIgnoreCase)
                 && value.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
     }
 

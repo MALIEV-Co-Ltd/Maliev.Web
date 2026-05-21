@@ -23,6 +23,41 @@ window.malievChatbot = {
     }
   },
 
+  postJson: async function (path, payload) {
+    if (!path || typeof path !== 'string' || !path.startsWith('/')) {
+      return JSON.stringify({
+        ok: false,
+        status: 400,
+        error: 'Invalid request path.'
+      });
+    }
+
+    try {
+      const response = await fetch(path, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload || {})
+      });
+      const body = await response.text();
+
+      return JSON.stringify({
+        ok: response.ok,
+        status: response.status,
+        body
+      });
+    } catch (error) {
+      return JSON.stringify({
+        ok: false,
+        status: 0,
+        error: error && error.message ? error.message : 'Request failed.'
+      });
+    }
+  },
+
   openSignInPopup: function (url) {
     if (!url || typeof url !== 'string' || !url.startsWith('/')) {
       return false;
