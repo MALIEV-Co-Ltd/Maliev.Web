@@ -609,7 +609,23 @@ main {
 }
 
 .home-services-section .section-heading {
+  align-items: start;
   margin-bottom: 30px;
+}
+
+.home-services-title {
+  display: grid;
+  gap: 2px;
+  max-width: 840px;
+}
+
+.home-services-title-lead,
+.home-services-title-muted {
+  display: block;
+}
+
+.home-services-title-muted {
+  color: var(--muted);
 }
 
 .section-heading,

@@ -404,6 +404,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-services-section", styles);
         Assert.Contains("padding-top: clamp(44px, 5vw, 72px);", styles);
         Assert.Contains(".home-services-section .section-heading", styles);
+        Assert.Contains("home-services-title", source);
+        Assert.Contains("home-services-title-lead", source);
+        Assert.Contains("Seven services. One workshop.", source);
+        Assert.Contains("Vertically integrated so your part never waits for a vendor.", source);
+        Assert.Contains(".home-services-title {\n  display: grid;", styles);
+        Assert.Contains(".home-services-title-muted", styles);
+        Assert.Contains("color: var(--muted);", styles);
         Assert.Contains("machine-feature", source);
         Assert.Contains("id=\"machine-feature-preview\"", source);
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
