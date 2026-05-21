@@ -626,14 +626,20 @@ main {
 }
 
 .home-services-section .section-heading {
-  align-items: start;
+  grid-template-columns: minmax(0, 660px) auto;
+  align-items: end;
   margin-bottom: 30px;
+}
+
+.home-services-section .section-link {
+  align-self: end;
+  justify-self: end;
 }
 
 .home-services-title {
   display: grid;
   gap: 2px;
-  max-width: 840px;
+  max-width: 660px;
 }
 
 .home-services-title-lead,
@@ -5724,6 +5730,14 @@ html[data-theme="dark"] .auth-google-icon {
   .contact-layout,
   .article-detail-layout {
     grid-template-columns: 1fr;
+  }
+
+  .home-services-section .section-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .home-services-section .section-link {
+    justify-self: start;
   }
 
   .detail-sidebar {
