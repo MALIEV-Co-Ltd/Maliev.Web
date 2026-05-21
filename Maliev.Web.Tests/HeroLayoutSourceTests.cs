@@ -492,6 +492,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains("width: 100vw;", styles);
+        Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
         Assert.Contains(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature-point-button.is-active", styles);
         Assert.Contains(".machine-feature .h-display", styles);
@@ -505,6 +507,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-size: clamp(1.5rem, 2.1vw, 2rem);", styles);
         Assert.Contains("margin-bottom: 30px;", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
+        Assert.Contains(".machine-stat-grid div {\n    min-height: 80px;", styles);
+        Assert.Contains("font-size: clamp(1.25rem, 6vw, 1.55rem);", styles);
         Assert.Contains(".social-link", styles);
     }
 

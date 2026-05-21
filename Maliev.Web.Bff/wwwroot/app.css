@@ -5987,10 +5987,17 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .machine-feature-backdrop {
     position: relative;
     grid-column: 1;
-    width: 100%;
+    justify-self: center;
+    width: 100vw;
+    max-width: none;
     height: min(58vw, 520px);
+    margin-inline: calc(50% - 50vw);
     object-fit: contain;
     object-position: left bottom;
+  }
+
+  .machine-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .service-grid,
@@ -6634,8 +6641,25 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-backdrop {
+    width: 100vw;
+    max-width: none;
     height: 320px;
+    margin-inline: calc(50% - 50vw);
     object-position: 34% bottom;
+  }
+
+  .machine-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .machine-stat-grid div {
+    min-height: 80px;
+    padding: 13px 14px;
+  }
+
+  .machine-stat-grid strong {
+    font-size: clamp(1.25rem, 6vw, 1.55rem);
   }
 
   .site-footer {
