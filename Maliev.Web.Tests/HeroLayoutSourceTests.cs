@@ -372,6 +372,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".service-card-media {\n  height: clamp(190px, 18vw, 236px);", styles);
         Assert.DoesNotContain(".service-card.primary .service-card-media", styles);
         Assert.DoesNotContain("grid-row: span 2;", styles);
+        Assert.Contains("body {\n  margin: 0;\n  color: var(--ink);\n  background: var(--paper);\n  overflow-x: hidden;\n  font-size: 15px;", styles);
+        Assert.Contains(".body {\n  color: var(--muted);\n  font-size: 1rem;\n  line-height: 1.6;", styles);
+        Assert.Contains(".service-card h3,\n.case-card h3,\n.blog-card h3 {\n  margin: 0;\n  font-size: 1.0625rem;", styles);
+        Assert.Contains(".service-card p,\n.case-card p,\n.blog-card p,\n.product-card p {\n  margin: 0;\n  color: var(--muted);\n  font-size: .9375rem;", styles);
+        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--blue);\n  font-size: .875rem;", styles);
+        Assert.Contains(".card-meta,\n.small,\n.load-message,\n.form-status,\n.success-message {\n  color: var(--muted);\n  font-size: .8125rem;", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
         Assert.Contains(".process-section::after", styles);
