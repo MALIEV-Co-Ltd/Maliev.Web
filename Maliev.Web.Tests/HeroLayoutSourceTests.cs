@@ -1245,17 +1245,42 @@ public sealed class HeroLayoutSourceTests
     {
         var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var reconnectModal = ReadRepoFile("Maliev.Web.Bff", "Components", "Layout", "ReconnectModal.razor");
         var clientProject = ReadRepoFile("Maliev.Web.Client", "Maliev.Web.Client.csproj");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var reconnectScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-reconnect.js");
 
         Assert.Contains("AddInteractiveServerComponents", program);
         Assert.Contains("AddInteractiveServerRenderMode", program);
         Assert.Contains("UseStaticWebAssets", program);
         Assert.Contains("app.UseStaticFiles();", program);
         Assert.Contains("@rendermode=\"InteractiveServer\"", app);
+        Assert.Contains("<ReconnectModal />", app);
+        Assert.Contains("js/maliev-reconnect.js", app);
         Assert.DoesNotContain("AddInteractiveWebAssemblyComponents", program);
         Assert.DoesNotContain("AddInteractiveWebAssemblyRenderMode", program);
         Assert.DoesNotContain("Microsoft.NET.Sdk.BlazorWebAssembly", clientProject);
         Assert.DoesNotContain("Microsoft.AspNetCore.Components.WebAssembly", clientProject);
+        Assert.Contains("id=\"components-reconnect-modal\"", reconnectModal);
+        Assert.Contains("components-reconnect-hide maliev-reconnect-modal", reconnectModal);
+        Assert.Contains("class=\"maliev-reconnect-logo\" src=\"/images/logo.svg\"", reconnectModal);
+        Assert.Contains("data-reconnect-elapsed", reconnectModal);
+        Assert.Contains("Reconnecting to your workspace", reconnectModal);
+        Assert.Contains("Still trying to reconnect", reconnectModal);
+        Assert.Contains("Refresh to continue", reconnectModal);
+        Assert.Contains("maliev-reconnect-actions", reconnectModal);
+        Assert.Contains("Blazor.reconnect()", reconnectModal);
+        Assert.Contains("#components-reconnect-modal.components-reconnect-show", styles);
+        Assert.Contains(".maliev-reconnect-panel--show", styles);
+        Assert.Contains(".maliev-reconnect-panel--failed", styles);
+        Assert.Contains(".maliev-reconnect-actions", styles);
+        Assert.Contains(".maliev-reconnect-logo", styles);
+        Assert.Contains(".maliev-reconnect-timer", styles);
+        Assert.Contains(".maliev-reconnect-progress::after", styles);
+        Assert.Contains("@keyframes reconnect-progress", styles);
+        Assert.Contains("components-reconnect-retrying", reconnectScript);
+        Assert.Contains("data-reconnect-elapsed", reconnectScript);
+        Assert.Contains("formatElapsed", reconnectScript);
 
         var centralPackages = ReadRepoFile("Directory.Build.props");
         Assert.DoesNotContain("Microsoft.AspNetCore.Components.WebAssembly", centralPackages);

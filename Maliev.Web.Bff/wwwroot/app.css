@@ -4673,6 +4673,131 @@ html[data-theme="dark"] .auth-google-icon {
   cursor: pointer;
 }
 
+#components-reconnect-modal.maliev-reconnect-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: none;
+  place-items: start center;
+  padding: 96px 20px 20px;
+  background: rgba(255, 255, 255, .62);
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
+  background: rgba(5, 7, 10, .66);
+}
+
+#components-reconnect-modal.components-reconnect-show,
+#components-reconnect-modal.components-reconnect-failed,
+#components-reconnect-modal.components-reconnect-rejected {
+  display: grid;
+}
+
+.maliev-reconnect-panel {
+  display: none;
+  width: min(460px, calc(100vw - 40px));
+  padding: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: rgba(17, 24, 39, .12) 0 24px 60px -32px, var(--shadow-border);
+  font-family: var(--maliev-font-sans);
+  line-height: 1.55;
+}
+
+#components-reconnect-modal.components-reconnect-show .maliev-reconnect-panel--show,
+#components-reconnect-modal.components-reconnect-failed .maliev-reconnect-panel--failed,
+#components-reconnect-modal.components-reconnect-rejected .maliev-reconnect-panel--rejected {
+  display: grid;
+  gap: 8px;
+}
+
+.maliev-reconnect-logo {
+  width: 104px;
+  height: auto;
+  margin-bottom: 8px;
+  filter: var(--logo-filter);
+}
+
+.maliev-reconnect-panel strong {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.maliev-reconnect-panel p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.maliev-reconnect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.maliev-reconnect-timer {
+  color: var(--muted-2);
+  font-size: .78rem;
+  font-weight: 500;
+}
+
+.maliev-reconnect-timer time {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.maliev-reconnect-panel button {
+  min-height: 34px;
+  padding: 7px 14px;
+  color: var(--cta-text);
+  background: var(--cta-bg);
+  border: 0;
+  border-radius: 999px;
+  font-size: .86rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.maliev-reconnect-progress {
+  display: block;
+  width: 160px;
+  height: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: var(--rule);
+  border-radius: 999px;
+}
+
+.maliev-reconnect-progress::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 100%;
+  background: var(--blue);
+  border-radius: inherit;
+  animation: reconnect-progress 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes reconnect-progress {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(220px);
+  }
+}
+
 .site-footer {
   max-width: none;
   display: grid;
