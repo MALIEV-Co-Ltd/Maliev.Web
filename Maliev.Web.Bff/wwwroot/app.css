@@ -4777,12 +4777,18 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .maliev-reconnect-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
-  margin-top: 10px;
-  padding-top: 16px;
+  margin-top: 4px;
+  padding-top: 10px;
   border-top: 1px solid var(--rule-soft);
+}
+
+.maliev-reconnect-panel--failed .maliev-reconnect-actions,
+.maliev-reconnect-panel--rejected .maliev-reconnect-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .maliev-reconnect-timer {
@@ -4796,16 +4802,22 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   font-variant-numeric: tabular-nums;
 }
 
-.maliev-reconnect-panel button {
+.maliev-reconnect-panel .maliev-reconnect-actions button {
   min-height: 34px;
-  padding: 7px 14px;
-  color: var(--cta-text);
-  background: var(--cta-bg);
+  padding: 7px 16px;
+  color: #ffffff !important;
+  background: var(--blue);
   border: 0;
   border-radius: 999px;
   font-size: .86rem;
   font-weight: 600;
   line-height: 1.2;
+}
+
+.maliev-reconnect-panel .maliev-reconnect-actions button:is(:hover, :focus-visible) {
+  color: #ffffff !important;
+  background: var(--cta-hover);
+  outline: none;
 }
 
 .maliev-reconnect-progress {

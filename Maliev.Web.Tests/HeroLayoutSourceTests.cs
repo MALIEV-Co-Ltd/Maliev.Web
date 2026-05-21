@@ -1337,6 +1337,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".maliev-reconnect-actions", styles);
         Assert.Contains(".maliev-reconnect-logo", styles);
         Assert.Contains(".maliev-reconnect-timer", styles);
+        Assert.Contains(".maliev-reconnect-panel--rejected .maliev-reconnect-actions", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr) auto;", styles);
+        Assert.Contains(".maliev-reconnect-panel .maliev-reconnect-actions button", styles);
+        Assert.Contains("color: #ffffff !important;\n  background: var(--blue);", styles);
+        Assert.Contains(".maliev-reconnect-panel .maliev-reconnect-actions button:is(:hover, :focus-visible)", styles);
         Assert.Contains(".maliev-reconnect-progress::after", styles);
         Assert.Contains("@keyframes reconnect-progress", styles);
         Assert.Contains("components-reconnect-retrying", reconnectScript);
