@@ -495,8 +495,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("home-services-title-lead", source);
         Assert.Contains("Seven services. One workshop.", source);
         Assert.Contains("Vertically integrated so your part never waits for a vendor.", source);
-        Assert.Contains(".home-services-title {\n  display: grid;", styles);
+        Assert.Contains(".home-services-section .home-services-title {\n  display: grid;", styles);
         Assert.Contains("max-width: 660px;", styles);
+        Assert.Contains("font-family: var(--maliev-font-sans);", styles);
+        Assert.Contains("font-size: 56px;", styles);
+        Assert.Contains("font-weight: 600;", styles);
         Assert.Contains(".home-services-title-muted", styles);
         Assert.Contains("color: var(--muted);", styles);
         Assert.Contains("machine-feature", source);

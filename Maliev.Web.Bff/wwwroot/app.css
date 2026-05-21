@@ -762,10 +762,13 @@ main {
   justify-self: end;
 }
 
-.home-services-title {
+.home-services-section .home-services-title {
   display: grid;
   gap: 2px;
   max-width: 660px;
+  font-family: var(--maliev-font-sans);
+  font-size: 56px;
+  font-weight: 600;
 }
 
 .home-services-title-lead,
