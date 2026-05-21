@@ -915,6 +915,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".footer-legal {\n  grid-column: 1 / -1;\n  display: flex;", styles);
         Assert.Contains(".footer-legal-links", styles);
         Assert.Contains(".footer-legal-copy span", styles);
+        Assert.Contains("@media (max-width: 820px) {\n  .footer-legal {\n    align-items: flex-start;\n    flex-direction: column;", styles);
+        Assert.Contains(".footer-typewriter {\n    display: block;\n    margin-top: 4px;", styles);
+        Assert.Contains(".footer-legal-links {\n    justify-content: flex-start;", styles);
         Assert.DoesNotContain("<strong>MALIEV Co., Ltd.</strong>", source);
         Assert.DoesNotContain("Nonthaburi, Thailand. Manufacturing services, machines, and production support.", source);
     }

@@ -5841,6 +5841,27 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   color: var(--footer-text);
 }
 
+@media (max-width: 820px) {
+  .footer-legal {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .footer-legal-copy {
+    display: block;
+  }
+
+  .footer-typewriter {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .footer-legal-links {
+    justify-content: flex-start;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
