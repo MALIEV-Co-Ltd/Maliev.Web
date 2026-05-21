@@ -137,10 +137,11 @@
          class="section process-section"
          aria-labelledby="process-title">
     <div class="section-lede process-lede">
-        <h2 id="process-title">@Text("From CAD file to production order, in one workspace.", "จากไฟล์ CAD สู่คำสั่งผลิตในพื้นที่เดียว")</h2>
-        <p>@Text("Visual checks, DFM feedback, pricing choices, and production tracking stay connected so teams can move faster with fewer handoffs.", "การตรวจไฟล์ DFM ตัวเลือกราคา และการติดตามผลิตอยู่ในขั้นตอนเดียว ทีมจึงเดินงานได้เร็วขึ้นและส่งต่อน้อยลง")</p>
+        <span class="process-eyebrow">@Text("How it works", "ขั้นตอนการทำงาน")</span>
+        <h2 id="process-title">@Text("Quote to part, no friction", "จากใบเสนอราคาสู่ชิ้นงานอย่างลื่นไหล")</h2>
+        <p>@Text("Upload CAD once, configure online, let MALIEV make it, and inspect or ship from the same workspace.", "อัปโหลด CAD ครั้งเดียว ตั้งค่างานออนไลน์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
     </div>
-    <div class="process-grid" aria-label="@Text("Production workflow carousel", "คารูเซลขั้นตอนการผลิต")">
+    <div class="process-grid" aria-label="@Text("Quote to part workflow", "ขั้นตอนจากใบเสนอราคาสู่ชิ้นงาน")">
         @foreach (var step in ProcessSteps)
         {
             <button class="@WorkflowStepClass(step)"
@@ -149,9 +150,6 @@
                     aria-current="@WorkflowAriaCurrent(step)"
                     @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
                 <span class="workflow-step-number">@step.Number</span>
-                <div class="workflow-step-visual" aria-hidden="true">
-                    <MudIcon Icon="@step.Icon" Size="Size.Large" />
-                </div>
                 <h2>@step.Title.For(Preferences.Culture)</h2>
                 <p>@step.Body.For(Preferences.Culture)</p>
             </button>
@@ -317,27 +315,23 @@
         new(
             "01",
             "upload",
-            Icons.Material.Filled.UploadFile,
-            SiteContent.Text("Upload your file", "อัปโหลดไฟล์"),
-            SiteContent.Text("STL, STEP, IGES, OBJ, and 3MF files move directly to the pricing workspace.", "ไฟล์ STL, STEP, IGES, OBJ และ 3MF เข้าสู่พื้นที่คำนวณราคาโดยตรง")),
+            SiteContent.Text("Drop your file", "วางไฟล์ของคุณ"),
+            SiteContent.Text("STEP, STL, IGES, OBJ, and 3MF files move into one quote-ready workspace.", "ไฟล์ STEP, STL, IGES, OBJ และ 3MF เข้าสู่พื้นที่พร้อมเสนอราคาเดียวกัน")),
         new(
             "02",
             "dfm",
-            Icons.Material.Filled.FactCheck,
-            SiteContent.Text("Review DFM", "ตรวจ DFM"),
-            SiteContent.Text("Manufacturability feedback helps you catch risks before placing an order.", "ผลตรวจความเหมาะสมช่วยให้เห็นความเสี่ยงก่อนสั่งผลิต")),
+            SiteContent.Text("Configure online", "ตั้งค่าออนไลน์"),
+            SiteContent.Text("Choose material, finish, quantity, tolerance, and delivery while pricing stays transparent.", "เลือกวัสดุ ผิวงาน จำนวน tolerance และการจัดส่ง พร้อมเห็นราคาชัดเจน")),
         new(
             "03",
             "price",
-            Icons.Material.Filled.PriceChange,
-            SiteContent.Text("Adjust price", "ปรับราคา"),
-            SiteContent.Text("Choose process, material, finish, quantity, tolerance, and delivery expectations online.", "เลือกกระบวนการ วัสดุ ผิวงาน จำนวน tolerance และการจัดส่งออนไลน์")),
+            SiteContent.Text("We make it", "เราผลิตให้"),
+            SiteContent.Text("In-house teams route the job across printing, CNC, scanning, casting, and molding.", "ทีมในโรงงานเดินงานผ่านการพิมพ์ CNC สแกน หล่อ และฉีดขึ้นรูป")),
         new(
             "04",
             "order",
-            Icons.Material.Filled.Inventory2,
-            SiteContent.Text("Order and track", "สั่งผลิตและติดตาม"),
-            SiteContent.Text("Accepted work continues into production tracking from the same customer workspace.", "งานที่ยืนยันแล้วติดตามการผลิตต่อได้ในพื้นที่ลูกค้าเดียวกัน"))
+            SiteContent.Text("Inspect and ship", "ตรวจและจัดส่ง"),
+            SiteContent.Text("Track production, request inspection, and ship with dimensional evidence when needed.", "ติดตามการผลิต ขอรายงานตรวจ และจัดส่งพร้อมหลักฐานมิติเมื่อจำเป็น"))
     ];
 
     protected override async Task OnInitializedAsync()
@@ -567,7 +561,6 @@
     private sealed record ProcessStep(
         string Number,
         string Accent,
-        string Icon,
         LocalizedText Title,
         LocalizedText Body);
 
