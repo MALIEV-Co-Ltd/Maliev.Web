@@ -66,18 +66,19 @@
             </button>
         </div>
         <nav class="@MobileNavClass" aria-label="Mobile navigation">
-            <NavLink href="/services" @onclick="CloseMobileNav">@Text("Services", "บริการ")</NavLink>
-            <NavLink href="/materials" @onclick="CloseMobileNav">@Text("Materials", "วัสดุ")</NavLink>
-            <NavLink href="/shop" @onclick="CloseMobileNav">@Text("Shop", "ร้านค้า")</NavLink>
-            <NavLink href="/case-studies" @onclick="CloseMobileNav">@Text("Case studies", "ผลงาน")</NavLink>
-            <NavLink href="/blog" @onclick="CloseMobileNav">@Text("Journal", "บทความ")</NavLink>
-            <NavLink href="/contact" @onclick="CloseMobileNav">@Text("Contact", "ติดต่อ")</NavLink>
-            <NavLink href="/account" @onclick="CloseMobileNav">@Text("Account", "บัญชี")</NavLink>
-            @if (HasCartItems)
-            {
-                <NavLink href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
-            }
-            <a href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+            <div class="mobile-nav-primary">
+                <NavLink href="/services" @onclick="CloseMobileNav">@Text("Services", "บริการ")</NavLink>
+                <NavLink href="/shop" @onclick="CloseMobileNav">@Text("Shop", "ร้านค้า")</NavLink>
+                <NavLink href="/contact" @onclick="CloseMobileNav">@Text("Contact", "ติดต่อ")</NavLink>
+            </div>
+            <div class="mobile-nav-actions">
+                <NavLink class="mobile-nav-secondary" href="/account" @onclick="CloseMobileNav">@Text("Account", "บัญชี")</NavLink>
+                @if (HasCartItems)
+                {
+                    <NavLink class="mobile-nav-secondary" href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
+                }
+                <a class="mobile-nav-quote" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+            </div>
         </nav>
     </header>
 
