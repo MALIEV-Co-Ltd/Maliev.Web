@@ -436,9 +436,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("align-items: stretch;", styles);
         Assert.Contains("height: 100%;", styles);
         Assert.Contains(".service-card.primary {\n  color: var(--inverse-text);", styles);
-        Assert.Contains("transition: box-shadow .18s ease-in-out;", styles);
-        Assert.Contains(".service-card:is(:hover, :focus-visible) {\n  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px, var(--shadow-card);", styles);
-        Assert.Contains(".service-card.primary:is(:hover, :focus-visible) {\n  box-shadow: rgba(0, 0, 0, .28) 0 24px 62px -34px, var(--shadow-dark-card);", styles);
+        Assert.Contains("transition: box-shadow .24s ease-in-out;", styles);
+        Assert.Contains(".service-card:is(:hover, :focus-visible) {\n  box-shadow: rgba(17, 24, 39, .18) 0 24px 64px -30px, rgba(17, 24, 39, .10) 0 8px 22px -18px, var(--shadow-card);", styles);
+        Assert.Contains(".service-card.primary:is(:hover, :focus-visible) {\n  box-shadow: rgba(0, 0, 0, .32) 0 26px 68px -30px, rgba(0, 0, 0, .20) 0 10px 24px -18px, var(--shadow-dark-card);", styles);
         Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--blue);", styles);
         Assert.Contains(".service-card.primary .card-link {\n  color: var(--inverse-text);", styles);
         Assert.Contains(".service-card.primary .card-link::after", styles);

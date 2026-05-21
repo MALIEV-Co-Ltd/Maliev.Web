@@ -1370,7 +1370,7 @@ html:lang(th) .h1 {
   height: 100%;
   min-height: 280px;
   color: var(--ink);
-  transition: box-shadow .18s ease-in-out;
+  transition: box-shadow .24s ease-in-out;
 }
 
 .material-category-card {
@@ -1386,12 +1386,12 @@ html:lang(th) .h1 {
 }
 
 .service-card:is(:hover, :focus-visible) {
-  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px, var(--shadow-card);
+  box-shadow: rgba(17, 24, 39, .18) 0 24px 64px -30px, rgba(17, 24, 39, .10) 0 8px 22px -18px, var(--shadow-card);
   outline: none;
 }
 
 .service-card.primary:is(:hover, :focus-visible) {
-  box-shadow: rgba(0, 0, 0, .28) 0 24px 62px -34px, var(--shadow-dark-card);
+  box-shadow: rgba(0, 0, 0, .32) 0 26px 68px -30px, rgba(0, 0, 0, .20) 0 10px 24px -18px, var(--shadow-dark-card);
 }
 
 .service-card-media,
