@@ -1867,6 +1867,19 @@ html[data-theme="dark"] .form-status--error {
   font-weight: 500;
 }
 
+.service-card.primary .card-link {
+  color: var(--inverse-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-card.primary .card-link::after {
+  content: "→";
+  font-size: .95em;
+  line-height: 1;
+}
+
 .feature-band {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;

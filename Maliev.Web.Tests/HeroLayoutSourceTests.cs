@@ -365,6 +365,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("align-items: stretch;", styles);
         Assert.Contains("height: 100%;", styles);
         Assert.Contains(".service-card.primary {\n  color: var(--inverse-text);", styles);
+        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--blue);", styles);
+        Assert.Contains(".service-card.primary .card-link {\n  color: var(--inverse-text);", styles);
+        Assert.Contains(".service-card.primary .card-link::after", styles);
+        Assert.Contains("content: \"→\";", styles);
         Assert.Contains(".service-card-media {\n  height: clamp(190px, 18vw, 236px);", styles);
         Assert.DoesNotContain(".service-card.primary .service-card-media", styles);
         Assert.DoesNotContain("grid-row: span 2;", styles);
