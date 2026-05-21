@@ -37,6 +37,10 @@
   --cta-bg: var(--blue);
   --cta-hover: var(--blue-hover);
   --cta-text: #ffffff;
+  --reconnect-button-bg: var(--blue);
+  --reconnect-button-hover: var(--blue-hover);
+  --reconnect-button-text: var(--blue-on);
+  --reconnect-button-focus: rgba(10, 114, 239, .24);
   --quote-surface: rgba(255, 255, 255, .96);
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
@@ -114,6 +118,10 @@ html[data-theme="dark"] {
   --cta-bg: #5ba7ff;
   --cta-hover: #82bdff;
   --cta-text: #07111f;
+  --reconnect-button-bg: var(--blue);
+  --reconnect-button-hover: var(--blue-hover);
+  --reconnect-button-text: var(--blue-on);
+  --reconnect-button-focus: rgba(91, 167, 255, .32);
   --quote-surface: rgba(21, 26, 33, .96);
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
@@ -4812,19 +4820,29 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   min-width: auto;
   margin: 0 !important;
   padding: 6px 14px !important;
-  color: #ffffff !important;
-  background: var(--blue);
+  color: var(--reconnect-button-text) !important;
+  background: var(--reconnect-button-bg);
   border: 0;
   border-radius: 999px;
+  box-shadow: var(--shadow-border);
   font-size: .86rem;
   font-weight: 600;
+  letter-spacing: 0;
   line-height: 1.2;
+  text-transform: none !important;
+  transition: background-color .16s ease, box-shadow .16s ease, transform .16s ease;
 }
 
 #components-reconnect-modal .maliev-reconnect-panel .maliev-reconnect-actions button:is(:hover, :focus-visible) {
-  color: #ffffff !important;
-  background: var(--cta-hover);
+  color: var(--reconnect-button-text) !important;
+  background: var(--reconnect-button-hover);
+}
+
+#components-reconnect-modal .maliev-reconnect-panel .maliev-reconnect-actions button:focus-visible {
   outline: none;
+  box-shadow:
+    0 0 0 3px var(--reconnect-button-focus),
+    var(--shadow-border);
 }
 
 .maliev-reconnect-progress {

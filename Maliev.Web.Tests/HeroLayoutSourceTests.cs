@@ -1292,6 +1292,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("html:lang(th)", styles);
         Assert.Contains("html[data-theme=\"dark\"]", styles);
         Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
+        Assert.Contains("--reconnect-button-text: var(--blue-on);", styles);
+        Assert.Contains("--reconnect-button-focus: rgba(10, 114, 239, .24);", styles);
+        Assert.Contains("--reconnect-button-focus: rgba(91, 167, 255, .32);", styles);
         Assert.Contains("document.documentElement.lang", cultureScript);
         Assert.Contains("document.documentElement.dataset.theme", cultureScript);
         Assert.DoesNotContain("isThaiRegionSignal", cultureScript);
@@ -1344,8 +1347,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("gap: 8px;\n  align-items: center;\n  justify-content: space-between;\n  margin-top: 2px;\n  padding-top: 4px;", styles);
         Assert.Contains("#components-reconnect-modal .maliev-reconnect-panel .maliev-reconnect-actions button", styles);
         Assert.Contains("min-height: 30px;\n  min-width: auto;\n  margin: 0 !important;\n  padding: 6px 14px !important;", styles);
-        Assert.Contains("color: #ffffff !important;\n  background: var(--blue);", styles);
+        Assert.Contains("color: var(--reconnect-button-text) !important;\n  background: var(--reconnect-button-bg);", styles);
+        Assert.Contains("text-transform: none !important;", styles);
         Assert.Contains("#components-reconnect-modal .maliev-reconnect-panel .maliev-reconnect-actions button:is(:hover, :focus-visible)", styles);
+        Assert.Contains("background: var(--reconnect-button-hover);", styles);
+        Assert.Contains("#components-reconnect-modal .maliev-reconnect-panel .maliev-reconnect-actions button:focus-visible", styles);
+        Assert.Contains("0 0 0 3px var(--reconnect-button-focus)", styles);
         Assert.Contains(".maliev-reconnect-progress::after", styles);
         Assert.Contains("@keyframes reconnect-progress", styles);
         Assert.Contains("components-reconnect-retrying", reconnectScript);
