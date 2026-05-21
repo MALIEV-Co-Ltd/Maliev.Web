@@ -632,7 +632,7 @@ main {
 }
 
 .home-services-section {
-  padding-top: clamp(44px, 5vw, 72px);
+  padding-top: clamp(112px, 12vw, 184px);
 }
 
 .home-services-section .section-heading {
@@ -5980,6 +5980,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     grid-template-columns: 1fr;
   }
 
+  .home-services-section {
+    padding-top: clamp(96px, 14vw, 128px);
+  }
+
   .home-services-section .section-link {
     justify-self: start;
   }
@@ -6193,6 +6197,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .section {
     padding-top: 64px;
     padding-bottom: 64px;
+  }
+
+  .home-services-section {
+    padding-top: 84px;
   }
 
   .page-hero.compact + .section {

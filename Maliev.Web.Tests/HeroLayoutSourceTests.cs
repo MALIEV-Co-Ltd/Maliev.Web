@@ -364,6 +364,9 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".final-dropzone-icon", styles);
         Assert.DoesNotContain(".final-dropzone-copy", styles);
         Assert.Contains(".service-grid {\n  grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
+        Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);", styles);
+        Assert.Contains(".home-services-section {\n    padding-top: clamp(96px, 14vw, 128px);", styles);
+        Assert.Contains(".home-services-section {\n    padding-top: 84px;", styles);
         Assert.DoesNotContain("grid-template-columns: 1.2fr 1fr 1fr;", styles);
         Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
@@ -418,7 +421,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".workflow-step--dfm .workflow-step-visual", styles);
         Assert.Contains("home-services-section", source);
         Assert.Contains(".home-services-section", styles);
-        Assert.Contains("padding-top: clamp(44px, 5vw, 72px);", styles);
+        Assert.DoesNotContain("padding-top: clamp(44px, 5vw, 72px);", styles);
         Assert.Contains(".home-services-section .section-heading", styles);
         Assert.Contains(".home-services-section .section-heading {\n  grid-template-columns: minmax(0, 660px) auto;\n  align-items: end;", styles);
         Assert.Contains(".home-services-section .section-link {\n  align-self: end;\n  justify-self: end;", styles);
