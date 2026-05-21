@@ -995,7 +995,7 @@ html:lang(th) .h1 {
   align-items: center;
   justify-content: center;
   min-height: 22px;
-  color: var(--ink);
+  color: var(--muted);
   background: transparent;
   border-radius: 0;
   padding: 0;
@@ -1004,7 +1004,8 @@ html:lang(th) .h1 {
   white-space: nowrap;
 }
 
-.landing-quote-dropzone-action:hover {
+.landing-quote-dropzone-action:hover,
+.landing-quote-dropzone:focus-visible .landing-quote-dropzone-action {
   color: var(--blue);
 }
 
