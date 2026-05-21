@@ -2158,7 +2158,7 @@ html:lang(th) .machine-feature-title-lead {
   transition: opacity .24s ease, transform .34s ease;
 }
 
-.machine-feature-backdrop--dark {
+.machine-feature-backdrop.machine-feature-backdrop--dark {
   display: none;
 }
 
