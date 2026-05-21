@@ -171,6 +171,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".service-detail-icon .mud-icon-root", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains(".final-dropzone", styles);
+        Assert.Contains(".final-cta {\n  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);\n  align-items: center;\n  max-width: var(--container);", styles);
+        Assert.DoesNotContain(".final-cta {\n  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);\n  align-items: center;\n  max-width: none;", styles);
         Assert.Matches(@"\.final-dropzone\s*\{[^}]*align-self:\s*center;", styles);
         Assert.DoesNotMatch(@"\.final-dropzone\s*\{[^}]*align-self:\s*stretch;", styles);
     }

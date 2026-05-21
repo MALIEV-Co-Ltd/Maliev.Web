@@ -3091,8 +3091,9 @@ html[data-theme="dark"] .workflow-step--order {
 .final-cta {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
   align-items: center;
-  max-width: none;
-  padding: clamp(86px, 9vw, 136px) clamp(20px, 4vw, 72px);
+  max-width: var(--container);
+  padding-top: clamp(86px, 9vw, 136px);
+  padding-bottom: clamp(86px, 9vw, 136px);
   background: var(--paper);
   border-top: 1px solid var(--rule);
 }
