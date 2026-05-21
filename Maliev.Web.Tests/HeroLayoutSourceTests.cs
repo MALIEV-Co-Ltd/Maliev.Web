@@ -358,8 +358,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-work-link", styles);
         Assert.Contains(".home-work-card", styles);
         Assert.Contains(".industry-sector-band", styles);
-        Assert.Contains(".industry-sector-band {\n  width: 100%;\n  padding: clamp(54px, 5.6vw, 76px) 32px;\n  background: var(--paper);", styles);
-        Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);\n  padding-bottom: clamp(112px, 12vw, 184px);\n  max-width: none;\n  background: var(--paper-2);", styles);
+        Assert.Contains(".industry-sector-band {\n  width: 100%;\n  padding: clamp(54px, 5.6vw, 76px) 32px;\n  background: var(--paper-2);", styles);
+        Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);\n  padding-bottom: clamp(112px, 12vw, 184px);\n  max-width: none;\n  background: var(--paper);", styles);
         Assert.Contains(".home-services-section .service-grid {\n  width: min(100%, var(--container));\n  margin-inline: auto;", styles);
         Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(6, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list li", styles);

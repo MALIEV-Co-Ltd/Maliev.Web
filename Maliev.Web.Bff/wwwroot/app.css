@@ -642,7 +642,7 @@ main {
 .industry-sector-band {
   width: 100%;
   padding: clamp(54px, 5.6vw, 76px) 32px;
-  background: var(--paper);
+  background: var(--paper-2);
 }
 
 .industry-sector-band-inner {
@@ -719,7 +719,7 @@ main {
   padding-top: clamp(112px, 12vw, 184px);
   padding-bottom: clamp(112px, 12vw, 184px);
   max-width: none;
-  background: var(--paper-2);
+  background: var(--paper);
 }
 
 .home-services-section .section-heading {
