@@ -725,9 +725,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("_highlightServiceSlug", source);
         Assert.Contains("@if (IsPrimaryService(service))", source);
         Assert.Contains("<span class=\"chip\">@PrimaryServiceBadgeText</span>", source);
-        Assert.Contains("private string PrimaryServiceBadgeText => _hasExplicitHeroTarget", source);
+        Assert.DoesNotContain("private string PrimaryServiceBadgeText => _hasExplicitHeroTarget", source);
         Assert.Contains("Text(\"Recommended\", \"แนะนำ\")", source);
-        Assert.Contains("Text(\"Primary service\", \"บริการหลัก\")", source);
+        Assert.DoesNotContain("Text(\"Primary service\", \"บริการหลัก\")", source);
         Assert.Contains("TryTakeMatchingServicesOrder", source);
         Assert.Contains("new ServicesOrderState(_heroTargetKey, _hasExplicitHeroTarget", source);
         Assert.Contains("serviceOrder.HasExplicitHeroTarget == _hasExplicitHeroTarget", source);

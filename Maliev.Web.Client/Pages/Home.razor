@@ -374,9 +374,7 @@
 
     private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
 
-    private string PrimaryServiceBadgeText => _hasExplicitHeroTarget
-        ? Text("Recommended", "แนะนำ")
-        : Text("Primary service", "บริการหลัก");
+    private string PrimaryServiceBadgeText => Text("Recommended", "แนะนำ");
 
     private string ServiceCardClass(ServicePageContent service)
     {
