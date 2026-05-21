@@ -80,6 +80,7 @@ public sealed class HeroCopyCatalogTests
     /// Verifies Google Ads final URLs can select the matching hero-copy category.
     /// </summary>
     [Theory]
+    [InlineData("https://www.maliev.com/?service=3d-design", "3d-design")]
     [InlineData("https://www.maliev.com/?service=fdm-3d-printing", "fdm-3d-printing")]
     [InlineData("https://www.maliev.com/?service=aluminum-cnc-milling", "aluminum-cnc-milling")]
     [InlineData("https://www.maliev.com/?utm_term=FDM%203D%20printing%20service", "fdm-3d-printing")]

@@ -681,6 +681,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("_heroServiceSlug", source);
         Assert.Contains("_highlightServiceSlug", source);
         Assert.Contains("@if (IsPrimaryService(service))", source);
+        Assert.Contains("<span class=\"chip\">@PrimaryServiceBadgeText</span>", source);
+        Assert.Contains("private string PrimaryServiceBadgeText => _hasExplicitHeroTarget", source);
+        Assert.Contains("Text(\"Recommended\", \"แนะนำ\")", source);
+        Assert.Contains("Text(\"Primary service\", \"บริการหลัก\")", source);
+        Assert.Contains("TryTakeMatchingServicesOrder", source);
+        Assert.Contains("new ServicesOrderState(_heroTargetKey, _hasExplicitHeroTarget", source);
+        Assert.Contains("serviceOrder.HasExplicitHeroTarget == _hasExplicitHeroTarget", source);
+        Assert.Contains("string.Equals(serviceOrder.TargetKey, _heroTargetKey, StringComparison.OrdinalIgnoreCase)", source);
         Assert.Contains("PromoteHighlightedService", source);
         Assert.Contains("SelectRotatingHighlightedService", source);
         Assert.Contains("StringComparison.OrdinalIgnoreCase", source);
@@ -689,6 +697,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto;", styles);
         Assert.Contains("grid-auto-rows: minmax(320px, 1fr);", styles);
         Assert.Contains(".service-card-media {\n  height: clamp(190px, 18vw, 236px);", styles);
+        Assert.Contains(".service-card-media .chip {\n  position: absolute;", styles);
         Assert.DoesNotContain(".service-card.primary .service-card-media", styles);
         Assert.DoesNotContain("grid-row: span 2;", styles);
         Assert.DoesNotContain("<span class=\"card-meta\">@service.Number</span>", source);

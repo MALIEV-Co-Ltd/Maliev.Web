@@ -1214,6 +1214,13 @@ html:lang(th) .h1 {
   height: clamp(190px, 18vw, 236px);
 }
 
+.service-card-media .chip {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
+}
+
 .material-category-media {
   aspect-ratio: 4 / 2.8;
 }

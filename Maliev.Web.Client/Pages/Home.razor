@@ -73,7 +73,7 @@
                     <img src="@service.ImageUrl" alt="@service.Title.For(Preferences.Culture)" loading="lazy" />
                     @if (IsPrimaryService(service))
                     {
-                        <span class="chip">@Text("Primary service", "บริการหลัก")</span>
+                        <span class="chip">@PrimaryServiceBadgeText</span>
                     }
                 </div>
                 <div class="service-card-body">
@@ -362,6 +362,10 @@
 
     private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
 
+    private string PrimaryServiceBadgeText => _hasExplicitHeroTarget
+        ? Text("Recommended", "แนะนำ")
+        : Text("Primary service", "บริการหลัก");
+
     private string ServiceCardClass(ServicePageContent service)
     {
         return IsPrimaryService(service) ? "service-card primary" : "service-card";
@@ -416,8 +420,8 @@
 
     private void InitializeRandomizedHomeContent()
     {
-        _services = ApplicationState.TryTakeFromJson<string[]>(ServicesOrderStateKey, out var serviceOrder) && serviceOrder is not null
-            ? PromoteHighlightedService(OrderByPersistedKeys(SiteContent.Services, serviceOrder, service => service.Slug))
+        _services = TryTakeMatchingServicesOrder(out var serviceOrder) && serviceOrder is not null
+            ? PromoteHighlightedService(OrderByPersistedKeys(SiteContent.Services, serviceOrder.Slugs, service => service.Slug))
             : PromoteHighlightedService(RandomizeSupportingServices());
 
         _caseStudies = ApplicationState.TryTakeFromJson<string[]>(CaseStudiesOrderStateKey, out var caseStudyOrder) && caseStudyOrder is not null
@@ -508,10 +512,26 @@
     {
         ApplicationState.PersistAsJson(HeroCopyStateKey, new HeroCopyState(_heroTargetKey, _heroVariantIndex));
         ApplicationState.PersistAsJson(HeroModelStateKey, new HeroModelState(_heroServiceSlug, _heroModel.Key));
-        ApplicationState.PersistAsJson(ServicesOrderStateKey, _services.Select(service => service.Slug).ToArray());
+        ApplicationState.PersistAsJson(
+            ServicesOrderStateKey,
+            new ServicesOrderState(_heroTargetKey, _hasExplicitHeroTarget, _services.Select(service => service.Slug).ToArray()));
         ApplicationState.PersistAsJson(CaseStudiesOrderStateKey, _caseStudies.Select(caseStudy => caseStudy.Slug).ToArray());
         ApplicationState.PersistAsJson(BlogPostsOrderStateKey, _blogPosts.Select(post => post.Slug).ToArray());
         return Task.CompletedTask;
+    }
+
+    private bool TryTakeMatchingServicesOrder(out ServicesOrderState? serviceOrder)
+    {
+        if (ApplicationState.TryTakeFromJson<ServicesOrderState>(ServicesOrderStateKey, out serviceOrder) &&
+            serviceOrder is not null &&
+            serviceOrder.HasExplicitHeroTarget == _hasExplicitHeroTarget &&
+            string.Equals(serviceOrder.TargetKey, _heroTargetKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        serviceOrder = null;
+        return false;
     }
 
     private static IReadOnlyList<T> OrderByPersistedKeys<T>(IReadOnlyList<T> source, IReadOnlyList<string> keys, Func<T, string> keySelector)
@@ -568,4 +588,6 @@
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 
     private sealed record HeroModelState(string ServiceSlug, string ModelKey);
+
+    private sealed record ServicesOrderState(string TargetKey, bool HasExplicitHeroTarget, string[] Slugs);
 }
