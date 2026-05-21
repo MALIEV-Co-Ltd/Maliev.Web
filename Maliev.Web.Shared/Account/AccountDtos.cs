@@ -104,6 +104,12 @@ public sealed class CustomerAddressDto
     /// <summary>Gets or sets whether this is the default address for its type.</summary>
     public bool IsDefault { get; set; }
 
+    /// <summary>Gets or sets the user-facing place label.</summary>
+    public string? PlaceLabel { get; set; }
+
+    /// <summary>Gets or sets the custom place label when the label is Other.</summary>
+    public string? PlaceLabelOther { get; set; }
+
     /// <summary>Gets or sets the first address line.</summary>
     public string AddressLine1 { get; set; } = string.Empty;
 
@@ -133,6 +139,24 @@ public sealed class CustomerAddressDto
 
     /// <summary>Gets or sets the delivery recipient phone.</summary>
     public string? RecipientPhone { get; set; }
+
+    /// <summary>Gets or sets the optional delivery note for the driver.</summary>
+    public string? DriverNote { get; set; }
+
+    /// <summary>Gets or sets the address source: Manual, GooglePlace, or GoogleMapPin.</summary>
+    public string AddressSource { get; set; } = "Manual";
+
+    /// <summary>Gets or sets the Google Places identifier.</summary>
+    public string? GooglePlaceId { get; set; }
+
+    /// <summary>Gets or sets the formatted Google address.</summary>
+    public string? FormattedAddress { get; set; }
+
+    /// <summary>Gets or sets the address latitude.</summary>
+    public decimal? Latitude { get; set; }
+
+    /// <summary>Gets or sets the address longitude.</summary>
+    public decimal? Longitude { get; set; }
 
     /// <summary>Gets or sets the concurrency token from CustomerService.</summary>
     public uint Version { get; set; }
@@ -149,6 +173,12 @@ public sealed class CustomerAddressUpsertRequest
     /// <summary>Gets or sets whether this is the default address for its type.</summary>
     public bool IsDefault { get; set; }
 
+    /// <summary>Gets or sets the user-facing place label.</summary>
+    public string? PlaceLabel { get; set; }
+
+    /// <summary>Gets or sets the custom place label when the label is Other.</summary>
+    public string? PlaceLabelOther { get; set; }
+
     /// <summary>Gets or sets the first address line.</summary>
     public string AddressLine1 { get; set; } = string.Empty;
 
@@ -178,6 +208,24 @@ public sealed class CustomerAddressUpsertRequest
 
     /// <summary>Gets or sets the delivery recipient phone.</summary>
     public string? RecipientPhone { get; set; }
+
+    /// <summary>Gets or sets the optional delivery note for the driver.</summary>
+    public string? DriverNote { get; set; }
+
+    /// <summary>Gets or sets the address source: Manual, GooglePlace, or GoogleMapPin.</summary>
+    public string AddressSource { get; set; } = "Manual";
+
+    /// <summary>Gets or sets the Google Places identifier.</summary>
+    public string? GooglePlaceId { get; set; }
+
+    /// <summary>Gets or sets the formatted Google address.</summary>
+    public string? FormattedAddress { get; set; }
+
+    /// <summary>Gets or sets the address latitude.</summary>
+    public decimal? Latitude { get; set; }
+
+    /// <summary>Gets or sets the address longitude.</summary>
+    public decimal? Longitude { get; set; }
 
     /// <summary>Gets or sets the concurrency token from CustomerService for updates.</summary>
     public uint Version { get; set; }

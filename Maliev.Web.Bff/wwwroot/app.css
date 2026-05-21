@@ -3718,6 +3718,7 @@ html[data-theme="dark"] .workflow-step--order {
 .auth-form input,
 .account-form input,
 .account-form select,
+.account-form textarea,
 .variant-select select,
 .cart-line input {
   width: 100%;
@@ -3730,7 +3731,8 @@ html[data-theme="dark"] .workflow-step--order {
   color: var(--ink);
 }
 
-.form-grid textarea {
+.form-grid textarea,
+.account-form textarea {
   min-height: 132px;
   resize: vertical;
 }
@@ -3850,6 +3852,123 @@ html[data-theme="dark"] .auth-google-icon {
 .account-form {
   display: grid;
   gap: 14px;
+}
+
+.account-google-address-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.account-google-address-label {
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.account-google-address-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46px;
+  gap: 10px;
+}
+
+.account-google-address-autocomplete {
+  min-height: 42px;
+}
+
+.account-google-address-autocomplete:empty::before {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+  color: var(--muted);
+  content: "Search for your location";
+}
+
+.account-google-map-button {
+  width: 46px;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.account-google-map-button svg {
+  width: 21px;
+  height: 21px;
+  fill: currentColor;
+}
+
+.account-google-address-selected,
+.account-google-address-status {
+  margin: 0;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.account-google-address-selected {
+  background: color-mix(in srgb, var(--line-green) 12%, transparent);
+  color: var(--ink);
+}
+
+.account-google-address-status {
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  color: var(--ink);
+}
+
+.account-google-map-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--page-gutter);
+  background: rgba(15, 23, 42, .58);
+}
+
+.account-google-map-dialog {
+  width: min(920px, 96vw);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.account-google-map-title,
+.account-google-map-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.account-google-map-title button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.account-google-map-canvas {
+  width: 100%;
+  min-height: 360px;
+  aspect-ratio: 16 / 9;
+}
+
+.account-google-map-footer {
+  color: var(--muted);
+  font-size: .86rem;
 }
 
 .auth-email-panel {

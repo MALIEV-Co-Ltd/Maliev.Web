@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Asp.Versioning;
+using Maliev.Aspire.ServiceDefaults.Authorization;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Client.Content;
 using Maliev.Web.Shared.Account;
@@ -14,7 +15,6 @@ namespace Maliev.Web.Bff.Controllers;
 /// </summary>
 [ApiController]
 [ApiVersion("1.0")]
-[Authorize]
 [Route("web/v{version:apiVersion}/account")]
 public sealed class AccountController(ICustomerServiceClient customerClient, ICountryServiceClient countryClient) : ControllerBase
 {
@@ -36,6 +36,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Gets the signed-in customer profile from CustomerService.</summary>
     [HttpGet("profile")]
+    [RequirePermission("customer.profile.read")]
     [ProducesResponseType(typeof(CustomerAccountProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -59,6 +60,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Updates the signed-in customer profile in CustomerService.</summary>
     [HttpPatch("profile")]
+    [RequirePermission("customer.profile.write")]
     [ProducesResponseType(typeof(CustomerAccountProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -92,6 +94,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Gets the signed-in customer address book from CustomerService.</summary>
     [HttpGet("addresses")]
+    [RequirePermission("customer.addresses.manage")]
     [ProducesResponseType(typeof(List<CustomerAddressDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -118,6 +121,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Creates a signed-in customer address in CustomerService.</summary>
     [HttpPost("addresses")]
+    [RequirePermission("customer.addresses.manage")]
     [ProducesResponseType(typeof(CustomerAddressDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -136,6 +140,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             ownerId = customerId.Value,
             type = request.Type,
             isDefault = request.IsDefault,
+            placeLabel = request.PlaceLabel,
+            placeLabelOther = request.PlaceLabelOther,
             addressLine1 = request.AddressLine1,
             addressLine2 = request.AddressLine2,
             addressLine3 = request.AddressLine3,
@@ -145,7 +151,13 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             postalCode = request.PostalCode,
             countryId,
             recipientName = request.RecipientName,
-            recipientPhone = request.RecipientPhone
+            recipientPhone = request.RecipientPhone,
+            driverNote = request.DriverNote,
+            addressSource = string.IsNullOrWhiteSpace(request.AddressSource) ? "Manual" : request.AddressSource,
+            googlePlaceId = request.GooglePlaceId,
+            formattedAddress = request.FormattedAddress,
+            latitude = request.Latitude,
+            longitude = request.Longitude
         }, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -159,6 +171,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Updates a signed-in customer address in CustomerService.</summary>
     [HttpPatch("addresses/{addressId:guid}")]
+    [RequirePermission("customer.addresses.manage")]
     [ProducesResponseType(typeof(CustomerAddressDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -194,6 +207,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         {
             type = request.Type,
             isDefault = request.IsDefault,
+            placeLabel = request.PlaceLabel,
+            placeLabelOther = request.PlaceLabelOther,
             addressLine1 = request.AddressLine1,
             addressLine2 = request.AddressLine2,
             addressLine3 = request.AddressLine3,
@@ -204,6 +219,12 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             countryId = request.CountryId == Guid.Empty ? (Guid?)null : request.CountryId,
             recipientName = request.RecipientName,
             recipientPhone = request.RecipientPhone,
+            driverNote = request.DriverNote,
+            addressSource = request.AddressSource,
+            googlePlaceId = request.GooglePlaceId,
+            formattedAddress = request.FormattedAddress,
+            latitude = request.Latitude,
+            longitude = request.Longitude,
             xmin = request.Version
         }, cancellationToken);
 
@@ -218,6 +239,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Deletes a signed-in customer address in CustomerService.</summary>
     [HttpDelete("addresses/{addressId:guid}")]
+    [RequirePermission("customer.addresses.manage")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -260,6 +282,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
     /// <summary>Gets customer-facing shop order history metadata.</summary>
     [HttpGet("orders")]
+    [RequirePermission("order.orders.read")]
     [ProducesResponseType(typeof(CustomerOrdersResponse), StatusCodes.Status200OK)]
     public ActionResult<CustomerOrdersResponse> GetOrders()
     {
@@ -366,6 +389,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             Id = GetGuid(root, "id", "Id") ?? Guid.Empty,
             Type = GetString(root, "type", "Type") ?? string.Empty,
             IsDefault = GetBool(root, "isDefault", "IsDefault"),
+            PlaceLabel = GetString(root, "placeLabel", "PlaceLabel"),
+            PlaceLabelOther = GetString(root, "placeLabelOther", "PlaceLabelOther"),
             AddressLine1 = GetString(root, "addressLine1", "AddressLine1") ?? string.Empty,
             AddressLine2 = GetString(root, "addressLine2", "AddressLine2"),
             AddressLine3 = GetString(root, "addressLine3", "AddressLine3"),
@@ -376,6 +401,12 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             CountryId = GetGuid(root, "countryId", "CountryId") ?? Guid.Empty,
             RecipientName = GetString(root, "recipientName", "RecipientName"),
             RecipientPhone = GetString(root, "recipientPhone", "RecipientPhone"),
+            DriverNote = GetString(root, "driverNote", "DriverNote"),
+            AddressSource = GetString(root, "addressSource", "AddressSource") ?? "Manual",
+            GooglePlaceId = GetString(root, "googlePlaceId", "GooglePlaceId"),
+            FormattedAddress = GetString(root, "formattedAddress", "FormattedAddress"),
+            Latitude = GetDecimal(root, "latitude", "Latitude"),
+            Longitude = GetDecimal(root, "longitude", "Longitude"),
             Version = GetUInt(root, "xmin", "Xmin", "version", "Version")
         };
     }
@@ -465,5 +496,20 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         }
 
         return 0;
+    }
+
+    private static decimal? GetDecimal(JsonElement root, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (root.TryGetProperty(name, out var value) &&
+                value.ValueKind == JsonValueKind.Number &&
+                value.TryGetDecimal(out var number))
+            {
+                return number;
+            }
+        }
+
+        return null;
     }
 }

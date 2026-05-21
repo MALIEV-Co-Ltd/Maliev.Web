@@ -76,6 +76,11 @@
             }
 
             <EditForm Model="_form" OnValidSubmit="SaveAsync" FormName="account-address-form" class="account-form">
+                <GoogleAddressPicker Latitude="@_form.Latitude"
+                                     Longitude="@_form.Longitude"
+                                     FormattedAddress="@_form.FormattedAddress"
+                                     Culture="@Preferences.Culture"
+                                     SelectionChanged="ApplyGoogleAddressSelection" />
                 <div class="form-grid two">
                     <label>
                         @Text("Type", "ประเภท")
@@ -91,17 +96,38 @@
                 </div>
                 <div class="form-grid two">
                     <label>
-                        @Text("Recipient", "ผู้รับ")
-                        <InputText @bind-Value="_form.RecipientName" name="recipientName" aria-label="@Text("Recipient", "ผู้รับ")" />
+                        @Text("Place name", "ชื่อสถานที่")
+                        <InputSelect @bind-Value="_form.PlaceLabel">
+                            <option value="Home">@Text("Home", "บ้าน")</option>
+                            <option value="Work">@Text("Work", "ที่ทำงาน")</option>
+                            <option value="Other">@Text("Other", "อื่นๆ")</option>
+                        </InputSelect>
+                    </label>
+                    @if (string.Equals(_form.PlaceLabel, "Other", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <label>
+                            @Text("Other place name", "ชื่อสถานที่อื่น")
+                            <InputText @bind-Value="_form.PlaceLabelOther" name="placeLabelOther" aria-label="@Text("Other place name", "ชื่อสถานที่อื่น")" />
+                        </label>
+                    }
+                </div>
+                <div class="form-grid two">
+                    <label>
+                        @Text("Recipient Name", "ชื่อผู้รับ")
+                        <InputText @bind-Value="_form.RecipientName" name="recipientName" aria-label="@Text("Recipient Name", "ชื่อผู้รับ")" />
                     </label>
                     <label>
-                        @Text("Recipient phone", "เบอร์ผู้รับ")
-                        <InputText @bind-Value="_form.RecipientPhone" name="recipientPhone" aria-label="@Text("Recipient phone", "เบอร์ผู้รับ")" />
+                        @Text("Mobile Number", "เบอร์มือถือ")
+                        <InputText @bind-Value="_form.RecipientPhone" name="recipientPhone" aria-label="@Text("Mobile Number", "เบอร์มือถือ")" />
                     </label>
                 </div>
                 <label class="form-full">
-                    @Text("Address line 1", "ที่อยู่บรรทัดที่ 1")
-                    <InputText @bind-Value="_form.AddressLine1" name="addressLine1" aria-label="@Text("Address line 1", "ที่อยู่บรรทัดที่ 1")" />
+                    @Text("Note to driver", "หมายเหตุถึงคนขับ")
+                    <InputTextArea @bind-Value="_form.DriverNote" name="driverNote" aria-label="@Text("Note to driver", "หมายเหตุถึงคนขับ")" />
+                </label>
+                <label class="form-full">
+                    @Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")
+                    <InputText @bind-Value="_form.AddressLine1" name="addressLine1" aria-label="@Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")" />
                 </label>
                 <label class="form-full">
                     @Text("Address line 2", "ที่อยู่บรรทัดที่ 2")
@@ -109,21 +135,21 @@
                 </label>
                 <div class="form-grid three">
                     <label>
-                        @Text("District", "เขต/อำเภอ")
-                        <InputText @bind-Value="_form.District" name="district" aria-label="@Text("District", "เขต/อำเภอ")" />
+                        @Text("Sub District", "แขวง/ตำบล")
+                        <InputText @bind-Value="_form.District" name="district" aria-label="@Text("Sub District", "แขวง/ตำบล")" />
                     </label>
                     <label>
-                        @Text("City", "เมือง")
-                        <InputText @bind-Value="_form.City" name="city" aria-label="@Text("City", "เมือง")" />
+                        @Text("District", "เขต/อำเภอ")
+                        <InputText @bind-Value="_form.City" name="city" aria-label="@Text("District", "เขต/อำเภอ")" />
                     </label>
                     <label>
                         @Text("Province", "จังหวัด")
-                        <InputText @bind-Value="_form.StateProvince" name="stateProvince" aria-label="@Text("Province", "จังหวัด")" />
+                        <InputText @bind-Value="_form.StateProvince" name="stateProvince" disabled="@ProvinceLocked" aria-label="@Text("Province", "จังหวัด")" />
                     </label>
                 </div>
                 <label class="form-short">
                     @Text("Postal code", "รหัสไปรษณีย์")
-                    <InputText @bind-Value="_form.PostalCode" name="postalCode" aria-label="@Text("Postal code", "รหัสไปรษณีย์")" />
+                    <InputText @bind-Value="_form.PostalCode" name="postalCode" disabled="@PostalCodeLocked" aria-label="@Text("Postal code", "รหัสไปรษณีย์")" />
                 </label>
                 <div class="account-form-actions">
                     <button class="button primary" type="submit" disabled="@_saving">@(_editingAddressId.HasValue ? Text("Save address", "บันทึกที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</button>
@@ -140,17 +166,35 @@
 @code {
     private readonly CustomerAddressUpsertRequest _form = new();
     private List<CustomerAddressDto> _addresses = [];
+    private CustomerAccountProfileDto? _profile;
     private Guid? _editingAddressId;
     private bool _loading = true;
     private bool _saving;
     private string? _status;
     private string? _error;
+    private bool IsGoogleAddress => string.Equals(_form.AddressSource, "GooglePlace", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(_form.AddressSource, "GoogleMapPin", StringComparison.OrdinalIgnoreCase);
+    private bool ProvinceLocked => IsGoogleAddress && !string.IsNullOrWhiteSpace(_form.StateProvince);
+    private bool PostalCodeLocked => IsGoogleAddress && !string.IsNullOrWhiteSpace(_form.PostalCode);
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+        await LoadProfileAsync();
         ResetForm();
         await LoadAsync();
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        try
+        {
+            _profile = await Api.GetAccountProfileAsync();
+        }
+        catch
+        {
+            _profile = null;
+        }
     }
 
     private async Task LoadAsync()
@@ -221,6 +265,8 @@
         _editingAddressId = address.Id;
         _form.Type = address.Type;
         _form.IsDefault = address.IsDefault;
+        _form.PlaceLabel = string.IsNullOrWhiteSpace(address.PlaceLabel) ? "Home" : address.PlaceLabel;
+        _form.PlaceLabelOther = address.PlaceLabelOther;
         _form.AddressLine1 = address.AddressLine1;
         _form.AddressLine2 = address.AddressLine2;
         _form.AddressLine3 = address.AddressLine3;
@@ -231,6 +277,12 @@
         _form.CountryId = address.CountryId;
         _form.RecipientName = address.RecipientName;
         _form.RecipientPhone = address.RecipientPhone;
+        _form.DriverNote = address.DriverNote;
+        _form.AddressSource = string.IsNullOrWhiteSpace(address.AddressSource) ? "Manual" : address.AddressSource;
+        _form.GooglePlaceId = address.GooglePlaceId;
+        _form.FormattedAddress = address.FormattedAddress;
+        _form.Latitude = address.Latitude;
+        _form.Longitude = address.Longitude;
         _form.Version = address.Version;
     }
 
@@ -239,6 +291,8 @@
         _editingAddressId = null;
         _form.Type = "Shipping";
         _form.IsDefault = false;
+        _form.PlaceLabel = "Home";
+        _form.PlaceLabelOther = null;
         _form.AddressLine1 = string.Empty;
         _form.AddressLine2 = null;
         _form.AddressLine3 = null;
@@ -247,9 +301,30 @@
         _form.StateProvince = string.Empty;
         _form.PostalCode = string.Empty;
         _form.CountryId = Guid.Empty;
-        _form.RecipientName = null;
-        _form.RecipientPhone = null;
+        _form.RecipientName = _profile?.DisplayName;
+        _form.RecipientPhone = _profile?.Mobile;
+        _form.DriverNote = null;
+        _form.AddressSource = "Manual";
+        _form.GooglePlaceId = null;
+        _form.FormattedAddress = null;
+        _form.Latitude = null;
+        _form.Longitude = null;
         _form.Version = 0;
+    }
+
+    private void ApplyGoogleAddressSelection(GoogleAddressSelection selection)
+    {
+        if (!string.IsNullOrWhiteSpace(selection.AddressLine1)) _form.AddressLine1 = selection.AddressLine1;
+        if (!string.IsNullOrWhiteSpace(selection.District)) _form.District = selection.District;
+        if (!string.IsNullOrWhiteSpace(selection.City)) _form.City = selection.City;
+        if (!string.IsNullOrWhiteSpace(selection.StateProvince)) _form.StateProvince = selection.StateProvince;
+        if (!string.IsNullOrWhiteSpace(selection.PostalCode)) _form.PostalCode = selection.PostalCode;
+
+        _form.AddressSource = string.IsNullOrWhiteSpace(selection.Source) ? "GooglePlace" : selection.Source;
+        _form.GooglePlaceId = selection.PlaceId;
+        _form.FormattedAddress = selection.FormattedAddress;
+        _form.Latitude = selection.Latitude;
+        _form.Longitude = selection.Longitude;
     }
 
     private static string AddressTitle(CustomerAddressDto address)

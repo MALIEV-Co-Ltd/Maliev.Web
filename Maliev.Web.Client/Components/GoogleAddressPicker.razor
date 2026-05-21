@@ -1,0 +1,149 @@
+@using Maliev.Web.Shared.Account
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="account-google-address-picker">
+    <label class="account-google-address-label" for="@_autocompleteElementId">@Text("Search for your location", "ค้นหาสถานที่ของคุณ")</label>
+    <div class="account-google-address-row">
+        <div id="@_autocompleteElementId" class="account-google-address-autocomplete" aria-label="@Text("Search for your location", "ค้นหาสถานที่ของคุณ")"></div>
+        <button type="button" class="account-google-map-button" @onclick="OpenMapAsync" aria-label="@Text("Open map", "เปิดแผนที่")">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 21s7-6.1 7-12A7 7 0 1 0 5 9c0 5.9 7 12 7 12Zm0-9.2A2.8 2.8 0 1 1 12 6.2a2.8 2.8 0 0 1 0 5.6Z" />
+            </svg>
+        </button>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(_selectedSummary))
+    {
+        <p class="account-google-address-selected">@_selectedSummary</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(_statusMessage))
+    {
+        <p class="account-google-address-status">@_statusMessage</p>
+    }
+</div>
+
+@if (_mapOpen)
+{
+    <div class="account-google-map-backdrop" role="dialog" aria-modal="true" aria-label="@Text("Select address on map", "เลือกที่อยู่บนแผนที่")">
+        <div class="account-google-map-dialog">
+            <div class="account-google-map-title">
+                <strong>@Text("Select location", "เลือกตำแหน่ง")</strong>
+                <button type="button" @onclick="CloseMapAsync" aria-label="@Text("Close map", "ปิดแผนที่")">x</button>
+            </div>
+            <div id="@_mapElementId" class="account-google-map-canvas"></div>
+            <div class="account-google-map-footer">
+                <span>@Text("Drag the marker or click the map to update the address.", "ลากหมุดหรือคลิกแผนที่เพื่ออัปเดตที่อยู่")</span>
+                <button type="button" class="button primary" @onclick="CloseMapAsync">@Text("Done", "เสร็จสิ้น")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private readonly string _autocompleteElementId = $"web-google-address-autocomplete-{Guid.NewGuid():N}";
+    private readonly string _mapElementId = $"web-google-address-map-{Guid.NewGuid():N}";
+    private DotNetObjectReference<GoogleAddressPicker>? _dotNetReference;
+    private GoogleAddressConfigResponse? _config;
+    private bool _searchInitialized;
+    private bool _mapOpen;
+    private string? _selectedSummary;
+    private string? _statusMessage;
+
+    /// <summary>Gets or sets the current latitude.</summary>
+    [Parameter] public decimal? Latitude { get; set; }
+
+    /// <summary>Gets or sets the current longitude.</summary>
+    [Parameter] public decimal? Longitude { get; set; }
+
+    /// <summary>Gets or sets the current formatted address.</summary>
+    [Parameter] public string? FormattedAddress { get; set; }
+
+    /// <summary>Gets or sets the current culture.</summary>
+    [Parameter] public string Culture { get; set; } = "en";
+
+    /// <summary>Raised when Google returns an address selection.</summary>
+    [Parameter] public EventCallback<GoogleAddressSelection> SelectionChanged { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _searchInitialized)
+        {
+            return;
+        }
+
+        _dotNetReference = DotNetObjectReference.Create(this);
+        _config = await LoadConfigAsync();
+        _selectedSummary = FormattedAddress;
+
+        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+        {
+            _statusMessage = Text("Google Maps key is not configured. Manual address fields remain available.", "ยังไม่ได้ตั้งค่า Google Maps สามารถกรอกที่อยู่เองได้");
+            StateHasChanged();
+            return;
+        }
+
+        await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeSearch", _autocompleteElementId, _dotNetReference, _config);
+        _searchInitialized = true;
+    }
+
+    private async Task<GoogleAddressConfigResponse> LoadConfigAsync()
+    {
+        try
+        {
+            return await Http.GetFromJsonAsync<GoogleAddressConfigResponse>("web/v1/address/google-config") ?? new GoogleAddressConfigResponse();
+        }
+        catch
+        {
+            return new GoogleAddressConfigResponse();
+        }
+    }
+
+    private async Task OpenMapAsync()
+    {
+        _config ??= await LoadConfigAsync();
+        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+        {
+            _statusMessage = Text("Google Maps key is not configured. Manual address fields remain available.", "ยังไม่ได้ตั้งค่า Google Maps สามารถกรอกที่อยู่เองได้");
+            return;
+        }
+
+        _mapOpen = true;
+        StateHasChanged();
+        await Task.Yield();
+        await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeMap", _mapElementId, _dotNetReference, _config, new
+        {
+            latitude = Latitude,
+            longitude = Longitude
+        });
+    }
+
+    private async Task CloseMapAsync()
+    {
+        _mapOpen = false;
+        await JS.InvokeVoidAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
+    }
+
+    /// <summary>Receives Google selections from JavaScript.</summary>
+    [JSInvokable]
+    public async Task NotifyGoogleAddressSelected(GoogleAddressSelection selection)
+    {
+        _selectedSummary = selection.FormattedAddress;
+        _statusMessage = null;
+        await SelectionChanged.InvokeAsync(selection);
+        StateHasChanged();
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("malievGoogleAddressPicker.disposeSearch", _autocompleteElementId);
+        await JS.InvokeVoidAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
+        _dotNetReference?.Dispose();
+    }
+
+    private string Text(string en, string th) =>
+        Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+}
