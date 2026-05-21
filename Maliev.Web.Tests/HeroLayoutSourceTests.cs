@@ -496,6 +496,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains("object-position: left bottom;", styles);
+        Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
         Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
         Assert.Contains(".machine-feature-point-button", styles);

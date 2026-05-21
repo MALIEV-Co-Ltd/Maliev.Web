@@ -2062,7 +2062,7 @@ html:lang(th) .machine-feature-title-lead {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: -160px bottom;
+  object-position: left bottom;
   transition: opacity .24s ease, transform .34s ease;
 }
 
