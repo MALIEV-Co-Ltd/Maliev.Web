@@ -107,10 +107,6 @@
             <NavLink href="/refund-policy">@Text("Refunds", "การคืนเงิน")</NavLink>
             <NavLink href="/warranty-policy">@Text("Warranty", "การรับประกัน")</NavLink>
             <NavLink href="/account/orders">@Text("Track orders", "ติดตามคำสั่งซื้อ")</NavLink>
-            <NavLink href="/privacy">@Text("Privacy", "ความเป็นส่วนตัว")</NavLink>
-            <NavLink href="/cookie-policy">@Text("Cookies", "คุกกี้")</NavLink>
-            <button class="footer-link-button" type="button" @onclick="OpenCookieSettingsAsync">@Text("Cookie settings", "ตั้งค่าคุกกี้")</button>
-            <NavLink href="/terms">@Text("Terms", "เงื่อนไข")</NavLink>
         </nav>
         <div class="footer-column footer-connect">
             <h2>Connect</h2>
@@ -151,7 +147,13 @@
             </div>
         </div>
         <div class="footer-legal">
-            <span>@CopyrightText</span>
+            <span class="footer-legal-copy">@CopyrightText <span>@RotatingManufacturingLine</span></span>
+            <nav class="footer-legal-links" aria-label="@Text("Legal links", "ลิงก์กฎหมาย")">
+                <NavLink href="/privacy">@Text("Privacy", "ความเป็นส่วนตัว")</NavLink>
+                <NavLink href="/terms">@Text("Terms", "เงื่อนไข")</NavLink>
+                <NavLink href="/cookie-policy">@Text("Cookies", "คุกกี้")</NavLink>
+                <button class="footer-link-button" type="button" @onclick="OpenCookieSettingsAsync">@Text("Cookie settings", "ตั้งค่าคุกกี้")</button>
+            </nav>
         </div>
     </footer>
     <CustomerChatbot />
@@ -249,12 +251,15 @@
     private string _selectedTheme = PreferenceService.LightTheme;
     private CookieConsentBanner? _cookieConsent;
     private bool _mobileNavOpen;
+    private int _footerLineIndex;
+    private CancellationTokenSource? _footerLineRotationCancellation;
     private const int FoundingYear = 2018;
     private string CartBadgeAriaLabel => $"{Text("Cart", "ตะกร้า")}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
     private static int CurrentYear => DateTime.Today.Year;
     private string CopyrightText => Text(
-        $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} MALIEV Co., Ltd. All rights reserved.",
-        $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} บริษัท มาลีฟ จำกัด สงวนลิขสิทธิ์");
+        $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} MALIEV Co., Ltd.",
+        $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} บริษัท มาลีฟ จำกัด");
+    private string RotatingManufacturingLine => ManufacturingFooterLines[_footerLineIndex % ManufacturingFooterLines.Length].For(Preferences.Culture);
     private string MobileNavClass => _mobileNavOpen ? "mobile-nav open" : "mobile-nav";
     private bool IsDarkMode => _selectedTheme.Equals(PreferenceService.DarkTheme, StringComparison.OrdinalIgnoreCase);
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
@@ -270,6 +275,8 @@
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
         _selectedTheme = Preferences.Theme;
+        _footerLineRotationCancellation = new CancellationTokenSource();
+        _ = RotateFooterLineAsync(_footerLineRotationCancellation.Token);
     }
 
     private async Task ChangeCultureAsync(string culture)
@@ -315,9 +322,89 @@
         return _cookieConsent?.ShowPreferencesAsync() ?? Task.CompletedTask;
     }
 
+    private async Task RotateFooterLineAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(6), cancellationToken);
+                _footerLineIndex = (_footerLineIndex + 1) % ManufacturingFooterLines.Length;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
     public void Dispose()
     {
         Cart.Changed -= StateHasChanged;
         Preferences.Changed -= OnPreferencesChanged;
+        _footerLineRotationCancellation?.Cancel();
+        _footerLineRotationCancellation?.Dispose();
     }
+
+    private sealed record LocalizedText(string English, string Thai)
+    {
+        public string For(string culture)
+        {
+            return culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? Thai : English;
+        }
+    }
+
+    private static readonly LocalizedText[] ManufacturingFooterLines =
+    [
+        new("Measure twice. Print once. Ship with confidence.", "วัดให้ชัด พิมพ์ให้แม่น ส่งมอบอย่างมั่นใจ"),
+        new("Good parts begin with honest tolerances.", "ชิ้นงานที่ดีเริ่มจาก tolerance ที่ตรงไปตรงมา"),
+        new("Every prototype is a decision made visible.", "ต้นแบบทุกชิ้นคือการตัดสินใจที่มองเห็นได้"),
+        new("Small batches deserve production discipline.", "งานล็อตเล็กก็สมควรได้วินัยแบบงานผลิตจริง"),
+        new("Precision is a habit before it is a number.", "ความแม่นยำเป็นนิสัยก่อนจะเป็นตัวเลข"),
+        new("Better fixtures make better workflows.", "ฟิกซ์เจอร์ที่ดีทำให้เวิร์กโฟลว์ดีขึ้น"),
+        new("Design for the process, then let the process work.", "ออกแบบให้เข้ากับกระบวนการ แล้วให้กระบวนการทำงาน"),
+        new("A clean drawing saves a thousand questions.", "แบบที่ชัดช่วยลดคำถามได้มากกว่าที่คิด"),
+        new("Material choice is engineering, not decoration.", "การเลือกวัสดุคือวิศวกรรม ไม่ใช่แค่ความสวยงาม"),
+        new("Fast is useful only when the part is right.", "ความเร็วมีค่าเมื่อชิ้นงานถูกต้อง"),
+        new("The best quote explains the path to production.", "ใบเสนอราคาที่ดีต้องอธิบายเส้นทางสู่การผลิต"),
+        new("Threads, fits, and faces tell the real story.", "เกลียว ฟิต และผิวสัมผัสบอกเรื่องจริงของชิ้นงาน"),
+        new("Prototype quickly. Learn deliberately.", "ทำต้นแบบให้เร็ว เรียนรู้อย่างตั้งใจ"),
+        new("A part is ready when the risk is understood.", "ชิ้นงานพร้อมเมื่อเข้าใจความเสี่ยงแล้ว"),
+        new("DFM turns uncertainty into next steps.", "DFM เปลี่ยนความไม่แน่นอนให้เป็นขั้นตอนถัดไป"),
+        new("Good surface finish starts before finishing.", "ผิวงานที่ดีเริ่มก่อนขั้นตอนตกแต่งผิว"),
+        new("Every radius is a manufacturing decision.", "รัศมีทุกจุดคือการตัดสินใจด้านการผลิต"),
+        new("Production rewards the teams that prepare.", "การผลิตให้รางวัลกับทีมที่เตรียมตัวดี"),
+        new("The right process protects the right budget.", "กระบวนการที่เหมาะสมช่วยรักษางบประมาณที่เหมาะสม"),
+        new("Make the invisible constraints visible early.", "ทำให้ข้อจำกัดที่มองไม่เห็นชัดเจนตั้งแต่ต้น"),
+        new("Strong parts come from aligned requirements.", "ชิ้นงานที่แข็งแรงมาจากข้อกำหนดที่สอดคล้องกัน"),
+        new("A useful prototype answers one clear question.", "ต้นแบบที่มีประโยชน์ตอบคำถามที่ชัดเจนหนึ่งข้อ"),
+        new("Lead time improves when handoffs disappear.", "เวลานำส่งดีขึ้นเมื่อการส่งต่องานลดลง"),
+        new("Quality is easier when the route is clear.", "คุณภาพทำได้ง่ายขึ้นเมื่อเส้นทางชัดเจน"),
+        new("The machine is only as good as the setup.", "เครื่องจักรดีได้เท่ากับการเซ็ตอัพ"),
+        new("Data makes craftsmanship repeatable.", "ข้อมูลทำให้ฝีมือทำซ้ำได้"),
+        new("Inspection is feedback, not friction.", "การตรวจสอบคือ feedback ไม่ใช่อุปสรรค"),
+        new("The first article teaches the batch.", "ชิ้นแรกสอนทั้งล็อต"),
+        new("Build the part you can verify.", "สร้างชิ้นงานที่ตรวจยืนยันได้"),
+        new("Tolerance stacks are business decisions too.", "การซ้อน tolerance ก็เป็นการตัดสินใจทางธุรกิจ"),
+        new("Short runs still need long-term thinking.", "ล็อตสั้นก็ต้องคิดระยะยาว"),
+        new("A good material match prevents late surprises.", "วัสดุที่เหมาะช่วยกันปัญหาช่วงท้าย"),
+        new("Manufacturing clarity compounds over every order.", "ความชัดเจนในการผลิตสะสมคุณค่าทุกคำสั่งซื้อ"),
+        new("Finish follows function.", "ผิวงานควรตามหน้าที่การใช้งาน"),
+        new("Choose the route that respects the part.", "เลือกเส้นทางที่เคารพหน้าที่ของชิ้นงาน"),
+        new("Reliable parts come from reliable assumptions.", "ชิ้นงานที่ไว้ใจได้มาจากสมมติฐานที่ไว้ใจได้"),
+        new("Tool access is part of the design.", "การเข้าถึงของเครื่องมือคือส่วนหนึ่งของการออกแบบ"),
+        new("Great batches start with one reviewed model.", "ล็อตที่ดีเริ่มจากโมเดลที่ผ่านการทบทวนหนึ่งไฟล์"),
+        new("A measured process is a teachable process.", "กระบวนการที่วัดได้คือกระบวนการที่ถ่ายทอดได้"),
+        new("The drawing is the contract with the shop floor.", "แบบคือสัญญากับหน้างานผลิต"),
+        new("Good quotes reduce guesswork before cutting begins.", "ใบเสนอราคาที่ดีลดการเดาก่อนเริ่มตัดเฉือน"),
+        new("Every build should leave the next one smarter.", "ทุกงานผลิตควรทำให้งานครั้งถัดไปฉลาดขึ้น"),
+        new("Prototype pressure reveals production truth.", "แรงกดดันของงานต้นแบบเผยความจริงของการผลิต"),
+        new("Make it clear. Make it repeatable.", "ทำให้ชัด ทำให้ทำซ้ำได้"),
+        new("The best workshop removes waiting from learning.", "เวิร์กช็อปที่ดีลดการรอออกจากการเรียนรู้"),
+        new("Geometry decides what the machine can promise.", "เรขาคณิตกำหนดสิ่งที่เครื่องจักรสัญญาได้"),
+        new("Quantity changes the answer. Requirements guide it.", "จำนวนเปลี่ยนคำตอบ ข้อกำหนดเป็นตัวนำทาง"),
+        new("From upload to order, clarity should not pause.", "จากอัปโหลดถึงสั่งผลิต ความชัดเจนไม่ควรหยุด"),
+        new("A sharper model creates a calmer production run.", "โมเดลที่คมชัดทำให้การผลิตนิ่งขึ้น"),
+        new("Manufacturing is momentum with evidence.", "การผลิตคือแรงส่งที่มีหลักฐานรองรับ")
+    ];
 }

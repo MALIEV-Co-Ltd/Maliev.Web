@@ -731,6 +731,24 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("href=\"/refund-policy\"", source);
         Assert.Contains("href=\"/warranty-policy\"", source);
         Assert.Contains("href=\"/cookie-policy\"", source);
+        Assert.True(
+            source.IndexOf("class=\"footer-legal\"", StringComparison.Ordinal) <
+            source.IndexOf("href=\"/privacy\"", StringComparison.Ordinal));
+        Assert.Contains("footer-legal-copy", source);
+        Assert.Contains("footer-legal-links", source);
+        Assert.Contains("aria-label=\"@Text(\"Legal links\", \"ลิงก์กฎหมาย\")\"", source);
+        Assert.Contains("href=\"/terms\"", source);
+        Assert.Contains("OpenCookieSettingsAsync", source);
+        Assert.Contains("RotatingManufacturingLine", source);
+        Assert.Contains("ManufacturingFooterLines", source);
+        Assert.Contains("Task.Delay(TimeSpan.FromSeconds(6)", source);
+        Assert.Contains("Measure twice. Print once. Ship with confidence.", source);
+        Assert.Contains("Manufacturing is momentum with evidence.", source);
+        Assert.Contains("วัดให้ชัด พิมพ์ให้แม่น ส่งมอบอย่างมั่นใจ", source);
+        var footerLinesStart = source.IndexOf("private static readonly LocalizedText[] ManufacturingFooterLines", StringComparison.Ordinal);
+        var footerLinesEnd = source.IndexOf("\n    ];", footerLinesStart, StringComparison.Ordinal);
+        Assert.True(footerLinesStart >= 0 && footerLinesEnd > footerLinesStart);
+        Assert.True(System.Text.RegularExpressions.Regex.Matches(source[footerLinesStart..footerLinesEnd], "new\\(").Count >= 50);
         Assert.DoesNotContain(">Facebook</a>", source);
         Assert.DoesNotContain(">YouTube</a>", source);
         Assert.DoesNotContain(">Instagram</a>", source);
@@ -749,8 +767,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("#833ab4", styles);
         Assert.Contains("FoundingYear = 2018", source);
         Assert.Contains("DateTime.Today.Year", source);
-        Assert.Contains("All rights reserved", source);
+        Assert.DoesNotContain("All rights reserved", source);
         Assert.Contains("footer-legal", source);
+        Assert.Contains(".footer-legal {\n  grid-column: 1 / -1;\n  display: flex;", styles);
+        Assert.Contains(".footer-legal-links", styles);
+        Assert.Contains(".footer-legal-copy span", styles);
         Assert.DoesNotContain("<strong>MALIEV Co., Ltd.</strong>", source);
         Assert.DoesNotContain("Nonthaburi, Thailand. Manufacturing services, machines, and production support.", source);
     }
