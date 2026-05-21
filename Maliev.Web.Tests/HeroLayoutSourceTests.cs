@@ -985,7 +985,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("mailto:info@maliev.com", source);
         Assert.Contains("mailto:support@maliev.com", source);
         Assert.Contains("support@maliev.com", source);
-        Assert.Contains("tel:+66818030404", source);
+        Assert.Contains("tel:+66898950690", source);
+        Assert.Contains("+66 89 895 0690", source);
+        Assert.Contains("+66 81 803 0404", source);
+        Assert.Contains("contact-phone-reveal", source);
         Assert.Contains("page.line.me/maliev", source);
         Assert.Contains("line-app-icon", source);
         Assert.Contains("/images/line-app-icon.png", source);
@@ -1049,6 +1052,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-business-section", styles);
         Assert.Contains(".contact-section-icon", styles);
         Assert.Contains(".contact-info-row", styles);
+        Assert.Contains(".contact-phone-reveal", styles);
+        Assert.Contains(".contact-phone-reveal-secondary", styles);
+        Assert.Contains(".contact-phone-reveal:hover .contact-phone-reveal-secondary", styles);
         Assert.Contains(".line-contact-link.contact-line-add-friend", styles);
         Assert.Contains(".line-contact-link", styles);
         Assert.Contains("border-radius: var(--radius);", addFriendLineButtonStyle);

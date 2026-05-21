@@ -3440,6 +3440,46 @@ html[data-theme="dark"] .workflow-step {
   font-size: .88rem;
 }
 
+.contact-phone-reveal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  min-width: 132px;
+  overflow: hidden;
+  line-height: 1.18;
+  transition: min-height .18s ease-in-out, padding-block .18s ease-in-out, box-shadow .18s ease-in-out, background-color .18s ease-in-out, color .18s ease-in-out;
+}
+
+.contact-phone-reveal-primary,
+.contact-phone-reveal-secondary {
+  display: block;
+  white-space: nowrap;
+}
+
+.contact-phone-reveal-secondary {
+  max-height: 0;
+  opacity: 0;
+  color: var(--ink-2);
+  font-size: .78rem;
+  transform: translateY(-2px);
+  transition: max-height .18s ease-in-out, opacity .18s ease-in-out, transform .18s ease-in-out;
+}
+
+.contact-phone-reveal:hover,
+.contact-phone-reveal:focus-visible {
+  min-height: 52px;
+  padding-block: 8px;
+}
+
+.contact-phone-reveal:hover .contact-phone-reveal-secondary,
+.contact-phone-reveal:focus-visible .contact-phone-reveal-secondary {
+  max-height: 18px;
+  opacity: .78;
+  transform: translateY(2px);
+}
+
 .line-contact-link.contact-line-add-friend {
   --line-link-bg: var(--paper);
   --line-link-ring: color-mix(in srgb, var(--line-green) 28%, var(--rule)) 0 0 0 1px;
