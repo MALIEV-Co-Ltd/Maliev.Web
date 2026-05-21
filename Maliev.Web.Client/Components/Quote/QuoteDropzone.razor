@@ -6,7 +6,7 @@
            class="landing-quote-dropzone-input"
            type="file"
            multiple
-           accept=".stl,.step,.stp,.obj,.3mf,.iges,.igs" />
+           accept="@SupportedFormatsAccept" />
     <div id="@DropzoneId"
          role="button"
          tabindex="0"
@@ -26,7 +26,7 @@
             </span>
             <span class="landing-quote-dropzone-divider" aria-hidden="true"></span>
             <span class="landing-quote-dropzone-browse">
-                <span class="landing-quote-dropzone-format-shell" data-dropzone-interactive>
+                <span id="@FormatsShellId" class="landing-quote-dropzone-format-shell" data-dropzone-interactive>
                     <button class="landing-quote-dropzone-format-button"
                             type="button"
                             aria-expanded="@FormatsExpanded"
@@ -60,8 +60,11 @@
 @code {
     private readonly string DropzoneId = $"quote-dropzone-{Guid.NewGuid():N}";
     private readonly string InputId = $"quote-dropzone-input-{Guid.NewGuid():N}";
+    private readonly string FormatsShellId = $"quote-dropzone-format-shell-{Guid.NewGuid():N}";
     private readonly string FormatsPanelId = $"quote-dropzone-formats-{Guid.NewGuid():N}";
-    private static readonly string[] SupportedFormats = [".STL", ".STEP", ".STP", ".IGES", ".IGS", ".OBJ", ".3MF"];
+    private static readonly string[] SupportedFormats = [".STL", ".STEP", ".STP", ".3MF", ".OBJ", ".IGS", ".IGES", ".BLEND", ".FBX", ".GLTF", ".GLB"];
+    private static readonly string SupportedFormatsAccept = string.Join(",", SupportedFormats.Select(format => format.ToLowerInvariant()));
+    private DotNetObjectReference<QuoteDropzone>? _objectReference;
     private bool _isFormatsOpen;
 
     [Parameter]
@@ -109,6 +112,19 @@
         _isFormatsOpen = !_isFormatsOpen;
     }
 
+    [JSInvokable]
+    public Task CloseFormatsAsync()
+    {
+        if (!_isFormatsOpen)
+        {
+            return Task.CompletedTask;
+        }
+
+        _isFormatsOpen = false;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
@@ -117,12 +133,15 @@
         }
 
         await Js.InvokeVoidAsync("malievQuoteDropzone.register", DropzoneId, InputId, Href);
+        _objectReference = DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("malievQuoteDropzone.registerFormatDismissal", FormatsShellId, _objectReference);
     }
 
     public async ValueTask DisposeAsync()
     {
         try
         {
+            await Js.InvokeVoidAsync("malievQuoteDropzone.unregisterFormatDismissal", FormatsShellId);
             await Js.InvokeVoidAsync("malievQuoteDropzone.unregister", DropzoneId);
         }
         catch (JSDisconnectedException)
@@ -131,6 +150,8 @@
         catch (InvalidOperationException ex) when (IsJsInteropUnavailable(ex))
         {
         }
+
+        _objectReference?.Dispose();
     }
 
     private static bool IsJsInteropUnavailable(InvalidOperationException exception)

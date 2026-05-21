@@ -8,7 +8,7 @@
   <data name="HeroSummary" xml:space="preserve"><value>อัปโหลดโมเดล เลือกกระบวนการ ตรวจ DFM และสั่งผลิตต่อในพื้นที่ลูกค้าเดียวกัน</value></data>
   <data name="StartQuote" xml:space="preserve"><value>ดูราคาชิ้นงาน</value></data>
   <data name="QuoteDropzoneTitle" xml:space="preserve"><value>อัปโหลด CAD เพื่อดูราคาชิ้นงาน</value></data>
-  <data name="QuoteDropzoneMeta" xml:space="preserve"><value>รองรับ STL, STEP, STP, OBJ, 3MF พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้</value></data>
+  <data name="QuoteDropzoneMeta" xml:space="preserve"><value>รองรับ STL, STEP, STP, 3MF, OBJ, IGS, IGES, BLEND, FBX, GLTF, GLB พร้อมตรวจ DFM ราคาอัปเดตทันที และสั่งผลิตต่อได้</value></data>
   <data name="ShopProducts" xml:space="preserve"><value>เลือกซื้อสินค้า</value></data>
   <data name="InstantQuote" xml:space="preserve"><value>ใบเสนอราคาทันที</value></data>
   <data name="Services" xml:space="preserve"><value>บริการ</value></data>

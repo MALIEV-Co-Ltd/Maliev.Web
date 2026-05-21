@@ -1132,7 +1132,23 @@ html:lang(th) .h1 {
   letter-spacing: .08em;
   line-height: 1;
   text-transform: uppercase;
-  cursor: pointer;
+  cursor: help;
+}
+
+.landing-quote-dropzone-format-button::after {
+  content: "?";
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  border-radius: 999px;
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+  font-family: var(--maliev-font-sans);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .landing-quote-dropzone-format-button:is(:hover, :focus-visible),
@@ -1151,9 +1167,9 @@ html:lang(th) .h1 {
   bottom: calc(100% + 10px);
   left: 0;
   display: grid;
-  grid-template-columns: repeat(2, max-content);
+  grid-template-columns: repeat(3, max-content);
   gap: 6px;
-  min-width: 196px;
+  min-width: 280px;
   padding: 10px;
   color: var(--ink);
   background: var(--paper);

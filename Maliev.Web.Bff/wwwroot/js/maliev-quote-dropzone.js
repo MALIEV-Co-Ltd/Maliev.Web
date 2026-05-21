@@ -1,6 +1,7 @@
 window.malievQuoteDropzone = (() => {
   const registrations = new Map();
-  const acceptedExtensions = new Set(["stl", "step", "stp", "obj", "3mf", "iges", "igs"]);
+  const formatDismissals = new Map();
+  const acceptedExtensions = new Set(["stl", "step", "stp", "3mf", "obj", "igs", "iges", "blend", "fbx", "gltf", "glb"]);
 
   function register(dropzoneId, inputId, quoteEngineUrl) {
     const dropzone = document.getElementById(dropzoneId);
@@ -102,10 +103,50 @@ window.malievQuoteDropzone = (() => {
     registrations.delete(dropzoneId);
   }
 
+  function registerFormatDismissal(shellId, dotNetReference) {
+    const shell = document.getElementById(shellId);
+    if (!shell || !dotNetReference) {
+      return;
+    }
+
+    unregisterFormatDismissal(shellId);
+
+    const closeIfOutside = event => {
+      if (!shell.contains(event.target)) {
+        dotNetReference.invokeMethodAsync("CloseFormatsAsync");
+      }
+    };
+
+    const closeOnEscape = event => {
+      if (event.key === "Escape") {
+        dotNetReference.invokeMethodAsync("CloseFormatsAsync");
+      }
+    };
+
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    document.addEventListener("keydown", closeOnEscape, true);
+
+    formatDismissals.set(shellId, {
+      closeIfOutside,
+      closeOnEscape
+    });
+  }
+
+  function unregisterFormatDismissal(shellId) {
+    const dismissal = formatDismissals.get(shellId);
+    if (!dismissal) {
+      return;
+    }
+
+    document.removeEventListener("pointerdown", dismissal.closeIfOutside, true);
+    document.removeEventListener("keydown", dismissal.closeOnEscape, true);
+    formatDismissals.delete(shellId);
+  }
+
   function routeToQuoteEngine(files, dropzone, quoteEngineUrl, state) {
     const uploadable = files.filter(file => isAccepted(file.name));
     if (!uploadable.length) {
-      showError(dropzone, "Use STL, STEP, STP, OBJ, 3MF, IGES, or IGS files.");
+      showError(dropzone, "Use STL, STEP, STP, 3MF, OBJ, IGS, IGES, BLEND, FBX, GLTF, or GLB files.");
       return;
     }
 
@@ -145,5 +186,5 @@ window.malievQuoteDropzone = (() => {
     }, 6000);
   }
 
-  return { register, unregister };
+  return { register, registerFormatDismissal, unregister, unregisterFormatDismissal };
 })();
