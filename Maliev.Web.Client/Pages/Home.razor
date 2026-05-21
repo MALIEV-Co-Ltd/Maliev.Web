@@ -107,45 +107,60 @@
 <section id="machine-feature-preview"
          @ref="_machineFeaturePreview"
          class="feature-band machine-feature"
-         aria-labelledby="imm-title"
+         aria-labelledby="imm-intro-title"
          data-selected-feature="@SelectedMachineFeature.Accent">
-    <img class="machine-feature-backdrop machine-feature-backdrop--light"
-         @key="SelectedMachineFeature.Accent"
-         src="@SelectedMachineFeature.FeatureImageUrl"
-         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
-         loading="lazy" />
-    <img class="machine-feature-backdrop machine-feature-backdrop--dark"
-         src="@SelectedMachineFeature.DarkFeatureImageUrl"
-         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
-         loading="lazy" />
-    <div class="machine-feature-copy">
-        <h2 id="imm-title" class="h-display machine-feature-title">
-            <span class="machine-feature-title-line machine-feature-title-lead">@Text("Pneumatic injection", "เครื่องฉีดระบบลม")</span>
-            <span class="machine-feature-title-line accent-blue">@Text("machines.", "สำหรับล็อตเล็ก")</span>
-        </h2>
-        <p class="lede">@SelectedMachineFeature.Body.For(Preferences.Culture)</p>
-        <div class="machine-stat-grid">
-            @foreach (var stat in SelectedMachineFeature.Stats)
-            {
-                <div><strong>@stat.Value.For(Preferences.Culture)</strong><small>@stat.Label.For(Preferences.Culture)</small></div>
-            }
+    <div class="machine-feature-panel machine-feature-panel--intro">
+        <img class="machine-feature-backdrop machine-feature-backdrop--light"
+             @key="SelectedMachineFeature.Accent"
+             src="@SelectedMachineFeature.FeatureImageUrl"
+             alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
+             loading="lazy" />
+        <img class="machine-feature-backdrop machine-feature-backdrop--dark"
+             src="@SelectedMachineFeature.DarkFeatureImageUrl"
+             alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
+             loading="lazy" />
+        <div class="machine-feature-copy machine-feature-intro-copy">
+            <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro">@Text("Injection Molding Machine", "เครื่องฉีดพลาสติก")</h2>
         </div>
-        <div class="machine-feature-points" aria-label="@Text("Machine fit", "ความเหมาะสมของเครื่อง")">
-            @foreach (var feature in MachineFeatures)
-            {
-                <button class="@MachineFeatureButtonClass(feature)"
-                        type="button"
-                        data-machine-feature="@feature.Accent"
-                        aria-current="@MachineFeatureAriaCurrent(feature)"
-                        @onclick="() => SelectMachineFeature(feature)">
-                    <span class="machine-feature-point-number">@feature.Number</span>
-                    <span>@feature.Title.For(Preferences.Culture)</span>
-                </button>
-            }
-        </div>
-        <div class="quote-actions machine-actions">
-            <a class="button primary" href="/shop/pneumatic-injection-molding-machine">@Text("Configure machine", "ตั้งค่าเครื่อง")</a>
-            <a class="button secondary" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
+    </div>
+    <div class="machine-feature-panel machine-feature-panel--details" aria-labelledby="imm-title">
+        <img class="machine-feature-backdrop machine-feature-backdrop--light"
+             src="@SelectedMachineFeature.FeatureImageUrl"
+             alt=""
+             loading="lazy" />
+        <img class="machine-feature-backdrop machine-feature-backdrop--dark"
+             src="@SelectedMachineFeature.DarkFeatureImageUrl"
+             alt=""
+             loading="lazy" />
+        <div class="machine-feature-copy">
+            <h2 id="imm-title" class="h-display machine-feature-title">
+                <span class="machine-feature-title-line machine-feature-title-lead">@Text("Pneumatic injection", "เครื่องฉีดระบบลม")</span>
+                <span class="machine-feature-title-line accent-blue">@Text("machines.", "สำหรับล็อตเล็ก")</span>
+            </h2>
+            <p class="lede">@SelectedMachineFeature.Body.For(Preferences.Culture)</p>
+            <div class="machine-stat-grid">
+                @foreach (var stat in SelectedMachineFeature.Stats)
+                {
+                    <div><strong>@stat.Value.For(Preferences.Culture)</strong><small>@stat.Label.For(Preferences.Culture)</small></div>
+                }
+            </div>
+            <div class="machine-feature-points" aria-label="@Text("Machine fit", "ความเหมาะสมของเครื่อง")">
+                @foreach (var feature in MachineFeatures)
+                {
+                    <button class="@MachineFeatureButtonClass(feature)"
+                            type="button"
+                            data-machine-feature="@feature.Accent"
+                            aria-current="@MachineFeatureAriaCurrent(feature)"
+                            @onclick="() => SelectMachineFeature(feature)">
+                        <span class="machine-feature-point-number">@feature.Number</span>
+                        <span>@feature.Title.For(Preferences.Culture)</span>
+                    </button>
+                }
+            </div>
+            <div class="quote-actions machine-actions">
+                <a class="button primary" href="/shop/pneumatic-injection-molding-machine">@Text("Configure machine", "ตั้งค่าเครื่อง")</a>
+                <a class="button secondary" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
+            </div>
         </div>
     </div>
 </section>

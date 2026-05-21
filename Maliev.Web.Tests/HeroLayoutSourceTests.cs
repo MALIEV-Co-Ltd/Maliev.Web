@@ -516,7 +516,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("color: var(--muted);", styles);
         Assert.Contains("machine-feature", source);
         Assert.Contains("id=\"machine-feature-preview\"", source);
+        Assert.Contains("aria-labelledby=\"imm-intro-title\"", source);
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
+        Assert.Contains("machine-feature-panel machine-feature-panel--intro", source);
+        Assert.Contains("machine-feature-panel machine-feature-panel--details", source);
+        Assert.Contains("@Text(\"Injection Molding Machine\", \"เครื่องฉีดพลาสติก\")", source);
+        Assert.Contains("machine-feature-title machine-feature-title--intro", source);
         Assert.Contains("machine-feature-backdrop", source);
         Assert.Contains("machine-feature-backdrop--light", source);
         Assert.Contains("machine-feature-backdrop--dark", source);
@@ -573,8 +578,14 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
+        Assert.Contains("display: block;", styles);
         Assert.Contains("scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);", styles);
+        Assert.Contains(".machine-feature-panel", styles);
+        Assert.Contains("min-height: calc(100svh - var(--site-header-height, 72px));", styles);
         Assert.Contains("grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);", styles);
+        Assert.Contains(".machine-feature-panel--details", styles);
+        Assert.Contains("min-height: 100svh;", styles);
+        Assert.Contains(".machine-feature-title--intro", styles);
         Assert.Contains("max-width: 480px;", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
