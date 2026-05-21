@@ -715,6 +715,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("home.hero.copy", source);
         Assert.Contains("@_heroCopy.HeadlineLead.For(Preferences.Culture)", source);
         Assert.Contains("@_heroCopy.HeadlineAccent.For(Preferences.Culture)", source);
+        Assert.Contains("data-hero-typewriter", source);
+        Assert.Contains("data-typewriter-interval=\"5000\"", source);
+        Assert.Contains("HeroTypewriterAccents", source);
+        Assert.Contains("HeroCopyCatalog.GetVariants(_heroTargetKey)", source);
+        Assert.Contains("data-typewriter-option", source);
         Assert.Contains("@_heroCopy.Body.For(Preferences.Culture)", source);
         Assert.Contains("@_heroCopy.MetaDescription.For(Preferences.Culture)", source);
         Assert.Contains("\"service\"", content);
@@ -726,6 +731,31 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("not quarters.", source);
         Assert.DoesNotContain("ชิ้นงานในไม่กี่วัน", source);
         Assert.DoesNotContain("ไม่ใช่หลายเดือน", source);
+    }
+
+    /// <summary>
+    /// Verifies the home hero typewriter has a fast five-second rotation and a blinking cursor.
+    /// </summary>
+    [Fact]
+    public void HomeHeroTypewriterUsesFastFiveSecondRotation()
+    {
+        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-typewriter.js");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("js/maliev-typewriter.js", app);
+        Assert.Contains("[data-hero-typewriter]", script);
+        Assert.Contains("root.dataset.typewriterInterval ?? \"5000\"", script);
+        Assert.Contains("root.dataset.typewriterSpeed ?? \"26\"", script);
+        Assert.Contains("root.dataset.typewriterEraseSpeed ?? \"16\"", script);
+        Assert.Contains("target.textContent = \"\";", script);
+        Assert.Contains("eraseText", script);
+        Assert.Contains("prefers-reduced-motion: reduce", script);
+        Assert.Contains("new MutationObserver", script);
+        Assert.Contains("scheduleInitialize(1000)", script);
+        Assert.Contains(".hero-typewriter-cursor", styles);
+        Assert.Contains("@keyframes hero-typewriter-cursor", styles);
+        Assert.Contains("animation: hero-typewriter-cursor 0.85s steps(1, end) infinite;", styles);
     }
 
     /// <summary>
