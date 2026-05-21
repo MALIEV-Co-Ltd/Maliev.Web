@@ -6188,7 +6188,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     line-height: 1;
   }
 
-  .mobile-nav-quote:hover {
+  .mobile-nav .mobile-nav-quote:is(:hover, :focus-visible, .active) {
     color: var(--cta-text);
     background: var(--cta-hover);
   }
