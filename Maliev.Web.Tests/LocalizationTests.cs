@@ -113,6 +113,8 @@ public sealed class LocalizationTests
         Assert.Contains("@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", layout);
         Assert.Contains("ActionText=\"@QuoteDropzoneAction\"", home);
         Assert.Contains("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
+        Assert.Contains("Configure material, finish and quantity after upload.", home);
+        Assert.DoesNotContain("quantity at quote.maliev.com", home);
     }
 
     /// <summary>

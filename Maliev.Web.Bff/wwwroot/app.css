@@ -798,16 +798,16 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone {
   width: 100%;
-  min-height: 148px;
+  min-height: 162px;
   color: var(--ink);
-  background: var(--quote-surface);
-  border: 1.5px dashed var(--quote-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  background: var(--paper);
+  border: 1px dashed color-mix(in srgb, var(--muted) 54%, transparent);
+  border-radius: 14px;
+  box-shadow: none;
   text-align: left;
   text-transform: none;
   cursor: pointer;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  transition: border-color .18s ease, background-color .18s ease;
   padding: 0;
 }
 
@@ -815,8 +815,7 @@ html:lang(th) .h1 {
 .landing-quote-dropzone:focus-visible,
 .landing-quote-dropzone.is-dragover {
   border-color: var(--blue);
-  box-shadow: var(--shadow-card), 0 0 0 4px color-mix(in srgb, var(--blue) 16%, transparent);
-  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--blue) 4%, var(--paper));
 }
 
 .landing-quote-dropzone:focus-visible {
@@ -830,7 +829,7 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone.has-error {
   border-color: #dc2626;
-  box-shadow: var(--shadow-card), 0 0 0 4px rgba(220, 38, 38, .12);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
 }
 
 .landing-quote-dropzone.has-error::after {
@@ -848,8 +847,8 @@ html:lang(th) .h1 {
   width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  padding: 18px;
+  gap: 18px;
+  padding: 22px;
 }
 
 .landing-quote-dropzone-primary,
@@ -861,7 +860,7 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone-primary {
   grid-template-columns: 48px minmax(0, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 
 .landing-quote-dropzone-divider {
@@ -871,7 +870,7 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone-browse {
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
+  gap: 18px;
 }
 
 .landing-quote-dropzone-icon {
@@ -896,13 +895,13 @@ html:lang(th) .h1 {
 }
 
 .landing-quote-dropzone-copy strong {
-  font-size: 1.08rem;
-  font-weight: 600;
+  font-size: 1.02rem;
+  font-weight: 700;
 }
 
 .landing-quote-dropzone-copy small {
   color: var(--muted);
-  font-size: .82rem;
+  font-size: .84rem;
   line-height: 1.45;
 }
 
@@ -918,19 +917,18 @@ html:lang(th) .h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 38px;
-  color: var(--blue-on);
-  background: var(--blue);
-  border-radius: var(--radius);
-  padding: 0 18px;
-  font-weight: 600;
+  min-height: 22px;
+  color: var(--ink);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
 }
 
-.landing-quote-dropzone-action .mud-icon-root {
-  font-size: 1rem;
+.landing-quote-dropzone-action:hover {
+  color: var(--blue);
 }
 
 .landing-hero-visual {
@@ -5844,7 +5842,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-quote-dropzone-browse {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .landing-quote-dropzone-icon {
@@ -5853,9 +5851,8 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-quote-dropzone-action {
-    width: 100%;
-    min-height: 36px;
-    padding: 0 12px;
+    justify-self: start;
+    min-height: 22px;
   }
 
   .landing-hero-visual {
@@ -6354,7 +6351,7 @@ html[data-theme="dark"] .auth-google-icon {
   }
 
   .landing-quote-dropzone-action {
-    padding: 0 10px;
+    padding: 0;
     font-size: .82rem;
   }
 

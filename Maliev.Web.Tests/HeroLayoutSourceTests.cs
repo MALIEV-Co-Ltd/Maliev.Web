@@ -188,8 +188,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("Class=\"final-dropzone\"", source);
         Assert.Contains("landing-quote-dropzone", dropzone);
-        Assert.Contains("Icons.Material.Filled.CloudUpload", dropzone);
-        Assert.Contains("Icons.Material.Filled.ArrowForward", dropzone);
+        Assert.Contains("Icons.Material.Filled.Upload", dropzone);
+        Assert.DoesNotContain("Icons.Material.Filled.CloudUpload", dropzone);
+        Assert.DoesNotContain("Icons.Material.Filled.ArrowForward", dropzone);
         Assert.Contains("landing-quote-dropzone-primary", dropzone);
         Assert.Contains("landing-quote-dropzone-divider", dropzone);
         Assert.Contains("landing-quote-dropzone-browse", dropzone);
@@ -198,7 +199,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone-action", dropzone);
         Assert.Contains("Drop 3D files for instant quote", source);
         Assert.Contains("Browse files", source);
+        Assert.Contains("Configure material, finish and quantity after upload.", source);
         Assert.Contains("Ready when you are.", source);
+        Assert.DoesNotContain("Configure material, finish and quantity at quote.maliev.com.", source);
+        Assert.DoesNotContain("Paste link", dropzone);
         Assert.DoesNotContain("StartIcon=", dropzone);
         Assert.DoesNotContain("EndIcon=", dropzone);
         Assert.DoesNotContain("class=\"quote-dropzone final-dropzone\"", source);
@@ -231,6 +235,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone-divider", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-browse", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-or", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-action:hover", styles, StringComparison.Ordinal);
+        Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Content-Range", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Uploading ", script, StringComparison.Ordinal);
@@ -2122,8 +2128,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
         Assert.Contains(".landing-hero-copy > p,\n  .landing-hero-actions {\n    max-width: none;\n    margin-inline: auto;", styles);
         Assert.Contains(".landing-quote-dropzone-primary {\n    grid-template-columns: 38px minmax(0, 1fr);\n    gap: 10px;", styles);
-        Assert.Contains(".landing-quote-dropzone-browse {\n    grid-template-columns: minmax(0, 1fr);", styles);
-        Assert.Contains(".landing-quote-dropzone-action {\n    width: 100%;", styles);
+        Assert.Contains(".landing-quote-dropzone-browse {\n    grid-template-columns: minmax(0, 1fr) auto;", styles);
+        Assert.Contains(".landing-quote-dropzone-action {\n    justify-self: start;", styles);
         Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
         Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
