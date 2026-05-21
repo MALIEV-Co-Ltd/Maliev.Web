@@ -347,6 +347,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("trust-band", source);
         Assert.DoesNotContain("trust-grid", source);
         Assert.Contains("section-link", source);
+        Assert.Contains(".section-link {\n  display: inline-flex;\n  align-items: center;", styles);
+        Assert.Contains("border-radius: 999px;", styles);
+        Assert.Contains(".section-link::after", styles);
+        Assert.Contains("content: \"→\";", styles);
         Assert.DoesNotContain("proof-band", source);
         Assert.DoesNotContain("Build. Test. Produce.", source);
         Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
