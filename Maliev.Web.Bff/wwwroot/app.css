@@ -2183,7 +2183,7 @@ html[data-theme="dark"] .form-status--error {
   overflow: hidden;
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
   min-height: clamp(560px, 52vw, 760px);
-  grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);
+  grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
   align-items: center;
   gap: clamp(20px, 3vw, 48px);
   background: rgb(var(--machine-feature-surface-rgb));
@@ -2241,7 +2241,7 @@ html:lang(th) .machine-feature-title-lead {
   align-content: center;
   justify-self: end;
   gap: 22px;
-  max-width: 640px;
+  max-width: 480px;
   min-width: 0;
   z-index: 2;
 }
@@ -5928,7 +5928,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature {
-    grid-template-columns: minmax(0, .76fr) minmax(520px, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
   }
 
   .machine-feature-title {

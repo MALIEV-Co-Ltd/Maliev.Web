@@ -562,7 +562,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.Contains(".machine-feature", styles);
         Assert.Contains("scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);", styles);
-        Assert.Contains("grid-template-columns: minmax(0, .74fr) minmax(620px, .98fr);", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);", styles);
+        Assert.Contains("max-width: 480px;", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
