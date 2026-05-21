@@ -643,6 +643,8 @@ main {
   width: 100%;
   padding: clamp(54px, 5.6vw, 76px) 32px;
   background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 
 .industry-sector-band-inner {
@@ -698,21 +700,41 @@ main {
 }
 
 .industry-sector-list li {
+  position: relative;
   display: grid;
-  place-items: center;
-  min-height: 52px;
-  padding: 10px 12px;
-  color: color-mix(in srgb, var(--muted) 80%, var(--ink));
-  background: color-mix(in srgb, var(--paper) 72%, transparent);
+  align-content: start;
+  gap: 8px;
+  min-height: 112px;
+  padding: 18px;
+  overflow: hidden;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
   border: 1px solid color-mix(in srgb, var(--rule) 82%, transparent);
-  border-radius: 999px;
+  border-radius: 8px;
+  box-shadow: color-mix(in srgb, var(--ink) 8%, transparent) 0 18px 42px -34px;
+}
+
+.industry-sector-list li::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--blue);
+}
+
+.industry-sector-list span {
   font-family: var(--font-mono);
   font-size: .72rem;
   font-weight: 700;
   letter-spacing: .12em;
   line-height: 1.25;
-  text-align: center;
   text-transform: uppercase;
+}
+
+.industry-sector-list small {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .home-services-section {
@@ -905,14 +927,6 @@ html:lang(th) .h1 {
   padding-top: 56px;
   padding-bottom: 72px;
   overflow: hidden;
-}
-
-.landing-hero::after {
-  content: "";
-  position: absolute;
-  inset: auto 32px 0;
-  height: 1px;
-  background: var(--rule);
 }
 
 .landing-hero-copy {
