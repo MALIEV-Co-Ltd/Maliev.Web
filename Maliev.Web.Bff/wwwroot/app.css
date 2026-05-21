@@ -1074,6 +1074,7 @@ html:lang(th) .h1 {
 
 .landing-quote-dropzone-primary {
   grid-template-columns: 48px minmax(0, 1fr);
+  align-items: start;
   gap: 14px;
 }
 
@@ -1094,6 +1095,7 @@ html:lang(th) .h1 {
   place-items: center;
   width: 48px;
   height: 48px;
+  margin-top: 2px;
   color: var(--blue-on);
   background: var(--blue);
   border-radius: var(--radius);
