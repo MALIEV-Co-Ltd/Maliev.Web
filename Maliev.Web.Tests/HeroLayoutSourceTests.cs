@@ -1074,6 +1074,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".cart-icon-button.mud-button-root {\n  background: transparent;", styles);
         Assert.Contains("--cta-bg: var(--blue);", styles);
         Assert.Contains("--cta-hover: var(--blue-hover);", styles);
+        Assert.Contains("--cta-text: #ffffff;", styles);
         Assert.Contains(".nav-quote-link {\n  border-radius: 999px;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);
         Assert.DoesNotContain("class=\"icon-link\"", source);
@@ -1295,9 +1296,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("html:lang(th)", styles);
         Assert.Contains("html[data-theme=\"dark\"]", styles);
         Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
+        Assert.Contains("--blue-on: #ffffff;", styles);
+        Assert.Contains("--cta-text: #ffffff;", styles);
         Assert.Contains("--reconnect-button-text: var(--blue-on);", styles);
         Assert.Contains("--reconnect-button-focus: rgba(10, 114, 239, .24);", styles);
-        Assert.Contains("--reconnect-button-focus: rgba(91, 167, 255, .32);", styles);
+        Assert.Contains("--reconnect-button-focus: rgba(10, 114, 239, .32);", styles);
         Assert.Contains("document.documentElement.lang", cultureScript);
         Assert.Contains("document.documentElement.dataset.theme", cultureScript);
         Assert.DoesNotContain("isThaiRegionSignal", cultureScript);
