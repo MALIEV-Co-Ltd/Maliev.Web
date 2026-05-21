@@ -15,10 +15,7 @@
         </NavLink>
         <nav class="nav-links" aria-label="Primary navigation">
             <NavLink href="/services">@Text("Services", "บริการ")</NavLink>
-            <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
             <NavLink href="/shop">@Text("Shop", "ร้านค้า")</NavLink>
-            <NavLink href="/case-studies">@Text("Case studies", "ผลงาน")</NavLink>
-            <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
             <NavLink href="/contact">@Text("Contact", "ติดต่อ")</NavLink>
         </nav>
         <div class="nav-actions">
@@ -41,11 +38,11 @@
                       BadgeAriaLabel="@CartBadgeAriaLabel"
                       Class="nav-icon-badge">
                 <MudIconButton Href="/cart"
-                               Icon="@Icons.Material.Filled.ShoppingCart"
+                               Icon="@Icons.Material.Outlined.ShoppingCart"
                                Variant="Variant.Text"
                                Color="Color.Inherit"
                                Size="Size.Medium"
-                               Class="nav-icon-button"
+                               Class="nav-icon-button cart-icon-button"
                                aria-label="@Text("Cart", "ตะกร้า")" />
             </MudBadge>
             <MudIconButton Href="/account"
@@ -98,6 +95,7 @@
             <NavLink href="/about">@Text("About", "เกี่ยวกับเรา")</NavLink>
             <NavLink href="/contact">@Text("Contact", "ติดต่อ")</NavLink>
             <NavLink href="/services">@Text("Services", "บริการ")</NavLink>
+            <NavLink href="/case-studies">@Text("Case studies", "ผลงาน")</NavLink>
             <NavLink href="/materials">@Text("Materials", "วัสดุ")</NavLink>
             <NavLink href="/blog">@Text("Journal", "บทความ")</NavLink>
             <NavLink href="/shop">@Text("Shop", "ร้านค้า")</NavLink>

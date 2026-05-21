@@ -962,11 +962,21 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("MudIconButton", source);
         Assert.Contains("MudBadge", source);
-        Assert.Contains("Icons.Material.Filled.ShoppingCart", source);
+        Assert.Contains("Icons.Material.Outlined.ShoppingCart", source);
+        Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
+        Assert.Contains("<NavLink href=\"/shop\">@Text(\"Shop\", \"ร้านค้า\")</NavLink>", source);
+        Assert.Contains("<NavLink href=\"/contact\">@Text(\"Contact\", \"ติดต่อ\")</NavLink>", source);
+        Assert.DoesNotContain("<NavLink href=\"/materials\">@Text(\"Materials\", \"วัสดุ\")</NavLink>\r\n            <NavLink href=\"/shop\">", source);
+        Assert.DoesNotContain("<NavLink href=\"/case-studies\">@Text(\"Case studies\", \"ผลงาน\")</NavLink>\r\n            <NavLink href=\"/blog\">", source);
+        Assert.Contains("<NavLink href=\"/case-studies\">@Text(\"Case studies\", \"ผลงาน\")</NavLink>", source);
         Assert.Contains(".nav-links a {\n  white-space: nowrap;", styles);
+        Assert.Contains(".cart-icon-button.mud-button-root {\n  background: transparent;\n  box-shadow: none;", styles);
+        Assert.Contains("--cta-bg: var(--blue);", styles);
+        Assert.Contains("--cta-hover: var(--blue-hover);", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);
         Assert.DoesNotContain("class=\"icon-link\"", source);
     }

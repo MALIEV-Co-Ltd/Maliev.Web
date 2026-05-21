@@ -34,8 +34,8 @@
   --header-shadow: rgba(0, 0, 0, .08) 0 1px 0;
   --active-pill-bg: #171717;
   --active-pill-text: #ffffff;
-  --cta-bg: #171717;
-  --cta-hover: #000000;
+  --cta-bg: var(--blue);
+  --cta-hover: var(--blue-hover);
   --cta-text: #ffffff;
   --quote-surface: rgba(255, 255, 255, .96);
   --quote-border: rgba(23, 23, 23, .18);
@@ -373,6 +373,17 @@ main {
   font-size: 1.22rem;
 }
 
+.cart-icon-button.mud-button-root {
+  background: transparent;
+  box-shadow: none;
+}
+
+.cart-icon-button.mud-button-root:hover,
+.cart-icon-button.mud-button-root:focus-visible {
+  background: transparent;
+  box-shadow: none;
+}
+
 .theme-toggle-button .mud-icon-root {
   font-size: 1.18rem;
 }
@@ -443,6 +454,12 @@ main {
 .button.primary:hover,
 .nav-quote-link:hover {
   background: var(--cta-hover);
+}
+
+.nav-quote-link::after {
+  content: "→";
+  font-size: .95em;
+  line-height: 1;
 }
 
 .button.secondary {
