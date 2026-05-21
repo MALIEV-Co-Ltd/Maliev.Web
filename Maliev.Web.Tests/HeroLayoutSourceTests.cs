@@ -979,7 +979,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("<NavLink href=\"/case-studies\">@Text(\"Case studies\", \"ผลงาน\")</NavLink>\r\n            <NavLink href=\"/blog\">", source);
         Assert.Contains("<NavLink href=\"/case-studies\">@Text(\"Case studies\", \"ผลงาน\")</NavLink>", source);
         Assert.Contains(".nav-links a {\n  white-space: nowrap;", styles);
-        Assert.Contains(".cart-icon-button.mud-button-root {\n  background: transparent;\n  box-shadow: none;", styles);
+        Assert.Contains(".nav-icon-button.mud-button-root {\n  width: 38px;", styles);
+        Assert.Contains("background: transparent;\n  border: 0;\n  border-radius: var(--radius);\n  box-shadow: none;", styles);
+        Assert.Contains(".nav-icon-button.mud-button-root:hover,\n.nav-icon-button.mud-button-root:focus-visible {\n  color: var(--ink);\n  background: transparent;\n  box-shadow: none;", styles);
+        Assert.DoesNotContain(".cart-icon-button.mud-button-root {\n  background: transparent;", styles);
         Assert.Contains("--cta-bg: var(--blue);", styles);
         Assert.Contains("--cta-hover: var(--blue-hover);", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);

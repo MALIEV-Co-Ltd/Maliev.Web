@@ -347,7 +347,26 @@ main {
   line-height: 16px;
 }
 
-.nav-icon-button.mud-button-root,
+.nav-icon-button.mud-button-root {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+.nav-icon-button.mud-button-root:hover,
+.nav-icon-button.mud-button-root:focus-visible {
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+}
+
 .mobile-menu-button {
   width: 38px;
   height: 38px;
@@ -361,8 +380,6 @@ main {
   box-shadow: var(--shadow-border);
 }
 
-.nav-icon-button.mud-button-root:hover,
-.nav-icon-button.mud-button-root:focus-visible,
 .mobile-menu-button:hover,
 .mobile-menu-button:focus-visible {
   color: var(--ink);
@@ -371,17 +388,6 @@ main {
 
 .nav-icon-button .mud-icon-root {
   font-size: 1.22rem;
-}
-
-.cart-icon-button.mud-button-root {
-  background: transparent;
-  box-shadow: none;
-}
-
-.cart-icon-button.mud-button-root:hover,
-.cart-icon-button.mud-button-root:focus-visible {
-  background: transparent;
-  box-shadow: none;
 }
 
 .theme-toggle-button .mud-icon-root {
