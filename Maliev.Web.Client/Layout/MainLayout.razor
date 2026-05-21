@@ -30,21 +30,24 @@
                            Class="nav-icon-button theme-toggle-button"
                            aria-label="@ThemeToggleAriaLabel"
                            OnClick="ToggleThemeAsync" />
-            <MudBadge Content="@Cart.Count"
-                      Color="Color.Info"
-                      Overlap="true"
-                      Bordered="false"
-                      Elevation="0"
-                      BadgeAriaLabel="@CartBadgeAriaLabel"
-                      Class="nav-icon-badge">
-                <MudIconButton Href="/cart"
-                               Icon="@Icons.Material.Outlined.ShoppingCart"
-                               Variant="Variant.Text"
-                               Color="Color.Inherit"
-                               Size="Size.Medium"
-                               Class="nav-icon-button cart-icon-button"
-                               aria-label="@Text("Cart", "ตะกร้า")" />
-            </MudBadge>
+            @if (HasCartItems)
+            {
+                <MudBadge Content="@Cart.Count"
+                          Color="Color.Info"
+                          Overlap="true"
+                          Bordered="false"
+                          Elevation="0"
+                          BadgeAriaLabel="@CartBadgeAriaLabel"
+                          Class="nav-icon-badge">
+                    <MudIconButton Href="/cart"
+                                   Icon="@Icons.Material.Outlined.ShoppingCart"
+                                   Variant="Variant.Text"
+                                   Color="Color.Inherit"
+                                   Size="Size.Medium"
+                                   Class="nav-icon-button cart-icon-button"
+                                   aria-label="@Text("Cart", "ตะกร้า")" />
+                </MudBadge>
+            }
             <MudIconButton Href="/account"
                            Icon="@Icons.Material.Filled.AccountCircle"
                            Variant="Variant.Text"
@@ -70,7 +73,10 @@
             <NavLink href="/blog" @onclick="CloseMobileNav">@Text("Journal", "บทความ")</NavLink>
             <NavLink href="/contact" @onclick="CloseMobileNav">@Text("Contact", "ติดต่อ")</NavLink>
             <NavLink href="/account" @onclick="CloseMobileNav">@Text("Account", "บัญชี")</NavLink>
-            <NavLink href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
+            @if (HasCartItems)
+            {
+                <NavLink href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
+            }
             <a href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
         </nav>
     </header>
@@ -254,6 +260,7 @@
     private int _footerLineIndex;
     private CancellationTokenSource? _footerLineRotationCancellation;
     private const int FoundingYear = 2018;
+    private bool HasCartItems => Cart.Count > 0;
     private string CartBadgeAriaLabel => $"{Text("Cart", "ตะกร้า")}: {Cart.Count.ToString(CultureInfo.InvariantCulture)}";
     private static int CurrentYear => DateTime.Today.Year;
     private string CopyrightText => Text(

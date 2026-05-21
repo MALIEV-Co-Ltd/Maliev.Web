@@ -1002,6 +1002,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("MudIconButton", source);
         Assert.Contains("MudBadge", source);
+        Assert.Contains("@if (HasCartItems)", source);
+        Assert.Contains("private bool HasCartItems => Cart.Count > 0;", source);
         Assert.Contains("Icons.Material.Outlined.ShoppingCart", source);
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
