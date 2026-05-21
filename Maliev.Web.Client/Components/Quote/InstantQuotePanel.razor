@@ -19,9 +19,9 @@
     }
 
     <label class="upload-zone">
-        <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.3mf,.obj,.igs,.iges,.blend,.fbx,.gltf,.glb" disabled="@(!_reference.Processes.Any())" />
+        <InputFile OnChange="HandleFilesAsync" multiple accept=".stl,.step,.stp,.3mf,.obj,.igs,.iges,.gltf,.glb" disabled="@(!_reference.Processes.Any())" />
         <span class="upload-title">Drop or choose 3D model files</span>
-        <span class="upload-meta">STL, STEP, STP, 3MF, OBJ, IGS, IGES, BLEND, FBX, GLTF, and GLB. Large files can stay on this page while they upload.</span>
+        <span class="upload-meta">STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, and GLB. Large files can stay on this page while they upload.</span>
     </label>
 
     @if (!string.IsNullOrWhiteSpace(_statusMessage))

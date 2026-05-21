@@ -1,7 +1,7 @@
 window.malievQuoteDropzone = (() => {
   const registrations = new Map();
   const formatDismissals = new Map();
-  const acceptedExtensions = new Set(["stl", "step", "stp", "3mf", "obj", "igs", "iges", "blend", "fbx", "gltf", "glb"]);
+  const acceptedExtensions = new Set(["stl", "step", "stp", "3mf", "obj", "igs", "iges", "gltf", "glb"]);
 
   function register(dropzoneId, inputId, quoteEngineUrl) {
     const dropzone = document.getElementById(dropzoneId);
@@ -146,7 +146,7 @@ window.malievQuoteDropzone = (() => {
   function routeToQuoteEngine(files, dropzone, quoteEngineUrl, state) {
     const uploadable = files.filter(file => isAccepted(file.name));
     if (!uploadable.length) {
-      showError(dropzone, "Use STL, STEP, STP, 3MF, OBJ, IGS, IGES, BLEND, FBX, GLTF, or GLB files.");
+      showError(dropzone, "Use STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, or GLB files.");
       return;
     }
 

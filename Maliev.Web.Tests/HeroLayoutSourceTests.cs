@@ -241,7 +241,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("FormatsButtonText", dropzone, StringComparison.Ordinal);
         Assert.Contains("FormatsExpanded => _isFormatsOpen ? \"true\" : \"false\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("SupportedFormats", dropzone, StringComparison.Ordinal);
-        Assert.Contains("\".STL\", \".STEP\", \".STP\", \".3MF\", \".OBJ\", \".IGS\", \".IGES\", \".BLEND\", \".FBX\", \".GLTF\", \".GLB\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("\".STL\", \".STEP\", \".STP\", \".3MF\", \".OBJ\", \".IGS\", \".IGES\", \".GLTF\", \".GLB\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("accept=\"@SupportedFormatsAccept\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("DotNetObjectReference<QuoteDropzone>", dropzone, StringComparison.Ordinal);
         Assert.Contains("[JSInvokable]", dropzone, StringComparison.Ordinal);
@@ -254,7 +254,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("registerFormatDismissal(shellId, dotNetReference)", script, StringComparison.Ordinal);
         Assert.Contains("document.addEventListener(\"pointerdown\", closeIfOutside, true)", script, StringComparison.Ordinal);
         Assert.Contains("unregisterFormatDismissal(shellId)", script, StringComparison.Ordinal);
-        Assert.Contains("\"blend\", \"fbx\", \"gltf\", \"glb\"", script, StringComparison.Ordinal);
+        Assert.Contains("\"gltf\", \"glb\"", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"blend\"", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"fbx\"", script, StringComparison.Ordinal);
         Assert.Contains("dropzone.addEventListener(\"keydown\", handleKeydown)", script, StringComparison.Ordinal);
         Assert.Contains("routeToQuoteEngine(Array.from(input.files), dropzone, quoteEngineUrl, state)", script, StringComparison.Ordinal);
         Assert.Contains("redirectToQuoteEngine(quoteEngineUrl)", script, StringComparison.Ordinal);
