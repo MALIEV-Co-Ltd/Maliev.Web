@@ -972,6 +972,8 @@ html:lang(th) .h1 {
 }
 
 .landing-quote-dropzone {
+  position: relative;
+  display: block;
   width: 100%;
   min-height: 162px;
   color: var(--ink);
@@ -1046,6 +1048,8 @@ html:lang(th) .h1 {
 .landing-quote-dropzone-browse {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
+  position: relative;
+  z-index: 1;
 }
 
 .landing-quote-dropzone-icon {
@@ -1086,6 +1090,72 @@ html:lang(th) .h1 {
   font-size: .72rem;
   letter-spacing: .08em;
   text-transform: uppercase;
+}
+
+.landing-quote-dropzone-format-shell {
+  position: relative;
+  z-index: 3;
+  justify-self: start;
+}
+
+.landing-quote-dropzone-format-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.landing-quote-dropzone-format-button:is(:hover, :focus-visible),
+.landing-quote-dropzone-format-button[aria-expanded="true"] {
+  color: var(--blue);
+}
+
+.landing-quote-dropzone-format-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue) 56%, transparent);
+  outline-offset: 4px;
+}
+
+.landing-quote-dropzone-format-popover {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 10px);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 6px;
+  min-width: 196px;
+  padding: 10px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: rgba(17, 24, 39, .16) 0 18px 46px -28px, var(--shadow-border);
+  cursor: default;
+}
+
+.landing-quote-dropzone-format-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  color: var(--ink-2);
+  background: var(--paper-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .landing-quote-dropzone-action {
@@ -6434,6 +6504,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .landing-quote-dropzone-action {
     justify-self: start;
     min-height: 22px;
+  }
+
+  .landing-quote-dropzone-format-popover {
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    max-width: min(260px, calc(100vw - 52px));
   }
 
   .landing-hero-visual {

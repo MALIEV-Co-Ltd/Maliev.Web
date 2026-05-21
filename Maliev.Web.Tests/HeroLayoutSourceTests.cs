@@ -196,7 +196,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone-primary", dropzone);
         Assert.Contains("landing-quote-dropzone-divider", dropzone);
         Assert.Contains("landing-quote-dropzone-browse", dropzone);
-        Assert.Contains("landing-quote-dropzone-or", dropzone);
+        Assert.Contains("role=\"button\"", dropzone);
+        Assert.Contains("tabindex=\"0\"", dropzone);
+        Assert.Contains("landing-quote-dropzone-format-button", dropzone);
+        Assert.Contains("landing-quote-dropzone-format-popover", dropzone);
+        Assert.Contains("data-dropzone-interactive", dropzone);
+        Assert.Contains("aria-expanded=\"@FormatsExpanded\"", dropzone);
+        Assert.Contains("@onclick:stopPropagation=\"true\"", dropzone);
+        Assert.Contains("@onpointerdown:stopPropagation=\"true\"", dropzone);
+        Assert.DoesNotContain("landing-quote-dropzone-or\">@OrText", dropzone);
         Assert.Contains("landing-quote-dropzone-icon", dropzone);
         Assert.Contains("landing-quote-dropzone-action", dropzone);
         Assert.Contains("Drop 3D files for instant quote", source);
@@ -226,9 +234,15 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("type=\"file\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("data-opening-label=\"@OpeningText\"", dropzone, StringComparison.Ordinal);
-        Assert.Contains("OrText", dropzone, StringComparison.Ordinal);
+        Assert.Contains("FormatsButtonText", dropzone, StringComparison.Ordinal);
+        Assert.Contains("FormatsExpanded => _isFormatsOpen ? \"true\" : \"false\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("SupportedFormats", dropzone, StringComparison.Ordinal);
+        Assert.Contains("\".STL\", \".STEP\", \".STP\", \".IGES\", \".IGS\", \".OBJ\", \".3MF\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("malievQuoteDropzone.register", dropzone, StringComparison.Ordinal);
         Assert.Contains("event.dataTransfer.files", script, StringComparison.Ordinal);
+        Assert.Contains("isInteractiveChild(event)", script, StringComparison.Ordinal);
+        Assert.Contains("data-dropzone-interactive", script, StringComparison.Ordinal);
+        Assert.Contains("dropzone.addEventListener(\"keydown\", handleKeydown)", script, StringComparison.Ordinal);
         Assert.Contains("routeToQuoteEngine(Array.from(input.files), dropzone, quoteEngineUrl, state)", script, StringComparison.Ordinal);
         Assert.Contains("redirectToQuoteEngine(quoteEngineUrl)", script, StringComparison.Ordinal);
         Assert.Contains("window.location.assign(url.toString())", script, StringComparison.Ordinal);
@@ -236,7 +250,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-divider", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-browse", styles, StringComparison.Ordinal);
-        Assert.Contains(".landing-quote-dropzone-or", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-format-button", styles, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone-format-popover", styles, StringComparison.Ordinal);
+        Assert.Contains("z-index: 20;", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-action {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 22px;\n  color: var(--muted);", styles, StringComparison.Ordinal);
         Assert.Contains("font-family: var(--font-mono);\n  font-size: .78rem;", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-action:hover,\n.landing-quote-dropzone:focus-visible .landing-quote-dropzone-action", styles, StringComparison.Ordinal);

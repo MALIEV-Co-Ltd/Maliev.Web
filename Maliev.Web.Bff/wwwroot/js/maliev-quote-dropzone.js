@@ -15,11 +15,25 @@ window.malievQuoteDropzone = (() => {
       isNavigating: false
     };
 
+    const isInteractiveChild = event => event.target?.closest?.("[data-dropzone-interactive]");
+
     const openPicker = event => {
       event.preventDefault();
+      if (isInteractiveChild(event)) {
+        return;
+      }
+
       if (!state.isNavigating) {
         input.click();
       }
+    };
+
+    const handleKeydown = event => {
+      if (isInteractiveChild(event) || event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+
+      openPicker(event);
     };
 
     const handleChange = () => {
@@ -54,6 +68,7 @@ window.malievQuoteDropzone = (() => {
     };
 
     dropzone.addEventListener("click", openPicker);
+    dropzone.addEventListener("keydown", handleKeydown);
     dropzone.addEventListener("dragover", dragOver);
     dropzone.addEventListener("dragleave", dragLeave);
     dropzone.addEventListener("drop", drop);
@@ -63,6 +78,7 @@ window.malievQuoteDropzone = (() => {
       dropzone,
       input,
       openPicker,
+      handleKeydown,
       handleChange,
       dragOver,
       dragLeave,
@@ -78,6 +94,7 @@ window.malievQuoteDropzone = (() => {
     }
 
     registration.dropzone.removeEventListener("click", registration.openPicker);
+    registration.dropzone.removeEventListener("keydown", registration.handleKeydown);
     registration.dropzone.removeEventListener("dragover", registration.dragOver);
     registration.dropzone.removeEventListener("dragleave", registration.dragLeave);
     registration.dropzone.removeEventListener("drop", registration.drop);

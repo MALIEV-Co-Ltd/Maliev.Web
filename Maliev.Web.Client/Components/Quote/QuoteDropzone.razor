@@ -7,12 +7,13 @@
            type="file"
            multiple
            accept=".stl,.step,.stp,.obj,.3mf,.iges,.igs" />
-    <button id="@DropzoneId"
-            type="button"
-            class="@ButtonClass"
-            aria-label="@AriaLabel"
-            data-idle-label="@ActionText"
-            data-opening-label="@OpeningText">
+    <div id="@DropzoneId"
+         role="button"
+         tabindex="0"
+         class="@ButtonClass"
+         aria-label="@AriaLabel"
+         data-idle-label="@ActionText"
+         data-opening-label="@OpeningText">
         <span class="landing-quote-dropzone-inner">
             <span class="landing-quote-dropzone-primary">
                 <span class="landing-quote-dropzone-icon" aria-hidden="true">
@@ -25,18 +26,43 @@
             </span>
             <span class="landing-quote-dropzone-divider" aria-hidden="true"></span>
             <span class="landing-quote-dropzone-browse">
-                <span class="landing-quote-dropzone-or">@OrText</span>
+                <span class="landing-quote-dropzone-format-shell" data-dropzone-interactive>
+                    <button class="landing-quote-dropzone-format-button"
+                            type="button"
+                            aria-expanded="@FormatsExpanded"
+                            aria-controls="@FormatsPanelId"
+                            @onclick="ToggleFormats"
+                            @onclick:stopPropagation="true"
+                            @onpointerdown:stopPropagation="true">
+                        @FormatsButtonText
+                    </button>
+                    @if (_isFormatsOpen)
+                    {
+                        <span id="@FormatsPanelId"
+                              class="landing-quote-dropzone-format-popover"
+                              role="list"
+                              aria-label="@FormatsPanelLabel">
+                            @foreach (var format in SupportedFormats)
+                            {
+                                <span class="landing-quote-dropzone-format-item" role="listitem">@format</span>
+                            }
+                        </span>
+                    }
+                </span>
                 <span class="landing-quote-dropzone-action">
                     <span data-quote-dropzone-label>@ActionText</span>
                 </span>
             </span>
         </span>
-    </button>
+    </div>
 </div>
 
 @code {
     private readonly string DropzoneId = $"quote-dropzone-{Guid.NewGuid():N}";
     private readonly string InputId = $"quote-dropzone-input-{Guid.NewGuid():N}";
+    private readonly string FormatsPanelId = $"quote-dropzone-formats-{Guid.NewGuid():N}";
+    private static readonly string[] SupportedFormats = [".STL", ".STEP", ".STP", ".IGES", ".IGS", ".OBJ", ".3MF"];
+    private bool _isFormatsOpen;
 
     [Parameter]
     public string Href { get; set; } = string.Empty;
@@ -57,6 +83,12 @@
     public string OrText { get; set; } = "OR";
 
     [Parameter]
+    public string FormatsButtonText { get; set; } = "Supported formats";
+
+    [Parameter]
+    public string FormatsPanelLabel { get; set; } = "Supported QuoteEngine file formats";
+
+    [Parameter]
     public string? AriaLabel { get; set; }
 
     [Parameter]
@@ -69,6 +101,13 @@
     private string ButtonClass => string.IsNullOrWhiteSpace(Class)
         ? "landing-quote-dropzone"
         : $"landing-quote-dropzone {Class}";
+
+    private string FormatsExpanded => _isFormatsOpen ? "true" : "false";
+
+    private void ToggleFormats()
+    {
+        _isFormatsOpen = !_isFormatsOpen;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
