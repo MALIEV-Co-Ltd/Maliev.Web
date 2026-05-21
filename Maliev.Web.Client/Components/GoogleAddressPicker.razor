@@ -139,10 +139,27 @@
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        await JS.InvokeVoidAsync("malievGoogleAddressPicker.disposeSearch", _autocompleteElementId);
-        await JS.InvokeVoidAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
+        await TryDisposeJsResourceAsync("malievGoogleAddressPicker.disposeSearch", _autocompleteElementId);
+        await TryDisposeJsResourceAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
         _dotNetReference?.Dispose();
     }
+
+    private async ValueTask TryDisposeJsResourceAsync(string identifier, string elementId)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync(identifier, elementId);
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (InvalidOperationException ex) when (IsJsInteropUnavailable(ex))
+        {
+        }
+    }
+
+    private static bool IsJsInteropUnavailable(InvalidOperationException exception)
+        => exception.Message.Contains("JavaScript interop calls cannot be issued", StringComparison.OrdinalIgnoreCase);
 
     private string Text(string en, string th) =>
         Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
