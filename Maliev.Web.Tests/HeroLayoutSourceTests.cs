@@ -238,6 +238,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone-browse", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-or", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-action {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 22px;\n  color: var(--muted);", styles, StringComparison.Ordinal);
+        Assert.Contains("font-family: var(--font-mono);\n  font-size: .78rem;", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-action:hover,\n.landing-quote-dropzone:focus-visible .landing-quote-dropzone-action", styles, StringComparison.Ordinal);
         Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
