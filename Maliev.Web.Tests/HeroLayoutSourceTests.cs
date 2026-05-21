@@ -358,7 +358,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-work-link", styles);
         Assert.Contains(".home-work-card", styles);
         Assert.Contains(".industry-sector-band", styles);
-        Assert.Contains("background: var(--paper-2);", styles);
+        Assert.Contains(".industry-sector-band {\n  width: 100%;\n  padding: clamp(54px, 5.6vw, 76px) 32px;\n  background: var(--paper);", styles);
+        Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);\n  padding-bottom: clamp(112px, 12vw, 184px);\n  max-width: none;\n  background: var(--paper-2);", styles);
+        Assert.Contains(".home-services-section .service-grid {\n  width: min(100%, var(--container));\n  margin-inline: auto;", styles);
         Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(6, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list li", styles);
         Assert.Contains("border-radius: 999px;", styles);
@@ -395,7 +397,6 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".final-dropzone-icon", styles);
         Assert.DoesNotContain(".final-dropzone-copy", styles);
         Assert.Contains(".service-grid {\n  grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
-        Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);", styles);
         Assert.Contains(".home-services-section {\n    padding-top: clamp(96px, 14vw, 128px);", styles);
         Assert.Contains(".home-services-section {\n    padding-top: 84px;", styles);
         Assert.DoesNotContain("grid-template-columns: 1.2fr 1fr 1fr;", styles);
@@ -420,7 +421,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".card-meta,\n.small,\n.load-message,\n.form-status,\n.success-message {\n  color: var(--muted);\n  font-size: .8125rem;", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
-        Assert.Contains("background: var(--paper-2);", styles);
+        Assert.Contains(".process-section {\n  max-width: none;\n  position: relative;\n  padding-top: clamp(88px, 9vw, 132px);\n  padding-bottom: clamp(92px, 9vw, 136px);\n  background: var(--paper);", styles);
         Assert.DoesNotContain(".process-section::after", styles);
         Assert.DoesNotContain(".process-section::before", styles);
         var processStylesStart = styles.IndexOf(".process-grid", StringComparison.Ordinal);

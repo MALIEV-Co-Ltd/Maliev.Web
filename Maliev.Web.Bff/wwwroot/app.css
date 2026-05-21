@@ -634,9 +634,7 @@ main {
 .industry-sector-band {
   width: 100%;
   padding: clamp(54px, 5.6vw, 76px) 32px;
-  background: var(--paper-2);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
 }
 
 .industry-sector-band-inner {
@@ -711,12 +709,22 @@ main {
 
 .home-services-section {
   padding-top: clamp(112px, 12vw, 184px);
+  padding-bottom: clamp(112px, 12vw, 184px);
+  max-width: none;
+  background: var(--paper-2);
 }
 
 .home-services-section .section-heading {
   grid-template-columns: minmax(0, 660px) auto;
   align-items: end;
+  width: min(100%, var(--container));
+  margin-inline: auto;
   margin-bottom: 30px;
+}
+
+.home-services-section .service-grid {
+  width: min(100%, var(--container));
+  margin-inline: auto;
 }
 
 .home-services-section .section-link {
@@ -2073,8 +2081,6 @@ html[data-theme="dark"] .form-status--error {
   gap: clamp(20px, 3vw, 48px);
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
 }
 
 .machine-feature::before {
@@ -2241,7 +2247,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   position: relative;
   padding-top: clamp(88px, 9vw, 132px);
   padding-bottom: clamp(92px, 9vw, 136px);
-  background: var(--paper-2);
+  background: var(--paper);
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
 }
 
@@ -2926,8 +2932,6 @@ html[data-theme="dark"] .workflow-step {
   max-width: none;
   padding: clamp(84px, 8vw, 128px) clamp(20px, 4vw, 72px);
   background: var(--home-work-surface);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
 }
 
 .home-work-heading {
