@@ -14,22 +14,6 @@ window.malievCulture = {
   preferredSystemTheme: function () {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   },
-  isThaiRegionSignal: function (language) {
-    if (!language) {
-      return false;
-    }
-
-    const normalized = language.toLowerCase();
-    if (normalized.startsWith('th')) {
-      return true;
-    }
-
-    try {
-      return new Intl.Locale(language).region === 'TH';
-    } catch {
-      return normalized.endsWith('-th');
-    }
-  },
   resolveCulture: function (fallback) {
     const stored = localStorage.getItem('maliev.culture');
     if (stored) {
@@ -41,16 +25,6 @@ window.malievCulture = {
       .find((row) => row.startsWith('maliev.culture='));
     if (cookie) {
       return window.malievCulture.applyDocumentCulture(decodeURIComponent(cookie.split('=')[1]));
-    }
-
-    const languages = navigator.languages || [navigator.language || fallback];
-    const browserCulture = languages.find((language) => window.malievCulture.isThaiRegionSignal(language));
-    if (browserCulture) {
-      return window.malievCulture.applyDocumentCulture('th-TH');
-    }
-
-    if (Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Bangkok') {
-      return window.malievCulture.applyDocumentCulture('th-TH');
     }
 
     return window.malievCulture.applyDocumentCulture(fallback || 'en-US');

@@ -1228,6 +1228,7 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var design = ReadRepoFile("DESIGN.md");
         var cultureScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-culture.js");
 
         Assert.Contains("<MudThemeProvider Theme=\"@_malievTheme\" IsDarkMode=\"@IsDarkMode\" />", source);
@@ -1240,15 +1241,27 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\" data-theme=\"light\">", app);
         Assert.Contains("<meta name=\"color-scheme\" content=\"light dark\" />", app);
         Assert.Contains("maliev.theme", app);
-        Assert.Contains("Noto+Sans+Thai", app);
-        Assert.Contains("--font-sans-en: Geist, \"Noto Sans Thai\"", styles);
+        Assert.Contains("family=Inter:wght@400;500;600;700", app);
+        Assert.Contains("family=JetBrains+Mono:wght@400;500;600;700", app);
+        Assert.Contains("family=Noto+Sans+Thai:wght@400;500;600;700", app);
+        Assert.DoesNotContain("Geist", app);
+        Assert.Contains("--font-sans-en: Inter, \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
+        Assert.Contains("--font-mono: \"JetBrains Mono\", \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: var(--font-sans-th)", styles);
+        Assert.DoesNotContain("Geist", styles);
+        Assert.Contains("The default English typography is Inter.", design);
+        Assert.Contains("JetBrains Mono completes the system", design);
+        Assert.Contains("Noto Sans Thai preserved as the Thai fallback", design);
+        Assert.DoesNotContain("Geist", design);
         Assert.Contains("html:lang(th)", styles);
         Assert.Contains("html[data-theme=\"dark\"]", styles);
         Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
         Assert.Contains("document.documentElement.lang", cultureScript);
         Assert.Contains("document.documentElement.dataset.theme", cultureScript);
+        Assert.DoesNotContain("isThaiRegionSignal", cultureScript);
+        Assert.DoesNotContain("Asia/Bangkok", cultureScript);
+        Assert.Contains("return window.malievCulture.applyDocumentCulture(fallback || 'en-US');", cultureScript);
     }
 
     /// <summary>
