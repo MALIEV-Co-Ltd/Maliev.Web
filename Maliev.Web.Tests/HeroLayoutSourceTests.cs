@@ -44,13 +44,16 @@ public sealed class HeroLayoutSourceTests
 
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-01.glb")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-02.glb")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-03.glb")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-scanning-part-01.glb")));
         Assert.Contains("hero-{service-slug}-{short-subject}-{nn}.glb", modelReadme);
+        Assert.Contains("hero-3d-printing-part-03.glb", modelReadme);
         Assert.Contains("hero-cnc-machining-fixture-01.glb", modelReadme);
         Assert.Contains("hero-3d-scanning-part-01.glb", modelReadme);
         Assert.Contains("internal const string DefaultServiceSlug = \"3d-printing\";", catalog);
         Assert.Contains("\"/models/hero-3d-printing-part-01.glb\"", catalog);
         Assert.Contains("\"/models/hero-3d-printing-part-02.glb\"", catalog);
+        Assert.Contains("\"/models/hero-3d-printing-part-03.glb\"", catalog);
         Assert.Contains("\"/models/hero-3d-scanning-part-01.glb\"", catalog);
         Assert.Contains("\"3d-scanning\"", catalog);
         Assert.Contains("SelectRandomForService", catalog);
@@ -81,6 +84,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Equal("3d-printing-part-02", HeroModelCatalog.Default.Key);
         Assert.Contains(candidates, asset => asset.Key == "3d-printing-part-02");
+        Assert.Contains(candidates, asset => asset.Key == "3d-printing-part-03");
         Assert.DoesNotContain(candidates, asset => asset.Key == "3d-printing-part-01");
     }
 

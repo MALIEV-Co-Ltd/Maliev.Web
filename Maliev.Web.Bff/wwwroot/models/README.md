@@ -5,6 +5,7 @@ Use `hero-{service-slug}-{short-subject}-{nn}.glb`.
 Examples:
 
 - `hero-3d-printing-part-01.glb`
+- `hero-3d-printing-part-03.glb`
 - `hero-cnc-machining-fixture-01.glb`
 - `hero-3d-scanning-part-01.glb`
 

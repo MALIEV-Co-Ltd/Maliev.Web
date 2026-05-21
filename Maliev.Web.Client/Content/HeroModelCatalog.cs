@@ -24,6 +24,12 @@ internal static class HeroModelCatalog
             SiteContent.Text("3D printed functional part preview", "ตัวอย่างชิ้นงานใช้งานจากงานพิมพ์ 3 มิติ"),
             true),
         new(
+            "3d-printing-part-03",
+            DefaultServiceSlug,
+            "/models/hero-3d-printing-part-03.glb",
+            SiteContent.Text("3D printed production part preview", "ตัวอย่างชิ้นงานผลิตจากงานพิมพ์ 3 มิติ"),
+            true),
+        new(
             "3d-scanning-part-01",
             "3d-scanning",
             "/models/hero-3d-scanning-part-01.glb",
