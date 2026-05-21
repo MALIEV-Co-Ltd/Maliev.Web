@@ -5202,8 +5202,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
 .customer-chatbot {
   position: fixed;
-  right: clamp(16px, 2.4vw, 32px);
-  bottom: clamp(16px, 2.4vw, 32px);
+  right: clamp(18px, 2.6vw, 36px);
+  bottom: clamp(84px, 8vh, 108px);
   z-index: 1200;
   display: grid;
   justify-items: end;
@@ -5719,19 +5719,22 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 .customer-chatbot-toggle {
-  width: 56px;
-  min-height: 56px;
+  width: 50px;
+  min-height: 50px;
   padding: 0;
   border-radius: 9999px;
   position: relative;
-  box-shadow: rgba(10, 114, 239, .28) 0 14px 34px -20px, var(--shadow-border);
+  opacity: .78;
+  box-shadow: rgba(10, 114, 239, .2) 0 12px 28px -20px, var(--shadow-border);
+  transition: opacity .18s ease-in-out, box-shadow .18s ease-in-out, background-color .18s ease-in-out;
 }
 
 .customer-chatbot-toggle .mud-icon-root {
-  font-size: 1.45rem;
+  font-size: 1.28rem;
 }
 
 .customer-chatbot-toggle.has-unread {
+  opacity: .94;
   box-shadow: rgba(10, 114, 239, .36) 0 16px 38px -18px, 0 0 0 4px color-mix(in srgb, var(--blue) 12%, transparent), var(--shadow-border);
 }
 
@@ -5758,6 +5761,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot-composer button:hover,
 .customer-chatbot-composer button:focus-visible {
   background: var(--blue-hover);
+}
+
+.customer-chatbot-toggle:hover,
+.customer-chatbot-toggle:focus-visible {
+  opacity: 1;
+  box-shadow: rgba(10, 114, 239, .28) 0 14px 34px -20px, var(--shadow-border);
 }
 
 .footer-legal {
@@ -7063,7 +7072,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .customer-chatbot {
     right: 12px;
-    bottom: 12px;
+    bottom: 72px;
   }
 
   .customer-chatbot-panel {
@@ -7080,8 +7089,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .customer-chatbot-toggle {
-    width: 50px;
-    min-height: 50px;
+    width: 46px;
+    min-height: 46px;
     padding: 0;
   }
 
