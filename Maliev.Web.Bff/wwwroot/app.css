@@ -1281,6 +1281,7 @@ html:lang(th) .h1 {
   height: 100%;
   min-height: 280px;
   color: var(--ink);
+  transition: box-shadow .18s ease-in-out;
 }
 
 .material-category-card {
@@ -1293,6 +1294,15 @@ html:lang(th) .h1 {
   color: var(--inverse-text);
   background: var(--inverse-surface);
   box-shadow: var(--shadow-dark-card);
+}
+
+.service-card:is(:hover, :focus-visible) {
+  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px, var(--shadow-card);
+  outline: none;
+}
+
+.service-card.primary:is(:hover, :focus-visible) {
+  box-shadow: rgba(0, 0, 0, .28) 0 24px 62px -34px, var(--shadow-dark-card);
 }
 
 .service-card-media,
@@ -2982,6 +2992,12 @@ html[data-theme="dark"] .workflow-step {
   border: 1px solid var(--home-work-rule);
   border-radius: 14px;
   box-shadow: none;
+  transition: box-shadow .18s ease-in-out;
+}
+
+.home-work-card:is(:hover, :focus-visible) {
+  box-shadow: rgba(17, 24, 39, .14) 0 22px 58px -34px, 0 0 0 1px var(--home-work-rule);
+  outline: none;
 }
 
 .home-work-card .case-card-media {
@@ -3012,6 +3028,14 @@ html[data-theme="dark"] .workflow-step {
   display: flex;
   flex-direction: column;
   color: var(--ink);
+  transition: box-shadow .18s ease-in-out;
+}
+
+.case-card:is(:hover, :focus-visible),
+.blog-card:is(:hover, :focus-visible),
+.product-card:is(:hover, :focus-visible) {
+  box-shadow: rgba(17, 24, 39, .16) 0 22px 58px -34px, var(--shadow-card);
+  outline: none;
 }
 
 .blog-grid {
@@ -3739,6 +3763,7 @@ html[data-theme="dark"] .workflow-step {
   min-height: 100%;
   border: 1px solid var(--rule);
   box-shadow: none;
+  transition: box-shadow .18s ease-in-out;
 }
 
 .product-card-featured {
