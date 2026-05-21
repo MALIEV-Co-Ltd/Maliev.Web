@@ -6127,6 +6127,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     min-height: auto;
     grid-template-columns: 1fr;
     gap: 34px;
+    padding-top: 0;
   }
 
   .machine-feature-copy {
@@ -6140,14 +6141,15 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-backdrop {
+    display: block;
     position: relative;
     grid-column: 1;
-    justify-self: center;
+    justify-self: stretch;
     width: 100vw;
     max-width: none;
     height: min(58vw, 520px);
     margin-inline: calc(50% - 50vw);
-    object-fit: contain;
+    object-fit: cover;
     object-position: left bottom;
   }
 
@@ -6797,7 +6799,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature {
-    padding-top: 56px;
+    padding-top: 0;
     padding-bottom: 64px;
   }
 
@@ -6814,7 +6816,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     max-width: none;
     height: 320px;
     margin-inline: calc(50% - 50vw);
-    object-position: 34% bottom;
+    object-position: left top;
   }
 
   .machine-stat-grid {
