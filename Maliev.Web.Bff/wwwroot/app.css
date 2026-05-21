@@ -450,6 +450,10 @@ main {
   line-height: 1.2;
 }
 
+.nav-quote-link {
+  border-radius: 999px;
+}
+
 .button.primary,
 .nav-quote-link {
   color: var(--cta-text);

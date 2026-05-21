@@ -1011,6 +1011,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".cart-icon-button.mud-button-root {\n  background: transparent;", styles);
         Assert.Contains("--cta-bg: var(--blue);", styles);
         Assert.Contains("--cta-hover: var(--blue-hover);", styles);
+        Assert.Contains(".nav-quote-link {\n  border-radius: 999px;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);
         Assert.DoesNotContain("class=\"icon-link\"", source);
     }
