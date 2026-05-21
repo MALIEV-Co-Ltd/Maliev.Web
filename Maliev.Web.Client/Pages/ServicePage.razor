@@ -83,19 +83,7 @@
         <div class="service-answer-card-grid service-answer-card-grid--routes">
             @foreach (var route in Detail.MaterialRoutes)
             {
-                <article class="@AnswerCardClass(route)">
-                    @if (!string.IsNullOrWhiteSpace(route.ImageUrl))
-                    {
-                        <figure class="service-answer-card-media">
-                            <img src="@route.ImageUrl" alt="@DetailItemImageAlt(route)" loading="lazy" />
-                        </figure>
-                    }
-                    else
-                    {
-                        <div class="service-detail-icon" aria-hidden="true">
-                            <MudIcon Icon="@DetailIcon(route.IconKey)" Size="Size.Medium" />
-                        </div>
-                    }
+                <article class="service-answer-card">
                     <div>
                         <span class="service-answer-meta">@route.Meta.For(Preferences.Culture)</span>
                         <h4>@route.Title.For(Preferences.Culture)</h4>
@@ -115,9 +103,6 @@
             @foreach (var gate in Detail.DfmGates)
             {
                 <article class="service-answer-card service-answer-card--check">
-                    <div class="service-detail-icon" aria-hidden="true">
-                        <MudIcon Icon="@DetailIcon(gate.IconKey)" Size="Size.Medium" />
-                    </div>
                     <h4>@gate.Title.For(Preferences.Culture)</h4>
                     <p>@gate.Body.For(Preferences.Culture)</p>
                 </article>
@@ -136,9 +121,6 @@
                 var step = Detail.OrderingSteps[index];
                 <li class="service-answer-step">
                     <span class="service-answer-step-number">@((index + 1).ToString("00", CultureInfo.InvariantCulture))</span>
-                    <div class="service-detail-icon" aria-hidden="true">
-                        <MudIcon Icon="@DetailIcon(step.IconKey)" Size="Size.Medium" />
-                    </div>
                     <div>
                         <h4>@step.Title.For(Preferences.Culture)</h4>
                         <p>@step.Body.For(Preferences.Culture)</p>
@@ -188,43 +170,6 @@
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
-    }
-
-    private string DetailItemImageAlt(ServiceDetailItem route)
-    {
-        return $"{route.Meta.For(Preferences.Culture)} - {route.Title.For(Preferences.Culture)}";
-    }
-
-    private static string AnswerCardClass(ServiceDetailItem route)
-    {
-        return string.IsNullOrWhiteSpace(route.ImageUrl)
-            ? "service-answer-card"
-            : "service-answer-card has-media";
-    }
-
-    private static string DetailIcon(string iconKey)
-    {
-        return iconKey switch
-        {
-            "cad" => Icons.Material.Filled.ViewInAr,
-            "chemical" => Icons.Material.Filled.Science,
-            "delivery" => Icons.Material.Filled.LocalShipping,
-            "environment" => Icons.Material.Filled.Thermostat,
-            "file" => Icons.Material.Filled.InsertDriveFile,
-            "finish" => Icons.Material.Filled.AutoFixHigh,
-            "fit" => Icons.Material.Filled.FactCheck,
-            "mold" => Icons.Material.Filled.PrecisionManufacturing,
-            "nylon" => Icons.Material.Filled.Inventory2,
-            "orientation" => Icons.Material.Filled.ScreenRotationAlt,
-            "price" => Icons.Material.Filled.PriceChange,
-            "quantity" => Icons.Material.Filled.FormatListNumbered,
-            "resin" => Icons.Material.Filled.WaterDrop,
-            "review" => Icons.Material.Filled.AssignmentTurnedIn,
-            "thermoplastic" => Icons.Material.Filled.Layers,
-            "upload" => Icons.Material.Filled.UploadFile,
-            "wall" => Icons.Material.Filled.Straighten,
-            _ => Icons.Material.Filled.CheckCircle
-        };
     }
 
     private void InitializeHeroModel()
