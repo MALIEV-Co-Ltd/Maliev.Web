@@ -557,10 +557,10 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the pneumatic injection machine fade follows the active light or dark theme.
+    /// Verifies the pneumatic injection machine section uses the prepared image without an extra fade overlay.
     /// </summary>
     [Fact]
-    public void HomeMachineFeatureFadeUsesThemeAwareColors()
+    public void HomeMachineFeatureUsesPreparedImageWithoutFadeOverlay()
     {
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var machineStylesStart = styles.IndexOf(".machine-feature {", StringComparison.Ordinal);
@@ -581,8 +581,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--machine-feature-active-text: var(--active-pill-text);", styles);
         Assert.Contains("background: rgb(var(--machine-feature-surface-rgb));", machineStyles);
         Assert.Contains("rgb(var(--machine-feature-grid-rgb) / .045)", machineStyles);
-        Assert.Contains("rgb(var(--machine-feature-surface-rgb) / .68) 46%", styles);
-        Assert.Contains("rgb(var(--machine-feature-surface-rgb) / .76) 58%", styles);
+        Assert.DoesNotContain(".machine-feature::after", machineStyles);
+        Assert.DoesNotContain("rgb(var(--machine-feature-surface-rgb) / .68)", styles);
+        Assert.DoesNotContain("rgb(var(--machine-feature-surface-rgb) / .76)", styles);
+        Assert.DoesNotContain("rgb(var(--machine-feature-surface-rgb) / .98)", styles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .72);", machineStyles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .74);", machineStyles);
         Assert.Contains("background: var(--machine-feature-active-bg);", machineStyles);

@@ -1998,15 +1998,6 @@ html[data-theme="dark"] .form-status--error {
   mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
 }
 
-.machine-feature::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(90deg, rgb(var(--machine-feature-surface-rgb) / .04) 0%, rgb(var(--machine-feature-surface-rgb) / .68) 46%, rgb(var(--machine-feature-surface-rgb) / .98) 66%, rgb(var(--machine-feature-surface-rgb)) 100%);
-  pointer-events: none;
-}
-
 .machine-feature .h-display {
   color: var(--ink);
 }
@@ -5844,10 +5835,6 @@ html[data-theme="dark"] .auth-google-icon {
     min-height: auto;
     grid-template-columns: 1fr;
     gap: 34px;
-  }
-
-  .machine-feature::after {
-    background: linear-gradient(180deg, rgb(var(--machine-feature-surface-rgb) / .08) 0%, rgb(var(--machine-feature-surface-rgb) / .76) 58%, rgb(var(--machine-feature-surface-rgb)) 100%);
   }
 
   .machine-feature-copy {
