@@ -359,6 +359,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".final-dropzone-arrow", styles);
         Assert.DoesNotContain(".final-dropzone-icon", styles);
         Assert.DoesNotContain(".final-dropzone-copy", styles);
+        Assert.Contains(".service-grid {\n  grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
+        Assert.DoesNotContain("grid-template-columns: 1.2fr 1fr 1fr;", styles);
         Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto", styles);
         Assert.Contains("align-content: start", styles);
         Assert.Contains("grid-auto-rows: minmax(320px, 1fr);", styles);
