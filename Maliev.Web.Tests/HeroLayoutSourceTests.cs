@@ -294,6 +294,26 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("service-grid", source);
         Assert.Contains("feature-band", source);
+        Assert.Contains("industry-sector-band", source);
+        Assert.Contains("industry-sector-band-inner", source);
+        Assert.Contains("industry-sector-list", source);
+        Assert.Contains("Used by engineers across industrial sectors", source);
+        Assert.Contains("MALIEV manufactures 3D-printed, CNC-machined, reverse-engineered, cast, and molded parts", source);
+        Assert.Contains("Automation", source);
+        Assert.Contains("Robotics", source);
+        Assert.Contains("Automotive", source);
+        Assert.Contains("Electronics", source);
+        Assert.Contains("Manufacturing", source);
+        Assert.Contains("R&D", source);
+        Assert.DoesNotContain("Trusted by engineers at", source);
+        Assert.DoesNotContain("SIEMENS", source);
+        Assert.DoesNotContain("BOSCH", source);
+        Assert.True(
+            source.IndexOf("<section class=\"landing-hero\"", StringComparison.Ordinal) <
+            source.IndexOf("<section class=\"industry-sector-band\"", StringComparison.Ordinal));
+        Assert.True(
+            source.IndexOf("<section class=\"industry-sector-band\"", StringComparison.Ordinal) <
+            source.IndexOf("<section class=\"section home-services-section\"", StringComparison.Ordinal));
         Assert.Contains("process-section", source);
         Assert.Contains("id=\"workflow-carousel\"", source);
         Assert.Contains("process-grid", source);
@@ -337,6 +357,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--home-work-surface: #11161d;", styles);
         Assert.Contains(".home-work-link", styles);
         Assert.Contains(".home-work-card", styles);
+        Assert.Contains(".industry-sector-band", styles);
+        Assert.Contains("background: var(--paper-2);", styles);
+        Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(6, minmax(0, 1fr));", styles);
+        Assert.Contains(".industry-sector-list li", styles);
+        Assert.Contains("border-radius: 999px;", styles);
+        Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.DoesNotContain("Recent work from", source);
         Assert.DoesNotContain("logo-heading", source);
         Assert.DoesNotContain("<img src=\"/images/logo.svg\" alt=\"MALIEV\" />", source);
