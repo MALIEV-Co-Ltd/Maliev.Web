@@ -5409,8 +5409,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot-reset,
 .customer-chatbot-toggle,
 .customer-chatbot-jump-latest,
-.customer-chatbot-composer button,
-.customer-chatbot-prompts button {
+.customer-chatbot-composer button {
   border: 0;
   border-radius: var(--radius);
 }
@@ -5626,29 +5625,27 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--rule);
+  padding: 8px 10px;
+  color: var(--blue-ink);
+  background: var(--blue-soft);
+  border: 0;
   border-radius: 9999px;
-  font-size: .8rem;
-  font-weight: 700;
+  font-size: .82rem;
+  font-weight: 650;
   line-height: 1;
   text-decoration: none;
-  box-shadow: var(--shadow-border);
+  box-shadow: none;
 }
 
 .customer-chatbot-action.primary {
-  color: var(--blue-on);
-  background: var(--blue);
-  border-color: var(--blue);
+  color: var(--blue-ink);
+  background: var(--blue-soft);
 }
 
 .customer-chatbot-action:hover,
 .customer-chatbot-action:focus-visible {
   color: var(--blue-on);
-  background: var(--blue-hover);
-  border-color: var(--blue-hover);
+  background: var(--blue);
 }
 
 .customer-chatbot-action .mud-icon-root {
@@ -5746,28 +5743,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 }
 
-.customer-chatbot-prompts {
-  display: flex;
-  gap: 8px;
-  padding: 0 14px 12px;
-  overflow-x: auto;
-}
-
-.customer-chatbot-prompts button {
-  flex: 0 0 auto;
-  padding: 8px 10px;
-  color: var(--blue-ink);
-  background: var(--blue-soft);
-  font-size: .82rem;
-  font-weight: 650;
-}
-
-.customer-chatbot-prompts button:hover,
-.customer-chatbot-prompts button:focus-visible {
-  color: var(--blue-on);
-  background: var(--blue);
-}
-
 .customer-chatbot-composer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
@@ -5820,8 +5795,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   transform: translateX(1px);
 }
 
-.customer-chatbot-composer button:disabled,
-.customer-chatbot-prompts button:disabled {
+.customer-chatbot-composer button:disabled {
   cursor: not-allowed;
   opacity: .48;
 }

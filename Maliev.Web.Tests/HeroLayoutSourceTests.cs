@@ -1351,6 +1351,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("rel=\"@action.Rel\"", component);
         Assert.Contains("customer-chatbot-actions", component);
         Assert.Contains("customer-chatbot-action", component);
+        Assert.DoesNotContain("customer-chatbot-prompts", component);
+        Assert.DoesNotContain("SuggestedPrompts", component);
+        Assert.DoesNotContain("SendSuggestionAsync", component);
+        Assert.DoesNotContain("CustomerChatPrompt", component);
         Assert.Contains("customer-chatbot-popout", component);
         Assert.Contains("customer-chatbot-unread-badge", component);
         Assert.Contains("rows=\"1\"", component);
@@ -1404,6 +1408,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-actions:has(.customer-chatbot-auth-google)", styles);
         Assert.Contains(".customer-chatbot-auth-email", styles);
         Assert.Contains(".customer-chatbot-action.primary", styles);
+        Assert.Contains(".customer-chatbot-action {\n  min-height: 34px;\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 8px 10px;\n  color: var(--blue-ink);\n  background: var(--blue-soft);\n  border: 0;", styles);
+        Assert.DoesNotContain(".customer-chatbot-prompts", styles);
         Assert.Contains(".customer-chatbot-message-rich a", styles);
         Assert.Contains(".customer-chatbot-message-rich :where(ul, ol)", styles);
         Assert.Contains(".customer-chatbot-message-rich pre", styles);

@@ -111,15 +111,6 @@
                 }
             </div>
 
-            <div class="customer-chatbot-prompts" aria-label="@Text("Suggested topics", "หัวข้อแนะนำ")">
-                @foreach (var prompt in SuggestedPrompts)
-                {
-                    <button type="button" @onclick="() => SendSuggestionAsync(prompt.Value.For(Preferences.Culture))" disabled="@(!CanInteract)">
-                        @prompt.Label.For(Preferences.Culture)
-                    </button>
-                }
-            </div>
-
             <div class="customer-chatbot-composer">
                 <textarea @ref="_draftInput"
                           rows="1"
@@ -250,14 +241,6 @@
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
     private string LatestUnreadBadgeText => _latestUnreadCount > 9 ? "9+" : Math.Max(_latestUnreadCount, 1).ToString(CultureInfo.InvariantCulture);
-
-    private IReadOnlyList<CustomerChatPrompt> SuggestedPrompts =>
-    [
-        new(Localized("Materials", "วัสดุ"), Localized("Which material should I use for a heat-resistant prototype?", "ควรใช้วัสดุอะไรสำหรับต้นแบบที่ทนความร้อน")),
-        new(Localized("Lead time", "ระยะเวลา"), Localized("What lead time should I expect for 3D printed parts?", "งานพิมพ์ 3D ใช้เวลาประมาณกี่วัน")),
-        new(Localized("Molding", "เครื่องฉีด"), Localized("What is the difference between the 30g and 50g machine variants?", "รุ่น 30g และ 50g ต่างกันอย่างไร")),
-        new(Localized("My orders", "คำสั่งซื้อของฉัน"), Localized("Can you help me check my quotes and orders?", "ช่วยตรวจใบเสนอราคาและคำสั่งซื้อของฉันได้ไหม"))
-    ];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -412,11 +395,6 @@
         {
             await EnsureChatSessionStartedAsync(forceNew: true);
         }
-    }
-
-    private Task SendSuggestionAsync(string message)
-    {
-        return SendAsync(message);
     }
 
     private async Task EnsureChatSessionStartedAsync(bool forceNew = false)
@@ -1823,8 +1801,6 @@
         string? Rel,
         string Icon,
         bool Primary);
-
-    private sealed record CustomerChatPrompt(LocalizedText Label, LocalizedText Value);
 
     private sealed record CustomerChatbotIdentity(bool IsAuthenticated, string? UserKey, string? DisplayName, string? Email);
 
