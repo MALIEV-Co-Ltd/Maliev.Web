@@ -2451,6 +2451,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
+        Assert.Contains(".metric-strip {\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  gap: clamp(34px, 4vw, 58px);", styles);
+        Assert.Contains("width: fit-content;\n  max-width: 100%;", styles);
+        Assert.Contains(".metric-strip {\n    justify-content: center;\n    gap: clamp(28px, 6vw, 56px);\n    margin-top: 22px;", styles);
         Assert.Contains("@media (min-width: 1600px)", styles);
         Assert.Contains("height: clamp(560px, 52vh, 720px);", styles);
         Assert.Contains("@media (min-width: 2400px)", styles);

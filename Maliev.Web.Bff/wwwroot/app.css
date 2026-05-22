@@ -1320,11 +1320,12 @@ html:lang(th) .h1 {
 
 .metric-strip {
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: clamp(36px, 6vw, 88px);
+  justify-content: flex-start;
+  gap: clamp(34px, 4vw, 58px);
   align-items: flex-start;
   margin-top: 32px;
-  width: min(100%, 720px);
+  width: fit-content;
+  max-width: 100%;
 }
 
 .metric-strip div,
@@ -6518,7 +6519,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .metric-strip {
-    justify-content: space-between;
+    justify-content: center;
+    gap: clamp(28px, 6vw, 56px);
     margin-top: 22px;
   }
 
