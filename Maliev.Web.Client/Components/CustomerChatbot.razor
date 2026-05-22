@@ -4,6 +4,7 @@
 @using System.Security.Claims
 @using System.Text.Json
 @using System.Text.RegularExpressions
+@using System.Threading
 @implements IDisposable
 @inject MalievApiClient ApiClient
 @inject PreferenceService Preferences
@@ -90,11 +91,8 @@
 
                     @if (_isSending)
                     {
-                        <div class="@PendingMessageClass">
-                            @if (_isStartingSession)
-                            {
-                                <span class="customer-chatbot-pending-copy">@Text("Connecting you to one of our agents", "กำลังเชื่อมต่อคุณกับเจ้าหน้าที่ของเรา")</span>
-                            }
+                        <div class="@PendingMessageClass" role="status" aria-live="polite">
+                            <span class="customer-chatbot-pending-copy">@PendingMessageText</span>
                             <span class="customer-chatbot-typing-dots" aria-hidden="true">
                                 <span class="customer-chatbot-typing-dot"></span>
                                 <span class="customer-chatbot-typing-dot"></span>
@@ -172,6 +170,8 @@
     private const int MaxStoredItems = 6;
     private const int SignInPollAttempts = 60;
     private static readonly TimeSpan SignInPollInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan AssistantWaitingDelay = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan AssistantRequestTimeout = TimeSpan.FromSeconds(45);
     private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
     private static readonly Regex DangerousHtmlBlockPattern = new(
         @"<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>",
@@ -228,17 +228,25 @@
     private bool _messageScrollSmooth;
     private bool _showJumpToLatest;
     private bool _isAwaitingSignIn;
+    private bool _isWaitingLong;
     private int _unreadCount;
     private int _latestUnreadCount;
+    private long _pendingOperationId;
     private CancellationTokenSource? _popoutCts;
     private CancellationTokenSource? _signInPollCts;
+    private CancellationTokenSource? _pendingDelayCts;
 
     private bool CanInteract => !_isSending && _sessionId.HasValue;
     private bool CanSend => CanInteract && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
-    private string PendingMessageClass => _isStartingSession
-        ? "customer-chatbot-message assistant pending pending-with-copy"
-        : "customer-chatbot-message assistant pending";
+    private string PendingMessageClass => "customer-chatbot-message assistant pending pending-with-copy";
+    private string PendingMessageText => _isStartingSession
+        ? (_isWaitingLong
+            ? Text("Still connecting. This is taking longer than usual.", "ยังเชื่อมต่ออยู่ค่ะ ใช้เวลานานกว่าปกติเล็กน้อย")
+            : Text("Connecting you to one of our agents", "กำลังเชื่อมต่อคุณกับเจ้าหน้าที่ของเรา"))
+        : (_isWaitingLong
+            ? Text("Still waiting for Mali's reply. I will time out and show an error if the service does not answer soon.", "ยังรอคำตอบจากน้องมะลิอยู่ค่ะ หากบริการไม่ตอบกลับ ระบบจะแจ้งข้อผิดพลาดให้ทราบ")
+            : Text("Mali is checking your message", "น้องมะลิกำลังตรวจสอบข้อความของคุณ"));
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
     private string LatestUnreadBadgeText => _latestUnreadCount > 9 ? "9+" : Math.Max(_latestUnreadCount, 1).ToString(CultureInfo.InvariantCulture);
@@ -418,8 +426,7 @@
             return;
         }
 
-        _isSending = true;
-        _isStartingSession = true;
+        BeginPendingState(isStartingSession: true);
         _showJumpToLatest = false;
         _latestUnreadCount = 0;
         QueueMessageScroll(false);
@@ -456,8 +463,7 @@
         }
         finally
         {
-            _isSending = false;
-            _isStartingSession = false;
+            EndPendingState();
             if (_isOpen && !_showJumpToLatest)
             {
                 QueueMessageScroll(true);
@@ -487,8 +493,7 @@
         var trimmed = message.Trim();
         _messages.Add(new CustomerChatMessage("user", trimmed));
         LearnFromCustomerMessage(trimmed);
-        _isSending = true;
-        _isStartingSession = false;
+        BeginPendingState(isStartingSession: false);
         _showJumpToLatest = false;
         _latestUnreadCount = 0;
         QueueMessageScroll(true);
@@ -526,7 +531,7 @@
         }
         finally
         {
-            _isSending = false;
+            EndPendingState();
             if (_isOpen && !_showJumpToLatest)
             {
                 QueueMessageScroll(true);
@@ -576,7 +581,11 @@
         BrowserJsonResponse? envelope;
         try
         {
-            var rawEnvelope = await JS.InvokeAsync<string>("malievChatbot.postJson", $"/{path.TrimStart('/')}", request);
+            var rawEnvelope = await JS.InvokeAsync<string>(
+                "malievChatbot.postJson",
+                $"/{path.TrimStart('/')}",
+                request,
+                (int)AssistantRequestTimeout.TotalMilliseconds);
             envelope = string.IsNullOrWhiteSpace(rawEnvelope)
                 ? null
                 : JsonSerializer.Deserialize<BrowserJsonResponse>(rawEnvelope, StorageJson);
@@ -1448,6 +1457,52 @@
         _signInPollCts = null;
     }
 
+    private void BeginPendingState(bool isStartingSession)
+    {
+        CancelPendingDelay();
+        _isSending = true;
+        _isStartingSession = isStartingSession;
+        _isWaitingLong = false;
+        var operationId = Interlocked.Increment(ref _pendingOperationId);
+        var cts = new CancellationTokenSource();
+        _pendingDelayCts = cts;
+        _ = ShowLongWaitingStateAsync(operationId, cts.Token);
+    }
+
+    private void EndPendingState()
+    {
+        CancelPendingDelay();
+        _isSending = false;
+        _isStartingSession = false;
+        _isWaitingLong = false;
+    }
+
+    private async Task ShowLongWaitingStateAsync(long operationId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(AssistantWaitingDelay, cancellationToken);
+            if (cancellationToken.IsCancellationRequested || operationId != _pendingOperationId || !_isSending)
+            {
+                return;
+            }
+
+            _isWaitingLong = true;
+            QueueMessageScroll(true);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private void CancelPendingDelay()
+    {
+        _pendingDelayCts?.Cancel();
+        _pendingDelayCts?.Dispose();
+        _pendingDelayCts = null;
+    }
+
     private static CustomerChatbotMemory NormalizeMemory(CustomerChatbotMemory memory)
     {
         memory.Name = CleanOneLine(memory.Name, 80);
@@ -1752,6 +1807,7 @@
     {
         CancelPopoutTimer();
         CancelSignInMonitor();
+        CancelPendingDelay();
     }
 
     private sealed record CustomerChatMessage(string Role, string Content, bool Persist = true)

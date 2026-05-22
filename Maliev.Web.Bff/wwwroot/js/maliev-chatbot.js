@@ -23,7 +23,7 @@ window.malievChatbot = {
     }
   },
 
-  postJson: async function (path, payload) {
+  postJson: async function (path, payload, timeoutMs) {
     if (!path || typeof path !== 'string' || !path.startsWith('/')) {
       return JSON.stringify({
         ok: false,
@@ -31,6 +31,12 @@ window.malievChatbot = {
         error: 'Invalid request path.'
       });
     }
+
+    const timeout = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 45000;
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(() => controller.abort(), timeout)
+      : null;
 
     try {
       const response = await fetch(path, {
@@ -40,6 +46,7 @@ window.malievChatbot = {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
+        signal: controller ? controller.signal : undefined,
         body: JSON.stringify(payload || {})
       });
       const body = await response.text();
@@ -50,11 +57,18 @@ window.malievChatbot = {
         body
       });
     } catch (error) {
+      const timedOut = error && error.name === 'AbortError';
       return JSON.stringify({
         ok: false,
-        status: 0,
-        error: error && error.message ? error.message : 'Request failed.'
+        status: timedOut ? 408 : 0,
+        error: timedOut
+          ? 'The assistant response timed out.'
+          : (error && error.message ? error.message : 'Request failed.')
       });
+    } finally {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     }
   },
 
