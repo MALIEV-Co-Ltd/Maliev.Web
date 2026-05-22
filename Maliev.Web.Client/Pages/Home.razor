@@ -133,34 +133,25 @@
          @ref="_machineFeaturePreview"
          class="feature-band machine-feature"
          aria-labelledby="imm-intro-title"
-         data-selected-feature="@SelectedMachineFeature.Accent">
-    <div class="machine-feature-panel machine-feature-panel--intro">
-        <img class="machine-feature-backdrop machine-feature-backdrop--light"
-             @key="SelectedMachineFeature.Accent"
-             src="@SelectedMachineFeature.FeatureImageUrl"
-             alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
-             loading="lazy" />
-        <img class="machine-feature-backdrop machine-feature-backdrop--dark"
-             src="@SelectedMachineFeature.DarkFeatureImageUrl"
-             alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
-             loading="lazy" />
-        <div class="machine-feature-copy machine-feature-intro-copy">
+         data-selected-feature="@SelectedMachineFeature.Accent"
+         data-machine-panel="intro">
+    <img class="machine-feature-backdrop machine-feature-backdrop--light"
+         @key="SelectedMachineFeature.Accent"
+         src="@SelectedMachineFeature.FeatureImageUrl"
+         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
+         loading="lazy" />
+    <img class="machine-feature-backdrop machine-feature-backdrop--dark"
+         src="@SelectedMachineFeature.DarkFeatureImageUrl"
+         alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
+         loading="lazy" />
+    <div class="machine-feature-panel">
+        <div class="machine-feature-copy machine-feature-intro-copy" data-machine-content="intro">
             <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro machine-feature-title--reveal">
                 <span class="accent-blue">@Text("Pneumatic", "เครื่องฉีดระบบลม")</span>
                 <span>@Text("Injection Molding Machine", "สำหรับล็อตเล็ก")</span>
             </h2>
         </div>
-    </div>
-    <div class="machine-feature-panel machine-feature-panel--details" @ref="_machineFeatureDetails" aria-labelledby="imm-title">
-        <img class="machine-feature-backdrop machine-feature-backdrop--light"
-             src="@SelectedMachineFeature.FeatureImageUrl"
-             alt=""
-             loading="lazy" />
-        <img class="machine-feature-backdrop machine-feature-backdrop--dark"
-             src="@SelectedMachineFeature.DarkFeatureImageUrl"
-             alt=""
-             loading="lazy" />
-        <div class="machine-feature-copy">
+        <div class="machine-feature-copy machine-feature-details-copy" data-machine-content="details" aria-labelledby="imm-title">
             <h2 id="imm-title" class="h-display machine-feature-title">
                 <span class="machine-feature-title-line machine-feature-title-lead">@Text("Pneumatic injection", "เครื่องฉีดระบบลม")</span>
                 <span class="machine-feature-title-line accent-blue">@Text("machines.", "สำหรับล็อตเล็ก")</span>
@@ -280,7 +271,6 @@
     private string _selectedWorkflowAccent = "upload";
     private string _selectedMachineFeatureAccent = "overview";
     private ElementReference _machineFeaturePreview;
-    private ElementReference _machineFeatureDetails;
     private ElementReference _workflowCarousel;
 
     private MachineFeature SelectedMachineFeature => MachineFeatures.FirstOrDefault(
@@ -387,7 +377,7 @@
             return;
         }
 
-        await JS.InvokeVoidAsync("malievScroll.bindMachineFeatureHandoff", _machineFeaturePreview, _machineFeatureDetails);
+        await JS.InvokeVoidAsync("malievScroll.bindMachineFeatureHandoff", _machineFeaturePreview);
         await JS.InvokeVoidAsync("malievScroll.bindWorkflowStepReveal", _workflowCarousel);
     }
 

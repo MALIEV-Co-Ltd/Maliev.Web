@@ -82,23 +82,17 @@ window.malievScroll = {
     window.requestAnimationFrame(revealWhenVisible);
   },
 
-  bindMachineFeatureHandoff: function (section, detailsPanel) {
-    if (!section || !detailsPanel || section.dataset.machineHandoffBound === 'true') {
+  bindMachineFeatureHandoff: function (section) {
+    if (!section || section.dataset.machineHandoffBound === 'true') {
       return;
     }
 
     section.dataset.machineHandoffBound = 'true';
 
     const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
-    const stickyOffset = () => {
-      const header = document.querySelector('.site-header');
-      return header?.getBoundingClientRect?.().height ?? 72;
-    };
-    const introPanel = section.querySelector('.machine-feature-panel--intro');
     const introTitle = section.querySelector('.machine-feature-title--reveal');
     let touchStartY = 0;
-    let isScrolling = false;
-    let hasSnappedToDetails = false;
+    let isSwitching = false;
 
     const revealIntroTitle = () => {
       introTitle?.classList.add('is-visible');
@@ -123,55 +117,33 @@ window.malievScroll = {
       }
     }
 
-    const introIsActive = () => {
-      if (!introPanel) {
-        return false;
-      }
-
-      const rect = introPanel.getBoundingClientRect();
-      return rect.top < window.innerHeight * .42 && rect.bottom > window.innerHeight * .52;
+    const sectionIsActive = () => {
+      const rect = section.getBoundingClientRect();
+      return rect.top < window.innerHeight * .72 && rect.bottom > window.innerHeight * .28;
     };
 
-    const scrollToDetails = () => {
-      if (isScrolling || !introIsActive()) {
+    const switchMachinePanel = direction => {
+      if (isSwitching || !sectionIsActive()) {
         return false;
       }
 
-      isScrolling = true;
-      hasSnappedToDetails = true;
-      const top = detailsPanel.getBoundingClientRect().top + window.scrollY - stickyOffset();
-      window.scrollTo({
-        top: Math.max(0, top),
-        behavior: prefersReducedMotion() ? 'auto' : 'smooth'
-      });
+      const currentPanel = section.dataset.machinePanel === 'details' ? 'details' : 'intro';
+      const nextPanel = direction > 0 ? 'details' : 'intro';
+      if (currentPanel === nextPanel) {
+        return false;
+      }
 
+      isSwitching = true;
+      section.dataset.machinePanel = nextPanel;
       window.setTimeout(() => {
-        isScrolling = false;
-      }, prefersReducedMotion() ? 120 : 760);
+        isSwitching = false;
+      }, prefersReducedMotion() ? 80 : 560);
 
       return true;
     };
 
-    const introHalfPassed = () => {
-      if (!introPanel || hasSnappedToDetails || isScrolling) {
-        return false;
-      }
-
-      const rect = introPanel.getBoundingClientRect();
-      const halfPoint = rect.top + rect.height / 2;
-      return halfPoint <= window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
-    };
-
-    const scheduleHalfwayHandoff = () => {
-      if (!introHalfPassed()) {
-        return;
-      }
-
-      scrollToDetails();
-    };
-
     section.addEventListener('wheel', event => {
-      if (event.deltaY > 12 && scrollToDetails()) {
+      if (Math.abs(event.deltaY) > 12 && switchMachinePanel(event.deltaY)) {
         event.preventDefault();
       }
     }, { passive: false });
@@ -182,21 +154,28 @@ window.malievScroll = {
 
     section.addEventListener('touchmove', event => {
       const currentY = event.touches?.[0]?.clientY ?? touchStartY;
-      if (touchStartY - currentY > 28 && scrollToDetails()) {
+      const deltaY = touchStartY - currentY;
+      if (Math.abs(deltaY) > 28 && switchMachinePanel(deltaY)) {
         event.preventDefault();
       }
     }, { passive: false });
 
     window.addEventListener('keydown', event => {
-      if (!['ArrowDown', 'PageDown', ' '].includes(event.key)) {
+      const directionByKey = {
+        ArrowDown: 1,
+        PageDown: 1,
+        ' ': 1,
+        ArrowUp: -1,
+        PageUp: -1
+      };
+      const direction = directionByKey[event.key];
+      if (!direction) {
         return;
       }
 
-      if (scrollToDetails()) {
+      if (switchMachinePanel(direction)) {
         event.preventDefault();
       }
     });
-
-    window.addEventListener('scroll', scheduleHalfwayHandoff, { passive: true });
   }
 };

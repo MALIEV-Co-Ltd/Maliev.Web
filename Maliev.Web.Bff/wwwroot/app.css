@@ -2221,7 +2221,7 @@ html[data-theme="dark"] .form-status--error {
   display: block;
   overflow: clip;
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
-  min-height: auto;
+  min-height: calc(100svh - var(--site-header-height, 72px));
   padding: 0;
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
@@ -2244,18 +2244,14 @@ html[data-theme="dark"] .form-status--error {
 .machine-feature-panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, min(38vw, 540px));
   align-items: end;
+  justify-content: center;
   gap: clamp(20px, 3vw, 48px);
   min-height: calc(100svh - var(--site-header-height, 72px));
   padding: 112px max(32px, calc((100vw - var(--container)) / 2 + 32px));
   overflow: hidden;
   scroll-margin-top: var(--site-header-height, 72px);
-  scroll-snap-align: start;
-}
-
-.machine-feature-panel--details {
-  min-height: 100svh;
 }
 
 .machine-feature .h-display {
@@ -2314,7 +2310,8 @@ html:lang(th) .machine-feature-title-lead {
 
 .machine-feature-copy {
   display: grid;
-  grid-column: 1;
+  grid-column: 2;
+  grid-row: 1;
   align-content: end;
   align-self: end;
   justify-self: end;
@@ -2330,6 +2327,36 @@ html:lang(th) .machine-feature-title-lead {
   align-self: end;
   justify-self: end;
   text-align: right;
+}
+
+.machine-feature-details-copy {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(42px);
+}
+
+.machine-feature-intro-copy,
+.machine-feature-details-copy {
+  transition:
+    opacity .44s ease-in-out,
+    transform .44s ease-in-out;
+  will-change: opacity, transform;
+}
+
+.machine-feature[data-machine-panel="details"] .machine-feature-backdrop {
+  transform: translateX(-5vw);
+}
+
+.machine-feature[data-machine-panel="details"] .machine-feature-intro-copy {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-42px);
+}
+
+.machine-feature[data-machine-panel="details"] .machine-feature-details-copy {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .machine-feature-backdrop {
@@ -6478,15 +6505,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-panel {
-    min-height: calc(100svh - var(--site-header-height, 72px));
+    min-height: auto;
     grid-template-columns: 1fr;
     gap: 34px;
     align-items: end;
     padding: 0 24px 42px;
-  }
-
-  .machine-feature-panel--details {
-    min-height: calc(100svh - var(--site-header-height, 72px));
   }
 
   .machine-feature-copy {
@@ -6505,8 +6528,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .machine-feature-backdrop {
     display: block;
     position: relative;
-    grid-column: 1;
-    justify-self: stretch;
     width: 100vw;
     max-width: none;
     height: min(58vw, 520px);
@@ -6515,7 +6536,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     object-position: left bottom;
   }
 
-  .machine-feature-panel--details .machine-feature-backdrop {
+  .machine-feature[data-machine-panel="details"] .machine-feature-backdrop {
     transform: none;
   }
 
