@@ -173,8 +173,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Matches(@"\.service-file-chip\s*\{[^}]*background:\s*transparent;", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains(".final-dropzone", styles);
-        Assert.Contains(".final-cta {\n  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);\n  align-items: center;\n  max-width: var(--container);", styles);
-        Assert.DoesNotContain(".final-cta {\n  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);\n  align-items: center;\n  max-width: none;", styles);
+        Assert.Contains(".final-cta {\n  grid-template-columns: minmax(0, 660px) minmax(320px, 540px);\n  align-items: center;\n  justify-content: center;\n  max-width: none;", styles);
+        Assert.Matches(@"\.final-cta\s*\{[^}]*background:\s*var\(--paper-2\);", styles);
+        Assert.DoesNotMatch(@"\.final-cta\s*\{[^}]*border-top:\s*1px solid var\(--rule\);", styles);
         Assert.Matches(@"\.final-dropzone\s*\{[^}]*align-self:\s*center;", styles);
         Assert.DoesNotMatch(@"\.final-dropzone\s*\{[^}]*align-self:\s*stretch;", styles);
     }
