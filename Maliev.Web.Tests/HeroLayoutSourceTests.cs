@@ -1429,6 +1429,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Noto Sans Thai preserved as the Thai fallback", design);
         Assert.DoesNotContain("Geist", design);
         Assert.Contains("html:lang(th)", styles);
+        Assert.Contains("hyphens: none;", styles);
+        Assert.Contains("line-break: strict;", styles);
+        Assert.Contains("overflow-wrap: normal;", styles);
+        Assert.Contains("word-break: keep-all;", styles);
         Assert.Contains("html[data-theme=\"dark\"]", styles);
         Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
         Assert.Contains("--blue-on: #ffffff;", styles);

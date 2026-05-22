@@ -181,6 +181,10 @@ html:lang(th) body,
   --font-mono: var(--font-sans-th);
   font-family: var(--maliev-font-sans);
   line-height: 1.7;
+  hyphens: none;
+  line-break: strict;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 html:lang(th) .card-meta,
