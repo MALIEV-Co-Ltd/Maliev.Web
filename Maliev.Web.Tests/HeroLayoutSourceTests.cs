@@ -1316,6 +1316,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("malievChatbot.fitComposer", component);
         Assert.Contains("malievChatbot.isNearBottom", component);
         Assert.Contains("malievChatbot.scrollToBottom", component);
+        Assert.Contains("malievChatbot.initFooterAwareFloat", component);
         Assert.Contains("QueueMessageScroll(true)", component);
         Assert.Contains("JumpToLatestAsync", component);
         Assert.Contains("HtmlSanitizer", component);
@@ -1336,6 +1337,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("textarea.style.overflowY", script);
         Assert.DoesNotContain("Ask MALIEV", component);
         Assert.Contains(".customer-chatbot", styles);
+        Assert.Contains("bottom: max(24px, env(safe-area-inset-bottom));", styles);
+        Assert.Contains("transform: translateY(calc(-1 * var(--customer-chatbot-footer-lift, 0px)));", styles);
+        Assert.Contains("transition: transform .22s ease-in-out;", styles);
         Assert.Contains(".customer-chatbot-panel", styles);
         Assert.Contains(".customer-chatbot-popout", styles);
         Assert.Contains(".customer-chatbot-profile", styles);
@@ -1368,13 +1372,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-composer {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) 44px;\n  align-items: end;", styles);
         Assert.Contains(".customer-chatbot-composer textarea {\n  height: 42px;", styles);
         Assert.Contains(".customer-chatbot-composer button {\n  width: 44px;\n  height: 42px;", styles);
-        Assert.Contains("bottom: clamp(84px, 8vh, 108px);", styles);
+        Assert.DoesNotContain("bottom: clamp(84px, 8vh, 108px);", styles);
         Assert.Contains(".customer-chatbot-toggle {\n  width: 50px;\n  min-height: 50px;\n  padding: 0;\n  border-radius: 9999px;", styles);
         Assert.Contains("opacity: .78;", styles);
         Assert.Contains("transition: opacity .18s ease-in-out, box-shadow .18s ease-in-out, background-color .18s ease-in-out;", styles);
         Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
         Assert.Contains(".customer-chatbot-toggle {\n    width: 46px;\n    min-height: 46px;", styles);
-        Assert.Contains("bottom: 72px;", styles);
+        Assert.Contains("bottom: max(16px, env(safe-area-inset-bottom));", styles);
+        Assert.Contains("initFooterAwareFloat: function ()", script);
+        Assert.Contains("footerLegal.getBoundingClientRect()", script);
+        Assert.Contains("--customer-chatbot-footer-lift", script);
         Assert.Contains("isNearBottom: function (container)", script);
         Assert.Contains("scrollToBottom: function (container, smooth)", script);
         Assert.Contains("container.scrollTo({", script);

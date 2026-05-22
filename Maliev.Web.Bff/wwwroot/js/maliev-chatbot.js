@@ -240,5 +240,43 @@ window.malievChatbot = {
         behavior: smooth ? 'smooth' : 'auto'
       });
     });
+  },
+
+  initFooterAwareFloat: function () {
+    const chatbot = document.querySelector('.customer-chatbot');
+    const footerLegal = document.querySelector('.footer-legal');
+    if (!chatbot || !footerLegal || chatbot.dataset.footerAwareBound === 'true') {
+      return;
+    }
+
+    chatbot.dataset.footerAwareBound = 'true';
+
+    let frame = 0;
+    const gap = 14;
+
+    const update = () => {
+      frame = 0;
+      chatbot.style.setProperty('--customer-chatbot-footer-lift', '0px');
+
+      const chatbotRect = chatbot.getBoundingClientRect();
+      const legalRect = footerLegal.getBoundingClientRect();
+      const isLegalVisible = legalRect.top < window.innerHeight && legalRect.bottom > 0;
+      const needsLift = isLegalVisible && chatbotRect.bottom + gap > legalRect.top;
+      const lift = needsLift ? Math.ceil(chatbotRect.bottom + gap - legalRect.top) : 0;
+
+      chatbot.style.setProperty('--customer-chatbot-footer-lift', `${Math.max(0, lift)}px`);
+    };
+
+    const schedule = () => {
+      if (frame) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    schedule();
   }
 };

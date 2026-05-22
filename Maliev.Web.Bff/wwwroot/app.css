@@ -5260,12 +5260,14 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot {
   position: fixed;
   right: clamp(18px, 2.6vw, 36px);
-  bottom: clamp(84px, 8vh, 108px);
+  bottom: max(24px, env(safe-area-inset-bottom));
   z-index: 1200;
   display: grid;
   justify-items: end;
   gap: 10px;
   pointer-events: none;
+  transform: translateY(calc(-1 * var(--customer-chatbot-footer-lift, 0px)));
+  transition: transform .22s ease-in-out;
 }
 
 .customer-chatbot-panel,
@@ -7181,7 +7183,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .customer-chatbot {
     right: 12px;
-    bottom: 72px;
+    bottom: max(16px, env(safe-area-inset-bottom));
   }
 
   .customer-chatbot-panel {
