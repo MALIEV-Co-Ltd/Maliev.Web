@@ -620,7 +620,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("bindMachineFeatureHandoff", scrollScript);
         Assert.Contains("switchMachinePanel", scrollScript);
         Assert.Contains("section.dataset.machinePanel = nextPanel", scrollScript);
-        Assert.Contains("rect.top < window.innerHeight * .72", scrollScript);
+        Assert.Contains("sectionIsReadyForHandoff", scrollScript);
+        Assert.Contains("readHeaderOffset", scrollScript);
+        Assert.Contains("rect.top <= headerOffset + tolerance", scrollScript);
+        Assert.Contains("rect.top >= headerOffset - tolerance", scrollScript);
+        Assert.Contains("rect.bottom >= viewportBottom - tolerance", scrollScript);
+        Assert.DoesNotContain("rect.top < window.innerHeight * .72", scrollScript);
         Assert.Contains("ArrowUp: -1", scrollScript);
         Assert.DoesNotContain("scrollToDetails", scrollScript);
         Assert.DoesNotContain("introHalfPassed", scrollScript);

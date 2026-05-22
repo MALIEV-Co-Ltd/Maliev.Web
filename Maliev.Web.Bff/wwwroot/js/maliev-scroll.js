@@ -117,13 +117,26 @@ window.malievScroll = {
       }
     }
 
-    const sectionIsActive = () => {
+    const readHeaderOffset = () => {
+      const cssOffset = window.getComputedStyle(document.documentElement).getPropertyValue('--site-header-height');
+      const parsedOffset = Number.parseFloat(cssOffset);
+      if (Number.isFinite(parsedOffset) && parsedOffset > 0) {
+        return parsedOffset;
+      }
+
+      return document.querySelector('.site-header')?.getBoundingClientRect?.().height ?? 72;
+    };
+
+    const sectionIsReadyForHandoff = () => {
       const rect = section.getBoundingClientRect();
-      return rect.top < window.innerHeight * .72 && rect.bottom > window.innerHeight * .28;
+      const headerOffset = readHeaderOffset();
+      const viewportBottom = window.innerHeight;
+      const tolerance = Math.max(10, Math.min(28, viewportBottom * .035));
+      return rect.top <= headerOffset + tolerance && rect.top >= headerOffset - tolerance && rect.bottom >= viewportBottom - tolerance;
     };
 
     const switchMachinePanel = direction => {
-      if (isSwitching || !sectionIsActive()) {
+      if (isSwitching || !sectionIsReadyForHandoff()) {
         return false;
       }
 
