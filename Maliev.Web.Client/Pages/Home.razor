@@ -23,6 +23,8 @@
                            Title="@QuoteDropzoneTitle"
                            Description="@QuoteDropzoneDescription"
                            ActionText="@QuoteDropzoneAction"
+                           FormatsButtonText="@QuoteDropzoneFormatsButtonText"
+                           FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
                            AriaLabel="@QuoteDropzoneAction" />
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
@@ -253,6 +255,8 @@
                    Title="@QuoteDropzoneTitle"
                    Description="@QuoteDropzoneDescription"
                    ActionText="@QuoteDropzoneAction"
+                   FormatsButtonText="@QuoteDropzoneFormatsButtonText"
+                   FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
                    AriaLabel="@QuoteDropzoneAction" />
 </section>
 
@@ -432,6 +436,10 @@
         "รองรับ STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, GLB สูงสุด 200 MB ตั้งค่าวัสดุ ผิวงาน และจำนวนหลังอัปโหลด");
 
     private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
+
+    private string QuoteDropzoneFormatsButtonText => Text("Supported formats", "ไฟล์ที่รองรับ");
+
+    private string QuoteDropzoneFormatsPanelLabel => Text("Supported QuoteEngine file formats", "รายการไฟล์ที่ QuoteEngine รองรับ");
 
     private string PrimaryServiceBadgeText => Text("Recommended", "แนะนำ");
 

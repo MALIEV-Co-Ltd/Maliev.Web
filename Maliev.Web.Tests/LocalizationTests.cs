@@ -113,8 +113,24 @@ public sealed class LocalizationTests
         Assert.Contains("@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", layout);
         Assert.Contains("ActionText=\"@QuoteDropzoneAction\"", home);
         Assert.Contains("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
+        Assert.Contains("FormatsButtonText=\"@QuoteDropzoneFormatsButtonText\"", home);
+        Assert.Contains("FormatsPanelLabel=\"@QuoteDropzoneFormatsPanelLabel\"", home);
+        Assert.Contains("private string QuoteDropzoneFormatsButtonText => Text(\"Supported formats\", \"ไฟล์ที่รองรับ\")", home);
+        Assert.Contains("private string QuoteDropzoneFormatsPanelLabel => Text(\"Supported QuoteEngine file formats\", \"รายการไฟล์ที่ QuoteEngine รองรับ\")", home);
         Assert.Contains("Configure material, finish and quantity after upload.", home);
         Assert.DoesNotContain("quantity at quote.maliev.com", home);
+    }
+
+    /// <summary>
+    /// Verifies quote dropzones on service pages also pass preference-backed format labels.
+    /// </summary>
+    [Fact]
+    public void ServiceQuoteDropzone_UsesPreferenceBackedFormatLabels()
+    {
+        var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+
+        Assert.Contains("FormatsButtonText=\"@Text(\"Supported formats\", \"ไฟล์ที่รองรับ\")\"", servicePage);
+        Assert.Contains("FormatsPanelLabel=\"@Text(\"Supported QuoteEngine file formats\", \"รายการไฟล์ที่ QuoteEngine รองรับ\")\"", servicePage);
     }
 
     /// <summary>
