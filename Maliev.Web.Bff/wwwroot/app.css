@@ -2250,6 +2250,7 @@ html[data-theme="dark"] .form-status--error {
 
 .machine-feature-title--intro {
   max-width: 540px;
+  text-align: right;
 }
 
 .machine-feature-title-line {
@@ -2290,6 +2291,7 @@ html:lang(th) .machine-feature-title-lead {
   gap: 0;
   align-self: end;
   justify-self: end;
+  text-align: right;
 }
 
 .machine-feature-backdrop {
@@ -2301,6 +2303,11 @@ html:lang(th) .machine-feature-title-lead {
   object-fit: cover;
   object-position: left bottom;
   transition: opacity .24s ease, transform .34s ease;
+}
+
+.machine-feature-panel--details .machine-feature-backdrop {
+  object-position: left bottom;
+  transform: translateX(-10vw) scale(1.02);
 }
 
 .machine-feature-backdrop.machine-feature-backdrop--dark {
@@ -6433,6 +6440,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     margin-inline: calc(50% - 50vw);
     object-fit: cover;
     object-position: left bottom;
+  }
+
+  .machine-feature-panel--details .machine-feature-backdrop {
+    transform: none;
   }
 
   .machine-stat-grid {

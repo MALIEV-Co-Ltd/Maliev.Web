@@ -123,7 +123,7 @@
             <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro">@Text("Injection Molding Machine", "เครื่องฉีดพลาสติก")</h2>
         </div>
     </div>
-    <div class="machine-feature-panel machine-feature-panel--details" aria-labelledby="imm-title">
+    <div class="machine-feature-panel machine-feature-panel--details" @ref="_machineFeatureDetails" aria-labelledby="imm-title">
         <img class="machine-feature-backdrop machine-feature-backdrop--light"
              src="@SelectedMachineFeature.FeatureImageUrl"
              alt=""
@@ -277,6 +277,7 @@
     private string _selectedWorkflowAccent = "upload";
     private string _selectedMachineFeatureAccent = "overview";
     private ElementReference _machineFeaturePreview;
+    private ElementReference _machineFeatureDetails;
     private ElementReference _workflowCarousel;
 
     private MachineFeature SelectedMachineFeature => MachineFeatures.FirstOrDefault(
@@ -374,6 +375,16 @@
         InitializeHeroModel();
         InitializeRandomizedHomeContent();
         _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistRandomizedHomeContent);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync("malievScroll.bindMachineFeatureHandoff", _machineFeaturePreview, _machineFeatureDetails);
     }
 
     private string Text(string en, string th)

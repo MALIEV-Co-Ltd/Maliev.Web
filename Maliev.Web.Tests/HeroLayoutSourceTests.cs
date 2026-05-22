@@ -521,7 +521,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("aria-labelledby=\"imm-intro-title\"", source);
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
         Assert.Contains("machine-feature-panel machine-feature-panel--intro", source);
-        Assert.Contains("machine-feature-panel machine-feature-panel--details", source);
+        Assert.Contains("machine-feature-panel machine-feature-panel--details\" @ref=\"_machineFeatureDetails\"", source);
         Assert.Contains("@Text(\"Injection Molding Machine\", \"เครื่องฉีดพลาสติก\")", source);
         Assert.Contains("machine-feature-title machine-feature-title--intro", source);
         Assert.Contains("machine-feature-backdrop", source);
@@ -542,7 +542,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("MachineFeatureButtonClass(feature)", source);
         Assert.Contains("WorkflowStepClass(step)", source);
         Assert.Contains("@ref=\"_machineFeaturePreview\"", source);
+        Assert.Contains("private ElementReference _machineFeatureDetails;", source);
         Assert.Contains("@ref=\"_workflowCarousel\"", source);
+        Assert.Contains("malievScroll.bindMachineFeatureHandoff", source);
         Assert.Contains("type=\"button\"", source);
         Assert.Contains("data-machine-feature=\"@feature.Accent\"", source);
         Assert.Contains("data-workflow-accent=\"@step.Accent\"", source);
@@ -552,6 +554,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("SelectWorkflowStepAsync(step, _workflowCarousel)", source);
         Assert.Contains("SelectWorkflowStepAsync(step, _machineFeaturePreview)", source);
         Assert.Contains("malievScroll.scrollIntoView", source);
+        var scrollScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
+        Assert.Contains("bindMachineFeatureHandoff", scrollScript);
+        Assert.Contains("scrollToDetails", scrollScript);
+        Assert.Contains("event.deltaY > 12", scrollScript);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body);", source);
         Assert.Contains("private sealed record MachineFeature(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineFeatureStat> Stats);", source);
         Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
@@ -590,10 +596,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("min-height: 100svh;", styles);
         Assert.Contains(".machine-feature-title--intro", styles);
         Assert.Contains("max-width: 480px;", styles);
+        Assert.Contains("text-align: right;", styles);
         Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
+        Assert.Contains(".machine-feature-panel--details .machine-feature-backdrop", styles);
+        Assert.Contains("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
         Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
