@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Chatbot;
+using Microsoft.Extensions.Configuration;
 
 namespace Maliev.Web.Tests;
 
@@ -33,6 +34,82 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Equal("website", client.InitiateRequest.Channel);
         Assert.Equal("en", client.InitiateRequest.Language);
         Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
+    /// Verifies opening the website assistant degrades gracefully when ChatbotService cannot be reached.
+    /// </summary>
+    [Fact]
+    public async Task StartSessionAsync_ChatbotServiceUnavailable_ReturnsDegradedWebsiteSession()
+    {
+        var client = new CapturingChatbotServiceClient
+        {
+            InitiateException = new BackendUnavailableException("ChatbotService", "No ChatbotService endpoint")
+        };
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.StartSessionAsync(new CustomerChatbotStartRequest
+        {
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotEqual(Guid.Empty, response.SessionId);
+        Assert.Equal("assistant", response.Role);
+        Assert.Equal("en", response.Language);
+        Assert.Contains("not fully available", response.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(response.SuggestedActions, action => action.Action == "request_quote" && action.Data == "/quote");
+        Assert.Contains(response.SuggestedActions, action => action.Action == "contact" && action.Data == "/contact");
+    }
+
+    /// <summary>
+    /// Verifies standalone Web runs do not wait on Aspire service discovery when ChatbotService is not configured.
+    /// </summary>
+    [Fact]
+    public async Task StartSessionAsync_ChatbotServiceUnconfigured_ReturnsDegradedWebsiteSessionWithoutDownstreamCall()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Services:ChatbotService:BaseUrl"] = null
+        }).Build();
+        var service = new CustomerChatbotService(client, configuration);
+
+        var response = await service.StartSessionAsync(new CustomerChatbotStartRequest
+        {
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotEqual(Guid.Empty, response.SessionId);
+        Assert.Contains("live assistant service is not fully available", response.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(client.InitiateRequest);
+        Assert.Null(client.MessageRequest);
+    }
+
+    /// <summary>
+    /// Verifies a manufacturing message receives a bounded fallback when the downstream assistant is unavailable.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_ChatbotServiceUnavailable_ReturnsDegradedAssistantResponse()
+    {
+        var sessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2");
+        var client = new CapturingChatbotServiceClient
+        {
+            FirstSendException = new BackendUnavailableException("ChatbotService", "No ChatbotService endpoint")
+        };
+        var service = new CustomerChatbotService(client);
+
+        var response = await service.SendAsync(new CustomerChatbotRequest
+        {
+            SessionId = sessionId,
+            Message = "Can you help price an FDM part?",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.Equal(sessionId, response.SessionId);
+        Assert.Equal("assistant", response.Role);
+        Assert.Contains("live assistant", response.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(response.SuggestedActions, action => action.Action == "request_quote" && action.Data == "/quote");
+        Assert.Contains(response.SuggestedActions, action => action.Action == "contact" && action.Data == "/contact");
     }
 
     /// <summary>
@@ -448,6 +525,8 @@ public sealed class CustomerChatbotBoundaryTests
 
         public ChatbotSendMessageRequest? MessageRequest { get; private set; }
 
+        public Exception? InitiateException { get; init; }
+
         public Exception? FirstSendException { get; init; }
 
         public List<ChatbotSuggestedAction> SuggestedActions { get; init; } = [];
@@ -457,6 +536,11 @@ public sealed class CustomerChatbotBoundaryTests
         public Task<ChatbotSessionResponse> InitiateSessionAsync(ChatbotInitiateSessionRequest request, CancellationToken cancellationToken)
         {
             InitiateRequest = request;
+            if (InitiateException is not null)
+            {
+                return Task.FromException<ChatbotSessionResponse>(InitiateException);
+            }
+
             return Task.FromResult(new ChatbotSessionResponse
             {
                 SessionId = SessionId,

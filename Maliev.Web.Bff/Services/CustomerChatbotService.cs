@@ -1,5 +1,6 @@
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Shared.Chatbot;
+using Microsoft.Extensions.Configuration;
 
 namespace Maliev.Web.Bff.Services;
 
@@ -25,7 +26,7 @@ public interface ICustomerChatbotService
     Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken);
 }
 
-internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient) : ICustomerChatbotService
+internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient, IConfiguration? configuration = null) : ICustomerChatbotService
 {
     private static readonly string[] AllowedTopicTerms =
     [
@@ -83,7 +84,21 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
     public async Task<CustomerChatbotResponse> StartSessionAsync(CustomerChatbotStartRequest request, CancellationToken cancellationToken)
     {
         var language = NormalizeLanguage(request.Language, string.Empty);
-        var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+        if (!IsChatbotServiceConfigured())
+        {
+            return CreateDegradedSessionResponse(language);
+        }
+
+        ChatbotSessionResponse session;
+        try
+        {
+            session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+        }
+        catch (BackendUnavailableException)
+        {
+            return CreateDegradedSessionResponse(language);
+        }
+
         language = NormalizeLanguage(session.Language, string.Empty);
 
         return new CustomerChatbotResponse
@@ -117,9 +132,23 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         }
 
         var sessionId = request.SessionId;
+        if (!IsChatbotServiceConfigured())
+        {
+            return CreateDegradedMessageResponse(IsUsableSession(sessionId) ? sessionId : Guid.NewGuid(), language);
+        }
+
         if (!IsUsableSession(sessionId))
         {
-            var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+            ChatbotSessionResponse session;
+            try
+            {
+                session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+            }
+            catch (BackendUnavailableException)
+            {
+                return CreateDegradedMessageResponse(Guid.NewGuid(), language);
+            }
+
             sessionId = session.SessionId;
             language = NormalizeLanguage(session.Language, message);
         }
@@ -130,12 +159,32 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         {
             chatbotResponse = await SendMessageAsync(sessionId!.Value, content, cancellationToken);
         }
+        catch (BackendUnavailableException)
+        {
+            return CreateDegradedMessageResponse(sessionId, language);
+        }
         catch (ChatbotSessionUnavailableException) when (request.SessionId.HasValue && request.SessionId.Value != Guid.Empty)
         {
-            var session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+            ChatbotSessionResponse session;
+            try
+            {
+                session = await InitiateWebsiteSessionAsync(language, cancellationToken);
+            }
+            catch (BackendUnavailableException)
+            {
+                return CreateDegradedMessageResponse(Guid.NewGuid(), language);
+            }
+
             sessionId = session.SessionId;
             language = NormalizeLanguage(session.Language, message);
-            chatbotResponse = await SendMessageAsync(sessionId.Value, content, cancellationToken);
+            try
+            {
+                chatbotResponse = await SendMessageAsync(sessionId.Value, content, cancellationToken);
+            }
+            catch (BackendUnavailableException)
+            {
+                return CreateDegradedMessageResponse(sessionId, language);
+            }
         }
 
         return new CustomerChatbotResponse
@@ -161,6 +210,17 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
     private static bool IsUsableSession(Guid? sessionId)
     {
         return sessionId.HasValue && sessionId.Value != Guid.Empty;
+    }
+
+    private bool IsChatbotServiceConfigured()
+    {
+        if (configuration is null)
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(configuration.GetConnectionString("ChatbotService"))
+            || !string.IsNullOrWhiteSpace(configuration["Services:ChatbotService:BaseUrl"]);
     }
 
     private Task<ChatbotSessionResponse> InitiateWebsiteSessionAsync(string language, CancellationToken cancellationToken)
@@ -385,6 +445,55 @@ Customer message:
             Language = language,
             CreatedAt = DateTimeOffset.UtcNow
         };
+    }
+
+    private static CustomerChatbotResponse CreateDegradedSessionResponse(string language)
+    {
+        return new CustomerChatbotResponse
+        {
+            SessionId = Guid.NewGuid(),
+            Content = language == "th"
+                ? "น้องมะลิเชื่อมต่อหน้าร้านแล้วค่ะ ตอนนี้ระบบผู้ช่วยอัตโนมัติยังไม่พร้อมเต็มรูปแบบ แต่ยังช่วยพาไปขอใบเสนอราคา ติดต่อทีมงาน หรือดูบริการของ MALIEV ได้ค่ะ"
+                : "Mali is connected to the website. The live assistant service is not fully available right now, but I can still help you get to Quote Engine, contact the team, or review MALIEV services.",
+            Role = "assistant",
+            Language = language,
+            CreatedAt = DateTimeOffset.UtcNow,
+            SuggestedActions = CreateDegradedActions(language)
+        };
+    }
+
+    private static CustomerChatbotResponse CreateDegradedMessageResponse(Guid? sessionId, string language)
+    {
+        return new CustomerChatbotResponse
+        {
+            SessionId = sessionId,
+            Content = language == "th"
+                ? "ตอนนี้ระบบผู้ช่วยอัตโนมัติยังตอบรายละเอียดไม่ได้ครบถ้วนค่ะ ถ้าต้องการราคา ให้อัปโหลดไฟล์ที่ระบบราคา หรือส่งข้อความถึงทีมงานให้ช่วยตรวจได้เลยค่ะ"
+                : "The live assistant cannot generate a detailed answer right now. For pricing, upload your CAD file in Quote Engine, or contact the team and we will review it directly.",
+            Role = "assistant",
+            Language = language,
+            CreatedAt = DateTimeOffset.UtcNow,
+            SuggestedActions = CreateDegradedActions(language)
+        };
+    }
+
+    private static List<CustomerChatbotActionDto> CreateDegradedActions(string language)
+    {
+        return
+        [
+            new CustomerChatbotActionDto
+            {
+                Label = language == "th" ? "ขอราคาชิ้นงาน" : "Get part price",
+                Action = "request_quote",
+                Data = "/quote"
+            },
+            new CustomerChatbotActionDto
+            {
+                Label = language == "th" ? "ติดต่อทีมงาน" : "Contact MALIEV",
+                Action = "contact",
+                Data = "/contact"
+            }
+        ];
     }
 
     private static string FallbackAnswer(string language)
