@@ -405,8 +405,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".industry-sector-list small", styles);
         Assert.Contains("border-radius: 8px;", styles);
         Assert.Contains("align-content: center;", styles);
+        Assert.Contains("align-items: center;", styles);
         Assert.Contains("justify-items: center;", styles);
         Assert.Contains("text-align: center;", styles);
+        Assert.Contains(".industry-sector-list li::before {\n  content: \"\";\n  position: absolute;\n  top: 18px;\n  left: 50%;\n  transform: translateX(-50%);", styles);
         Assert.Contains(".industry-sector-list li:is(:hover, :focus-within)", styles);
         Assert.Contains("transform: translateY(-3px);", styles);
         Assert.Contains("transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, border-color .22s ease-in-out;", styles);
@@ -614,7 +616,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
-        Assert.DoesNotContain(".machine-feature-panel--details .machine-feature-backdrop", styles);
+        Assert.Contains(".machine-feature-panel--details .machine-feature-backdrop {\n    transform: none;", styles);
         Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
