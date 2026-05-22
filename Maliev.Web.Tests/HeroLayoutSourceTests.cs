@@ -623,6 +623,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("max-width: 480px;", styles);
         Assert.Contains("text-align: right;", styles);
         Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);
+        Assert.Contains(".machine-feature-panel {\n    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);\n  }\n\n  .machine-feature-copy {\n    grid-column: 2;", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);

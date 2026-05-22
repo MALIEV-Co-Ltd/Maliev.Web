@@ -6086,7 +6086,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-panel {
-    grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
+  }
+
+  .machine-feature-copy {
+    grid-column: 2;
+    max-width: min(100%, 380px);
   }
 
   .machine-feature-title {
