@@ -408,6 +408,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("align-items: center;", styles);
         Assert.Contains("justify-items: center;", styles);
         Assert.Contains("text-align: center;", styles);
+        Assert.Contains("cursor: pointer;", styles);
         Assert.Contains(".industry-sector-list li::before {\n  content: \"\";\n  position: absolute;\n  top: 18px;\n  left: 50%;\n  transform: translateX(-50%);", styles);
         Assert.Contains(".industry-sector-list li:is(:hover, :focus-within)", styles);
         Assert.Contains("transform: translateY(-3px);", styles);

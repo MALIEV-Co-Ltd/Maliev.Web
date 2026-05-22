@@ -719,6 +719,7 @@ main {
   border: 1px solid color-mix(in srgb, var(--rule) 82%, transparent);
   border-radius: 8px;
   box-shadow: color-mix(in srgb, var(--ink) 8%, transparent) 0 18px 42px -34px;
+  cursor: pointer;
   transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, border-color .22s ease-in-out;
 }
 
