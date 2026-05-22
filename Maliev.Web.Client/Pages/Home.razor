@@ -232,7 +232,7 @@
         {
             <a class="blog-card" href="/blog/@post.Slug">
                 <div class="blog-card-media">
-                    <img src="@post.ImageUrl" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
+                    <img src="@SiteContent.ResolveBlogImageUrl(post)" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
                 </div>
                 <div class="blog-card-body">
                     <span class="card-meta">@post.Category.For(Preferences.Culture)</span>
@@ -266,10 +266,11 @@
     private const string BlogPostsOrderStateKey = "home.blogPosts.order";
     private const string HeroCopyStateKey = "home.hero.copy";
     private const string HeroModelStateKey = "home.hero.model";
+    private const int HomeBlogPostCount = 3;
     private PersistingComponentStateSubscription? _persistingSubscription;
     private IReadOnlyList<ServicePageContent> _services = SiteContent.Services;
     private IReadOnlyList<CaseStudyContent> _caseStudies = SiteContent.CaseStudies;
-    private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts;
+    private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts.Take(HomeBlogPostCount).ToList();
     private HeroCopy _heroCopy = HeroCopyCatalog.Default;
     private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
@@ -505,9 +506,11 @@
             ? OrderByPersistedKeys(SiteContent.CaseStudies, caseStudyOrder, caseStudy => caseStudy.Slug)
             : Shuffle(SiteContent.CaseStudies);
 
-        _blogPosts = ApplicationState.TryTakeFromJson<string[]>(BlogPostsOrderStateKey, out var blogPostOrder) && blogPostOrder is not null
+        var blogPosts = ApplicationState.TryTakeFromJson<string[]>(BlogPostsOrderStateKey, out var blogPostOrder) && blogPostOrder is not null
             ? OrderByPersistedKeys(SiteContent.BlogPosts, blogPostOrder, post => post.Slug)
             : Shuffle(SiteContent.BlogPosts);
+
+        _blogPosts = blogPosts.Take(HomeBlogPostCount).ToList();
     }
 
     private void InitializeHeroCopy()

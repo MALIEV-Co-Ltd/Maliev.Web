@@ -372,13 +372,38 @@ else if (Path == "case-studies")
 }
 else if (Path == "blog")
 {
-    <section class="section">
+    <section class="section blog-library-section" aria-labelledby="blog-library-title">
+        <div class="blog-library-tools">
+            <div>
+                <span class="card-meta">@Text("Manufacturing notes", "บันทึกงานผลิต")</span>
+                <h2 id="blog-library-title">@Text("Browse practical notes", "ค้นหาบทความเชิงปฏิบัติ")</h2>
+                <p>@Text("Search the full library by process, material, fit, quoting, or production topic.", "ค้นหาคลังบทความตามกระบวนการ วัสดุ การประกอบ การเสนอราคา หรือหัวข้องานผลิต")</p>
+            </div>
+            <form class="blog-search-form" action="/blog" method="get" role="search">
+                <label for="blog-search">@Text("Search posts", "ค้นหาบทความ")</label>
+                <div class="blog-search-row">
+                    <input id="blog-search"
+                           name="q"
+                           type="search"
+                           value="@BlogSearch"
+                           placeholder="@Text("Search CNC, resin, tolerance...", "ค้นหา CNC, เรซิน, tolerance...")" />
+                    <button type="submit" class="button primary">@Text("Search", "ค้นหา")</button>
+                    @if (!string.IsNullOrWhiteSpace(BlogSearch))
+                    {
+                        <a class="button secondary" href="/blog">@Text("Clear", "ล้าง")</a>
+                    }
+                </div>
+            </form>
+        </div>
+        <div class="blog-library-status" role="status">
+            @Text($"{FilteredBlogPosts.Count} notes found", $"พบบทความ {FilteredBlogPosts.Count} รายการ")
+        </div>
         <div class="blog-grid">
-            @foreach (var post in SiteContent.BlogPosts)
+            @foreach (var post in PagedBlogPosts)
             {
                 <a class="blog-card" href="/blog/@post.Slug">
                     <div class="blog-card-media">
-                        <img src="@post.ImageUrl" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
+                        <img src="@SiteContent.ResolveBlogImageUrl(post)" alt="@post.Title.For(Preferences.Culture)" loading="lazy" />
                     </div>
                     <div class="blog-card-body">
                         <span class="card-meta">@post.Category.For(Preferences.Culture)</span>
@@ -389,6 +414,23 @@ else if (Path == "blog")
                 </a>
             }
         </div>
+        @if (TotalBlogPages > 1)
+        {
+            <nav class="pagination blog-pagination" aria-label="@Text("Blog pages", "หน้าบทความ")">
+                <a class="@PaginationLinkClass(BlogPage <= 1)"
+                   href="@BuildBlogPageHref(BlogPage - 1)"
+                   aria-disabled="@(BlogPage <= 1)">@Text("Previous", "ก่อนหน้า")</a>
+                @foreach (var pageNumber in VisibleBlogPages)
+                {
+                    <a class="@PaginationPageClass(pageNumber)"
+                       href="@BuildBlogPageHref(pageNumber)"
+                       aria-current="@(pageNumber == BlogPage ? "page" : null)">@pageNumber.ToString(CultureInfo.InvariantCulture)</a>
+                }
+                <a class="@PaginationLinkClass(BlogPage >= TotalBlogPages)"
+                   href="@BuildBlogPageHref(BlogPage + 1)"
+                   aria-disabled="@(BlogPage >= TotalBlogPages)">@Text("Next", "ถัดไป")</a>
+            </nav>
+        }
     </section>
 }
 else if (CurrentCaseStudy is { } caseStudyDetail)
@@ -436,7 +478,7 @@ else if (CurrentBlogPost is { } blogPost)
     <section class="section article-detail-layout blog-detail">
         <article class="article-detail-body">
             <div class="article-detail-media">
-                <img src="@blogPost.ImageUrl" alt="@blogPost.Title.For(Preferences.Culture)" loading="lazy" />
+                <img src="@SiteContent.ResolveBlogImageUrl(blogPost)" alt="@blogPost.Title.For(Preferences.Culture)" loading="lazy" />
             </div>
             <div class="content-stack">
                 @foreach (var item in blogPost.Sections)
@@ -725,6 +767,7 @@ else
     private const int MaxContactFiles = 5;
     private const long MaxContactFileBytes = 10 * 1024 * 1024;
     private const int MaxContactFileMegabytes = 10;
+    private const int BlogPageSize = 12;
     private const string MalievMapUrl = "https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand";
     private const string MalievMapEmbedUrl = MalievMapUrl + "&output=embed";
     private readonly List<string> _selectedContactFileSummaries = [];
@@ -740,6 +783,57 @@ else
     private string _materialUseFilter = AllMaterialsFilter;
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
     private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
+    private string BlogSearch => ReadQueryStringValue("q").Trim();
+    private int BlogPage
+    {
+        get
+        {
+            var rawPage = ReadQueryStringValue("page");
+            return int.TryParse(rawPage, NumberStyles.Integer, CultureInfo.InvariantCulture, out var page)
+                ? Math.Clamp(page, 1, TotalBlogPages)
+                : 1;
+        }
+    }
+
+    private IReadOnlyList<BlogPostContent> FilteredBlogPosts
+    {
+        get
+        {
+            var query = BlogSearch;
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return SiteContent.BlogPosts;
+            }
+
+            return SiteContent.BlogPosts
+                .Where(post => BlogPostMatchesSearch(post, query))
+                .ToList();
+        }
+    }
+
+    private IReadOnlyList<BlogPostContent> PagedBlogPosts =>
+        FilteredBlogPosts
+            .Skip((BlogPage - 1) * BlogPageSize)
+            .Take(BlogPageSize)
+            .ToList();
+
+    private int TotalBlogPages => Math.Max(1, (int)Math.Ceiling(FilteredBlogPosts.Count / (double)BlogPageSize));
+
+    private IEnumerable<int> VisibleBlogPages
+    {
+        get
+        {
+            var start = Math.Max(1, BlogPage - 2);
+            var end = Math.Min(TotalBlogPages, start + 4);
+            start = Math.Max(1, end - 4);
+
+            for (var page = start; page <= end; page++)
+            {
+                yield return page;
+            }
+        }
+    }
+
     private BlogPostContent? CurrentBlogPost => Path.StartsWith("blog/", StringComparison.Ordinal)
         ? SiteContent.BlogPosts.FirstOrDefault(item => item.Slug.Equals(Slug, StringComparison.OrdinalIgnoreCase))
         : null;
@@ -1141,6 +1235,78 @@ else
     private async Task DownloadBlogPdfAsync()
     {
         await JS.InvokeVoidAsync("print");
+    }
+
+    private string ReadQueryStringValue(string key)
+    {
+        var query = new Uri(Navigation.Uri).Query;
+        if (query.Length <= 1)
+        {
+            return string.Empty;
+        }
+
+        var pairs = query[1..].Split('&', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var pair in pairs)
+        {
+            var separatorIndex = pair.IndexOf('=', StringComparison.Ordinal);
+            var rawKey = separatorIndex >= 0 ? pair[..separatorIndex] : pair;
+            if (!string.Equals(Uri.UnescapeDataString(rawKey.Replace("+", " ")), key, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var rawValue = separatorIndex >= 0 ? pair[(separatorIndex + 1)..] : string.Empty;
+            return Uri.UnescapeDataString(rawValue.Replace("+", " "));
+        }
+
+        return string.Empty;
+    }
+
+    private static bool BlogPostMatchesSearch(BlogPostContent post, string query)
+    {
+        return ContainsSearch(post.Slug, query)
+            || ContainsSearch(post.Title.En, query)
+            || ContainsSearch(post.Title.Th, query)
+            || ContainsSearch(post.Summary.En, query)
+            || ContainsSearch(post.Summary.Th, query)
+            || ContainsSearch(post.Category.En, query)
+            || ContainsSearch(post.Category.Th, query)
+            || post.Sections.Any(section =>
+                ContainsSearch(section.Title.En, query)
+                || ContainsSearch(section.Title.Th, query)
+                || ContainsSearch(section.Body.En, query)
+                || ContainsSearch(section.Body.Th, query));
+    }
+
+    private static bool ContainsSearch(string value, string query)
+    {
+        return value.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string BuildBlogPageHref(int page)
+    {
+        var safePage = Math.Clamp(page, 1, TotalBlogPages);
+        var query = BlogSearch;
+        var pageSegment = safePage > 1 ? $"page={safePage.ToString(CultureInfo.InvariantCulture)}" : string.Empty;
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return string.IsNullOrEmpty(pageSegment) ? "/blog" : $"/blog?{pageSegment}";
+        }
+
+        var searchSegment = $"q={Uri.EscapeDataString(query)}";
+        return string.IsNullOrEmpty(pageSegment)
+            ? $"/blog?{searchSegment}"
+            : $"/blog?{searchSegment}&{pageSegment}";
+    }
+
+    private static string PaginationLinkClass(bool disabled)
+    {
+        return disabled ? "pagination-link is-disabled" : "pagination-link";
+    }
+
+    private string PaginationPageClass(int page)
+    {
+        return page == BlogPage ? "pagination-link is-current" : "pagination-link";
     }
 
     private string CompareGuidance => SelectedMaterialComparisons.Count switch

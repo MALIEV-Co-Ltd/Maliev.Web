@@ -390,6 +390,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("quote-flow-band", source);
         Assert.Contains("blog-grid", source);
         Assert.Contains("SiteContent.BlogPosts", source);
+        Assert.Contains("HomeBlogPostCount = 3", source);
+        Assert.Contains("blogPosts.Take(HomeBlogPostCount)", source);
         Assert.Contains("PersistentComponentState", source);
         Assert.Contains("RandomizeSupportingServices", source);
         Assert.Contains("Shuffle(SiteContent.CaseStudies)", source);
@@ -743,6 +745,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ดาวน์โหลด PDF", source);
         Assert.Contains("blog-pdf-button", source);
         Assert.Contains("InvokeVoidAsync(\"print\")", source);
+        Assert.Contains("blog-search-form", source);
+        Assert.Contains("PagedBlogPosts", source);
+        Assert.Contains("BlogPageSize = 12", source);
+        Assert.Contains("BuildBlogPageHref", source);
+        Assert.Contains("ResolveBlogImageUrl", source);
+        Assert.Contains(".blog-library-tools", styles);
+        Assert.Contains(".pagination-link", styles);
         Assert.Contains("@media print", styles);
         Assert.Contains(".article-detail-layout.blog-detail", styles);
         Assert.Contains(".site-header,\n  .site-footer,\n  .customer-chatbot,\n  .page-hero,\n  .detail-sidebar,\n  .blog-pdf-button", styles);

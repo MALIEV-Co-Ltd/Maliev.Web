@@ -29,6 +29,80 @@ internal static class SiteContent
     internal const string InjectionMoldingLineImageUrl = "https://images.unsplash.com/photo-1730705788367-dbd288c40ee7?auto=format&fit=crop&w=1200&q=80";
     private const string FactoryPipeProductionImageUrl = "https://images.unsplash.com/photo-1699799678681-3c156c3c5553?auto=format&fit=crop&w=1200&q=80";
 
+    internal static string ResolveBlogImageUrl(BlogPostContent post)
+    {
+        var slug = post.Slug;
+        var category = post.Category.En;
+
+        if (ContainsAny(slug, "cnc", "machining", "drill", "thread", "tapped", "radius", "stock", "dowel", "bearing"))
+        {
+            return ContainsAny(slug, "inspection", "tolerance", "datum", "fit")
+                ? CaliperInspectionImageUrl
+                : PipeMachiningImageUrl;
+        }
+
+        if (ContainsAny(slug, "scan", "reverse", "deviation", "legacy", "replacement"))
+        {
+            return ContainsAny(slug, "comparison", "inspection", "acceptance")
+                ? CaliperInspectionImageUrl
+                : ThreeDimensionalScannerImageUrl;
+        }
+
+        if (ContainsAny(slug, "injection", "mold", "molding", "tooling", "cast", "casting", "silicone", "urethane"))
+        {
+            return ContainsAny(slug, "pilot", "batch", "production")
+                ? FactoryPipeProductionImageUrl
+                : InjectionMoldingLineImageUrl;
+        }
+
+        if (ContainsAny(slug, "sla", "resin", "clear"))
+        {
+            return SlaResinImageUrl;
+        }
+
+        if (ContainsAny(slug, "sls", "mjf", "nylon", "powder"))
+        {
+            return PowderBedNylonImageUrl;
+        }
+
+        if (ContainsAny(slug, "fdm", "tpu", "asa", "petg", "pla", "orientation", "layer", "wall", "insert"))
+        {
+            return ContainsAny(slug, "operator", "support", "finish", "insert")
+                ? ThreeDimensionalPrinterOperatorImageUrl
+                : FdmThermoplasticsImageUrl;
+        }
+
+        if (ContainsAny(slug, "electronics", "enclosure", "robot", "automotive", "fixture", "guard", "bracket", "assembly", "hardware"))
+        {
+            return ContainsAny(slug, "fit", "hardware", "assembly")
+                ? CaliperInspectionImageUrl
+                : DesignPlanningImageUrl;
+        }
+
+        if (ContainsAny(slug, "quote", "cost", "order", "file", "checklist", "delivery", "packaging", "production", "handoff")
+            || ContainsAny(category, "quoting", "ordering", "delivery", "file"))
+        {
+            return FactoryPipeProductionImageUrl;
+        }
+
+        if (ContainsAny(slug, "material", "heat", "chemical", "substitution", "outdoor"))
+        {
+            return EngineeringPolymerReviewImageUrl;
+        }
+
+        if (ContainsAny(slug, "design", "dfm", "draft", "text", "label", "split"))
+        {
+            return DesignPlanningImageUrl;
+        }
+
+        return post.ImageUrl;
+    }
+
+    private static bool ContainsAny(string value, params string[] tokens)
+    {
+        return tokens.Any(token => value.Contains(token, StringComparison.OrdinalIgnoreCase));
+    }
+
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
     [
         new(Text("2018", "2018"), Text("founded in Thailand", "เริ่มต้นในประเทศไทย"), 2018),
