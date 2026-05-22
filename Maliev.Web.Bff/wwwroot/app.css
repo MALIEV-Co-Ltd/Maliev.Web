@@ -6787,8 +6787,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .industry-sector-list li {
+    justify-items: center;
     min-height: 104px;
     padding: 15px;
+    text-align: center;
   }
 
   .industry-sector-list span {

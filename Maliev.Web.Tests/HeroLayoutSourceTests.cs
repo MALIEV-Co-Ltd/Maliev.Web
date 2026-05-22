@@ -408,6 +408,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".industry-sector-list li {\n  display: grid;\n  place-items: center;", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
+        Assert.Contains(".industry-sector-list li {\n    justify-items: center;\n    min-height: 104px;\n    padding: 15px;\n    text-align: center;", styles);
         Assert.DoesNotContain(".material-category-grid,\n  .industry-sector-list,\n  .service-answer-card-grid--routes", styles);
         Assert.DoesNotContain("Recent work from", source);
         Assert.DoesNotContain("logo-heading", source);
