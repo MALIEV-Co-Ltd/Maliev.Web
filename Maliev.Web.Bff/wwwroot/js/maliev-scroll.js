@@ -14,6 +14,74 @@ window.malievScroll = {
     });
   },
 
+  bindWorkflowStepReveal: function (section) {
+    if (!section || section.dataset.workflowRevealBound === 'true') {
+      return;
+    }
+
+    section.dataset.workflowRevealBound = 'true';
+
+    const grid = section.querySelector('.process-grid');
+    if (!grid) {
+      return;
+    }
+
+    let hasRevealed = false;
+    let removeVisibilityListeners = () => {};
+
+    const reveal = () => {
+      if (hasRevealed) {
+        return;
+      }
+
+      hasRevealed = true;
+      grid.classList.add('workflow-steps-visible');
+      removeVisibilityListeners();
+    };
+
+    grid.classList.add('workflow-steps-ready');
+
+    const gridIsVisible = () => {
+      const rect = grid.getBoundingClientRect();
+      return rect.top < window.innerHeight * .84 && rect.bottom > window.innerHeight * .16;
+    };
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+    if (prefersReducedMotion || typeof IntersectionObserver !== 'function') {
+      reveal();
+      return;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        reveal();
+        observer.disconnect();
+      }
+    }, {
+      root: null,
+      threshold: 0.28,
+      rootMargin: '0px 0px -10% 0px'
+    });
+
+    observer.observe(grid);
+
+    const revealWhenVisible = () => {
+      if (gridIsVisible()) {
+        reveal();
+        observer.disconnect();
+      }
+    };
+
+    removeVisibilityListeners = () => {
+      window.removeEventListener('scroll', revealWhenVisible);
+      window.removeEventListener('resize', revealWhenVisible);
+    };
+
+    window.addEventListener('scroll', revealWhenVisible, { passive: true });
+    window.addEventListener('resize', revealWhenVisible, { passive: true });
+    window.requestAnimationFrame(revealWhenVisible);
+  },
+
   bindMachineFeatureHandoff: function (section, detailsPanel) {
     if (!section || !detailsPanel || section.dataset.machineHandoffBound === 'true') {
       return;

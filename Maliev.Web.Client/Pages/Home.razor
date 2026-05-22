@@ -388,6 +388,7 @@
         }
 
         await JS.InvokeVoidAsync("malievScroll.bindMachineFeatureHandoff", _machineFeaturePreview, _machineFeatureDetails);
+        await JS.InvokeVoidAsync("malievScroll.bindWorkflowStepReveal", _workflowCarousel);
     }
 
     private string Text(string en, string th)

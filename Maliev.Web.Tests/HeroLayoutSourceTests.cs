@@ -355,6 +355,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("process-section", source);
         Assert.Contains("id=\"workflow-carousel\"", source);
         Assert.Contains("process-grid", source);
+        Assert.Contains("bindWorkflowStepReveal", source);
         Assert.Contains("Quote to part workflow", source);
         Assert.Contains("process-eyebrow", source);
         Assert.Contains("How it works", source);
@@ -502,6 +503,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".process-eyebrow::before", processStyles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", processStyles);
         Assert.Contains("gap: clamp(36px, 5vw, 84px);", processStyles);
+        Assert.Contains(".process-grid.workflow-steps-ready .workflow-step", processStyles);
+        Assert.Contains(".process-grid.workflow-steps-visible .workflow-step", processStyles);
+        Assert.Contains("@keyframes workflowStepReveal", processStyles);
+        Assert.Contains("animation-delay: .16s;", processStyles);
+        Assert.Contains("animation-delay: .32s;", processStyles);
+        Assert.Contains("animation-delay: .48s;", processStyles);
         Assert.Contains("background: transparent;", processStyles);
         Assert.Contains("border: 0;", processStyles);
         Assert.Contains("border-radius: 0;", processStyles);
@@ -566,6 +573,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("private ElementReference _machineFeatureDetails;", source);
         Assert.Contains("@ref=\"_workflowCarousel\"", source);
         Assert.Contains("malievScroll.bindMachineFeatureHandoff", source);
+        Assert.Contains("malievScroll.bindWorkflowStepReveal", source);
         Assert.Contains("type=\"button\"", source);
         Assert.Contains("data-machine-feature=\"@feature.Accent\"", source);
         Assert.Contains("data-workflow-accent=\"@step.Accent\"", source);
@@ -576,6 +584,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SelectWorkflowStepAsync(step, _machineFeaturePreview)", source);
         Assert.Contains("malievScroll.scrollIntoView", source);
         var scrollScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
+        Assert.Contains("bindWorkflowStepReveal", scrollScript);
+        Assert.Contains("workflow-steps-ready", scrollScript);
+        Assert.Contains("workflow-steps-visible", scrollScript);
+        Assert.Contains("window.addEventListener('scroll', revealWhenVisible", scrollScript);
         Assert.Contains("bindMachineFeatureHandoff", scrollScript);
         Assert.Contains("scrollToDetails", scrollScript);
         Assert.Contains("introHalfPassed", scrollScript);
@@ -1102,8 +1114,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-info-row", styles);
         Assert.Contains(".contact-phone-reveal", styles);
         Assert.Contains(".contact-phone-reveal-secondary", styles);
-        Assert.Contains("bottom: calc(100% + 8px);", styles);
+        Assert.Contains("left: -1px;", styles);
+        Assert.Contains("right: -1px;", styles);
+        Assert.Contains("bottom: calc(100% - 1px);", styles);
+        Assert.Contains("font-size: inherit;", styles);
+        Assert.Contains("border-radius: 0 0 12px 12px;", styles);
         Assert.Contains(".contact-phone-reveal:hover .contact-phone-reveal-secondary", styles);
+        Assert.Contains(".contact-phone-reveal:focus-within .contact-phone-reveal-secondary", styles);
         Assert.DoesNotContain(".contact-phone-reveal:hover,\n.contact-phone-reveal:focus-visible {\n  min-height: 52px;", styles);
         Assert.Contains(".line-contact-link.contact-line-add-friend", styles);
         Assert.Contains(".line-contact-link", styles);
