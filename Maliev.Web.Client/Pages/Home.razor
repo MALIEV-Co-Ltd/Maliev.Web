@@ -58,17 +58,22 @@
 <section class="industry-sector-band" aria-labelledby="industry-sector-title">
     <div class="industry-sector-band-inner">
         <div class="industry-sector-copy">
-            <p class="industry-sector-eyebrow">@Text("Used by engineers across industrial sectors", "ใช้งานโดยวิศวกรในหลายอุตสาหกรรม")</p>
+            <p class="industry-sector-kicker">@Text("Used by engineers across industrial sectors", "ใช้งานโดยวิศวกรในหลายอุตสาหกรรม")</p>
             <h2 id="industry-sector-title">@Text("Custom parts for teams that build, test, and keep production moving.", "ชิ้นงานสั่งผลิตสำหรับทีมที่สร้าง ทดสอบ และเดินงานผลิตต่อเนื่อง")</h2>
             <p>@Text("MALIEV manufactures 3D-printed, CNC-machined, reverse-engineered, cast, and molded parts for practical engineering work.", "MALIEV ผลิตชิ้นงาน 3D print, CNC, reverse engineering, งานหล่อ และงานฉีดขึ้นรูปสำหรับงานวิศวกรรมจริง")</p>
         </div>
         <ul class="industry-sector-list" aria-label="@Text("Industrial sectors served", "กลุ่มอุตสาหกรรมที่รองรับ")">
-            <li><span>@Text("Automation", "Automation")</span><small>@Text("fixtures, guards, brackets", "ฟิกซ์เจอร์ การ์ด ขายึด")</small></li>
-            <li><span>@Text("Robotics", "Robotics")</span><small>@Text("end effectors, mounts", "หัวจับ ขายึด")</small></li>
-            <li><span>@Text("Automotive", "Automotive")</span><small>@Text("checks, jigs, samples", "จิ๊กตรวจ ตัวอย่าง")</small></li>
-            <li><span>@Text("Electronics", "Electronics")</span><small>@Text("enclosures, inserts", "กล่อง อินเสิร์ต")</small></li>
-            <li><span>@Text("Manufacturing", "Manufacturing")</span><small>@Text("tools, spares, trials", "เครื่องมือ อะไหล่ ทดลอง")</small></li>
-            <li><span>@Text("R&D", "R&D")</span><small>@Text("prototypes, test rigs", "ต้นแบบ ชุดทดสอบ")</small></li>
+            @foreach (var sector in IndustrySectors)
+            {
+                <li>
+                    <img class="industry-sector-image"
+                         src="@sector.ImageUrl"
+                         alt="@sector.ImageAlt.For(Preferences.Culture)"
+                         loading="lazy" />
+                    <span>@sector.Title.For(Preferences.Culture)</span>
+                    <small>@sector.Body.For(Preferences.Culture)</small>
+                </li>
+            }
         </ul>
     </div>
 </section>
@@ -109,7 +114,7 @@
          class="section process-section"
          aria-labelledby="process-title">
     <div class="section-lede process-lede">
-        <span class="process-eyebrow">@Text("How it works", "ขั้นตอนการทำงาน")</span>
+        <span class="process-step-kicker">@Text("How it works", "ขั้นตอนการทำงาน")</span>
         <h2 id="process-title">@Text("Quote to part, no friction", "จากใบเสนอราคาสู่ชิ้นงานอย่างลื่นไหล")</h2>
         <p>@Text("Upload CAD once, configure online, let MALIEV make it, and inspect or ship from the same workspace.", "อัปโหลด CAD ครั้งเดียว ตั้งค่างานออนไลน์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
     </div>
@@ -272,6 +277,40 @@
     private string _selectedMachineFeatureAccent = "overview";
     private ElementReference _machineFeaturePreview;
     private ElementReference _workflowCarousel;
+
+    private static readonly IReadOnlyList<IndustrySector> IndustrySectors =
+    [
+        new(
+            SiteContent.Text("Automation", "Automation"),
+            SiteContent.Text("fixtures, guards, brackets", "ฟิกซ์เจอร์ การ์ด ขายึด"),
+            ServiceImage("cnc-machining"),
+            SiteContent.Text("CNC-machined automation fixture being used on a production floor", "ฟิกซ์เจอร์งาน CNC ที่ใช้งานจริงในไลน์ผลิต")),
+        new(
+            SiteContent.Text("Robotics", "Robotics"),
+            SiteContent.Text("end effectors, mounts", "หัวจับ ขายึด"),
+            ServiceImage("rapid-prototyping"),
+            SiteContent.Text("3D-printed robot tooling and mounting parts prepared for fit testing", "ทูลลิ่งและขายึดหุ่นยนต์จากงานพิมพ์ 3 มิติที่เตรียมทดสอบการประกอบ")),
+        new(
+            SiteContent.Text("Automotive", "Automotive"),
+            SiteContent.Text("checks, jigs, samples", "จิ๊กตรวจ ตัวอย่าง"),
+            ServiceImage("deviation-analysis"),
+            SiteContent.Text("Inspection caliper checking an automotive jig and machined sample", "การตรวจจิ๊กและตัวอย่างชิ้นงานยานยนต์ด้วยเวอร์เนียร์")),
+        new(
+            SiteContent.Text("Electronics", "Electronics"),
+            SiteContent.Text("enclosures, inserts", "กล่อง อินเสิร์ต"),
+            ServiceImage("3d-design"),
+            SiteContent.Text("Electronics enclosure design and CAD review for a manufacturable prototype", "การออกแบบกล่องอิเล็กทรอนิกส์และตรวจ CAD สำหรับต้นแบบที่ผลิตได้จริง")),
+        new(
+            SiteContent.Text("Manufacturing", "Manufacturing"),
+            SiteContent.Text("tools, spares, trials", "เครื่องมือ อะไหล่ ทดลอง"),
+            ServiceImage("silicone-casting"),
+            SiteContent.Text("Small-batch tooling and molded production parts in a workshop environment", "ทูลลิ่งล็อตเล็กและชิ้นงานขึ้นรูปในสภาพแวดล้อมเวิร์กช็อป")),
+        new(
+            SiteContent.Text("R&D", "R&D"),
+            SiteContent.Text("prototypes, test rigs", "ต้นแบบ ชุดทดสอบ"),
+            ServiceImage("3d-printing"),
+            SiteContent.Text("3D-printed prototype part used for engineering testing and iteration", "ต้นแบบพิมพ์ 3 มิติที่ใช้ทดสอบและปรับแบบทางวิศวกรรม"))
+    ];
 
     private MachineFeature SelectedMachineFeature => MachineFeatures.FirstOrDefault(
         feature => string.Equals(feature.Accent, _selectedMachineFeatureAccent, StringComparison.OrdinalIgnoreCase))
@@ -588,6 +627,11 @@
         return items;
     }
 
+    private static string ServiceImage(string slug)
+    {
+        return SiteContent.Services.First(service => string.Equals(service.Slug, slug, StringComparison.OrdinalIgnoreCase)).ImageUrl;
+    }
+
     public override void Dispose()
     {
         base.Dispose();
@@ -613,6 +657,12 @@
     private sealed record MachineFeatureStat(
         LocalizedText Value,
         LocalizedText Label);
+
+    private sealed record IndustrySector(
+        LocalizedText Title,
+        LocalizedText Body,
+        string ImageUrl,
+        LocalizedText ImageAlt);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 

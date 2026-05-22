@@ -344,6 +344,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("tools, spares, trials", source);
         Assert.Contains("R&D", source);
         Assert.Contains("prototypes, test rigs", source);
+        Assert.Contains("IndustrySectors", source);
+        Assert.Contains("industry-sector-image", source);
+        Assert.Contains("ServiceImage(\"cnc-machining\")", source);
+        Assert.Contains("ServiceImage(\"rapid-prototyping\")", source);
+        Assert.Contains("ServiceImage(\"deviation-analysis\")", source);
+        Assert.Contains("ServiceImage(\"3d-design\")", source);
+        Assert.Contains("ServiceImage(\"silicone-casting\")", source);
+        Assert.Contains("ServiceImage(\"3d-printing\")", source);
+        Assert.Contains("CNC-machined automation fixture being used on a production floor", source);
+        Assert.Contains("3D-printed prototype part used for engineering testing and iteration", source);
         Assert.DoesNotContain("Trusted by engineers at", source);
         Assert.DoesNotContain("SIEMENS", source);
         Assert.DoesNotContain("BOSCH", source);
@@ -358,7 +368,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("process-grid", source);
         Assert.Contains("bindWorkflowStepReveal", source);
         Assert.Contains("Quote to part workflow", source);
-        Assert.Contains("process-eyebrow", source);
+        Assert.Contains("process-step-kicker", source);
         Assert.Contains("How it works", source);
         Assert.Contains("Quote to part, no friction", source);
         Assert.Contains("Upload CAD once, configure online, let MALIEV make it", source);
@@ -368,7 +378,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Inspect and ship", source);
         Assert.DoesNotContain("workflow-step-visual", source);
         Assert.Contains("workflow-step-number", source);
-        Assert.DoesNotContain("process-kicker", source);
+        Assert.DoesNotContain("process-eyebrow", source);
         Assert.DoesNotContain("Customer workflow", source);
         Assert.DoesNotContain("ขั้นตอนลูกค้า", source);
         Assert.DoesNotContain("<MudIcon Icon=\"@step.Icon\" Size=\"Size.Large\" />", source);
@@ -401,9 +411,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".industry-sector-band {\n  width: 100%;\n  padding: clamp(54px, 5.6vw, 76px) 32px;\n  background: var(--paper-2);\n  border-top: 1px solid var(--rule);\n  border-bottom: 1px solid var(--rule);", styles);
         Assert.Contains(".home-services-section {\n  padding-top: clamp(112px, 12vw, 184px);\n  padding-bottom: clamp(112px, 12vw, 184px);\n  max-width: none;\n  background: var(--paper);", styles);
         Assert.Contains(".home-services-section .service-grid {\n  width: min(100%, var(--container));\n  margin-inline: auto;", styles);
-        Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(6, minmax(0, 1fr));", styles);
+        Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list li", styles);
-        Assert.Contains(".industry-sector-list li::before", styles);
+        Assert.Contains(".industry-sector-image", styles);
+        Assert.Contains("aspect-ratio: 16 / 9;", styles);
+        Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains(".industry-sector-list span::before", styles);
         Assert.Contains(".industry-sector-list small", styles);
         Assert.Contains("border-radius: 8px;", styles);
         Assert.Contains("align-content: center;", styles);
@@ -411,7 +424,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("justify-items: center;", styles);
         Assert.Contains("text-align: center;", styles);
         Assert.Contains("cursor: pointer;", styles);
-        Assert.Contains(".industry-sector-list li::before {\n  content: \"\";\n  position: absolute;\n  top: 18px;\n  left: 50%;\n  transform: translateX(-50%);", styles);
+        Assert.Contains(".industry-sector-list span::before {\n  content: \"\";\n  position: absolute;\n  top: -12px;\n  left: 50%;\n  transform: translateX(-50%);", styles);
         Assert.Contains(".industry-sector-list li:is(:hover, :focus-within)", styles);
         Assert.Contains("transform: translateY(-3px);", styles);
         Assert.Contains("transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, border-color .22s ease-in-out;", styles);
@@ -419,7 +432,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".industry-sector-list li {\n  display: grid;\n  place-items: center;", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
-        Assert.Contains(".industry-sector-list li {\n    justify-items: center;\n    min-height: 104px;\n    padding: 15px;\n    text-align: center;", styles);
+        Assert.Contains(".industry-sector-list li {\n    justify-items: center;\n    min-height: 186px;\n    padding: 0 0 14px;\n    text-align: center;", styles);
+        Assert.Contains(".industry-sector-image {\n    aspect-ratio: 4 / 3;", styles);
         Assert.DoesNotContain(".material-category-grid,\n  .industry-sector-list,\n  .service-answer-card-grid--routes", styles);
         Assert.DoesNotContain("Recent work from", source);
         Assert.DoesNotContain("logo-heading", source);
@@ -500,8 +514,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--workflow-accent: #3f6f62;", processStyles);
         Assert.Contains("--workflow-accent: #8a6a2d;", processStyles);
         Assert.Contains("--workflow-accent: #743f3f;", processStyles);
-        Assert.Contains(".process-eyebrow", processStyles);
-        Assert.Contains(".process-eyebrow::before", processStyles);
+        Assert.Contains(".process-step-kicker", processStyles);
+        Assert.Contains(".process-step-kicker::before", processStyles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", processStyles);
         Assert.Contains("gap: clamp(36px, 5vw, 84px);", processStyles);
         Assert.Contains(".process-grid.workflow-steps-ready .workflow-step", processStyles);
@@ -521,7 +535,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, #fbfbfa 100%);", processStyles);
         Assert.DoesNotContain("background: rgba(255, 255, 255, .9);", processStyles);
         Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);", processStyles);
-        Assert.DoesNotContain(".process-kicker", styles);
+        Assert.DoesNotContain(".process-eyebrow", styles);
         Assert.Contains(".workflow-step-number", styles);
         Assert.DoesNotContain(".workflow-step-visual .mud-icon-root", styles);
         Assert.DoesNotContain(".workflow-step-visual span", styles);
