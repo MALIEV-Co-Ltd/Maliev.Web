@@ -90,10 +90,16 @@
 
                     @if (_isSending)
                     {
-                        <div class="customer-chatbot-message assistant pending">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                        <div class="@PendingMessageClass">
+                            @if (_isStartingSession)
+                            {
+                                <span class="customer-chatbot-pending-copy">@Text("Connecting you to one of our agents", "กำลังเชื่อมต่อคุณกับเจ้าหน้าที่ของเรา")</span>
+                            }
+                            <span class="customer-chatbot-typing-dots" aria-hidden="true">
+                                <span class="customer-chatbot-typing-dot"></span>
+                                <span class="customer-chatbot-typing-dot"></span>
+                                <span class="customer-chatbot-typing-dot"></span>
+                            </span>
                         </div>
                     }
                 </div>
@@ -214,6 +220,7 @@
     private string _popoutMessage = string.Empty;
     private bool _isOpen;
     private bool _isSending;
+    private bool _isStartingSession;
     private bool _storageReady;
     private bool _showPopout;
     private bool _composerResizePending;
@@ -229,6 +236,9 @@
     private bool CanInteract => !_isSending && _sessionId.HasValue;
     private bool CanSend => CanInteract && !string.IsNullOrWhiteSpace(_draft);
     private string ToggleButtonClass => _unreadCount > 0 ? "customer-chatbot-toggle has-unread" : "customer-chatbot-toggle";
+    private string PendingMessageClass => _isStartingSession
+        ? "customer-chatbot-message assistant pending pending-with-copy"
+        : "customer-chatbot-message assistant pending";
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
     private string LatestUnreadBadgeText => _latestUnreadCount > 9 ? "9+" : Math.Max(_latestUnreadCount, 1).ToString(CultureInfo.InvariantCulture);
@@ -408,6 +418,7 @@
         }
 
         _isSending = true;
+        _isStartingSession = true;
         _showJumpToLatest = false;
         _latestUnreadCount = 0;
         QueueMessageScroll(false);
@@ -445,6 +456,7 @@
         finally
         {
             _isSending = false;
+            _isStartingSession = false;
             if (_isOpen && !_showJumpToLatest)
             {
                 QueueMessageScroll(true);
@@ -475,6 +487,7 @@
         _messages.Add(new CustomerChatMessage("user", trimmed));
         LearnFromCustomerMessage(trimmed);
         _isSending = true;
+        _isStartingSession = false;
         _showJumpToLatest = false;
         _latestUnreadCount = 0;
         QueueMessageScroll(true);

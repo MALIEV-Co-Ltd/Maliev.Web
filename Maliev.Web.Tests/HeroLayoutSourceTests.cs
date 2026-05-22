@@ -1208,6 +1208,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Customer manufacturing assistant", component);
         Assert.Contains("EnsureChatSessionStartedAsync", component);
         Assert.Contains("StartChatbotSessionForBrowserAsync", component);
+        Assert.Contains("Connecting you to one of our agents", component);
+        Assert.Contains("customer-chatbot-pending-copy", component);
+        Assert.Contains("customer-chatbot-typing-dots", component);
+        Assert.Contains("customer-chatbot-typing-dot", component);
+        Assert.Contains("_isStartingSession = true;", component);
         Assert.Contains("malievChatbot.postJson", component);
         Assert.Contains("StartChatbotSessionAsync", ReadRepoFile("Maliev.Web.Client", "Services", "MalievApiClient.cs"));
         Assert.Contains("postJson: async function", script);
@@ -1341,6 +1346,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-message-rich :where(ul, ol)", styles);
         Assert.Contains(".customer-chatbot-message-rich pre", styles);
         Assert.Contains(".customer-chatbot-message-rich table", styles);
+        Assert.Contains(".customer-chatbot-message.pending-with-copy", styles);
+        Assert.Contains(".customer-chatbot-pending-copy", styles);
+        Assert.Contains(".customer-chatbot-typing-dots", styles);
+        Assert.Contains(".customer-chatbot-typing-dot", styles);
+        Assert.DoesNotContain(".customer-chatbot-message.pending span {", styles);
         Assert.Contains(".customer-chatbot-composer {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) 44px;\n  align-items: end;", styles);
         Assert.Contains(".customer-chatbot-composer textarea {\n  height: 42px;", styles);
         Assert.Contains(".customer-chatbot-composer button {\n  width: 44px;\n  height: 42px;", styles);

@@ -5650,7 +5650,28 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   gap: 5px;
 }
 
-.customer-chatbot-message.pending span {
+.customer-chatbot-message.pending-with-copy {
+  width: min(100%, 300px);
+  max-width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.customer-chatbot-pending-copy {
+  color: var(--ink);
+  font-size: .9rem;
+  line-height: 1.42;
+}
+
+.customer-chatbot-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 5px;
+  padding-top: .42em;
+}
+
+.customer-chatbot-typing-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -5658,11 +5679,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   animation: chatbot-pulse 1.1s ease-in-out infinite;
 }
 
-.customer-chatbot-message.pending span:nth-child(2) {
+.customer-chatbot-typing-dot:nth-child(2) {
   animation-delay: .16s;
 }
 
-.customer-chatbot-message.pending span:nth-child(3) {
+.customer-chatbot-typing-dot:nth-child(3) {
   animation-delay: .32s;
 }
 
@@ -5937,7 +5958,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .customer-chatbot-message.pending span {
+  .customer-chatbot-typing-dot {
     animation: none;
   }
 }
