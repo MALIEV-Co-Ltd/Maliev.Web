@@ -2318,11 +2318,6 @@ html:lang(th) .machine-feature-title-lead {
   transition: opacity .24s ease, transform .34s ease;
 }
 
-.machine-feature-panel--details .machine-feature-backdrop {
-  object-position: left bottom;
-  transform: translateX(-10vw) scale(1.02);
-}
-
 .machine-feature-backdrop.machine-feature-backdrop--dark {
   display: none;
 }

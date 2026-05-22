@@ -567,6 +567,9 @@ public sealed class HeroLayoutSourceTests
         var scrollScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
         Assert.Contains("bindMachineFeatureHandoff", scrollScript);
         Assert.Contains("scrollToDetails", scrollScript);
+        Assert.Contains("introHalfPassed", scrollScript);
+        Assert.Contains("hasSnappedToDetails", scrollScript);
+        Assert.Contains("window.addEventListener('scroll', scheduleHalfwayHandoff", scrollScript);
         Assert.Contains("event.deltaY > 12", scrollScript);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body);", source);
         Assert.Contains("private sealed record MachineFeature(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineFeatureStat> Stats);", source);
@@ -611,8 +614,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
-        Assert.Contains(".machine-feature-panel--details .machine-feature-backdrop", styles);
-        Assert.Contains("transform: translateX(-10vw) scale(1.02);", styles);
+        Assert.DoesNotContain(".machine-feature-panel--details .machine-feature-backdrop", styles);
+        Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
         Assert.Contains("margin-inline: calc(50% - 50vw);", styles);

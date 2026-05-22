@@ -29,6 +29,7 @@ window.malievScroll = {
     const introPanel = section.querySelector('.machine-feature-panel--intro');
     let touchStartY = 0;
     let isScrolling = false;
+    let hasSnappedToDetails = false;
 
     const introIsActive = () => {
       if (!introPanel) {
@@ -45,6 +46,7 @@ window.malievScroll = {
       }
 
       isScrolling = true;
+      hasSnappedToDetails = true;
       const top = detailsPanel.getBoundingClientRect().top + window.scrollY - stickyOffset();
       window.scrollTo({
         top: Math.max(0, top),
@@ -56,6 +58,24 @@ window.malievScroll = {
       }, prefersReducedMotion() ? 120 : 760);
 
       return true;
+    };
+
+    const introHalfPassed = () => {
+      if (!introPanel || hasSnappedToDetails || isScrolling) {
+        return false;
+      }
+
+      const rect = introPanel.getBoundingClientRect();
+      const halfPoint = rect.top + rect.height / 2;
+      return halfPoint <= window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+    };
+
+    const scheduleHalfwayHandoff = () => {
+      if (!introHalfPassed()) {
+        return;
+      }
+
+      scrollToDetails();
     };
 
     section.addEventListener('wheel', event => {
@@ -84,5 +104,7 @@ window.malievScroll = {
         event.preventDefault();
       }
     });
+
+    window.addEventListener('scroll', scheduleHalfwayHandoff, { passive: true });
   }
 };
