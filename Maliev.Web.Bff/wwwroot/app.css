@@ -6745,7 +6745,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .blog-grid,
   .product-grid,
   .material-category-grid,
-  .industry-sector-list,
   .service-answer-card-grid--routes,
   .service-answer-card-grid--checks,
   .service-answer-steps,
@@ -6762,6 +6761,20 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .preference-grid,
   .address-grid {
     grid-template-columns: 1fr;
+  }
+
+  .industry-sector-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .industry-sector-list li {
+    min-height: 104px;
+    padding: 15px;
+  }
+
+  .industry-sector-list span {
+    font-size: .68rem;
+    letter-spacing: .1em;
   }
 
   .shop-masthead {
