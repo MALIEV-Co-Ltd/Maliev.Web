@@ -1054,7 +1054,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".contact-info-row", styles);
         Assert.Contains(".contact-phone-reveal", styles);
         Assert.Contains(".contact-phone-reveal-secondary", styles);
+        Assert.Contains("bottom: calc(100% + 8px);", styles);
         Assert.Contains(".contact-phone-reveal:hover .contact-phone-reveal-secondary", styles);
+        Assert.DoesNotContain(".contact-phone-reveal:hover,\n.contact-phone-reveal:focus-visible {\n  min-height: 52px;", styles);
         Assert.Contains(".line-contact-link.contact-line-add-friend", styles);
         Assert.Contains(".line-contact-link", styles);
         Assert.Contains("border-radius: var(--radius);", addFriendLineButtonStyle);

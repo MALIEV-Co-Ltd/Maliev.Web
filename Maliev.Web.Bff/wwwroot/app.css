@@ -3442,14 +3442,15 @@ html[data-theme="dark"] .workflow-step {
 
 .contact-phone-reveal {
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   justify-content: center;
-  gap: 0;
+  position: relative;
   min-width: 132px;
-  overflow: hidden;
   line-height: 1.18;
-  transition: min-height .18s ease-in-out, padding-block .18s ease-in-out, box-shadow .18s ease-in-out, background-color .18s ease-in-out, color .18s ease-in-out;
+  overflow: visible;
+  z-index: 2;
+  transition: box-shadow .18s ease-in-out, background-color .18s ease-in-out, color .18s ease-in-out;
 }
 
 .contact-phone-reveal-primary,
@@ -3459,25 +3460,26 @@ html[data-theme="dark"] .workflow-step {
 }
 
 .contact-phone-reveal-secondary {
-  max-height: 0;
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 4;
+  padding: 8px 10px;
+  border-radius: 999px;
   opacity: 0;
-  color: var(--ink-2);
-  font-size: .78rem;
-  transform: translateY(-2px);
-  transition: max-height .18s ease-in-out, opacity .18s ease-in-out, transform .18s ease-in-out;
-}
-
-.contact-phone-reveal:hover,
-.contact-phone-reveal:focus-visible {
-  min-height: 52px;
-  padding-block: 8px;
+  pointer-events: none;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: rgba(15, 23, 42, .12) 0 14px 34px -20px, var(--shadow-border);
+  font-size: .8rem;
+  transform: translateY(4px);
+  transition: opacity .16s ease-in-out, transform .16s ease-in-out;
 }
 
 .contact-phone-reveal:hover .contact-phone-reveal-secondary,
 .contact-phone-reveal:focus-visible .contact-phone-reveal-secondary {
-  max-height: 18px;
-  opacity: .78;
-  transform: translateY(2px);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .line-contact-link.contact-line-add-friend {
