@@ -469,6 +469,7 @@ else if (CurrentBlogPost is { } blogPost)
             <div class="detail-sidebar-actions" aria-label="@Text("Blog sidebar actions", "ปุ่มดำเนินการในแถบบทความ")">
                 <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
                 <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
+                <button type="button" class="button secondary blog-pdf-button" @onclick="DownloadBlogPdfAsync">@Text("Download PDF", "ดาวน์โหลด PDF")</button>
             </div>
         </aside>
     </section>
@@ -1136,6 +1137,11 @@ else
         MaterialComparisons
             .Where(material => _selectedMaterialNames.Contains(material.Name))
             .ToList();
+
+    private async Task DownloadBlogPdfAsync()
+    {
+        await JS.InvokeVoidAsync("print");
+    }
 
     private string CompareGuidance => SelectedMaterialComparisons.Count switch
     {

@@ -3391,6 +3391,10 @@ html[data-theme="dark"] .workflow-step {
   background: color-mix(in srgb, var(--paper) 88%, var(--control-surface));
 }
 
+.blog-pdf-button {
+  cursor: pointer;
+}
+
 .case-study-detail .detail-sidebar {
   border-color: color-mix(in srgb, var(--blue) 22%, var(--rule));
 }
@@ -7408,5 +7412,61 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .cookie-consent {
     padding: 14px;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .site-header,
+  .site-footer,
+  .customer-chatbot,
+  .page-hero,
+  .detail-sidebar,
+  .blog-pdf-button {
+    display: none !important;
+  }
+
+  .site-shell,
+  main,
+  .section,
+  .article-detail-layout.blog-detail,
+  .article-detail-body,
+  .content-stack,
+  .detail-section {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .article-detail-media {
+    max-height: 280px;
+    margin-bottom: 28px;
+    break-inside: avoid;
+  }
+
+  .detail-section {
+    margin-bottom: 24px !important;
+    break-inside: avoid;
+  }
+
+  .detail-section h2 {
+    color: #111 !important;
+    font-size: 20pt !important;
+  }
+
+  .detail-section p,
+  .detail-section li {
+    color: #222 !important;
+    font-size: 11pt !important;
+    line-height: 1.55 !important;
   }
 }

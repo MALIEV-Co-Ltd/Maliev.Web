@@ -709,6 +709,41 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the practical notes library has enough researched content and printable article support.
+    /// </summary>
+    [Fact]
+    public void BlogPostsIncludeExpandedPracticalNotesAndPdfPrintAction()
+    {
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.True(SiteContent.BlogPosts.Count >= 53);
+        Assert.Equal(SiteContent.BlogPosts.Count, SiteContent.BlogPosts.Select(post => post.Slug).Distinct(StringComparer.Ordinal).Count());
+        Assert.All(SiteContent.BlogPosts, post =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(post.ImageUrl));
+            Assert.NotEmpty(post.Sections);
+            Assert.NotEmpty(post.Takeaways);
+            Assert.All(post.Sections, section =>
+            {
+                Assert.False(string.IsNullOrWhiteSpace(section.Title.En));
+                Assert.False(string.IsNullOrWhiteSpace(section.Title.Th));
+                Assert.False(string.IsNullOrWhiteSpace(section.Body.En));
+                Assert.False(string.IsNullOrWhiteSpace(section.Body.Th));
+            });
+        });
+        Assert.Contains("fdm-print-orientation", SiteContent.BlogPosts.Select(post => post.Slug));
+        Assert.Contains("order-ready-checklist", SiteContent.BlogPosts.Select(post => post.Slug));
+        Assert.Contains("Download PDF", source);
+        Assert.Contains("ดาวน์โหลด PDF", source);
+        Assert.Contains("blog-pdf-button", source);
+        Assert.Contains("InvokeVoidAsync(\"print\")", source);
+        Assert.Contains("@media print", styles);
+        Assert.Contains(".article-detail-layout.blog-detail", styles);
+        Assert.Contains(".site-header,\n  .site-footer,\n  .customer-chatbot,\n  .page-hero,\n  .detail-sidebar,\n  .blog-pdf-button", styles);
+    }
+
+    /// <summary>
     /// Verifies the pneumatic injection machine controls rotate only machine-specific content.
     /// </summary>
     [Fact]
