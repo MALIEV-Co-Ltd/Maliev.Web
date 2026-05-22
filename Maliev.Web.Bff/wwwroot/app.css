@@ -1408,7 +1408,7 @@ html:lang(th) .h1 {
   height: 100%;
   min-height: 280px;
   color: var(--ink);
-  transition: box-shadow .24s ease-in-out;
+  transition: box-shadow .52s ease-in-out;
 }
 
 .material-category-card {
