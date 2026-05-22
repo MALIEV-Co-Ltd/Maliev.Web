@@ -2403,14 +2403,14 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .process-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   position: relative;
-  gap: clamp(14px, 1.6vw, 20px);
+  gap: clamp(36px, 5vw, 84px);
 }
 
 .process-section {
   max-width: none;
   position: relative;
-  padding-top: clamp(88px, 9vw, 132px);
-  padding-bottom: clamp(92px, 9vw, 136px);
+  padding-top: clamp(96px, 10vw, 150px);
+  padding-bottom: clamp(92px, 9vw, 138px);
   background: var(--paper);
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
 }
@@ -2425,7 +2425,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   display: grid;
   gap: 0;
   max-width: var(--container);
-  margin-bottom: clamp(34px, 4vw, 58px);
+  margin-bottom: clamp(46px, 5vw, 72px);
 }
 
 .process-eyebrow {
@@ -2451,10 +2451,11 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 .process-lede h2 {
-  max-width: 650px;
+  max-width: 760px;
   margin: 0;
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size: clamp(2.8rem, 5vw, 4.15rem);
   line-height: 1.02;
+  font-weight: 600;
 }
 
 .process-lede p {
@@ -2466,59 +2467,57 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 .workflow-step {
-  --workflow-accent: #315f72;
-
   position: relative;
   display: grid;
   align-content: start;
-  gap: 22px;
-  min-height: 210px;
-  padding: clamp(22px, 2vw, 30px);
+  gap: 18px;
+  min-height: 0;
+  padding: 0;
   font: inherit;
   color: inherit;
   text-align: left;
   text-decoration: none;
-  background: color-mix(in srgb, var(--blue-soft) 72%, var(--paper));
-  border: 1px solid color-mix(in srgb, var(--blue) 10%, var(--rule));
-  border-radius: var(--radius);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
   cursor: pointer;
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition: color .2s ease;
 }
 
 .workflow-step:is(:hover, :focus-visible) {
-  border-color: color-mix(in srgb, var(--blue) 24%, var(--rule));
-  box-shadow: rgba(17, 24, 39, .08) 0 18px 44px -32px;
-  transform: translateY(-2px);
+  color: var(--blue-ink);
   outline: none;
 }
 
 .workflow-step.is-active {
-  border-color: color-mix(in srgb, var(--blue) 10%, var(--rule));
+  color: inherit;
+  border-color: transparent;
   box-shadow: none;
 }
 
 .workflow-step.is-active .workflow-step-number {
   color: var(--blue-ink);
-  background: color-mix(in srgb, var(--blue-soft) 86%, var(--paper));
+  background: color-mix(in srgb, var(--blue-soft) 88%, var(--paper));
 }
 
 .workflow-step-number {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   color: var(--blue-ink);
-  background: color-mix(in srgb, var(--blue-soft) 86%, var(--paper));
+  background: color-mix(in srgb, var(--blue-soft) 88%, var(--paper));
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: .72rem;
+  font-size: .78rem;
   font-weight: 700;
 }
 
 .workflow-step h2 {
-  margin: 10px 0 0;
-  font-size: .98rem;
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 1rem;
   line-height: 1.25;
   font-weight: 700;
 }
@@ -2526,7 +2525,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .workflow-step p {
   margin: 0;
   color: var(--muted);
-  font-size: .88rem;
+  font-size: .94rem;
   line-height: 1.58;
 }
 
@@ -2547,8 +2546,8 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 html[data-theme="dark"] .workflow-step {
-  background: color-mix(in srgb, var(--blue-soft) 22%, var(--paper));
-  border-color: color-mix(in srgb, var(--blue) 16%, var(--rule));
+  background: transparent;
+  border-color: transparent;
 }
 
 .service-detail-section {
