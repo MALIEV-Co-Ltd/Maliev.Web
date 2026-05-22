@@ -517,10 +517,20 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".process-step-kicker", processStyles);
         Assert.Contains(".process-step-kicker::before", processStyles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", processStyles);
+        Assert.Contains("align-items: start;", processStyles);
+        Assert.Contains("grid-auto-flow: row;", processStyles);
         Assert.Contains("gap: clamp(36px, 5vw, 84px);", processStyles);
         Assert.Contains(".process-grid.workflow-steps-ready .workflow-step", processStyles);
         Assert.Contains(".process-grid.workflow-steps-visible .workflow-step", processStyles);
         Assert.Contains("@keyframes workflowStepReveal", processStyles);
+        Assert.Contains("clip-path: inset(0 100% 0 0);", processStyles);
+        Assert.Contains("clip-path: inset(0 0 0 0);", processStyles);
+        Assert.Contains("width: 100%;", processStyles);
+        Assert.Contains("min-width: 0;", processStyles);
+        Assert.Contains("justify-items: start;", processStyles);
+        Assert.Contains(".workflow-step:nth-child(odd) {\n    grid-column: 1;", styles);
+        Assert.Contains(".workflow-step:nth-child(even) {\n    grid-column: 2;", styles);
+        Assert.Contains(".workflow-step,\n  .workflow-step:nth-child(odd),\n  .workflow-step:nth-child(even) {\n    grid-column: auto;", styles);
         Assert.Contains("animation-delay: .16s;", processStyles);
         Assert.Contains("animation-delay: .32s;", processStyles);
         Assert.Contains("animation-delay: .48s;", processStyles);
@@ -532,6 +542,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-size: .94rem;", processStyles);
         Assert.Contains("html[data-theme=\"dark\"] .workflow-step", styles);
         Assert.DoesNotContain("transform: translateY(-2px);", processStyles);
+        Assert.DoesNotContain("transform: translateX(-24px);", processStyles);
         Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, #fbfbfa 100%);", processStyles);
         Assert.DoesNotContain("background: rgba(255, 255, 255, .9);", processStyles);
         Assert.DoesNotContain("background: linear-gradient(180deg, #fff 0%, var(--workflow-accent-soft) 100%);", processStyles);

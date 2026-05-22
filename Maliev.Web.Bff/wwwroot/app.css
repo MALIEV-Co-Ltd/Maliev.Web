@@ -2475,6 +2475,8 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .process-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   position: relative;
+  align-items: start;
+  grid-auto-flow: row;
   gap: clamp(36px, 5vw, 84px);
 }
 
@@ -2541,7 +2543,10 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .workflow-step {
   position: relative;
   display: grid;
+  width: 100%;
+  min-width: 0;
   align-content: start;
+  justify-items: start;
   gap: 18px;
   min-height: 0;
   padding: 0;
@@ -2559,7 +2564,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 
 .process-grid.workflow-steps-ready .workflow-step {
   opacity: 0;
-  transform: translateX(-24px);
+  clip-path: inset(0 100% 0 0);
 }
 
 .process-grid.workflow-steps-visible .workflow-step {
@@ -2581,12 +2586,12 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 @keyframes workflowStepReveal {
   from {
     opacity: 0;
-    transform: translateX(-24px);
+    clip-path: inset(0 100% 0 0);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    clip-path: inset(0 0 0 0);
   }
 }
 
@@ -2594,7 +2599,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   .process-grid.workflow-steps-ready .workflow-step,
   .process-grid.workflow-steps-visible .workflow-step {
     opacity: 1;
-    transform: none;
+    clip-path: none;
     animation: none;
   }
 }
@@ -6158,6 +6163,14 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .workflow-step:nth-child(odd) {
+    grid-column: 1;
+  }
+
+  .workflow-step:nth-child(even) {
+    grid-column: 2;
+  }
+
   .industry-sector-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -6887,6 +6900,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .preference-grid,
   .address-grid {
     grid-template-columns: 1fr;
+  }
+
+  .workflow-step,
+  .workflow-step:nth-child(odd),
+  .workflow-step:nth-child(even) {
+    grid-column: auto;
   }
 
   .industry-sector-list {
