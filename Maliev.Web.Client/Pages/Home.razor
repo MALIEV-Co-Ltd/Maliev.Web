@@ -104,6 +104,31 @@
     </div>
 </section>
 
+<section id="workflow-carousel"
+         @ref="_workflowCarousel"
+         class="section process-section"
+         aria-labelledby="process-title">
+    <div class="section-lede process-lede">
+        <span class="process-eyebrow">@Text("How it works", "ขั้นตอนการทำงาน")</span>
+        <h2 id="process-title">@Text("Quote to part, no friction", "จากใบเสนอราคาสู่ชิ้นงานอย่างลื่นไหล")</h2>
+        <p>@Text("Upload CAD once, configure online, let MALIEV make it, and inspect or ship from the same workspace.", "อัปโหลด CAD ครั้งเดียว ตั้งค่างานออนไลน์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
+    </div>
+    <div class="process-grid" aria-label="@Text("Quote to part workflow", "ขั้นตอนจากใบเสนอราคาสู่ชิ้นงาน")">
+        @foreach (var step in ProcessSteps)
+        {
+            <button class="@WorkflowStepClass(step)"
+                    type="button"
+                    data-workflow-accent="@step.Accent"
+                    aria-current="@WorkflowAriaCurrent(step)"
+                    @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
+                <span class="workflow-step-number">@step.Number</span>
+                <h2>@step.Title.For(Preferences.Culture)</h2>
+                <p>@step.Body.For(Preferences.Culture)</p>
+            </button>
+        }
+    </div>
+</section>
+
 <section id="machine-feature-preview"
          @ref="_machineFeaturePreview"
          class="feature-band machine-feature"
@@ -165,31 +190,6 @@
                 <a class="button secondary" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
             </div>
         </div>
-    </div>
-</section>
-
-<section id="workflow-carousel"
-         @ref="_workflowCarousel"
-         class="section process-section"
-         aria-labelledby="process-title">
-    <div class="section-lede process-lede">
-        <span class="process-eyebrow">@Text("How it works", "ขั้นตอนการทำงาน")</span>
-        <h2 id="process-title">@Text("Quote to part, no friction", "จากใบเสนอราคาสู่ชิ้นงานอย่างลื่นไหล")</h2>
-        <p>@Text("Upload CAD once, configure online, let MALIEV make it, and inspect or ship from the same workspace.", "อัปโหลด CAD ครั้งเดียว ตั้งค่างานออนไลน์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
-    </div>
-    <div class="process-grid" aria-label="@Text("Quote to part workflow", "ขั้นตอนจากใบเสนอราคาสู่ชิ้นงาน")">
-        @foreach (var step in ProcessSteps)
-        {
-            <button class="@WorkflowStepClass(step)"
-                    type="button"
-                    data-workflow-accent="@step.Accent"
-                    aria-current="@WorkflowAriaCurrent(step)"
-                    @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
-                <span class="workflow-step-number">@step.Number</span>
-                <h2>@step.Title.For(Preferences.Culture)</h2>
-                <p>@step.Body.For(Preferences.Culture)</p>
-            </button>
-        }
     </div>
 </section>
 

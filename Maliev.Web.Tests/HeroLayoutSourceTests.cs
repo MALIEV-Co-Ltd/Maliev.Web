@@ -479,6 +479,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
         Assert.Contains(".process-section {\n  max-width: none;\n  position: relative;\n  padding-top: clamp(96px, 10vw, 150px);\n  padding-bottom: clamp(92px, 9vw, 138px);\n  background: var(--paper);", styles);
+        Assert.True(
+            source.IndexOf("<section id=\"workflow-carousel\"", StringComparison.Ordinal) <
+            source.IndexOf("<section id=\"machine-feature-preview\"", StringComparison.Ordinal));
+        Assert.True(
+            source.IndexOf("<section id=\"machine-feature-preview\"", StringComparison.Ordinal) <
+            source.IndexOf("<section class=\"section home-work-section\"", StringComparison.Ordinal));
         Assert.DoesNotContain(".process-section::after", styles);
         Assert.DoesNotContain(".process-section::before", styles);
         var processStylesStart = styles.IndexOf(".process-grid", StringComparison.Ordinal);
@@ -659,11 +665,14 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var machineStart = source.IndexOf("<section id=\"machine-feature-preview\"", StringComparison.Ordinal);
         var workflowStart = source.IndexOf("<section id=\"workflow-carousel\"", StringComparison.Ordinal);
+        var homeWorkStart = source.IndexOf("<section class=\"section home-work-section\"", StringComparison.Ordinal);
 
         Assert.True(machineStart >= 0);
-        Assert.True(workflowStart > machineStart);
+        Assert.True(workflowStart >= 0);
+        Assert.True(homeWorkStart > machineStart);
+        Assert.True(machineStart > workflowStart);
 
-        var machineSection = source[machineStart..workflowStart];
+        var machineSection = source[machineStart..homeWorkStart];
 
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", machineSection);
         Assert.Contains("@key=\"SelectedMachineFeature.Accent\"", machineSection);
