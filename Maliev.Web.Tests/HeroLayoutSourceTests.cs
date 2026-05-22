@@ -404,6 +404,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".industry-sector-list li::before", styles);
         Assert.Contains(".industry-sector-list small", styles);
         Assert.Contains("border-radius: 8px;", styles);
+        Assert.Contains("align-content: center;", styles);
+        Assert.Contains("justify-items: center;", styles);
+        Assert.Contains("text-align: center;", styles);
+        Assert.Contains(".industry-sector-list li:is(:hover, :focus-within)", styles);
+        Assert.Contains("transform: translateY(-3px);", styles);
+        Assert.Contains("transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, border-color .22s ease-in-out;", styles);
         Assert.DoesNotContain(".landing-hero::after", styles);
         Assert.DoesNotContain(".industry-sector-list li {\n  display: grid;\n  place-items: center;", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);

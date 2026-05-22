@@ -706,16 +706,25 @@ main {
 .industry-sector-list li {
   position: relative;
   display: grid;
-  align-content: start;
+  align-content: center;
+  justify-items: center;
   gap: 8px;
   min-height: 112px;
   padding: 18px;
   overflow: hidden;
   color: var(--ink);
+  text-align: center;
   background: color-mix(in srgb, var(--paper) 86%, transparent);
   border: 1px solid color-mix(in srgb, var(--rule) 82%, transparent);
   border-radius: 8px;
   box-shadow: color-mix(in srgb, var(--ink) 8%, transparent) 0 18px 42px -34px;
+  transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, border-color .22s ease-in-out;
+}
+
+.industry-sector-list li:is(:hover, :focus-within) {
+  border-color: color-mix(in srgb, var(--blue) 28%, var(--rule));
+  box-shadow: color-mix(in srgb, var(--ink) 16%, transparent) 0 26px 58px -36px;
+  transform: translateY(-3px);
 }
 
 .industry-sector-list li::before {
