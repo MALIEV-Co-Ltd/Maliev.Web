@@ -2225,6 +2225,7 @@ html[data-theme="dark"] .form-status--error {
   padding: 0;
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
+  transition: background-color .42s ease-in-out, color .42s ease-in-out;
 }
 
 .machine-feature::before {
@@ -2343,10 +2344,6 @@ html:lang(th) .machine-feature-title-lead {
   will-change: opacity, transform;
 }
 
-.machine-feature[data-machine-panel="details"] .machine-feature-backdrop {
-  transform: translateX(-5vw);
-}
-
 .machine-feature[data-machine-panel="details"] .machine-feature-intro-copy {
   opacity: 0;
   pointer-events: none;
@@ -2367,19 +2364,22 @@ html:lang(th) .machine-feature-title-lead {
   height: 100%;
   object-fit: cover;
   object-position: left bottom;
-  transition: opacity .24s ease, transform .34s ease;
+  opacity: 1;
+  transform: translateZ(0);
+  transition: opacity .48s ease-in-out;
+  will-change: opacity;
 }
 
 .machine-feature-backdrop.machine-feature-backdrop--dark {
-  display: none;
+  opacity: 0;
 }
 
 html[data-theme="dark"] .machine-feature-backdrop--light {
-  display: none;
+  opacity: 0;
 }
 
 html[data-theme="dark"] .machine-feature-backdrop--dark {
-  display: block;
+  opacity: 1;
 }
 
 .machine-stat-grid {
@@ -6534,10 +6534,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     margin-inline: calc(50% - 50vw);
     object-fit: cover;
     object-position: left bottom;
-  }
-
-  .machine-feature[data-machine-panel="details"] .machine-feature-backdrop {
-    transform: none;
   }
 
   .machine-stat-grid {

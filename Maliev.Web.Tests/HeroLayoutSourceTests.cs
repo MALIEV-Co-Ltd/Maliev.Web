@@ -642,7 +642,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".machine-feature-panel--details", styles);
         Assert.Contains(".machine-feature-details-copy", styles);
         Assert.Contains(".machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
-        Assert.Contains(".machine-feature[data-machine-panel=\"details\"] .machine-feature-backdrop", styles);
+        Assert.DoesNotContain(".machine-feature[data-machine-panel=\"details\"] .machine-feature-backdrop", styles);
         Assert.Contains(".machine-feature-title--intro", styles);
         Assert.Contains(".machine-feature-title--reveal", styles);
         Assert.Contains("transform: translateX(44px);", styles);
@@ -655,8 +655,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
-        Assert.Contains(".machine-feature[data-machine-panel=\"details\"] .machine-feature-backdrop {\n    transform: none;", styles);
+        Assert.Contains("transition: opacity .48s ease-in-out;", styles);
+        Assert.Contains(".machine-feature-backdrop.machine-feature-backdrop--dark {\n  opacity: 0;", styles);
+        Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light {\n  opacity: 0;", styles);
+        Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark {\n  opacity: 1;", styles);
+        Assert.DoesNotContain("display: none;\n}\n\nhtml[data-theme=\"dark\"] .machine-feature-backdrop--light", styles);
         Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
+        Assert.DoesNotContain("transform: translateX(-5vw);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
         Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
