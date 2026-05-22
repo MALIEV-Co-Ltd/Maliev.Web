@@ -2224,8 +2224,8 @@ html[data-theme="dark"] .form-status--error {
 .machine-feature-panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
   gap: clamp(20px, 3vw, 48px);
   min-height: calc(100svh - var(--site-header-height, 72px));
   padding: 112px max(32px, calc((100vw - var(--container)) / 2 + 32px));
@@ -2275,17 +2275,21 @@ html:lang(th) .machine-feature-title-lead {
 
 .machine-feature-copy {
   display: grid;
-  grid-column: 2;
-  align-content: center;
+  grid-column: 1;
+  align-content: end;
+  align-self: end;
   justify-self: end;
   gap: 22px;
   max-width: 480px;
+  margin-bottom: clamp(36px, 5.5vh, 72px);
   min-width: 0;
   z-index: 2;
 }
 
 .machine-feature-intro-copy {
   gap: 0;
+  align-self: end;
+  justify-self: end;
 }
 
 .machine-feature-backdrop {
@@ -6394,24 +6398,28 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-panel {
-    min-height: auto;
+    min-height: calc(100svh - var(--site-header-height, 72px));
     grid-template-columns: 1fr;
     gap: 34px;
-    padding: 0 24px 80px;
+    align-items: end;
+    padding: 0 24px 42px;
   }
 
   .machine-feature-panel--details {
-    min-height: auto;
+    min-height: calc(100svh - var(--site-header-height, 72px));
   }
 
   .machine-feature-copy {
     grid-column: 1;
-    justify-self: start;
-    max-width: 760px;
+    align-self: end;
+    justify-self: end;
+    max-width: min(760px, 82vw);
+    margin-bottom: 0;
+    text-align: right;
   }
 
   .machine-feature-title {
-    max-width: 760px;
+    max-width: min(760px, 82vw);
   }
 
   .machine-feature-backdrop {
@@ -7100,7 +7108,15 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .machine-feature-panel {
     padding-left: 18px;
     padding-right: 18px;
-    padding-bottom: 64px;
+    padding-bottom: 32px;
+  }
+
+  .machine-feature-copy {
+    max-width: min(360px, 86vw);
+  }
+
+  .machine-feature-title {
+    max-width: min(360px, 86vw);
   }
 
   .machine-feature-title {

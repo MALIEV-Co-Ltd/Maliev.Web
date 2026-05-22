@@ -584,11 +584,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);", styles);
         Assert.Contains(".machine-feature-panel", styles);
         Assert.Contains("min-height: calc(100svh - var(--site-header-height, 72px));", styles);
-        Assert.Contains("grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr);", styles);
+        Assert.Contains("align-items: end;", styles);
         Assert.Contains(".machine-feature-panel--details", styles);
         Assert.Contains("min-height: 100svh;", styles);
         Assert.Contains(".machine-feature-title--intro", styles);
         Assert.Contains("max-width: 480px;", styles);
+        Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
