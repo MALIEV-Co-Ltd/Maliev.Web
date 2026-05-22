@@ -27,9 +27,33 @@ window.malievScroll = {
       return header?.getBoundingClientRect?.().height ?? 72;
     };
     const introPanel = section.querySelector('.machine-feature-panel--intro');
+    const introTitle = section.querySelector('.machine-feature-title--reveal');
     let touchStartY = 0;
     let isScrolling = false;
     let hasSnappedToDetails = false;
+
+    const revealIntroTitle = () => {
+      introTitle?.classList.add('is-visible');
+    };
+
+    if (introTitle) {
+      if (prefersReducedMotion() || typeof IntersectionObserver !== 'function') {
+        revealIntroTitle();
+      } else {
+        const titleObserver = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            revealIntroTitle();
+            titleObserver.disconnect();
+          }
+        }, {
+          root: null,
+          threshold: 0.35,
+          rootMargin: '0px 0px -12% 0px'
+        });
+
+        titleObserver.observe(introTitle);
+      }
+    }
 
     const introIsActive = () => {
       if (!introPanel) {

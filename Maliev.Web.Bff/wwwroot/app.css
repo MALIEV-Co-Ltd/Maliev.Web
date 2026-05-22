@@ -2272,6 +2272,24 @@ html[data-theme="dark"] .form-status--error {
   text-align: right;
 }
 
+.machine-feature-title--reveal {
+  opacity: 0;
+  transform: translateX(44px);
+  transition:
+    opacity .58s ease-out,
+    transform .58s ease-out;
+  will-change: opacity, transform;
+}
+
+.machine-feature-title--reveal.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.machine-feature-title--intro > span {
+  display: block;
+}
+
 .machine-feature-title-line {
   display: block;
   min-width: 0;

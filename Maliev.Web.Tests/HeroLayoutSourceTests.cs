@@ -534,7 +534,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
         Assert.Contains("machine-feature-panel machine-feature-panel--intro", source);
         Assert.Contains("machine-feature-panel machine-feature-panel--details\" @ref=\"_machineFeatureDetails\"", source);
-        Assert.Contains("@Text(\"Injection Molding Machine\", \"เครื่องฉีดพลาสติก\")", source);
+        Assert.Contains("@Text(\"Pneumatic\", \"เครื่องฉีดระบบลม\")", source);
+        Assert.Contains("@Text(\"Injection Molding Machine\", \"สำหรับล็อตเล็ก\")", source);
+        Assert.Contains("machine-feature-title--intro machine-feature-title--reveal", source);
         Assert.Contains("machine-feature-title machine-feature-title--intro", source);
         Assert.Contains("machine-feature-backdrop", source);
         Assert.Contains("machine-feature-backdrop--light", source);
@@ -571,6 +573,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("scrollToDetails", scrollScript);
         Assert.Contains("introHalfPassed", scrollScript);
         Assert.Contains("hasSnappedToDetails", scrollScript);
+        Assert.Contains("machine-feature-title--reveal", scrollScript);
+        Assert.Contains("IntersectionObserver", scrollScript);
+        Assert.Contains("classList.add('is-visible')", scrollScript);
         Assert.Contains("window.addEventListener('scroll', scheduleHalfwayHandoff", scrollScript);
         Assert.Contains("event.deltaY > 12", scrollScript);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body);", source);
@@ -610,6 +615,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-panel--details", styles);
         Assert.Contains("min-height: 100svh;", styles);
         Assert.Contains(".machine-feature-title--intro", styles);
+        Assert.Contains(".machine-feature-title--reveal", styles);
+        Assert.Contains("transform: translateX(44px);", styles);
+        Assert.Contains(".machine-feature-title--reveal.is-visible", styles);
+        Assert.Contains(".machine-feature-title--intro > span", styles);
         Assert.Contains("max-width: 480px;", styles);
         Assert.Contains("text-align: right;", styles);
         Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);

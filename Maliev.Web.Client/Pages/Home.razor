@@ -120,7 +120,10 @@
              alt="@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)"
              loading="lazy" />
         <div class="machine-feature-copy machine-feature-intro-copy">
-            <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro">@Text("Injection Molding Machine", "เครื่องฉีดพลาสติก")</h2>
+            <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro machine-feature-title--reveal">
+                <span class="accent-blue">@Text("Pneumatic", "เครื่องฉีดระบบลม")</span>
+                <span>@Text("Injection Molding Machine", "สำหรับล็อตเล็ก")</span>
+            </h2>
         </div>
     </div>
     <div class="machine-feature-panel machine-feature-panel--details" @ref="_machineFeatureDetails" aria-labelledby="imm-title">
