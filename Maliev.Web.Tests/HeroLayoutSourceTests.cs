@@ -1414,7 +1414,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-toggle {\n    width: 46px;\n    min-height: 46px;", styles);
         Assert.Contains("bottom: max(16px, env(safe-area-inset-bottom));", styles);
         Assert.Contains("initFooterAwareFloat: function ()", script);
-        Assert.Contains("footerLegal.getBoundingClientRect()", script);
+        Assert.Contains("document.querySelectorAll('.footer-legal-links a, .footer-legal-links button')", script);
+        Assert.Contains("const horizontalOverlap = naturalRect.left - clearance < targetRect.right", script);
+        Assert.Contains("const verticalOverlap = naturalRect.top - clearance < targetRect.bottom", script);
+        Assert.Contains("const currentLift = getCurrentLift();", script);
+        Assert.Contains("top: toggleRect.top + currentLift", script);
+        Assert.DoesNotContain("footerLegal.getBoundingClientRect()", script);
         Assert.Contains("--customer-chatbot-footer-lift", script);
         Assert.Contains("isNearBottom: function (container)", script);
         Assert.Contains("scrollToBottom: function (container, smooth)", script);

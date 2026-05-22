@@ -258,27 +258,55 @@ window.malievChatbot = {
 
   initFooterAwareFloat: function () {
     const chatbot = document.querySelector('.customer-chatbot');
-    const footerLegal = document.querySelector('.footer-legal');
-    if (!chatbot || !footerLegal || chatbot.dataset.footerAwareBound === 'true') {
+    if (!chatbot || chatbot.dataset.footerAwareBound === 'true') {
       return;
     }
 
     chatbot.dataset.footerAwareBound = 'true';
 
     let frame = 0;
-    const gap = 14;
+    const clearance = 14;
+    const maxLift = 132;
+
+    const getCurrentLift = () => {
+      const value = window.getComputedStyle(chatbot).getPropertyValue('--customer-chatbot-footer-lift');
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+    };
 
     const update = () => {
       frame = 0;
-      chatbot.style.setProperty('--customer-chatbot-footer-lift', '0px');
 
-      const chatbotRect = chatbot.getBoundingClientRect();
-      const legalRect = footerLegal.getBoundingClientRect();
-      const isLegalVisible = legalRect.top < window.innerHeight && legalRect.bottom > 0;
-      const needsLift = isLegalVisible && chatbotRect.bottom + gap > legalRect.top;
-      const lift = needsLift ? Math.ceil(chatbotRect.bottom + gap - legalRect.top) : 0;
+      const toggle = chatbot.querySelector('.customer-chatbot-toggle') || chatbot;
+      const toggleRect = toggle.getBoundingClientRect();
+      const currentLift = getCurrentLift();
+      const naturalRect = {
+        top: toggleRect.top + currentLift,
+        right: toggleRect.right,
+        bottom: toggleRect.bottom + currentLift,
+        left: toggleRect.left
+      };
+      const legalTargets = document.querySelectorAll('.footer-legal-links a, .footer-legal-links button');
+      let lift = 0;
 
-      chatbot.style.setProperty('--customer-chatbot-footer-lift', `${Math.max(0, lift)}px`);
+      legalTargets.forEach(target => {
+        const targetRect = target.getBoundingClientRect();
+        if (targetRect.width <= 0 || targetRect.height <= 0 || targetRect.top >= window.innerHeight || targetRect.bottom <= 0) {
+          return;
+        }
+
+        const horizontalOverlap = naturalRect.left - clearance < targetRect.right
+          && naturalRect.right + clearance > targetRect.left;
+        const verticalOverlap = naturalRect.top - clearance < targetRect.bottom
+          && naturalRect.bottom + clearance > targetRect.top;
+        if (!horizontalOverlap || !verticalOverlap) {
+          return;
+        }
+
+        lift = Math.max(lift, Math.ceil(naturalRect.bottom + clearance - targetRect.top));
+      });
+
+      chatbot.style.setProperty('--customer-chatbot-footer-lift', `${Math.min(maxLift, Math.max(0, lift))}px`);
     };
 
     const schedule = () => {
