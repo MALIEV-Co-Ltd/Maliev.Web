@@ -31,76 +31,12 @@ internal static class SiteContent
 
     internal static string ResolveBlogImageUrl(BlogPostContent post)
     {
-        var slug = post.Slug;
-        var category = post.Category.En;
-
-        if (ContainsAny(slug, "cnc", "machining", "drill", "thread", "tapped", "radius", "stock", "dowel", "bearing"))
-        {
-            return ContainsAny(slug, "inspection", "tolerance", "datum", "fit")
-                ? CaliperInspectionImageUrl
-                : PipeMachiningImageUrl;
-        }
-
-        if (ContainsAny(slug, "scan", "reverse", "deviation", "legacy", "replacement"))
-        {
-            return ContainsAny(slug, "comparison", "inspection", "acceptance")
-                ? CaliperInspectionImageUrl
-                : ThreeDimensionalScannerImageUrl;
-        }
-
-        if (ContainsAny(slug, "injection", "mold", "molding", "tooling", "cast", "casting", "silicone", "urethane"))
-        {
-            return ContainsAny(slug, "pilot", "batch", "production")
-                ? FactoryPipeProductionImageUrl
-                : InjectionMoldingLineImageUrl;
-        }
-
-        if (ContainsAny(slug, "sla", "resin", "clear"))
-        {
-            return SlaResinImageUrl;
-        }
-
-        if (ContainsAny(slug, "sls", "mjf", "nylon", "powder"))
-        {
-            return PowderBedNylonImageUrl;
-        }
-
-        if (ContainsAny(slug, "fdm", "tpu", "asa", "petg", "pla", "orientation", "layer", "wall", "insert"))
-        {
-            return ContainsAny(slug, "operator", "support", "finish", "insert")
-                ? ThreeDimensionalPrinterOperatorImageUrl
-                : FdmThermoplasticsImageUrl;
-        }
-
-        if (ContainsAny(slug, "electronics", "enclosure", "robot", "automotive", "fixture", "guard", "bracket", "assembly", "hardware"))
-        {
-            return ContainsAny(slug, "fit", "hardware", "assembly")
-                ? CaliperInspectionImageUrl
-                : DesignPlanningImageUrl;
-        }
-
-        if (ContainsAny(slug, "quote", "cost", "order", "file", "checklist", "delivery", "packaging", "production", "handoff")
-            || ContainsAny(category, "quoting", "ordering", "delivery", "file"))
-        {
-            return FactoryPipeProductionImageUrl;
-        }
-
-        if (ContainsAny(slug, "material", "heat", "chemical", "substitution", "outdoor"))
-        {
-            return EngineeringPolymerReviewImageUrl;
-        }
-
-        if (ContainsAny(slug, "design", "dfm", "draft", "text", "label", "split"))
-        {
-            return DesignPlanningImageUrl;
-        }
-
-        return post.ImageUrl;
+        return BlogImageUrl(post.Slug);
     }
 
-    private static bool ContainsAny(string value, params string[] tokens)
+    private static string BlogImageUrl(string slug)
     {
-        return tokens.Any(token => value.Contains(token, StringComparison.OrdinalIgnoreCase));
+        return $"/images/blog/{slug}.svg";
     }
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
@@ -1817,23 +1753,62 @@ internal static class SiteContent
         string reviewTh,
         params (string En, string Th)[] takeaways)
     {
+        _ = imageUrl;
+
+        var takeawayItems = takeaways.Length > 0
+            ? takeaways
+            :
+            [
+                (summaryEn, summaryTh)
+            ];
+        var seoSummaryEn = summaryEn.Length >= 70
+            ? summaryEn
+            : $"{summaryEn} Use it to reduce quoting delay, DFM risk, and production rework.";
+        var seoSummaryTh = summaryTh.Length >= 45
+            ? summaryTh
+            : $"{summaryTh} ใช้ลดการถามกลับ ความเสี่ยง DFM และงานแก้หลังผลิต";
+        var lowerTitleEn = titleEn.ToLowerInvariant();
+
         return new BlogPostContent(
             slug,
             Text(titleEn, titleTh),
-            Text(summaryEn, summaryTh),
+            Text(seoSummaryEn, seoSummaryTh),
             Text(categoryEn, categoryTh),
-            imageUrl,
+            BlogImageUrl(slug),
             [
+                Section(
+                    "Why this topic matters",
+                    "ทำไมหัวข้อนี้สำคัญ",
+                    $"{seoSummaryEn} In custom manufacturing, this is not only a design preference. It affects process choice, quote confidence, inspection effort, delivery risk, and whether the finished part answers the customer's real engineering question.",
+                    $"{seoSummaryTh} ในงานผลิตเฉพาะแบบ เรื่องนี้ไม่ใช่แค่ความชอบในการออกแบบ แต่มีผลต่อการเลือกกระบวนการ ความมั่นใจของราคา งานตรวจ ความเสี่ยงส่งมอบ และชิ้นงานสุดท้ายจะตอบโจทย์วิศวกรรมจริงหรือไม่",
+                    takeawayItems),
                 Section(
                     "What to decide before upload",
                     "สิ่งที่ควรตัดสินใจก่อนอัปโหลด",
-                    decisionEn,
-                    decisionTh),
+                    $"{decisionEn} Add the decision to the quote notes or drawing instead of leaving it hidden in the CAD model. A short note about use case, fit, load, finish, environment, quantity, and what failure you are trying to prevent helps the review focus on the right details.",
+                    $"{decisionTh} ควรใส่การตัดสินใจนี้ไว้ในหมายเหตุใบเสนอราคาหรือ Drawing แทนที่จะปล่อยให้ซ่อนอยู่ในโมเดล CAD หมายเหตุสั้นๆ เรื่องการใช้งาน การประกอบ แรง ผิว สภาพแวดล้อม จำนวน และความเสียหายที่ต้องป้องกัน จะช่วยให้การตรวจโฟกัสถูกจุด",
+                    ("Name the feature, face, hole, surface, or material behavior that matters most.", "ระบุ Feature, ผิว, รู, พื้นผิว หรือพฤติกรรมวัสดุที่สำคัญที่สุด"),
+                    ("Separate must-have requirements from preferences that can change during DFM review.", "แยกข้อกำหนดที่ห้ามเปลี่ยนออกจากความต้องการที่ปรับได้ระหว่างตรวจ DFM")),
                 Section(
                     "How the manufacturing review uses it",
                     "การตรวจผลิตใช้ข้อมูลนี้อย่างไร",
-                    reviewEn,
-                    reviewTh)
+                    $"{reviewEn} During review, MALIEV turns the requirement into practical manufacturing checks: process route, material suitability, setup access, tolerance risk, finishing effort, inspection points, and whether a prototype or small pilot batch should come before a repeat order.",
+                    $"{reviewTh} ระหว่างตรวจ MALIEV จะแปลงข้อกำหนดนี้เป็นจุดตรวจงานผลิตจริง เช่น เส้นทางกระบวนการ ความเหมาะสมของวัสดุ ทางเข้าการจับงาน ความเสี่ยง tolerance เวลาเก็บผิว จุดตรวจรับ และควรทำต้นแบบหรือล็อตทดลองก่อนสั่งซ้ำหรือไม่",
+                    ("The same geometry may need different processes when the acceptance decision changes.", "Geometry เดียวกันอาจต้องใช้กระบวนการต่างกันเมื่อเกณฑ์รับงานเปลี่ยน"),
+                    ("Review should reduce ambiguity before production starts, not after the part arrives.", "การตรวจควรลดความกำกวมก่อนผลิต ไม่ใช่หลังชิ้นงานส่งถึงมือ")),
+                Section(
+                    "A practical example before ordering",
+                    "ตัวอย่างเชิงปฏิบัติก่อนสั่งงาน",
+                    $"For {lowerTitleEn}, two parts can look similar on screen but need different routes in production. A visual sample may prioritize surface and lead time. A fit-check part may prioritize holes, datums, and mating faces. A production spare may prioritize repeatability, packaging, revision control, and inspection evidence. State which decision this part must support before comparing prices.",
+                    $"สำหรับ {titleTh} ชิ้นงานสองแบบอาจดูคล้ายกันบนหน้าจอ แต่ต้องใช้เส้นทางผลิตต่างกัน ตัวอย่างโชว์งานอาจให้ความสำคัญกับผิวและเวลา ชิ้นทดสอบประกอบอาจเน้นรู Datum และผิวประกบ ส่วนอะไหล่ใช้งานซ้ำอาจเน้นความซ้ำได้ บรรจุภัณฑ์ Revision และหลักฐานตรวจรับ ควรระบุว่าชิ้นงานนี้ต้องช่วยตัดสินใจเรื่องใดก่อนเทียบราคา",
+                    ("Use photos of mating parts or failed samples when CAD alone does not explain the risk.", "ใช้รูปชิ้นส่วนประกบหรือตัวอย่างเสียเมื่อ CAD อย่างเดียวอธิบายความเสี่ยงไม่พอ"),
+                    ("If the part has a go/no-go dimension, call it out before the quote is accepted.", "ถ้าชิ้นงานมีมิติ Go/No-go ให้ระบุก่อนอนุมัติใบเสนอราคา")),
+                Section(
+                    "Order-ready checklist",
+                    "เช็กลิสต์ก่อนพร้อมสั่ง",
+                    "Before approving the quote, confirm the CAD revision, drawing or notes, material target, quantity, deadline, visible surfaces, critical dimensions, hardware assumptions, and acceptance criteria. This keeps the article's guidance connected to the real order instead of becoming general advice.",
+                    "ก่อนอนุมัติใบเสนอราคา ควรยืนยัน Revision ของ CAD, Drawing หรือหมายเหตุ, วัสดุเป้าหมาย, จำนวน, กำหนดส่ง, ผิวโชว์, มิติสำคัญ, สมมติฐาน Hardware และเกณฑ์รับงาน เพื่อให้คำแนะนำในบทความเชื่อมกับคำสั่งผลิตจริง ไม่ใช่เป็นคำแนะนำทั่วไป",
+                    takeawayItems)
             ],
             takeaways.Select(item => Text(item.En, item.Th)).ToArray());
     }
