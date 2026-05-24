@@ -7315,6 +7315,30 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     padding-top: clamp(78px, 11vw, 108px);
   }
 
+  .final-cta {
+    justify-items: center;
+    gap: 26px;
+    text-align: center;
+  }
+
+  .final-cta-copy {
+    order: 2;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+  }
+
+  .final-cta-copy .lede {
+    max-width: 58ch;
+    margin-inline: auto;
+  }
+
+  .final-cta > .final-dropzone {
+    order: 1;
+    justify-self: center;
+    width: min(100%, 560px);
+  }
+
   .home-services-tabs {
     justify-content: flex-start;
   }

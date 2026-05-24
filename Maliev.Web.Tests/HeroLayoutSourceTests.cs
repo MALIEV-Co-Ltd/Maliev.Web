@@ -482,6 +482,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("Build. Test. Produce.", source);
         Assert.DoesNotContain("Customer-facing quoting and commerce in one path", source);
         Assert.DoesNotContain("<span class=\"button primary\">@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")</span>", source);
+        Assert.Contains("class=\"final-cta-copy\"", source);
+        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta\s*\{[^}]*justify-items:\s*center;[^}]*gap:\s*26px;[^}]*text-align:\s*center;", styles);
+        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta-copy\s*\{[^}]*order:\s*2;[^}]*display:\s*grid;[^}]*justify-items:\s*center;", styles);
+        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta-copy \.lede\s*\{[^}]*max-width:\s*58ch;", styles);
+        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta > \.final-dropzone\s*\{[^}]*order:\s*1;[^}]*justify-self:\s*center;[^}]*width:\s*min\(100%, 560px\);", styles);
         Assert.DoesNotContain("final-dropzone-arrow", source);
         Assert.DoesNotContain(".final-dropzone-arrow", styles);
         Assert.DoesNotContain(".final-dropzone-icon", styles);
