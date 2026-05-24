@@ -1775,6 +1775,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("class=\"@ContactStatusClass\" role=\"@ContactStatusRole\"", source);
         Assert.Contains("form-status--error", source);
         Assert.Contains("We could not send the message right now.", source);
+        Assert.Contains("aria-busy=\"@_submittingContact\"", source);
+        Assert.Contains("@ContactSubmitLabel", source);
+        Assert.Contains("await InvokeAsync(StateHasChanged);", source);
+        Assert.Contains(".button:disabled,", styles);
+        Assert.Contains(".button-busy-indicator", styles);
         Assert.DoesNotContain("_contactStatus = ex.Message;", source);
         Assert.DoesNotContain("@page \"/account/orders\"", source);
         Assert.DoesNotContain("@page \"/account/preferences\"", source);

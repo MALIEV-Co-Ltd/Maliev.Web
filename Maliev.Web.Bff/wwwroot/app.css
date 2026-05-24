@@ -478,6 +478,33 @@ main {
   background: var(--cta-hover);
 }
 
+.button:disabled,
+.button[aria-disabled="true"] {
+  opacity: .62;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.button.primary:disabled {
+  background: color-mix(in srgb, var(--cta-bg) 72%, var(--paper-3));
+}
+
+.button-busy-indicator {
+  width: 1em;
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, currentColor 34%, transparent);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: button-busy-spin .8s linear infinite;
+}
+
+@keyframes button-busy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .nav-quote-link::after {
   content: "→";
   font-size: .95em;

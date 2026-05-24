@@ -635,7 +635,7 @@ else if (Path == "contact")
                 </div>
             </article>
         </div>
-        <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form">
+        <EditForm Model="_contact" OnValidSubmit="SubmitContactAsync" FormName="contact-form" class="contact-form" aria-busy="@_submittingContact">
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="form-grid">
@@ -687,7 +687,13 @@ else if (Path == "contact")
             {
                 <p class="@ContactStatusClass" role="@ContactStatusRole">@_contactStatus</p>
             }
-            <button class="button primary" type="submit" disabled="@_submittingContact">@Text("Send message", "ส่งข้อความ")</button>
+            <button class="button primary contact-submit-button" type="submit" disabled="@_submittingContact" aria-live="polite">
+                @if (_submittingContact)
+                {
+                    <span class="button-busy-indicator" aria-hidden="true"></span>
+                }
+                <span>@ContactSubmitLabel</span>
+            </button>
         </EditForm>
     </section>
     @if (_showContactMapDialog)
@@ -877,6 +883,10 @@ else
     };
 
     private string ContactStatusRole => _contactStatusKind == ContactFormStatus.Error ? "alert" : "status";
+
+    private string ContactSubmitLabel => _submittingContact
+        ? Text("Sending...", "กำลังส่ง...")
+        : Text("Send message", "ส่งข้อความ");
 
     private string Body => Path switch
     {
@@ -1647,8 +1657,14 @@ else
 
     private async Task SubmitContactAsync()
     {
+        if (_submittingContact)
+        {
+            return;
+        }
+
         _submittingContact = true;
         ClearContactStatus();
+        await InvokeAsync(StateHasChanged);
         try
         {
             var response = await Api.SubmitContactMessageAsync(_contact);

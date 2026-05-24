@@ -49,20 +49,45 @@ internal sealed class ContactMessageService(IContactServiceClient contactClient,
             return requestedCountryId;
         }
 
-        using var response = await countryClient.GetCountryByIso2Async("TH", cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response;
+        try
         {
-            throw new BackendUnavailableException("CountryService", $"CountryService returned {(int)response.StatusCode} while resolving the default contact country.");
+            response = await countryClient.GetCountryByIso2Async("TH", cancellationToken);
+        }
+        catch (Exception ex) when (IsUnavailableFailure(ex, cancellationToken))
+        {
+            throw new BackendUnavailableException("CountryService", "CountryService did not respond while resolving the default contact country.", ex);
         }
 
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-        if (TryGetGuid(document.RootElement, "id", "Id") is { } countryId)
+        using (response)
         {
-            return countryId;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new BackendUnavailableException("CountryService", $"CountryService returned {(int)response.StatusCode} while resolving the default contact country.");
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            if (TryGetGuid(document.RootElement, "id", "Id") is { } countryId)
+            {
+                return countryId;
+            }
+
+            throw new BackendUnavailableException("CountryService", "CountryService returned a country response without an id.");
+        }
+    }
+
+    private static bool IsUnavailableFailure(Exception exception, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
         }
 
-        throw new BackendUnavailableException("CountryService", "CountryService returned a country response without an id.");
+        return exception is HttpRequestException
+            || exception is TimeoutException
+            || exception is TaskCanceledException
+            || exception.GetType().FullName == "Polly.Timeout.TimeoutRejectedException";
     }
 
     private static ContactServiceFileRequest MapAttachment(ContactAttachmentDto file)

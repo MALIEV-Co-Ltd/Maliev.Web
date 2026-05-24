@@ -123,6 +123,28 @@ public sealed class ContactMessageBoundaryTests
         Assert.Contains("did not respond", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Verifies CountryService resolution failures are mapped to the Web BFF backend-unavailable contract.
+    /// </summary>
+    [Fact]
+    public async Task SubmitAsync_CountryServiceUnavailable_ThrowsBackendUnavailable()
+    {
+        var service = new ContactMessageService(
+            new CapturingContactServiceClient(),
+            new ThrowingCountryServiceClient(new HttpRequestException("No such host is known.")));
+
+        var exception = await Assert.ThrowsAsync<BackendUnavailableException>(() => service.SubmitAsync(new ContactMessageRequest
+        {
+            FullName = "Website Customer",
+            Email = "customer@example.com",
+            Subject = "Manufacturing question",
+            Message = "Can MALIEV review this project?"
+        }, CancellationToken.None));
+
+        Assert.Equal("CountryService", exception.BackendName);
+        Assert.Contains("did not respond", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class CapturingContactServiceClient : IContactServiceClient
     {
         public ContactServiceCreateRequest? Request { get; private set; }
@@ -143,6 +165,15 @@ public sealed class ContactMessageBoundaryTests
             {
                 Content = JsonContent.Create(new { id = countryId, iso2 = "TH", isActive = true })
             });
+        }
+    }
+
+    private sealed class ThrowingCountryServiceClient(Exception exception) : ICountryServiceClient
+    {
+        public Task<HttpResponseMessage> GetCountryByIso2Async(string iso2, CancellationToken cancellationToken)
+        {
+            Assert.Equal("TH", iso2);
+            return Task.FromException<HttpResponseMessage>(exception);
         }
     }
 
