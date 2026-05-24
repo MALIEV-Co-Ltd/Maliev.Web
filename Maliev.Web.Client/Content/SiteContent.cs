@@ -36,7 +36,7 @@ internal static class SiteContent
 
     private static string BlogImageUrl(string slug)
     {
-        return $"/images/blog/{slug}.svg";
+        return $"/images/blog/{slug}.jpg";
     }
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =
