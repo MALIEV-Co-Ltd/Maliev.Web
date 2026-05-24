@@ -2114,6 +2114,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".blog-detail .detail-sidebar li", styles);
         Assert.Contains("list-style: none;", styles);
         Assert.Contains("grid-template-columns: 10px minmax(0, 1fr);", styles);
+        Assert.Contains("BlogDetailSectionClass", source);
+        Assert.Contains("IsBlogChecklistSection", source);
+        Assert.Contains("article-checklist", source);
+        Assert.Contains(".detail-section--checklist", styles);
+        Assert.Contains(".article-checklist", styles);
+        Assert.Contains("content: \"✓\";", styles);
         Assert.DoesNotContain("var path when path == \"blog\" || path.StartsWith(\"blog/\"", source);
         Assert.DoesNotContain("var path when path == \"case-studies\" || path.StartsWith(\"case-studies/\"", source);
 

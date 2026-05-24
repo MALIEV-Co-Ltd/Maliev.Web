@@ -3896,6 +3896,64 @@ html[data-theme="dark"] .workflow-step {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 16%, transparent);
 }
 
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist {
+  gap: 18px;
+  padding: clamp(20px, 3vw, 28px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--blue-soft) 58%, var(--paper)) 0%, color-mix(in srgb, var(--paper-2) 72%, var(--paper)) 100%);
+  border: 1px solid color-mix(in srgb, var(--blue) 22%, var(--rule));
+  border-radius: var(--radius-lg);
+  box-shadow: rgba(10, 114, 239, .10) 0 22px 54px -36px;
+}
+
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist h2 {
+  max-width: 620px;
+}
+
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist p {
+  max-width: 720px;
+  color: var(--ink-2);
+}
+
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist ul.article-checklist {
+  gap: 12px;
+  margin-top: 0;
+}
+
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist .article-checklist li {
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--paper) 92%, var(--blue-soft));
+  border-color: color-mix(in srgb, var(--blue) 18%, var(--rule));
+  box-shadow: rgba(17, 24, 39, .08) 0 14px 28px -24px;
+}
+
+.article-detail-layout.blog-detail .content-stack .detail-section--checklist .article-checklist li::before {
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: .08em;
+  border-radius: 50%;
+  color: var(--blue-on);
+  background: var(--blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 14%, transparent);
+  font-size: .84rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detail-section--checklist {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--blue-soft) 44%, var(--paper)) 0%, color-mix(in srgb, var(--paper-2) 88%, var(--paper)) 100%);
+  box-shadow: rgba(0, 0, 0, .28) 0 24px 58px -36px;
+}
+
+html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detail-section--checklist .article-checklist li {
+  background: color-mix(in srgb, var(--paper-2) 88%, var(--blue-soft));
+  box-shadow: rgba(0, 0, 0, .26) 0 14px 34px -26px;
+}
+
 .blog-detail .detail-sidebar ul {
   gap: 8px;
 }

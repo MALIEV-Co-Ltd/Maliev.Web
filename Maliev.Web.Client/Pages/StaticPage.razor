@@ -518,7 +518,8 @@ else if (CurrentBlogPost is { } blogPost)
             <div class="content-stack">
                 @foreach (var item in blogPost.Sections)
                 {
-                    <article class="detail-section">
+                    var isChecklistSection = IsBlogChecklistSection(item);
+                    <article class="@BlogDetailSectionClass(isChecklistSection)">
                         <h2>@item.Title.For(Preferences.Culture)</h2>
                         <p>@item.Body.For(Preferences.Culture)</p>
                         @if (item.Image is { } image)
@@ -530,7 +531,7 @@ else if (CurrentBlogPost is { } blogPost)
                         }
                         @if (item.Items.Count > 0)
                         {
-                            <ul>
+                            <ul class="@(isChecklistSection ? "article-checklist" : null)">
                                 @foreach (var point in item.Items)
                                 {
                                     <li>@point.For(Preferences.Culture)</li>
@@ -1897,6 +1898,17 @@ else
     }
 
     private bool IsThaiCulture => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);
+
+    private static string BlogDetailSectionClass(bool isChecklistSection)
+    {
+        return isChecklistSection ? "detail-section detail-section--checklist" : "detail-section";
+    }
+
+    private static bool IsBlogChecklistSection(ArticleSectionContent section)
+    {
+        return section.Title.En.Contains("checklist", StringComparison.OrdinalIgnoreCase)
+            || section.Title.Th.Contains("เช็กลิสต์", StringComparison.OrdinalIgnoreCase);
+    }
 
     private string Text(string en, string th)
     {
