@@ -333,26 +333,26 @@
         new(
             SiteContent.Text("Aerospace", "อากาศยาน"),
             SiteContent.Text("Lightweight prototypes, inspection aids, and production support parts for flight-adjacent engineering work.", "ต้นแบบน้ำหนักเบา อุปกรณ์ช่วยตรวจ และชิ้นส่วนสนับสนุนการผลิตสำหรับงานวิศวกรรมใกล้เคียงอากาศยาน"),
-            ServiceImage("cnc-machining"),
-            SiteContent.Text("Precision machined component prepared for aerospace-adjacent engineering review", "ชิ้นงานกัดละเอียดที่เตรียมสำหรับการตรวจทบทวนงานวิศวกรรมใกล้เคียงอากาศยาน"),
+            "/images/blog/articles/instant-part-pricing-02.jpg",
+            SiteContent.Text("Aircraft program hardware used as a visual reference for aerospace-adjacent engineering support", "ฮาร์ดแวร์ในโครงการอากาศยานที่ใช้เป็นภาพอ้างอิงสำหรับงานสนับสนุนวิศวกรรมใกล้เคียงอากาศยาน"),
             "/services/cnc-machining"),
         new(
             SiteContent.Text("Automotive", "ยานยนต์"),
             SiteContent.Text("Rapid fixtures, jig components, and validation samples for vehicle and mobility programs.", "ฟิกซ์เจอร์ จิ๊ก และชิ้นงานตัวอย่างสำหรับการตรวจยืนยันในโครงการยานยนต์และโมบิลิตี้"),
-            ServiceImage("deviation-analysis"),
-            SiteContent.Text("Inspection caliper checking an automotive jig and machined validation sample", "การตรวจจิ๊กยานยนต์และตัวอย่างชิ้นงานกัดด้วยเวอร์เนียร์"),
+            "/images/blog/surface-text-labels.jpg",
+            SiteContent.Text("Vehicle body and trim surface used as a visual reference for automotive prototype validation", "ตัวถังและผิวตกแต่งรถยนต์ที่ใช้เป็นภาพอ้างอิงสำหรับการตรวจยืนยันต้นแบบยานยนต์"),
             "/services/deviation-analysis"),
         new(
             SiteContent.Text("Consumer electronics", "อิเล็กทรอนิกส์ผู้บริโภค"),
             SiteContent.Text("Enclosures, inserts, fit-check models, and cosmetic prototypes for product teams.", "กล่อง อินเสิร์ต โมเดลเช็กการประกอบ และต้นแบบผิวภายนอกสำหรับทีมพัฒนาผลิตภัณฑ์"),
-            ServiceImage("3d-design"),
-            SiteContent.Text("Consumer electronics enclosure design and CAD review for a manufacturable prototype", "การออกแบบกล่องอิเล็กทรอนิกส์และตรวจ CAD สำหรับต้นแบบที่ผลิตได้จริง"),
+            "/images/blog/articles/enclosure-snap-fits-01.jpg",
+            SiteContent.Text("Clear consumer electronics enclosure prototype with visible internal fit and fastening details", "ต้นแบบกล่องอิเล็กทรอนิกส์ใสที่เห็นรายละเอียดการประกอบและจุดยึดภายใน"),
             "/services/3d-design"),
         new(
             SiteContent.Text("Medical", "การแพทย์"),
             SiteContent.Text("Device housings, ergonomic prototypes, and cleanable workshop-built components for health-product development.", "ตัวเรือนอุปกรณ์ ต้นแบบด้านสรีรศาสตร์ และชิ้นส่วนเวิร์กช็อปที่ทำความสะอาดง่ายสำหรับการพัฒนาผลิตภัณฑ์สุขภาพ"),
-            ServiceImage("rapid-prototyping"),
-            SiteContent.Text("Prototype device housing prepared for medical product development review", "ตัวเรือนอุปกรณ์ต้นแบบที่เตรียมสำหรับการตรวจทบทวนผลิตภัณฑ์สุขภาพ"),
+            "/images/blog/instant-part-pricing.jpg",
+            SiteContent.Text("Cleanroom product review scene representing medical device prototype handling and inspection", "ภาพการตรวจทบทวนผลิตภัณฑ์ในห้องสะอาดที่สื่อถึงการจัดการและตรวจต้นแบบอุปกรณ์การแพทย์"),
             "/services/rapid-prototyping")
     ];
 
@@ -690,11 +690,6 @@
         }
 
         return items;
-    }
-
-    private static string ServiceImage(string slug)
-    {
-        return SiteContent.Services.First(service => string.Equals(service.Slug, slug, StringComparison.OrdinalIgnoreCase)).ImageUrl;
     }
 
     public override void Dispose()
