@@ -320,8 +320,8 @@ internal static class SiteContent
                 Section(
                     "Use comparison to narrow the quote, not to replace review",
                     "ใช้การเปรียบเทียบเพื่อกรองทางเลือก ไม่ใช่แทนการตรวจ",
-                    "Material tables help narrow the conversation, but final selection still depends on geometry, wall thickness, print orientation, quantity, finish, and acceptance criteria. For uncertain parts, order one or two test pieces before committing to a production batch.",
-                    "ตารางวัสดุช่วยกรองทางเลือก แต่การเลือกสุดท้ายยังขึ้นกับ Geometry ความหนาผนัง ทิศทางพิมพ์ จำนวน ผิวงาน และเกณฑ์รับงาน สำหรับชิ้นงานที่ยังไม่แน่ใจ ควรสั่งทดสอบหนึ่งหรือสองชิ้นก่อนสั่งล็อตผลิต")
+                    "Material tables help narrow the conversation, but final selection still depends on geometry, wall thickness, print orientation, quantity, finish, and acceptance criteria. When fit and appearance both matter, compare the material against the real mating part and the real handling condition, not only a data-sheet number. For uncertain parts, order one or two test pieces before committing to a production batch.",
+                    "ตารางวัสดุช่วยกรองทางเลือก แต่การเลือกสุดท้ายยังขึ้นกับ Geometry ความหนาผนัง ทิศทางพิมพ์ จำนวน ผิวงาน และเกณฑ์รับงาน เมื่อทั้งการประกอบและหน้าตาสำคัญ ให้เทียบวัสดุกับชิ้นส่วนประกบจริงและสภาพการหยิบจับจริง ไม่ใช่ดูแค่ตัวเลขใน Datasheet สำหรับชิ้นงานที่ยังไม่แน่ใจ ควรสั่งทดสอบหนึ่งหรือสองชิ้นก่อนสั่งล็อตผลิต")
             ],
             [
                 Text("Choose from use case, heat, chemicals, and visible surfaces.", "เลือกจากการใช้งาน ความร้อน สารเคมี และผิวโชว์"),
@@ -352,15 +352,15 @@ internal static class SiteContent
                 Section(
                     "Customers can explore trade-offs before committing",
                     "ลูกค้าสำรวจข้อแลกเปลี่ยนก่อนยืนยันงานได้",
-                    "Changing quantity, process, material, finish, and delivery expectation can expose the real cost driver. Sometimes a small CAD change reduces production risk more than changing material. Sometimes the same geometry needs two routes: a quick prototype and a controlled final batch.",
-                    "การเปลี่ยนจำนวน กระบวนการ วัสดุ ผิวงาน และระยะส่งมอบ ช่วยให้เห็นตัวผลักดันต้นทุนจริง บางครั้งการแก้ CAD เล็กน้อยลดความเสี่ยงผลิตได้มากกว่าการเปลี่ยนวัสดุ บางครั้ง Geometry เดียวต้องใช้สองเส้นทาง คือ ต้นแบบเร็วและล็อตสุดท้ายที่ควบคุมมากขึ้น",
+                    "Changing quantity, process, material, finish, and delivery expectation can expose the real cost driver. Sometimes a small CAD change reduces production risk more than changing material. Sometimes the same geometry needs two routes: a quick prototype and a controlled final batch. Treat those comparisons as a design conversation, because the cheapest option is not useful if it misses the fit, finish, or deadline that made the order necessary.",
+                    "การเปลี่ยนจำนวน กระบวนการ วัสดุ ผิวงาน และระยะส่งมอบ ช่วยให้เห็นตัวผลักดันต้นทุนจริง บางครั้งการแก้ CAD เล็กน้อยลดความเสี่ยงผลิตได้มากกว่าการเปลี่ยนวัสดุ บางครั้ง Geometry เดียวต้องใช้สองเส้นทาง คือ ต้นแบบเร็วและล็อตสุดท้ายที่ควบคุมมากขึ้น ควรมองการเปรียบเทียบเหล่านี้เป็นบทสนทนาด้านแบบ เพราะตัวเลือกที่ถูกที่สุดไม่มีประโยชน์ถ้าพลาดการประกอบ ผิวงาน หรือกำหนดส่งที่ทำให้ต้องสั่งผลิต",
                     ("Use the workspace to compare, not to guess through separate emails.", "ใช้พื้นที่ราคาเพื่อเปรียบเทียบ แทนการเดาผ่านอีเมลแยกกัน"),
                     ("Keep notes with the quote so review context is not lost.", "เก็บหมายเหตุไว้กับใบเสนอราคาเพื่อไม่ให้บริบทการตรวจหาย")),
                 Section(
                     "The accepted quote becomes production context",
                     "ใบเสนอราคาที่อนุมัติกลายเป็นบริบทผลิต",
-                    "Once a customer accepts a quote, the selected files, material, quantity, DFM notes, lead time, and documents should continue into ordering and tracking. That continuity is what prevents vendor handoffs from becoming repeated clarification work.",
-                    "เมื่อลูกค้าอนุมัติใบเสนอราคา ไฟล์ วัสดุ จำนวน หมายเหตุ DFM ระยะเวลา และเอกสารที่เลือกควรต่อเนื่องไปถึงการสั่งผลิตและติดตามงาน ความต่อเนื่องนี้ช่วยไม่ให้การส่งต่องานกลายเป็นการถามข้อมูลซ้ำ")
+                    "Once a customer accepts a quote, the selected files, material, quantity, DFM notes, lead time, and documents should continue into ordering and tracking. That continuity is what prevents vendor handoffs from becoming repeated clarification work. A good quote record also protects repeat orders: the next buyer can see which revision was approved, which warning was resolved, and what evidence was expected at delivery.",
+                    "เมื่อลูกค้าอนุมัติใบเสนอราคา ไฟล์ วัสดุ จำนวน หมายเหตุ DFM ระยะเวลา และเอกสารที่เลือกควรต่อเนื่องไปถึงการสั่งผลิตและติดตามงาน ความต่อเนื่องนี้ช่วยไม่ให้การส่งต่องานกลายเป็นการถามข้อมูลซ้ำ บันทึกใบเสนอราคาที่ดียังช่วยงานสั่งซ้ำ เพราะผู้สั่งครั้งถัดไปเห็นได้ว่า Revision ใดถูกอนุมัติ คำเตือนใดถูกแก้ และต้องการหลักฐานอะไรตอนส่งมอบ")
             ],
             [
                 Text("Pricing reacts to process, material, quantity, finish, and lead time.", "ราคาตอบสนองต่อกระบวนการ วัสดุ จำนวน ผิว และระยะเวลา"),
@@ -1767,7 +1767,7 @@ internal static class SiteContent
         var seoSummaryTh = summaryTh.Length >= 45
             ? summaryTh
             : $"{summaryTh} ใช้ลดการถามกลับ ความเสี่ยง DFM และงานแก้หลังผลิต";
-        var lowerTitleEn = titleEn.ToLowerInvariant();
+        var profile = ResolvePracticalNoteProfile(slug, categoryEn);
 
         return new BlogPostContent(
             slug,
@@ -1777,41 +1777,247 @@ internal static class SiteContent
             BlogImageUrl(slug),
             [
                 Section(
-                    "Why this topic matters",
-                    "ทำไมหัวข้อนี้สำคัญ",
-                    $"{seoSummaryEn} In custom manufacturing, this is not only a design preference. It affects process choice, quote confidence, inspection effort, delivery risk, and whether the finished part answers the customer's real engineering question.",
-                    $"{seoSummaryTh} ในงานผลิตเฉพาะแบบ เรื่องนี้ไม่ใช่แค่ความชอบในการออกแบบ แต่มีผลต่อการเลือกกระบวนการ ความมั่นใจของราคา งานตรวจ ความเสี่ยงส่งมอบ และชิ้นงานสุดท้ายจะตอบโจทย์วิศวกรรมจริงหรือไม่",
+                    profile.ContextTitleEn,
+                    profile.ContextTitleTh,
+                    $"{seoSummaryEn} {profile.ContextBodyEn} For {titleEn.ToLowerInvariant()}, the useful question is not whether the model looks finished on screen; it is what the part must prove after it is produced, handled, inspected, and installed.",
+                    $"{seoSummaryTh} {profile.ContextBodyTh} สำหรับ {titleTh} คำถามที่มีประโยชน์ไม่ใช่แค่โมเดลดูเสร็จบนหน้าจอหรือไม่ แต่คือชิ้นงานต้องพิสูจน์อะไรหลังผลิต จับ ตรวจ และนำไปประกอบจริง",
                     takeawayItems),
                 Section(
-                    "What to decide before upload",
-                    "สิ่งที่ควรตัดสินใจก่อนอัปโหลด",
-                    $"{decisionEn} Add the decision to the quote notes or drawing instead of leaving it hidden in the CAD model. A short note about use case, fit, load, finish, environment, quantity, and what failure you are trying to prevent helps the review focus on the right details.",
-                    $"{decisionTh} ควรใส่การตัดสินใจนี้ไว้ในหมายเหตุใบเสนอราคาหรือ Drawing แทนที่จะปล่อยให้ซ่อนอยู่ในโมเดล CAD หมายเหตุสั้นๆ เรื่องการใช้งาน การประกอบ แรง ผิว สภาพแวดล้อม จำนวน และความเสียหายที่ต้องป้องกัน จะช่วยให้การตรวจโฟกัสถูกจุด",
-                    ("Name the feature, face, hole, surface, or material behavior that matters most.", "ระบุ Feature, ผิว, รู, พื้นผิว หรือพฤติกรรมวัสดุที่สำคัญที่สุด"),
-                    ("Separate must-have requirements from preferences that can change during DFM review.", "แยกข้อกำหนดที่ห้ามเปลี่ยนออกจากความต้องการที่ปรับได้ระหว่างตรวจ DFM")),
+                    profile.DecisionTitleEn,
+                    profile.DecisionTitleTh,
+                    $"{decisionEn} {profile.DecisionBodyEn} Put the decision in the quote notes, drawing, or acceptance criteria so the reviewer can separate must-have requirements from preferences that can change during DFM review.",
+                    $"{decisionTh} {profile.DecisionBodyTh} ใส่การตัดสินใจนี้ไว้ในหมายเหตุใบเสนอราคา Drawing หรือเกณฑ์รับงาน เพื่อให้ผู้ตรวจแยกข้อกำหนดที่ห้ามเปลี่ยนออกจากความต้องการที่ปรับได้ระหว่างตรวจ DFM",
+                    ("Name the feature, face, hole, surface, material behavior, or assembly condition that decides success.", "ระบุ Feature, ผิว, รู, พฤติกรรมวัสดุ หรือสภาพประกอบที่ใช้ตัดสินความสำเร็จ"),
+                    ("Include quantity, deadline, finish expectation, and use environment before comparing prices.", "ใส่จำนวน กำหนดส่ง ผิวที่คาดหวัง และสภาพใช้งานก่อนเทียบราคา")),
                 Section(
-                    "How the manufacturing review uses it",
-                    "การตรวจผลิตใช้ข้อมูลนี้อย่างไร",
-                    $"{reviewEn} During review, MALIEV turns the requirement into practical manufacturing checks: process route, material suitability, setup access, tolerance risk, finishing effort, inspection points, and whether a prototype or small pilot batch should come before a repeat order.",
-                    $"{reviewTh} ระหว่างตรวจ MALIEV จะแปลงข้อกำหนดนี้เป็นจุดตรวจงานผลิตจริง เช่น เส้นทางกระบวนการ ความเหมาะสมของวัสดุ ทางเข้าการจับงาน ความเสี่ยง tolerance เวลาเก็บผิว จุดตรวจรับ และควรทำต้นแบบหรือล็อตทดลองก่อนสั่งซ้ำหรือไม่",
+                    profile.ReviewTitleEn,
+                    profile.ReviewTitleTh,
+                    $"{reviewEn} {profile.ReviewBodyEn} The review turns the requirement into practical checks for process route, material suitability, setup access, tolerance risk, finishing effort, inspection points, and whether a prototype or pilot batch should come before a repeat order.",
+                    $"{reviewTh} {profile.ReviewBodyTh} การตรวจจะแปลงข้อกำหนดเป็นจุดตรวจจริง เช่น เส้นทางกระบวนการ ความเหมาะสมของวัสดุ ทางเข้าการจับงาน ความเสี่ยง tolerance เวลาเก็บผิว จุดตรวจรับ และควรทำต้นแบบหรือล็อตทดลองก่อนสั่งซ้ำหรือไม่",
                     ("The same geometry may need different processes when the acceptance decision changes.", "Geometry เดียวกันอาจต้องใช้กระบวนการต่างกันเมื่อเกณฑ์รับงานเปลี่ยน"),
                     ("Review should reduce ambiguity before production starts, not after the part arrives.", "การตรวจควรลดความกำกวมก่อนผลิต ไม่ใช่หลังชิ้นงานส่งถึงมือ")),
                 Section(
-                    "A practical example before ordering",
-                    "ตัวอย่างเชิงปฏิบัติก่อนสั่งงาน",
-                    $"For {lowerTitleEn}, two parts can look similar on screen but need different routes in production. A visual sample may prioritize surface and lead time. A fit-check part may prioritize holes, datums, and mating faces. A production spare may prioritize repeatability, packaging, revision control, and inspection evidence. State which decision this part must support before comparing prices.",
-                    $"สำหรับ {titleTh} ชิ้นงานสองแบบอาจดูคล้ายกันบนหน้าจอ แต่ต้องใช้เส้นทางผลิตต่างกัน ตัวอย่างโชว์งานอาจให้ความสำคัญกับผิวและเวลา ชิ้นทดสอบประกอบอาจเน้นรู Datum และผิวประกบ ส่วนอะไหล่ใช้งานซ้ำอาจเน้นความซ้ำได้ บรรจุภัณฑ์ Revision และหลักฐานตรวจรับ ควรระบุว่าชิ้นงานนี้ต้องช่วยตัดสินใจเรื่องใดก่อนเทียบราคา",
+                    profile.ExampleTitleEn,
+                    profile.ExampleTitleTh,
+                    $"{profile.ExampleBodyEn} A visual sample may prioritize surface and lead time. A fit-check part may prioritize holes, datums, and mating faces. A production spare may prioritize repeatability, packaging, revision control, and inspection evidence. State which decision {titleEn.ToLowerInvariant()} must support before comparing prices.",
+                    $"{profile.ExampleBodyTh} ตัวอย่างโชว์งานอาจให้ความสำคัญกับผิวและเวลา ชิ้นทดสอบประกอบอาจเน้นรู Datum และผิวประกบ ส่วนอะไหล่ใช้งานซ้ำอาจเน้นความซ้ำได้ บรรจุภัณฑ์ Revision และหลักฐานตรวจรับ ควรระบุว่า {titleTh} ต้องช่วยตัดสินใจเรื่องใดก่อนเทียบราคา",
                     ("Use photos of mating parts or failed samples when CAD alone does not explain the risk.", "ใช้รูปชิ้นส่วนประกบหรือตัวอย่างเสียเมื่อ CAD อย่างเดียวอธิบายความเสี่ยงไม่พอ"),
                     ("If the part has a go/no-go dimension, call it out before the quote is accepted.", "ถ้าชิ้นงานมีมิติ Go/No-go ให้ระบุก่อนอนุมัติใบเสนอราคา")),
                 Section(
-                    "Order-ready checklist",
-                    "เช็กลิสต์ก่อนพร้อมสั่ง",
-                    "Before approving the quote, confirm the CAD revision, drawing or notes, material target, quantity, deadline, visible surfaces, critical dimensions, hardware assumptions, and acceptance criteria. This keeps the article's guidance connected to the real order instead of becoming general advice.",
-                    "ก่อนอนุมัติใบเสนอราคา ควรยืนยัน Revision ของ CAD, Drawing หรือหมายเหตุ, วัสดุเป้าหมาย, จำนวน, กำหนดส่ง, ผิวโชว์, มิติสำคัญ, สมมติฐาน Hardware และเกณฑ์รับงาน เพื่อให้คำแนะนำในบทความเชื่อมกับคำสั่งผลิตจริง ไม่ใช่เป็นคำแนะนำทั่วไป",
+                    profile.ChecklistTitleEn,
+                    profile.ChecklistTitleTh,
+                    $"{profile.ChecklistBodyEn} Before approving the quote, confirm the CAD revision, drawing or notes, material target, quantity, deadline, visible surfaces, critical dimensions, hardware assumptions, and acceptance criteria. This keeps the guidance connected to the real order instead of becoming general advice.",
+                    $"{profile.ChecklistBodyTh} ก่อนอนุมัติใบเสนอราคา ควรยืนยัน Revision ของ CAD, Drawing หรือหมายเหตุ, วัสดุเป้าหมาย, จำนวน, กำหนดส่ง, ผิวโชว์, มิติสำคัญ, สมมติฐาน Hardware และเกณฑ์รับงาน เพื่อให้คำแนะนำเชื่อมกับคำสั่งผลิตจริง ไม่ใช่เป็นคำแนะนำทั่วไป",
                     takeawayItems)
             ],
             takeaways.Select(item => Text(item.En, item.Th)).ToArray());
     }
+
+    private static PracticalNoteProfile ResolvePracticalNoteProfile(string slug, string categoryEn)
+    {
+        if (slug.StartsWith("fdm-", StringComparison.Ordinal) || slug.Contains("tpu", StringComparison.Ordinal) || slug.Contains("asa", StringComparison.Ordinal) || slug.Contains("petg", StringComparison.Ordinal) || slug.Contains("heat-set", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Start with load, heat, and layer direction",
+                "เริ่มจากแรง ความร้อน และทิศเลเยอร์",
+                "FDM and other thermoplastic routes are practical when the part's load path, heat exposure, screw behavior, and visible surfaces are understood before slicing. Orientation, infill, wall strategy, and post-processing are engineering choices, not decoration.",
+                "งาน FDM และเทอร์โมพลาสติกใช้ได้ดีเมื่อเข้าใจทิศแรง ความร้อน พฤติกรรมสกรู และผิวโชว์ก่อนตั้งค่าพิมพ์ ทิศพิมพ์ Infill กลยุทธ์ผนัง และงานเก็บผิวเป็นการตัดสินใจเชิงวิศวกรรม ไม่ใช่ของตกแต่ง",
+                "Define what the printed part must survive",
+                "กำหนดว่าชิ้นงานพิมพ์ต้องทนอะไร",
+                "A desk model, fixture, snap clip, outdoor bracket, and serviceable enclosure should not be priced from the same assumptions. State whether the part is pulled, bent, screwed, dropped, heated, cleaned, or exposed to sunlight.",
+                "โมเดลตั้งโต๊ะ ฟิกซ์เจอร์ คลิปสแนป ขายึดกลางแจ้ง และเคสที่ต้องซ่อมบำรุง ไม่ควรถูกประเมินจากสมมติฐานเดียวกัน ควรระบุว่าชิ้นงานถูกดึง งอ ขันสกรู ตก กระทบร้อน ล้าง หรือโดนแดดหรือไม่",
+                "How MALIEV reviews thermoplastic printing",
+                "MALIEV ตรวจงานพิมพ์เทอร์โมพลาสติกอย่างไร",
+                "The review checks layer direction, minimum wall, hole allowance, heat risk, support cleanup, insert access, and whether nylon, resin, CNC, or a hybrid route is safer for the first functional test.",
+                "การตรวจจะดูทิศเลเยอร์ ความหนาต่ำสุด เผื่อรู ความเสี่ยงร้อน การแกะซัพพอร์ต ทางเข้า Insert และดูว่าไนลอน เรซิน CNC หรือเส้นทางผสมเหมาะกับการทดสอบใช้งานครั้งแรกกว่าหรือไม่",
+                "Example: same shape, different FDM decision",
+                "ตัวอย่าง: รูปร่างเหมือนกันแต่ตัดสินใจ FDM ต่างกัน",
+                "Two covers can share the same outside shape but need different builds when one is only a visual mockup and the other holds screws beside a warm motor.",
+                "ฝาครอบสองชิ้นอาจมีทรงภายนอกเหมือนกัน แต่ต้องตั้งค่างานต่างกันเมื่อชิ้นหนึ่งเป็นตัวอย่างโชว์ และอีกชิ้นต้องยึดสกรูข้างมอเตอร์ร้อน",
+                "Thermoplastic order checklist",
+                "เช็กลิสต์งานเทอร์โมพลาสติกก่อนสั่ง");
+        }
+
+        if (slug.Contains("resin", StringComparison.Ordinal) || slug.Contains("sla", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Separate detail, clarity, and strength",
+                "แยกรายละเอียด ความใส และความแข็งแรง",
+                "Resin printing can deliver fine features and smooth surfaces, but detail does not automatically mean toughness, optical clarity, or service life. The useful review starts by naming which faces are cosmetic, which dimensions must fit, and which features carry load.",
+                "งานเรซินให้รายละเอียดและผิวเรียบได้ดี แต่รายละเอียดสูงไม่ได้แปลว่าทนแรง ใสระดับเลนส์ หรือใช้งานนานได้โดยอัตโนมัติ การตรวจที่ดีเริ่มจากระบุผิวโชว์ มิติประกอบ และฟีเจอร์ที่รับแรง",
+                "State the resin test, not just the resin type",
+                "ระบุการทดสอบของเรซิน ไม่ใช่แค่ชนิดเรซิน",
+                "Tell the team whether the part is a cosmetic sample, snap-fit trial, transparent window, sealing surface, heat-exposed part, or handling prototype. Those decisions affect resin family, orientation, support placement, curing, sanding, and coating.",
+                "บอกทีมว่าชิ้นงานเป็นตัวอย่างโชว์ ทดสอบสแนปฟิต หน้าต่างใส ผิวซีล ชิ้นงานโดนความร้อน หรือต้นแบบหยิบจับ เพราะสิ่งเหล่านี้มีผลต่อกลุ่มเรซิน ทิศพิมพ์ ตำแหน่งซัพพอร์ต การอบ การขัด และการเคลือบ",
+                "How MALIEV reviews resin risks",
+                "MALIEV ตรวจความเสี่ยงเรซินอย่างไร",
+                "The review checks support scars, thin tabs, brittle clips, polishing access, trapped resin, wall thickness, and whether a nylon or machined route would be more reliable for functional testing.",
+                "การตรวจจะดูรอยซัพพอร์ต แท็บบาง คลิปเปราะ ทางเข้าเก็บใส เรซินค้าง ความหนาผนัง และดูว่าไนลอนหรืองานกัดน่าเชื่อถือกว่าสำหรับการทดสอบใช้งานหรือไม่",
+                "Example: a pretty resin part can still fail",
+                "ตัวอย่าง: ชิ้นเรซินสวยแต่ยังล้มเหลวได้",
+                "A small cover may look finished after curing, yet crack at a clip, show support marks on a visible face, or become cloudy if the required optical surface was not called out.",
+                "ฝาครอบขนาดเล็กอาจดูเสร็จหลังอบ แต่แตกที่คลิป มีรอยซัพพอร์ตบนผิวโชว์ หรือขุ่นได้ถ้าไม่ได้ระบุผิว Optical ที่ต้องการ",
+                "Resin order checklist",
+                "เช็กลิสต์งานเรซินก่อนสั่ง");
+        }
+
+        if (slug.Contains("sls", StringComparison.Ordinal) || slug.Contains("nylon", StringComparison.Ordinal) || categoryEn.Contains("Powder", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Treat powder-bed parts as functional polymers",
+                "มองงานพาวเดอร์เบดเป็นชิ้นงานโพลีเมอร์ใช้งานจริง",
+                "Powder-bed nylon is useful for clips, hinges, housings, and low-volume parts because it avoids visible support scars, but the design still needs powder escape, wall control, dye expectations, and repeatability planning.",
+                "ไนลอนพาวเดอร์เบดเหมาะกับคลิป บานพับ เคส และงานจำนวนน้อยเพราะไม่มีรอยซัพพอร์ตชัด แต่แบบยังต้องคุมทางออกผง ความหนาผนัง ความคาดหวังการย้อม และความสม่ำเสมอ",
+                "Decide what powder, dye, and texture may do",
+                "ตัดสินใจเรื่องผง สี และผิวสัมผัส",
+                "Closed cavities, narrow channels, dark colors, rubbing surfaces, and customer-facing textures should be stated before quote approval. These details decide whether the part needs drain holes, blasting, dyeing, machining, or another process.",
+                "โพรงปิด ช่องแคบ สีเข้ม ผิวเสียดสี และผิวที่ลูกค้าเห็น ควรถูกระบุก่อนอนุมัติราคา รายละเอียดเหล่านี้ตัดสินว่าชิ้นงานต้องมีรูระบายผง ยิงผิว ย้อมสี กัดต่อ หรือเปลี่ยนกระบวนการหรือไม่",
+                "How MALIEV reviews powder-bed routes",
+                "MALIEV ตรวจเส้นทางพาวเดอร์เบดอย่างไร",
+                "The review checks trapped powder, minimum wall, feature cleanup, dye consistency, mating surfaces, batch nesting, and whether the first order should be a pilot batch before repeat production.",
+                "การตรวจจะดูผงค้าง ความหนาขั้นต่ำ การเก็บ Feature ความสม่ำเสมอของสี ผิวประกบ การจัดงานในล็อต และควรเริ่มจากล็อตทดลองก่อนผลิตซ้ำหรือไม่",
+                "Example: a nylon batch needs escape paths",
+                "ตัวอย่าง: ล็อตไนลอนต้องมีทางออกผง",
+                "A housing with the same external envelope can be easy to print as an open shell but risky as a sealed cavity if powder cannot be removed or verified.",
+                "เคสที่มี Envelope ภายนอกเหมือนกันอาจผลิตง่ายเมื่อเป็น Shell เปิด แต่เสี่ยงเมื่อเป็นโพรงปิดที่เอาผงออกหรือตรวจยืนยันไม่ได้",
+                "Powder-bed order checklist",
+                "เช็กลิสต์งานพาวเดอร์เบดก่อนสั่ง");
+        }
+
+        if (slug.StartsWith("cnc-", StringComparison.Ordinal) || slug.Contains("cnc", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Identify the faces the cutter must control",
+                "ระบุผิวที่เครื่องมือต้องคุม",
+                "CNC work is strongest when the quote distinguishes controlled faces from default surfaces. Tool access, setup direction, internal corner radius, stock size, and tolerance stack-up affect cost more than the outside render suggests.",
+                "งาน CNC ดีที่สุดเมื่อใบเสนอราคาแยกผิวที่ต้องคุมออกจากผิวค่ามาตรฐาน ทางเข้าเครื่องมือ ทิศตั้งงาน รัศมีมุมใน ขนาดวัตถุดิบ และ Stack-up ของ tolerance มีผลต่อต้นทุนมากกว่าภาพ Render ภายนอก",
+                "Call out controlled dimensions and access",
+                "ระบุมิติที่ต้องคุมและทางเข้าเครื่องมือ",
+                "A STEP file should be paired with drawings or notes for threads, hole depths, bearing seats, sealing faces, surface finish, and inspection dimensions. Features that cannot be reached by a tool may need redesign or a second setup.",
+                "ไฟล์ STEP ควรมาพร้อม Drawing หรือหมายเหตุสำหรับเกลียว ความลึกรู ที่นั่งแบริ่ง ผิวซีล ผิวงาน และมิติที่ต้องตรวจ Feature ที่เครื่องมือเข้าไม่ถึงอาจต้องแก้แบบหรือเพิ่ม Setup",
+                "How MALIEV reviews CNC manufacturability",
+                "MALIEV ตรวจความเหมาะสม CNC อย่างไร",
+                "The review checks cutter reach, fixture strategy, pocket depth, internal radii, thread callouts, material machinability, finish effort, and whether only selected faces need tight tolerance.",
+                "การตรวจจะดูระยะเข้าเครื่องมือ กลยุทธ์ฟิกซ์เจอร์ ความลึก Pocket รัศมีมุมใน หมายเหตุเกลียว ความง่ายในการกัดวัสดุ งานเก็บผิว และจุดที่ต้องคุม tolerance แคบเฉพาะตำแหน่ง",
+                "Example: same bracket, different CNC cost",
+                "ตัวอย่าง: ขายึดเหมือนกันแต่ต้นทุน CNC ต่างกัน",
+                "A bracket can be low-risk when only its outer profile matters, but expensive when deep pockets, sharp internal corners, and multiple datum faces must all be controlled.",
+                "ขายึดอาจเสี่ยงต่ำเมื่อคุมแค่รูปร่างภายนอก แต่แพงขึ้นมากเมื่อมี Pocket ลึก มุมในคม และหลายผิว Datum ที่ต้องคุมพร้อมกัน",
+                "CNC order checklist",
+                "เช็กลิสต์งาน CNC ก่อนสั่ง");
+        }
+
+        if (slug.Contains("injection", StringComparison.Ordinal) || slug.Contains("casting", StringComparison.Ordinal) || slug.Contains("urethane", StringComparison.Ordinal) || slug.Contains("silicone", StringComparison.Ordinal) || slug.Contains("pneumatic", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Review the mold behavior before the part",
+                "ตรวจพฤติกรรมแม่พิมพ์ก่อนดูชิ้นงาน",
+                "Casting and molding decisions are affected by draft, wall thickness, gates, vents, shrinkage, bubbles, master quality, and how many similar parts must be repeated. A shape that can be printed once may still be difficult to mold cleanly.",
+                "งานหล่อและแม่พิมพ์ขึ้นกับ Draft ความหนาผนัง Gate Vent การหด ฟอง คุณภาพ Master และจำนวนชิ้นที่ต้องทำซ้ำ รูปทรงที่พิมพ์ครั้งเดียวได้ อาจยังทำแม่พิมพ์ให้สะอาดได้ยาก",
+                "Decide batch size, surface, and release needs",
+                "กำหนดจำนวนล็อต ผิว และการถอดแบบ",
+                "Before quoting, state whether this is a visual sample, pilot batch, soft-touch part, functional housing, or pre-tooling bridge. The answer affects split lines, parting surfaces, vent strategy, finish, and acceptance criteria.",
+                "ก่อนเสนอราคา ควรบอกว่างานนี้เป็นตัวอย่างโชว์ ล็อตทดลอง ชิ้นนิ่ม เคสใช้งาน หรือช่วงเชื่อมก่อนทำแม่พิมพ์จริง เพราะมีผลต่อเส้นแบ่งแม่พิมพ์ ผิวแยก Vent ผิวงาน และเกณฑ์รับงาน",
+                "How MALIEV reviews molding and casting",
+                "MALIEV ตรวจงานแม่พิมพ์และหล่ออย่างไร",
+                "The review checks draft, undercuts, bubbles, vents, gate marks, shrink allowance, master finishing, expected rejects, and whether printing or machining should validate the geometry first.",
+                "การตรวจจะดู Draft Undercut ฟอง Vent รอย Gate เผื่อหด งานเก็บ Master ของเสียที่คาด และควรใช้พิมพ์หรือกัดเพื่อตรวจ Geometry ก่อนหรือไม่",
+                "Example: one master can define the whole batch",
+                "ตัวอย่าง: Master หนึ่งชิ้นกำหนดทั้งล็อตได้",
+                "A polished master can make a short run feel production-ready, while a rushed master can copy tool marks, bubbles, or dimensional errors into every cast part.",
+                "Master ที่เก็บผิวดีทำให้ล็อตสั้นดูพร้อมผลิต แต่ Master ที่เร่งงานอาจคัดลอกรอยเครื่องมือ ฟอง หรือมิติผิดไปทุกชิ้นที่หล่อ",
+                "Molding and casting order checklist",
+                "เช็กลิสต์งานหล่อและแม่พิมพ์ก่อนสั่ง");
+        }
+
+        if (slug.StartsWith("scan", StringComparison.Ordinal) || slug.Contains("reconstruction", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Define what the scan must prove",
+                "กำหนดว่าสแกนต้องพิสูจน์อะไร",
+                "A scan is useful only when the required output is clear: reference mesh, inspection comparison, reverse-engineered CAD, repair geometry, or deviation evidence. Reflective, transparent, worn, flexible, and hidden surfaces all change confidence.",
+                "งานสแกนมีประโยชน์เมื่อ Output ชัดเจน เช่น Mesh อ้างอิง การเทียบตรวจ CAD รีเวิร์สเอนจิเนียริ่ง Geometry ซ่อม หรือหลักฐาน Deviation ผิวสะท้อน ใส สึก ยืดหยุ่น และซ่อนอยู่ เปลี่ยนความมั่นใจของข้อมูล",
+                "Choose datum, output, and confidence level",
+                "เลือก Datum, Output และระดับความมั่นใจ",
+                "Before quoting, state whether the result will drive acceptance, repair, redesign, replacement production, or supplier discussion. Include master parts, drawings, target dimensions, and photos of hard-to-access areas.",
+                "ก่อนเสนอราคา ควรบอกว่าผลลัพธ์ใช้รับงาน ซ่อม แก้แบบ ผลิตทดแทน หรือคุย Supplier พร้อมส่ง Master, Drawing, ขนาดเป้าหมาย และรูปจุดที่เข้าถึงยาก",
+                "How MALIEV reviews scan work",
+                "MALIEV ตรวจงานสแกนอย่างไร",
+                "The review checks alignment strategy, datum selection, surface limits, expected mesh cleanup, CAD reconstruction scope, inspection zones, and whether physical fixturing is needed during capture.",
+                "การตรวจจะดูวิธีจัดแนว การเลือก Datum ข้อจำกัดผิว ขอบเขตเก็บ Mesh ขอบเขตสร้าง CAD โซนตรวจ และต้องใช้ฟิกซ์เจอร์ช่วยจับชิ้นงานตอนเก็บข้อมูลหรือไม่",
+                "Example: a scan is not always CAD",
+                "ตัวอย่าง: สแกนไม่ได้แปลว่าได้ CAD เสมอ",
+                "A mesh can document an existing part quickly, but replacement manufacturing usually needs rebuilt surfaces, corrected damage, defined datums, and dimensions that can be inspected later.",
+                "Mesh สามารถบันทึกชิ้นงานเดิมได้เร็ว แต่งานผลิตทดแทนมักต้องสร้างผิวใหม่ แยกความเสียหาย กำหนด Datum และมีมิติที่ตรวจซ้ำได้",
+                "Scanning order checklist",
+                "เช็กลิสต์งานสแกนก่อนสั่ง");
+        }
+
+        if (categoryEn.Contains("Assembly", StringComparison.Ordinal) || categoryEn.Contains("Enclosures", StringComparison.Ordinal) || slug.Contains("fixture", StringComparison.Ordinal) || slug.Contains("boss", StringComparison.Ordinal) || slug.Contains("hardware", StringComparison.Ordinal) || slug.Contains("enclosure", StringComparison.Ordinal) || slug.Contains("robot", StringComparison.Ordinal) || slug.Contains("maintenance", StringComparison.Ordinal))
+        {
+            return new PracticalNoteProfile(
+                "Start from the assembly interface",
+                "เริ่มจาก Interface การประกอบ",
+                "Assembly parts are judged by fit, service access, hardware behavior, cable clearance, repeatability, and how quickly a technician can use the part without improvising. The CAD shape is only one part of that decision.",
+                "ชิ้นงานประกอบถูกตัดสินจากการ Fit ทางเข้าเซอร์วิส พฤติกรรม Hardware ระยะสาย ความซ้ำได้ และช่างใช้งานได้เร็วโดยไม่ต้องดัดแปลงหรือไม่ รูปทรง CAD เป็นเพียงส่วนหนึ่งของการตัดสินใจ",
+                "List hardware, mating parts, and service actions",
+                "ระบุ Hardware ชิ้นประกบ และการซ่อมบำรุง",
+                "Before upload, include screw sizes, insert types, pin fits, moving parts, cable paths, labels, load direction, and whether the part is assembled once or opened repeatedly.",
+                "ก่อนอัปโหลด ให้ระบุขนาดสกรู ประเภท Insert ระยะพิน ชิ้นส่วนเคลื่อนที่ ทางเดินสาย ป้าย ทิศแรง และชิ้นงานถูกประกอบครั้งเดียวหรือเปิดซ้ำเพื่อซ่อม",
+                "How MALIEV reviews assembly parts",
+                "MALIEV ตรวจชิ้นงานประกอบอย่างไร",
+                "The review checks bosses, snap fits, screw access, tool clearance, end-effector loads, fixture datums, cable relief, labeling, and whether printed, machined, or hybrid parts are the reliable route.",
+                "การตรวจจะดู Boss, Snap-fit, ทางเข้าไขสกรู ระยะเครื่องมือ โหลด End-effector, Datum ฟิกซ์เจอร์, Cable relief, Label และดูว่าพิมพ์ กัด หรือทำแบบผสมเป็นเส้นทางที่น่าเชื่อถือกว่า",
+                "Example: a fixture succeeds by repeatability",
+                "ตัวอย่าง: ฟิกซ์เจอร์สำเร็จเพราะทำซ้ำได้",
+                "A fixture, enclosure, or robot tool may look simple but fail if the hardware list is missing, the datum is ambiguous, or the operator cannot reach the fastener during use.",
+                "ฟิกซ์เจอร์ เคส หรือเครื่องมือหุ่นยนต์อาจดูง่ายแต่ล้มเหลวได้ถ้าไม่มีรายการ Hardware, Datum กำกวม หรือผู้ปฏิบัติงานเข้าไม่ถึงสกรูตอนใช้งาน",
+                "Assembly order checklist",
+                "เช็กลิสต์ชิ้นงานประกอบก่อนสั่ง");
+        }
+
+        return new PracticalNoteProfile(
+            "Turn the file into a manufacturing decision",
+            "เปลี่ยนไฟล์ให้เป็นการตัดสินใจผลิต",
+            "File preparation, pricing, process choice, production planning, packaging, and revision control all depend on context that CAD alone cannot carry. The quote should answer what the part must do, not only what the geometry looks like.",
+            "การเตรียมไฟล์ ราคา การเลือกกระบวนการ แผนผลิต บรรจุภัณฑ์ และการควบคุม Revision ต้องใช้บริบทที่ CAD อย่างเดียวเก็บไม่ได้ ใบเสนอราคาควรตอบว่าชิ้นงานต้องทำอะไร ไม่ใช่แค่ Geometry เป็นอย่างไร",
+            "Put the commercial and technical context together",
+            "ใส่บริบทเชิงพาณิชย์และเทคนิคร่วมกัน",
+            "Quantity, lead time, revision, material preference, inspection evidence, packaging, and acceptance criteria often change the best manufacturing route as much as the geometry does.",
+            "จำนวน ระยะเวลา Revision วัสดุที่ต้องการ หลักฐานตรวจรับ บรรจุภัณฑ์ และเกณฑ์รับงาน มักเปลี่ยนเส้นทางผลิตที่เหมาะสมพอๆ กับ Geometry",
+            "How MALIEV reviews file and order readiness",
+            "MALIEV ตรวจความพร้อมไฟล์และคำสั่งอย่างไร",
+            "The review checks whether the uploaded package contains the right CAD format, drawing notes, process target, material expectations, quantity, deadline, fit risk, and the decision the customer needs to make.",
+            "การตรวจจะดูว่าชุดไฟล์มีรูปแบบ CAD ที่เหมาะ หมายเหตุ Drawing เป้าหมายกระบวนการ ความคาดหวังวัสดุ จำนวน กำหนดส่ง ความเสี่ยงประกอบ และการตัดสินใจที่ลูกค้าต้องการหรือไม่",
+            "Example: price follows the real requirement",
+            "ตัวอย่าง: ราคาตามข้อกำหนดจริง",
+            "A quick visual prototype, a quote for ten customer samples, and a repeat order for spare parts can use the same CAD but require different review depth, packaging, QA evidence, and production assumptions.",
+            "ต้นแบบโชว์เร็ว ตัวอย่างลูกค้า 10 ชิ้น และงานสั่งซ้ำเพื่อเป็นอะไหล่ อาจใช้ CAD เดียวกัน แต่ต้องการความลึกการตรวจ บรรจุภัณฑ์ หลักฐาน QA และสมมติฐานผลิตต่างกัน",
+            "Order package checklist",
+            "เช็กลิสต์ชุดข้อมูลก่อนสั่ง");
+    }
+
+    private sealed record PracticalNoteProfile(
+        string ContextTitleEn,
+        string ContextTitleTh,
+        string ContextBodyEn,
+        string ContextBodyTh,
+        string DecisionTitleEn,
+        string DecisionTitleTh,
+        string DecisionBodyEn,
+        string DecisionBodyTh,
+        string ReviewTitleEn,
+        string ReviewTitleTh,
+        string ReviewBodyEn,
+        string ReviewBodyTh,
+        string ExampleTitleEn,
+        string ExampleTitleTh,
+        string ExampleBodyEn,
+        string ExampleBodyTh,
+        string ChecklistTitleEn,
+        string ChecklistTitleTh,
+        string ChecklistBodyEn = "Use the quote as a production handoff, not just a price snapshot.",
+        string ChecklistBodyTh = "ใช้ใบเสนอราคาเป็นข้อมูลส่งต่องานผลิต ไม่ใช่แค่ภาพราคาชั่วคราว");
 
     private static ArticleSectionContent Section(string titleEn, string titleTh, string bodyEn, string bodyTh, params (string En, string Th)[] items)
     {

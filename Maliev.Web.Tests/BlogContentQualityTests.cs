@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using Maliev.Web.Client.Content;
@@ -19,11 +20,16 @@ public sealed class BlogContentQualityTests
         var root = FindRepoRoot();
         var posts = SiteContent.BlogPosts;
         var imageUrls = posts.Select(SiteContent.ResolveBlogImageUrl).ToArray();
+        var imageCredits = ReadImageCredits(root);
         var imageHashes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var sectionTitleSequences = new HashSet<string>(StringComparer.Ordinal);
 
         Assert.True(posts.Count >= 50, $"Expected at least 50 blog posts, found {posts.Count}.");
         Assert.Equal(posts.Count, posts.Select(post => post.Slug).Distinct(StringComparer.OrdinalIgnoreCase).Count());
         Assert.Equal(posts.Count, imageUrls.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(posts.Count, imageCredits.Count);
+        Assert.Equal(imageCredits.Count, imageCredits.Values.Select(credit => credit.SourceUrl).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(imageCredits.Values, AssertApprovedImageCredit);
 
         foreach (var post in posts)
         {
@@ -31,7 +37,10 @@ public sealed class BlogContentQualityTests
             Assert.True(post.Summary.Th.Length >= 30, $"{post.Slug} needs a stronger Thai meta summary.");
             Assert.True(post.Sections.Count >= 4, $"{post.Slug} needs at least four article sections.");
             Assert.True(post.Takeaways.Count >= 3, $"{post.Slug} needs at least three actionable takeaways.");
-            Assert.True(CountEnglishWords(post) >= 220, $"{post.Slug} is still too thin for an SEO article.");
+            Assert.True(CountEnglishWords(post) >= 360, $"{post.Slug} is still too thin for an SEO article.");
+            Assert.DoesNotContain(post.Sections, section => section.Title.En == "Why this topic matters");
+            Assert.True(imageCredits.ContainsKey(post.Slug), $"{post.Slug} is missing researched image credit metadata.");
+            sectionTitleSequences.Add(string.Join(" | ", post.Sections.Select(section => section.Title.En)));
 
             foreach (var section in post.Sections)
             {
@@ -58,6 +67,39 @@ public sealed class BlogContentQualityTests
             Assert.True(width >= 1000, $"{post.Slug} image width is too small.");
             Assert.True(height >= 600, $"{post.Slug} image height is too small.");
             Assert.True(imageHashes.Add(Convert.ToHexString(SHA256.HashData(imageBytes))), $"{post.Slug} reuses another blog image file.");
+        }
+
+        Assert.True(sectionTitleSequences.Count >= 8, "Blog posts still reuse too many generic article structures.");
+    }
+
+    private static IReadOnlyDictionary<string, BlogImageCredit> ReadImageCredits(string root)
+    {
+        var creditsPath = Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "blog", "image-credits.json");
+        Assert.True(File.Exists(creditsPath), "Blog image source metadata is missing.");
+
+        var credits = JsonSerializer.Deserialize<IReadOnlyList<BlogImageCredit>>(
+            File.ReadAllText(creditsPath),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.NotNull(credits);
+
+        return credits.ToDictionary(credit => credit.Slug, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void AssertApprovedImageCredit(BlogImageCredit credit)
+    {
+        Assert.False(string.IsNullOrWhiteSpace(credit.Slug), "Image credit is missing a slug.");
+        Assert.False(string.IsNullOrWhiteSpace(credit.SourceTitle), $"{credit.Slug} is missing a source title.");
+        Assert.False(string.IsNullOrWhiteSpace(credit.SourceUrl), $"{credit.Slug} is missing a source URL.");
+        Assert.False(string.IsNullOrWhiteSpace(credit.AssetUrl), $"{credit.Slug} is missing an asset URL.");
+        Assert.False(string.IsNullOrWhiteSpace(credit.LandingUrl), $"{credit.Slug} is missing a source landing URL.");
+        Assert.Contains(credit.License, ApprovedImageLicenses, StringComparer.OrdinalIgnoreCase);
+        Assert.StartsWith("https://upload.wikimedia.org/", credit.SourceUrl, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("https://commons.wikimedia.org/wiki/File:", credit.LandingUrl, StringComparison.OrdinalIgnoreCase);
+
+        foreach (var rejectedTerm in RejectedImageSourceTerms)
+        {
+            Assert.DoesNotContain(rejectedTerm, credit.SourceTitle, StringComparison.OrdinalIgnoreCase);
         }
     }
 
@@ -153,4 +195,29 @@ public sealed class BlogContentQualityTests
 
         throw new InvalidDataException("Could not read JPEG dimensions.");
     }
+
+    private static readonly string[] ApprovedImageLicenses = ["CC0", "Public domain"];
+
+    private static readonly string[] RejectedImageSourceTerms =
+    [
+        "Atlas Van der Hagen",
+        "Battlefield",
+        "Bicycle Sink",
+        "D-Link",
+        "Gas Station",
+        "Glaubersalz",
+        "Government Marble",
+        "Locomotive crank",
+        "Mercedes SLS",
+        "Old dusty",
+        "Optical Fabrication Lab"
+    ];
+
+    private sealed record BlogImageCredit(
+        string Slug,
+        string SourceTitle,
+        string License,
+        string SourceUrl,
+        string AssetUrl,
+        string LandingUrl);
 }
