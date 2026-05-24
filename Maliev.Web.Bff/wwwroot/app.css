@@ -813,6 +813,7 @@ main {
   display: grid;
   gap: clamp(34px, 4vw, 52px);
   width: min(100%, var(--container));
+  min-width: 0;
   margin-inline: auto;
 }
 
@@ -835,10 +836,15 @@ main {
   display: flex;
   justify-content: center;
   gap: clamp(18px, 3vw, 46px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   border-bottom: 1px solid var(--rule);
+  overscroll-behavior-x: contain;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .home-services-tab {
@@ -890,11 +896,14 @@ main {
 .home-services-panel {
   display: grid;
   grid-template-columns: minmax(0, .86fr) minmax(280px, 1fr) minmax(260px, .88fr);
+  grid-template-areas: "copy proof media";
   gap: clamp(34px, 5vw, 76px);
   align-items: center;
+  min-width: 0;
 }
 
 .home-services-panel-copy {
+  grid-area: copy;
   display: grid;
   align-content: start;
   justify-items: start;
@@ -938,6 +947,7 @@ main {
 }
 
 .home-services-proof-list {
+  grid-area: proof;
   display: grid;
   gap: 18px;
   margin: 0;
@@ -966,6 +976,7 @@ main {
 }
 
 .home-services-media {
+  grid-area: media;
   display: grid;
   justify-items: center;
   gap: 14px;
@@ -7303,18 +7314,22 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .home-services-panel {
-    grid-template-columns: 1fr;
-    gap: 30px;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .82fr);
+    grid-template-areas:
+      "copy media"
+      "proof media";
+    gap: clamp(24px, 4vw, 40px);
+    align-items: start;
   }
 
   .home-services-media {
     justify-items: start;
-    width: min(100%, 540px);
+    width: 100%;
   }
 
   .home-services-media img {
-    width: min(100%, 540px);
-    height: clamp(250px, 42vw, 340px);
+    width: 100%;
+    height: clamp(210px, 32vw, 320px);
     object-fit: cover;
   }
 
@@ -7562,25 +7577,48 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .home-services-tabs {
-    gap: 28px;
-    margin-inline: -18px;
-    padding-inline: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+    border-bottom: 0;
   }
 
   .home-services-tab {
-    min-height: 48px;
-    padding-bottom: 15px;
-    font-size: .92rem;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0 10px;
+    color: var(--muted);
+    white-space: normal;
+    text-align: left;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: .84rem;
   }
 
-  .home-services-panel-copy,
+  .home-services-tab.is-active {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--blue) 8%, var(--paper));
+    border-color: color-mix(in srgb, var(--blue) 42%, var(--rule));
+  }
+
+  .home-services-tab::after {
+    display: none;
+  }
+
+  .home-services-panel-copy {
+    justify-items: start;
+  }
+
   .home-services-media {
     justify-items: stretch;
   }
 
   .home-services-cta {
     justify-content: center;
-    width: 100%;
   }
 
   .page-hero.compact + .section {
@@ -8258,6 +8296,23 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 @media (max-width: 520px) {
+  .home-services-panel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "media"
+      "proof";
+  }
+
+  .home-services-panel-copy,
+  .home-services-media {
+    justify-items: stretch;
+  }
+
+  .home-services-cta {
+    width: 100%;
+  }
+
   .site-footer {
     grid-template-columns: 1fr;
   }
