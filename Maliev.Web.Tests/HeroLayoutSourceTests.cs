@@ -425,6 +425,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("aspect-ratio: 16 / 8.6;", styles);
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains(".industry-sector-card-copy", styles);
+        Assert.Contains("grid-template-rows: auto minmax(0, 1fr) auto;", styles);
+        Assert.Contains("align-content: stretch;", styles);
         Assert.Contains(".industry-sector-card-title", styles);
         Assert.Contains(".industry-sector-card-body", styles);
         Assert.Contains(".industry-sector-link", styles);

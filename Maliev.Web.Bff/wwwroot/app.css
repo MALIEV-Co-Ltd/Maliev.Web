@@ -770,7 +770,8 @@ main {
 
 .industry-sector-card-copy {
   display: grid;
-  align-content: start;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
   gap: 14px;
   min-height: 250px;
   padding: clamp(24px, 2.2vw, 32px);
