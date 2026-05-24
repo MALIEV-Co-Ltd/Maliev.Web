@@ -446,6 +446,13 @@ else if (CurrentCaseStudy is { } caseStudyDetail)
                     <article class="detail-section">
                         <h2>@item.Title.For(Preferences.Culture)</h2>
                         <p>@item.Body.For(Preferences.Culture)</p>
+                        @if (item.Image is { } image)
+                        {
+                            <figure class="article-section-media">
+                                <img src="@image.Url" alt="@image.Alt.For(Preferences.Culture)" loading="lazy" />
+                                <figcaption>@image.Caption.For(Preferences.Culture)</figcaption>
+                            </figure>
+                        }
                         @if (item.Items.Count > 0)
                         {
                             <ul>
@@ -486,6 +493,13 @@ else if (CurrentBlogPost is { } blogPost)
                     <article class="detail-section">
                         <h2>@item.Title.For(Preferences.Culture)</h2>
                         <p>@item.Body.For(Preferences.Culture)</p>
+                        @if (item.Image is { } image)
+                        {
+                            <figure class="article-section-media">
+                                <img src="@image.Url" alt="@image.Alt.For(Preferences.Culture)" loading="lazy" />
+                                <figcaption>@image.Caption.For(Preferences.Culture)</figcaption>
+                            </figure>
+                        }
                         @if (item.Items.Count > 0)
                         {
                             <ul>

@@ -3465,6 +3465,28 @@ html[data-theme="dark"] .workflow-step {
   line-height: 1.78;
 }
 
+.article-section-media {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 2px;
+}
+
+.article-section-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-2);
+}
+
+.article-section-media figcaption {
+  color: var(--muted);
+  font-size: .93rem;
+  line-height: 1.55;
+}
+
 .detail-section ul,
 .detail-sidebar ul {
   margin: 0;

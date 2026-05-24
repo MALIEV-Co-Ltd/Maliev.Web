@@ -255,25 +255,28 @@ internal static class SiteContent
             Text("DFM guide", "คู่มือ DFM"),
             DesignPlanningImageUrl,
             [
-                Section(
+                SectionWithImage(
                     "Wall thickness is the first DFM signal",
                     "ความหนาผนังคือสัญญาณ DFM แรก",
                     "Before upload, check whether the part has thin walls, isolated towers, deep pockets, or thick masses. Thin walls can crack, warp, or fail during finishing. Overly thick areas can increase print time, machining time, material use, and shrink risk. If a flexible wall is intentional, mark it in the drawing or note field so it is reviewed as a design feature rather than a mistake.",
                     "ก่อนอัปโหลด ควรตรวจว่าชิ้นงานมีผนังบาง เสาสูงเดี่ยว ร่องลึก หรือมวลหนามากหรือไม่ ผนังบางอาจแตก บิด หรือเสียหายตอนเก็บผิว ส่วนพื้นที่หนาเกินไปอาจเพิ่มเวลาพิมพ์ เวลากัด วัสดุ และความเสี่ยงหดตัว หากต้องการผนังยืดหยุ่นโดยตั้งใจ ให้ระบุใน Drawing หรือช่องหมายเหตุ เพื่อให้ตรวจเป็นคุณสมบัติของแบบ ไม่ใช่ข้อผิดพลาด",
+                    BlogArticleImage("design-for-manufacturing", 1, "DFM wall thickness review with ribs, thin walls, and thick mass risk.", "ภาพตรวจ DFM เรื่องผนังบาง Rib และมวลหนาที่เสี่ยงผลิตยาก", "Wall thickness, ribs, and mass transitions are reviewed before a quote is accepted.", "ตรวจความหนาผนัง Rib และการเปลี่ยนมวลก่อนอนุมัติราคา"),
                     ("Use ribs and fillets to support tall or load-bearing walls.", "ใช้ Rib และ Fillet ช่วยผนังสูงหรือผนังรับแรง"),
                     ("Avoid sudden thickness changes unless the transition is part of the function.", "หลีกเลี่ยงการเปลี่ยนความหนาฉับพลัน เว้นแต่เป็นฟังก์ชันของชิ้นงาน")),
-                Section(
+                SectionWithImage(
                     "Holes, threads, and inserts need manufacturing intent",
                     "รู เกลียว และ Insert ต้องมีเจตนาผลิตชัดเจน",
                     "A CAD hole is not always a finished hole. Printed holes may need clearance, reaming, or heat-set inserts. CNC tapped holes need tool access, thread depth, and a practical bottom condition. If the part uses screws, pins, bearings, or press-fit hardware, include the hardware size and whether the hole is clearance, tapped, or post-machined.",
                     "รูใน CAD ไม่ได้หมายความว่าเป็นรูพร้อมใช้งานเสมอไป รูพิมพ์อาจต้องเผื่อระยะ คว้าน หรือใส่ Insert แบบฝังร้อน รูต๊าป CNC ต้องมีทางเข้าเครื่องมือ ความลึกเกลียว และปลายรูที่ผลิตได้ หากชิ้นงานใช้สกรู พิน แบริ่ง หรือ Hardware แบบ Press-fit ให้ระบุขนาดและหน้าที่ของรูว่าเป็นรูหลวม รูต๊าป หรือรูเก็บงานหลังผลิต",
+                    BlogArticleImage("design-for-manufacturing", 2, "Hole strategy showing clearance holes, tapped holes, and heat-set insert bosses.", "ภาพกลยุทธ์รูที่แยกรูหลวม รูต๊าป และ Boss สำหรับ Insert ฝังร้อน", "Hole intent should be visible in drawings and quote notes, not hidden in CAD.", "เจตนาของรูควรอยู่ใน Drawing และหมายเหตุราคา ไม่ใช่ซ่อนใน CAD"),
                     ("Call out thread standard, depth, and whether inserts are acceptable.", "ระบุมาตรฐานเกลียว ความลึก และยอมรับ Insert ได้หรือไม่"),
                     ("Separate cosmetic holes from controlled fit holes.", "แยกรูโชว์ออกจากรูที่ต้องควบคุมการประกอบ")),
-                Section(
+                SectionWithImage(
                     "Tolerances should be paid for only where they matter",
                     "ควรจ่ายค่า tolerance เฉพาะจุดสำคัญ",
                     "Tight tolerance everywhere makes custom parts expensive and sometimes impossible. Mark datums, mating faces, critical hole patterns, and inspection dimensions. Leave non-functional surfaces at process default. When tolerances come from assembly fit, send the mating part or the nominal interface dimensions so the review can check the real stack-up.",
                     "การกำหนด tolerance แคบทุกตำแหน่งทำให้งานเฉพาะแพงและบางครั้งผลิตไม่ได้ ควรระบุ Datum ผิวประกบ Pattern รูสำคัญ และขนาดที่ต้องตรวจ ปล่อยผิวที่ไม่ใช้งานให้เป็นค่ามาตรฐานของกระบวนการ หาก tolerance มาจากการประกอบ ให้ส่งชิ้นส่วนที่ประกบหรือขนาด Interface เพื่อให้ตรวจ Stack-up จริง",
+                    BlogArticleImage("design-for-manufacturing", 3, "Tolerance stack-up reference with datums, mating faces, and inspection dimensions.", "ภาพอ้างอิง Stack-up ของ tolerance พร้อม Datum ผิวประกบ และมิติที่ต้องตรวจ", "Only the faces and dimensions that decide fit should carry tight tolerances.", "เฉพาะผิวและมิติที่ใช้ตัดสินการประกอบเท่านั้นที่ควรมี tolerance แคบ"),
                     ("Use drawings for dimensions that must be inspected.", "ใช้ Drawing สำหรับขนาดที่ต้องตรวจรับ"),
                     ("Mention the failure mode: too loose, too tight, leaks, rubs, or misaligns.", "ระบุอาการเสียที่ต้องป้องกัน เช่น หลวม แน่น รั่ว ขูด หรือเยื้องศูนย์")),
                 Section(
@@ -296,25 +299,28 @@ internal static class SiteContent
             Text("Materials", "วัสดุ"),
             ThreeDimensionalPrinterImageUrl,
             [
-                Section(
+                SectionWithImage(
                     "Start from the part's job, not the material name",
                     "เริ่มจากหน้าที่ของชิ้นงาน ไม่ใช่ชื่อวัสดุ",
                     "A material that sounds stronger is not always better for the part. First decide what the part must prove: visual shape, fit, stiffness, impact, heat, chemicals, outdoor exposure, flexibility, or repeated handling. The right material is the one that matches that job with acceptable lead time and finish.",
                     "วัสดุที่ฟังดูแข็งแรงกว่าไม่ได้เหมาะกับทุกชิ้นงานเสมอไป ควรเริ่มจากสิ่งที่ชิ้นงานต้องพิสูจน์ เช่น รูปทรง การประกอบ ความแข็ง Impact ความร้อน สารเคมี งานกลางแจ้ง ความยืดหยุ่น หรือการหยิบจับซ้ำ วัสดุที่ดีคือวัสดุที่ตรงหน้าที่นั้นพร้อมเวลาและผิวที่ยอมรับได้",
+                    BlogArticleImage("choosing-3d-printing-materials", 1, "3D printing material comparison for visual models, fit checks, and functional parts.", "ภาพเปรียบเทียบวัสดุพิมพ์สำหรับโมเดลโชว์ งานลองประกอบ และชิ้นงานใช้งานจริง", "Material choice starts from what the part must prove.", "การเลือกวัสดุเริ่มจากสิ่งที่ชิ้นงานต้องพิสูจน์"),
                     ("Use PLA or basic resin when shape review matters more than load.", "ใช้ PLA หรือเรซินทั่วไปเมื่อต้องตรวจรูปร่างมากกว่ารับแรง"),
                     ("Move to PETG, ABS, ASA, TPU, PA12, or filled nylon when the test includes real use.", "ย้ายไป PETG, ABS, ASA, TPU, PA12 หรือไนลอนผสม เมื่อการทดสอบรวมการใช้งานจริง")),
-                Section(
+                SectionWithImage(
                     "Heat and environment decide many failures",
                     "ความร้อนและสภาพแวดล้อมเป็นตัวตัดสินความเสียหายจำนวนมาก",
                     "Parts left in a vehicle, near motors, in sunlight, near cleaning chemicals, or around warm fixtures need a different review from desk models. Heat can soften a polymer before it breaks. Chemicals can make a good-looking part brittle later. Tell the quote team about temperature, exposure time, oils, fuels, cleaners, UV, and whether the part is indoors or outdoors.",
                     "ชิ้นงานในรถ ใกล้มอเตอร์ กลางแดด ใกล้น้ำยา หรือใกล้ฟิกซ์เจอร์อุ่น ต้องตรวจต่างจากโมเดลตั้งโต๊ะ ความร้อนอาจทำให้พลาสติกนิ่มก่อนแตก สารเคมีอาจทำให้ชิ้นงานที่ดูดีเปราะภายหลัง แจ้งทีมราคาเรื่องอุณหภูมิ เวลาสัมผัส น้ำมัน เชื้อเพลิง น้ำยา UV และการใช้งานในร่มหรือกลางแจ้ง",
+                    BlogArticleImage("choosing-3d-printing-materials", 2, "Environmental material review showing heat, UV, chemicals, and repeated handling.", "ภาพตรวจวัสดุจากความร้อน UV สารเคมี และการหยิบจับซ้ำ", "Heat, chemicals, UV, and handling narrow the material route.", "ความร้อน สารเคมี UV และการหยิบจับช่วยกรองเส้นทางวัสดุ"),
                     ("ASA is usually a better outdoor conversation than PLA.", "ASA มักเหมาะเริ่มคุยเรื่องงานกลางแจ้งมากกว่า PLA"),
                     ("PA12 and engineering resins are useful when repeated handling matters.", "PA12 และเรซินวิศวกรรมเหมาะเมื่อมีการหยิบจับหรือใช้งานซ้ำ")),
-                Section(
+                SectionWithImage(
                     "Surface finish is a process decision",
                     "ผิวงานคือการตัดสินใจกระบวนการ",
                     "Layer lines, support marks, powder texture, resin detail, and machining marks are not the same failure. A display prototype may need resin detail or post-finishing. A bracket may accept texture if the holes and stiffness are right. Decide which faces are visible and which faces are functional before choosing the material.",
                     "เส้นเลเยอร์ รอยซัพพอร์ต ผิวพาวเดอร์ รายละเอียดเรซิน และรอยเครื่องมือ ไม่ใช่ความเสียหายแบบเดียวกัน ต้นแบบโชว์อาจต้องใช้เรซินหรือเก็บผิวเพิ่ม ขายึดอาจยอมรับ Texture ได้ถ้ารูและความแข็งถูกต้อง ควรระบุผิวโชว์และผิวใช้งานก่อนเลือกวัสดุ",
+                    BlogArticleImage("choosing-3d-printing-materials", 3, "Surface finish examples for layer lines, resin support marks, powder texture, and machined faces.", "ภาพตัวอย่างผิวงาน เช่น เส้นเลเยอร์ รอยซัพพอร์ตเรซิน ผิวพาวเดอร์ และผิวกัด", "Surface finish is chosen by visible faces and functional faces.", "ผิวงานเลือกจากผิวโชว์และผิวใช้งาน"),
                     ("Mark visible faces if cosmetic quality matters.", "ระบุผิวโชว์หากคุณภาพหน้าตาสำคัญ"),
                     ("Do not pay for cosmetic finish on test-only prototypes unless it affects the decision.", "อย่าจ่ายค่าผิวโชว์ในต้นแบบทดสอบ เว้นแต่มีผลต่อการตัดสินใจ")),
                 Section(
@@ -335,25 +341,28 @@ internal static class SiteContent
             Text("Quote engine", "ระบบราคา"),
             FactoryPipeProductionImageUrl,
             [
-                Section(
+                SectionWithImage(
                     "Instant pricing is a quoting workspace, not a blind checkout",
                     "ระบบราคาทันทีคือพื้นที่ทำใบเสนอราคา ไม่ใช่ Checkout แบบไม่ตรวจ",
                     "The quote engine is designed to move CAD files, DFM feedback, material choices, quantity, lead time, and order tracking into one workflow. It gives customers a fast commercial path while still leaving room for manufacturability review before work is accepted.",
                     "ระบบราคาถูกออกแบบให้ไฟล์ CAD หมายเหตุ DFM การเลือกวัสดุ จำนวน ระยะเวลา และการติดตามงานอยู่ในเวิร์กโฟลว์เดียว ลูกค้าจึงเห็นเส้นทางการค้าเร็วขึ้น แต่ยังมีพื้นที่ให้ตรวจความเหมาะสมในการผลิตก่อนรับงาน",
+                    BlogArticleImage("instant-part-pricing", 1, "Quote workspace showing CAD upload, DFM warnings, material choice, quantity, and lead time.", "ภาพพื้นที่ทำใบเสนอราคาที่มี CAD, คำเตือน DFM, วัสดุ, จำนวน และระยะเวลา", "Instant pricing is a review workspace, not a blind checkout.", "ระบบราคาทันทีคือพื้นที่ตรวจและเลือก ไม่ใช่ Checkout แบบไม่ตรวจ"),
                     ("The price changes when process, material, quantity, finish, or lead time changes.", "ราคาจะเปลี่ยนเมื่อเปลี่ยนกระบวนการ วัสดุ จำนวน ผิว หรือระยะเวลา"),
                     ("Warnings should be resolved before ordering parts that must fit or perform.", "ควรแก้คำเตือนก่อนสั่งชิ้นงานที่ต้องประกอบหรือใช้งานจริง")),
-                Section(
+                SectionWithImage(
                     "The file is checked for manufacturing signals",
                     "ไฟล์ถูกตรวจจากสัญญาณงานผลิต",
                     "A CAD upload can reveal volume, bounding box, wall patterns, hole features, mesh quality, and process risks. The engine uses these signals to prepare the workspace, while we can still ask for drawings, photos, or notes when geometry alone does not explain the requirement.",
                     "การอัปโหลด CAD ทำให้เห็นปริมาตร Bounding box รูปแบบผนัง Feature รู คุณภาพ Mesh และความเสี่ยงของกระบวนการ ระบบใช้สัญญาณเหล่านี้เพื่อเตรียมพื้นที่ราคา ขณะเดียวกัน MALIEV ยังอาจขอ Drawing รูป หรือหมายเหตุเมื่อ Geometry อย่างเดียวอธิบายความต้องการไม่พอ",
+                    BlogArticleImage("instant-part-pricing", 2, "Manufacturing signal review for bounding box, hole features, wall risk, and mesh quality.", "ภาพตรวจสัญญาณผลิต เช่น Bounding box, Feature รู, ความเสี่ยงผนัง และคุณภาพ Mesh", "The file is checked for manufacturing signals before the order moves forward.", "ไฟล์ถูกตรวจจากสัญญาณงานผลิตก่อนเข้าสู่ขั้นตอนถัดไป"),
                     ("STEP is preferred when controlled faces and machining features matter.", "ควรใช้ STEP เมื่อผิวควบคุมและ Feature สำหรับกัดสำคัญ"),
                     ("STL, OBJ, and 3MF can work for print-focused geometry.", "STL, OBJ และ 3MF ใช้ได้กับ Geometry ที่เน้นงานพิมพ์")),
-                Section(
+                SectionWithImage(
                     "Customers can explore trade-offs before committing",
                     "ลูกค้าสำรวจข้อแลกเปลี่ยนก่อนยืนยันงานได้",
                     "Changing quantity, process, material, finish, and delivery expectation can expose the real cost driver. Sometimes a small CAD change reduces production risk more than changing material. Sometimes the same geometry needs two routes: a quick prototype and a controlled final batch. Treat those comparisons as a design conversation, because the cheapest option is not useful if it misses the fit, finish, or deadline that made the order necessary.",
                     "การเปลี่ยนจำนวน กระบวนการ วัสดุ ผิวงาน และระยะส่งมอบ ช่วยให้เห็นตัวผลักดันต้นทุนจริง บางครั้งการแก้ CAD เล็กน้อยลดความเสี่ยงผลิตได้มากกว่าการเปลี่ยนวัสดุ บางครั้ง Geometry เดียวต้องใช้สองเส้นทาง คือ ต้นแบบเร็วและล็อตสุดท้ายที่ควบคุมมากขึ้น ควรมองการเปรียบเทียบเหล่านี้เป็นบทสนทนาด้านแบบ เพราะตัวเลือกที่ถูกที่สุดไม่มีประโยชน์ถ้าพลาดการประกอบ ผิวงาน หรือกำหนดส่งที่ทำให้ต้องสั่งผลิต",
+                    BlogArticleImage("instant-part-pricing", 3, "Trade-off comparison showing process, material, quantity, finish, lead time, and cost driver.", "ภาพเปรียบเทียบข้อแลกเปลี่ยนของกระบวนการ วัสดุ จำนวน ผิว ระยะเวลา และตัวผลักดันต้นทุน", "Trade-off review exposes the real cost driver before commitment.", "การเปรียบเทียบช่วยเห็นตัวผลักดันต้นทุนก่อนยืนยันงาน"),
                     ("Use the workspace to compare, not to guess through separate emails.", "ใช้พื้นที่ราคาเพื่อเปรียบเทียบ แทนการเดาผ่านอีเมลแยกกัน"),
                     ("Keep notes with the quote so review context is not lost.", "เก็บหมายเหตุไว้กับใบเสนอราคาเพื่อไม่ให้บริบทการตรวจหาย")),
                 Section(
@@ -1776,24 +1785,27 @@ internal static class SiteContent
             Text(categoryEn, categoryTh),
             BlogImageUrl(slug),
             [
-                Section(
+                SectionWithImage(
                     profile.ContextTitleEn,
                     profile.ContextTitleTh,
                     $"{seoSummaryEn} {profile.ContextBodyEn} For {titleEn.ToLowerInvariant()}, the useful question is not whether the model looks finished on screen; it is what the part must prove after it is produced, handled, inspected, and installed.",
                     $"{seoSummaryTh} {profile.ContextBodyTh} สำหรับ {titleTh} คำถามที่มีประโยชน์ไม่ใช่แค่โมเดลดูเสร็จบนหน้าจอหรือไม่ แต่คือชิ้นงานต้องพิสูจน์อะไรหลังผลิต จับ ตรวจ และนำไปประกอบจริง",
+                    BlogArticleImage(slug, 1, profile.ContextImageAltEn, profile.ContextImageAltTh, profile.ContextImageCaptionEn, profile.ContextImageCaptionTh),
                     takeawayItems),
-                Section(
+                SectionWithImage(
                     profile.DecisionTitleEn,
                     profile.DecisionTitleTh,
                     $"{decisionEn} {profile.DecisionBodyEn} Put the decision in the quote notes, drawing, or acceptance criteria so the reviewer can separate must-have requirements from preferences that can change during DFM review.",
                     $"{decisionTh} {profile.DecisionBodyTh} ใส่การตัดสินใจนี้ไว้ในหมายเหตุใบเสนอราคา Drawing หรือเกณฑ์รับงาน เพื่อให้ผู้ตรวจแยกข้อกำหนดที่ห้ามเปลี่ยนออกจากความต้องการที่ปรับได้ระหว่างตรวจ DFM",
+                    BlogArticleImage(slug, 2, profile.DecisionImageAltEn, profile.DecisionImageAltTh, profile.DecisionImageCaptionEn, profile.DecisionImageCaptionTh),
                     ("Name the feature, face, hole, surface, material behavior, or assembly condition that decides success.", "ระบุ Feature, ผิว, รู, พฤติกรรมวัสดุ หรือสภาพประกอบที่ใช้ตัดสินความสำเร็จ"),
                     ("Include quantity, deadline, finish expectation, and use environment before comparing prices.", "ใส่จำนวน กำหนดส่ง ผิวที่คาดหวัง และสภาพใช้งานก่อนเทียบราคา")),
-                Section(
+                SectionWithImage(
                     profile.ReviewTitleEn,
                     profile.ReviewTitleTh,
                     $"{reviewEn} {profile.ReviewBodyEn} The review turns the requirement into practical checks for process route, material suitability, setup access, tolerance risk, finishing effort, inspection points, and whether a prototype or pilot batch should come before a repeat order.",
                     $"{reviewTh} {profile.ReviewBodyTh} การตรวจจะแปลงข้อกำหนดเป็นจุดตรวจจริง เช่น เส้นทางกระบวนการ ความเหมาะสมของวัสดุ ทางเข้าการจับงาน ความเสี่ยง tolerance เวลาเก็บผิว จุดตรวจรับ และควรทำต้นแบบหรือล็อตทดลองก่อนสั่งซ้ำหรือไม่",
+                    BlogArticleImage(slug, 3, profile.ReviewImageAltEn, profile.ReviewImageAltTh, profile.ReviewImageCaptionEn, profile.ReviewImageCaptionTh),
                     ("The same geometry may need different processes when the acceptance decision changes.", "Geometry เดียวกันอาจต้องใช้กระบวนการต่างกันเมื่อเกณฑ์รับงานเปลี่ยน"),
                     ("Review should reduce ambiguity before production starts, not after the part arrives.", "การตรวจควรลดความกำกวมก่อนผลิต ไม่ใช่หลังชิ้นงานส่งถึงมือ")),
                 Section(
@@ -1858,7 +1870,19 @@ internal static class SiteContent
                 "A small cover may look finished after curing, yet crack at a clip, show support marks on a visible face, or become cloudy if the required optical surface was not called out.",
                 "ฝาครอบขนาดเล็กอาจดูเสร็จหลังอบ แต่แตกที่คลิป มีรอยซัพพอร์ตบนผิวโชว์ หรือขุ่นได้ถ้าไม่ได้ระบุผิว Optical ที่ต้องการ",
                 "Resin order checklist",
-                "เช็กลิสต์งานเรซินก่อนสั่ง");
+                "เช็กลิสต์งานเรซินก่อนสั่ง",
+                ContextImageAltEn: "Clear resin SLA part showing haze, polished areas, and optical surface expectations.",
+                ContextImageAltTh: "ภาพชิ้นงาน SLA เรซินใสที่แสดงความขุ่น ผิวขัด และความคาดหวังด้าน Optical",
+                ContextImageCaptionEn: "Clear resin must be judged by the optical decision, not only by the material name.",
+                ContextImageCaptionTh: "เรซินใสต้องตัดสินจากเป้าหมายด้านแสง ไม่ใช่จากชื่อวัสดุอย่างเดียว",
+                DecisionImageAltEn: "Clear resin support marks placed away from an optical face to protect transparency.",
+                DecisionImageAltTh: "ภาพรอยซัพพอร์ตบนเรซินใสที่วางออกจากผิว Optical เพื่อรักษาความใส",
+                DecisionImageCaptionEn: "Support marks affect optical surfaces, so clean faces must be identified before printing.",
+                DecisionImageCaptionTh: "รอยซัพพอร์ตกระทบผิว Optical จึงต้องระบุผิวสะอาดก่อนพิมพ์",
+                ReviewImageAltEn: "Resin review layout showing orientation, support marks, wall thickness, trapped resin, and polishing access.",
+                ReviewImageAltTh: "ภาพการตรวจเรซินที่แสดงทิศพิมพ์ รอยซัพพอร์ต ความหนาผนัง เรซินค้าง และทางเข้าขัด",
+                ReviewImageCaptionEn: "Resin review checks orientation, support marks, wall thickness, trapped resin, and finishing access.",
+                ReviewImageCaptionTh: "การตรวจเรซินดูทิศพิมพ์ รอยซัพพอร์ต ความหนาผนัง เรซินค้าง และทางเข้าเก็บผิว");
         }
 
         if (slug.Contains("sls", StringComparison.Ordinal) || slug.Contains("nylon", StringComparison.Ordinal) || categoryEn.Contains("Powder", StringComparison.Ordinal))
@@ -2017,7 +2041,19 @@ internal static class SiteContent
         string ChecklistTitleEn,
         string ChecklistTitleTh,
         string ChecklistBodyEn = "Use the quote as a production handoff, not just a price snapshot.",
-        string ChecklistBodyTh = "ใช้ใบเสนอราคาเป็นข้อมูลส่งต่องานผลิต ไม่ใช่แค่ภาพราคาชั่วคราว");
+        string ChecklistBodyTh = "ใช้ใบเสนอราคาเป็นข้อมูลส่งต่องานผลิต ไม่ใช่แค่ภาพราคาชั่วคราว",
+        string ContextImageAltEn = "Technical article image showing the main manufacturing context for this topic.",
+        string ContextImageAltTh = "ภาพประกอบเทคนิคที่แสดงบริบทการผลิตหลักของหัวข้อนี้",
+        string ContextImageCaptionEn = "Start with the real manufacturing context before comparing prices.",
+        string ContextImageCaptionTh = "เริ่มจากบริบทการผลิตจริงก่อนเทียบราคา",
+        string DecisionImageAltEn = "Technical article image showing the decision points that must be stated before quotation.",
+        string DecisionImageAltTh = "ภาพประกอบเทคนิคที่แสดงจุดตัดสินใจก่อนเสนอราคา",
+        string DecisionImageCaptionEn = "State the decision points so the review focuses on the right details.",
+        string DecisionImageCaptionTh = "ระบุจุดตัดสินใจเพื่อให้การตรวจโฟกัสถูกเรื่อง",
+        string ReviewImageAltEn = "Technical article image showing manufacturing review checks for this topic.",
+        string ReviewImageAltTh = "ภาพประกอบเทคนิคที่แสดงจุดตรวจงานผลิตของหัวข้อนี้",
+        string ReviewImageCaptionEn = "Manufacturing review turns the requirement into practical checks.",
+        string ReviewImageCaptionTh = "การตรวจผลิตแปลงข้อกำหนดเป็นจุดตรวจที่ใช้งานได้จริง");
 
     private static ArticleSectionContent Section(string titleEn, string titleTh, string bodyEn, string bodyTh, params (string En, string Th)[] items)
     {
@@ -2025,6 +2061,35 @@ internal static class SiteContent
             Text(titleEn, titleTh),
             Text(bodyEn, bodyTh),
             items.Select(item => Text(item.En, item.Th)).ToArray());
+    }
+
+    private static ArticleSectionContent SectionWithImage(
+        string titleEn,
+        string titleTh,
+        string bodyEn,
+        string bodyTh,
+        ArticleImageContent image,
+        params (string En, string Th)[] items)
+    {
+        return new ArticleSectionContent(
+            Text(titleEn, titleTh),
+            Text(bodyEn, bodyTh),
+            items.Select(item => Text(item.En, item.Th)).ToArray(),
+            image);
+    }
+
+    private static ArticleImageContent BlogArticleImage(
+        string slug,
+        int index,
+        string altEn,
+        string altTh,
+        string captionEn,
+        string captionTh)
+    {
+        return new ArticleImageContent(
+            $"/images/blog/articles/{slug}-{index:00}.jpg",
+            Text(altEn, altTh),
+            Text(captionEn, captionTh));
     }
 
     private static string ResolveQuoteEngineUrl()
@@ -2144,4 +2209,10 @@ internal sealed record BlogPostContent(
     IReadOnlyList<ArticleSectionContent> Sections,
     IReadOnlyList<LocalizedText> Takeaways);
 
-internal sealed record ArticleSectionContent(LocalizedText Title, LocalizedText Body, IReadOnlyList<LocalizedText> Items);
+internal sealed record ArticleSectionContent(
+    LocalizedText Title,
+    LocalizedText Body,
+    IReadOnlyList<LocalizedText> Items,
+    ArticleImageContent? Image = null);
+
+internal sealed record ArticleImageContent(string Url, LocalizedText Alt, LocalizedText Caption);
