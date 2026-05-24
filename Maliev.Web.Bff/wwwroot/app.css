@@ -2758,7 +2758,41 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 .machine-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);
+  gap: 10px;
+  align-items: stretch;
+  width: min(100%, 430px);
   margin-top: 4px;
+}
+
+.machine-actions .button {
+  min-height: 52px;
+  border-radius: 10px;
+  font-weight: 750;
+}
+
+.machine-actions .button.primary {
+  justify-content: space-between;
+  padding-inline: 18px;
+  box-shadow: rgba(10, 114, 239, .24) 0 14px 30px -22px;
+}
+
+.machine-actions .button.primary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-left: 10px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.machine-actions .button.secondary {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue) 18%, var(--rule));
 }
 
 .process-grid {
@@ -8281,6 +8315,31 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .machine-config-summary strong {
     text-align: left;
+  }
+
+  .machine-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background: rgb(var(--machine-feature-panel-rgb) / .62);
+    border: 1px solid rgb(var(--machine-feature-border-rgb) / .10);
+    border-radius: 14px;
+    box-shadow: rgba(17, 24, 39, .08) 0 18px 44px -30px;
+  }
+
+  .machine-actions .button {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .machine-actions .button.primary {
+    padding-inline: 16px;
+  }
+
+  .machine-actions .button.secondary {
+    justify-content: center;
+    background: transparent;
   }
 
   .machine-stat-grid div {

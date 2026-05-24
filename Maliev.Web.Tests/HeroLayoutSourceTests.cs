@@ -769,6 +769,20 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-addon-option", styles);
         Assert.Contains(".machine-addon-option.is-selected", styles);
         Assert.Contains(".machine-config-summary", styles);
+        Assert.Contains(".machine-actions {\n  display: grid;", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);", styles);
+        Assert.Contains(".machine-actions .button {\n  min-height: 52px;", styles);
+        Assert.Contains(".machine-actions .button.primary {\n  justify-content: space-between;", styles);
+        Assert.Contains(".machine-actions .button.primary::after", styles);
+        Assert.Matches(
+            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions\s*\{[^}]*grid-template-columns:\s*1fr;[^}]*gap:\s*10px;[^}]*padding:\s*10px;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions \.button\s*\{[^}]*width:\s*100%;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions \.button\.secondary\s*\{[^}]*justify-content:\s*center;",
+            styles);
         Assert.DoesNotContain(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature .h-display", styles);
         Assert.Contains(".machine-feature-title", styles);
