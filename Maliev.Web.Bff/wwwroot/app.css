@@ -846,7 +846,7 @@ main {
   flex: 0 0 auto;
   min-height: 52px;
   padding: 0 0 17px;
-  color: var(--ink);
+  color: var(--muted);
   font: inherit;
   font-size: .98rem;
   font-weight: 650;
@@ -855,6 +855,12 @@ main {
   background: transparent;
   border: 0;
   cursor: pointer;
+  transition: color .18s ease-in-out;
+}
+
+.home-services-tab:is(:hover, :focus-visible),
+.home-services-tab.is-active {
+  color: var(--ink);
 }
 
 .home-services-tab::after {
