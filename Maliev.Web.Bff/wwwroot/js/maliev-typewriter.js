@@ -31,6 +31,22 @@
     return true;
   };
 
+  const runReducedMotionRotation = async (target, options, interval, token) => {
+    let optionIndex = 0;
+    target.textContent = options[optionIndex];
+
+    while (!token.cancelled) {
+      await sleep(interval);
+
+      if (token.cancelled) {
+        return;
+      }
+
+      optionIndex = (optionIndex + 1) % options.length;
+      target.textContent = options[optionIndex];
+    }
+  };
+
   const initializeTypewriter = root => {
     const target = root.querySelector("[data-typewriter-text]");
     const options = Array.from(root.querySelectorAll("[data-typewriter-option]"))
@@ -55,7 +71,7 @@
     root.dataset.typewriterSignature = signature;
     target.textContent = uniqueOptions[0];
 
-    if (uniqueOptions.length === 1 || reduceMotion()) {
+    if (uniqueOptions.length === 1) {
       return;
     }
 
@@ -67,6 +83,11 @@
     let optionIndex = 0;
 
     root._malievTypewriterToken = token;
+
+    if (reduceMotion()) {
+      void runReducedMotionRotation(target, uniqueOptions, cycleInterval, token);
+      return;
+    }
 
     const run = async () => {
       while (!token.cancelled) {

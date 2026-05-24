@@ -1081,6 +1081,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("target.textContent = \"\";", script);
         Assert.Contains("eraseText", script);
         Assert.Contains("prefers-reduced-motion: reduce", script);
+        Assert.Contains("runReducedMotionRotation", script);
+        Assert.Contains("void runReducedMotionRotation(target, uniqueOptions, cycleInterval, token);", script);
         Assert.Contains("new MutationObserver", script);
         Assert.Contains("scheduleInitialize(1000)", script);
         Assert.Contains(".footer-typewriter-cursor", styles);
