@@ -2774,27 +2774,6 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   margin-bottom: clamp(46px, 5vw, 72px);
 }
 
-.process-step-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  width: fit-content;
-  margin-bottom: 18px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-.process-step-kicker::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--blue);
-  border-radius: 999px;
-}
 
 .process-lede h2 {
   max-width: 760px;

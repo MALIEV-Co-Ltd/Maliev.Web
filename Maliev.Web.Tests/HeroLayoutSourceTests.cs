@@ -382,8 +382,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("process-grid", source);
         Assert.Contains("bindWorkflowStepReveal", source);
         Assert.Contains("Quote to part workflow", source);
-        Assert.Contains("process-step-kicker", source);
-        Assert.Contains("How it works", source);
+        Assert.DoesNotContain("process-step-kicker", source);
+        Assert.DoesNotContain("How it works", source);
         Assert.Contains("Quote to part, no friction", source);
         Assert.Contains("Upload CAD once, configure online, let MALIEV make it", source);
         Assert.Contains("Drop your file", source);
@@ -533,8 +533,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--workflow-accent: #3f6f62;", processStyles);
         Assert.Contains("--workflow-accent: #8a6a2d;", processStyles);
         Assert.Contains("--workflow-accent: #743f3f;", processStyles);
-        Assert.Contains(".process-step-kicker", processStyles);
-        Assert.Contains(".process-step-kicker::before", processStyles);
+        Assert.DoesNotContain(".process-step-kicker", processStyles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", processStyles);
         Assert.Contains("align-items: start;", processStyles);
         Assert.Contains("grid-auto-flow: row;", processStyles);
