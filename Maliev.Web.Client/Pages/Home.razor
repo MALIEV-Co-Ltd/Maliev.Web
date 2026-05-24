@@ -60,20 +60,24 @@
 <section class="industry-sector-band" aria-labelledby="industry-sector-title">
     <div class="industry-sector-band-inner">
         <div class="industry-sector-copy">
-            <p class="industry-sector-kicker">@Text("Used by engineers across industrial sectors", "ใช้งานโดยวิศวกรในหลายอุตสาหกรรม")</p>
-            <h2 id="industry-sector-title">@Text("Custom parts for teams that build, test, and keep production moving.", "ชิ้นงานสั่งผลิตสำหรับทีมที่สร้าง ทดสอบ และเดินงานผลิตต่อเนื่อง")</h2>
-            <p>@Text("MALIEV manufactures 3D-printed, CNC-machined, reverse-engineered, cast, and molded parts for practical engineering work.", "MALIEV ผลิตชิ้นงาน 3D print, CNC, reverse engineering, งานหล่อ และงานฉีดขึ้นรูปสำหรับงานวิศวกรรมจริง")</p>
+            <h2 id="industry-sector-title">@Text("Major industries served", "อุตสาหกรรมหลักที่เราให้บริการ")</h2>
+            <p>@Text("We help engineering teams move from prototype to usable production parts across demanding product categories.", "เราช่วยทีมวิศวกรรมเปลี่ยนจากต้นแบบไปสู่ชิ้นงานใช้งานจริงในกลุ่มผลิตภัณฑ์ที่ต้องการความละเอียดสูง")</p>
         </div>
         <ul class="industry-sector-list" aria-label="@Text("Industrial sectors served", "กลุ่มอุตสาหกรรมที่รองรับ")">
             @foreach (var sector in IndustrySectors)
             {
                 <li>
-                    <img class="industry-sector-image"
-                         src="@sector.ImageUrl"
-                         alt="@sector.ImageAlt.For(Preferences.Culture)"
-                         loading="lazy" />
-                    <span>@sector.Title.For(Preferences.Culture)</span>
-                    <small>@sector.Body.For(Preferences.Culture)</small>
+                    <a class="industry-sector-card" href="@sector.LinkUrl">
+                        <img class="industry-sector-image"
+                             src="@sector.ImageUrl"
+                             alt="@sector.ImageAlt.For(Preferences.Culture)"
+                             loading="lazy" />
+                        <span class="industry-sector-card-copy">
+                            <span class="industry-sector-card-title">@sector.Title.For(Preferences.Culture)</span>
+                            <span class="industry-sector-card-body">@sector.Body.For(Preferences.Culture)</span>
+                            <span class="industry-sector-link">@Text("Learn more", "เรียนรู้เพิ่มเติม") <span aria-hidden="true">&rarr;</span></span>
+                        </span>
+                    </a>
                 </li>
             }
         </ul>
@@ -286,35 +290,29 @@
     private static readonly IReadOnlyList<IndustrySector> IndustrySectors =
     [
         new(
-            SiteContent.Text("Automation", "Automation"),
-            SiteContent.Text("fixtures, guards, brackets", "ฟิกซ์เจอร์ การ์ด ขายึด"),
+            SiteContent.Text("Aerospace", "อากาศยาน"),
+            SiteContent.Text("Lightweight prototypes, inspection aids, and production support parts for flight-adjacent engineering work.", "ต้นแบบน้ำหนักเบา อุปกรณ์ช่วยตรวจ และชิ้นส่วนสนับสนุนการผลิตสำหรับงานวิศวกรรมใกล้เคียงอากาศยาน"),
             ServiceImage("cnc-machining"),
-            SiteContent.Text("CNC-machined automation fixture being used on a production floor", "ฟิกซ์เจอร์งาน CNC ที่ใช้งานจริงในไลน์ผลิต")),
+            SiteContent.Text("Precision machined component prepared for aerospace-adjacent engineering review", "ชิ้นงานกัดละเอียดที่เตรียมสำหรับการตรวจทบทวนงานวิศวกรรมใกล้เคียงอากาศยาน"),
+            "/services/cnc-machining"),
         new(
-            SiteContent.Text("Robotics", "Robotics"),
-            SiteContent.Text("end effectors, mounts", "หัวจับ ขายึด"),
-            ServiceImage("rapid-prototyping"),
-            SiteContent.Text("3D-printed robot tooling and mounting parts prepared for fit testing", "ทูลลิ่งและขายึดหุ่นยนต์จากงานพิมพ์ 3 มิติที่เตรียมทดสอบการประกอบ")),
-        new(
-            SiteContent.Text("Automotive", "Automotive"),
-            SiteContent.Text("checks, jigs, samples", "จิ๊กตรวจ ตัวอย่าง"),
+            SiteContent.Text("Automotive", "ยานยนต์"),
+            SiteContent.Text("Rapid fixtures, jig components, and validation samples for vehicle and mobility programs.", "ฟิกซ์เจอร์ จิ๊ก และชิ้นงานตัวอย่างสำหรับการตรวจยืนยันในโครงการยานยนต์และโมบิลิตี้"),
             ServiceImage("deviation-analysis"),
-            SiteContent.Text("Inspection caliper checking an automotive jig and machined sample", "การตรวจจิ๊กและตัวอย่างชิ้นงานยานยนต์ด้วยเวอร์เนียร์")),
+            SiteContent.Text("Inspection caliper checking an automotive jig and machined validation sample", "การตรวจจิ๊กยานยนต์และตัวอย่างชิ้นงานกัดด้วยเวอร์เนียร์"),
+            "/services/deviation-analysis"),
         new(
-            SiteContent.Text("Electronics", "Electronics"),
-            SiteContent.Text("enclosures, inserts", "กล่อง อินเสิร์ต"),
+            SiteContent.Text("Consumer electronics", "อิเล็กทรอนิกส์ผู้บริโภค"),
+            SiteContent.Text("Enclosures, inserts, fit-check models, and cosmetic prototypes for product teams.", "กล่อง อินเสิร์ต โมเดลเช็กการประกอบ และต้นแบบผิวภายนอกสำหรับทีมพัฒนาผลิตภัณฑ์"),
             ServiceImage("3d-design"),
-            SiteContent.Text("Electronics enclosure design and CAD review for a manufacturable prototype", "การออกแบบกล่องอิเล็กทรอนิกส์และตรวจ CAD สำหรับต้นแบบที่ผลิตได้จริง")),
+            SiteContent.Text("Consumer electronics enclosure design and CAD review for a manufacturable prototype", "การออกแบบกล่องอิเล็กทรอนิกส์และตรวจ CAD สำหรับต้นแบบที่ผลิตได้จริง"),
+            "/services/3d-design"),
         new(
-            SiteContent.Text("Manufacturing", "Manufacturing"),
-            SiteContent.Text("tools, spares, trials", "เครื่องมือ อะไหล่ ทดลอง"),
-            ServiceImage("silicone-casting"),
-            SiteContent.Text("Small-batch tooling and molded production parts in a workshop environment", "ทูลลิ่งล็อตเล็กและชิ้นงานขึ้นรูปในสภาพแวดล้อมเวิร์กช็อป")),
-        new(
-            SiteContent.Text("R&D", "R&D"),
-            SiteContent.Text("prototypes, test rigs", "ต้นแบบ ชุดทดสอบ"),
-            ServiceImage("3d-printing"),
-            SiteContent.Text("3D-printed prototype part used for engineering testing and iteration", "ต้นแบบพิมพ์ 3 มิติที่ใช้ทดสอบและปรับแบบทางวิศวกรรม"))
+            SiteContent.Text("Medical", "การแพทย์"),
+            SiteContent.Text("Device housings, ergonomic prototypes, and cleanable workshop-built components for health-product development.", "ตัวเรือนอุปกรณ์ ต้นแบบด้านสรีรศาสตร์ และชิ้นส่วนเวิร์กช็อปที่ทำความสะอาดง่ายสำหรับการพัฒนาผลิตภัณฑ์สุขภาพ"),
+            ServiceImage("rapid-prototyping"),
+            SiteContent.Text("Prototype device housing prepared for medical product development review", "ตัวเรือนอุปกรณ์ต้นแบบที่เตรียมสำหรับการตรวจทบทวนผลิตภัณฑ์สุขภาพ"),
+            "/services/rapid-prototyping")
     ];
 
     private MachineFeature SelectedMachineFeature => MachineFeatures.FirstOrDefault(
@@ -673,7 +671,8 @@
         LocalizedText Title,
         LocalizedText Body,
         string ImageUrl,
-        LocalizedText ImageAlt);
+        LocalizedText ImageAlt,
+        string LinkUrl);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
 
