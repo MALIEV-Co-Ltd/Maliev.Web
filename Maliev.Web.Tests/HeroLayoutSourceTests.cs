@@ -165,6 +165,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Matches(@"\.service-answer-card\s*\{[^}]*background:\s*transparent;", styles);
         Assert.Matches(@"\.service-answer-card\s*\{[^}]*border:\s*0;", styles);
         Assert.Matches(@"\.service-answer-card-grid--routes\s*\{[^}]*repeat\(4, minmax\(0, 1fr\)\);", styles);
+        Assert.Matches(@"\.service-answer-meta\s*\{[^}]*display:\s*inline-flex;", styles);
+        Assert.Matches(@"\.service-answer-meta\s*\{[^}]*width:\s*fit-content;", styles);
+        Assert.Matches(@"\.service-answer-meta\s*\{[^}]*max-width:\s*100%;", styles);
+        Assert.Matches(@"\.service-answer-meta\s*\{[^}]*min-height:\s*34px;", styles);
+        Assert.Matches(@"\.service-answer-meta\s*\{[^}]*overflow-wrap:\s*anywhere;", styles);
+        Assert.DoesNotMatch(@"\.service-answer-meta\s*\{[^}]*width:\s*42px;", styles);
+        Assert.DoesNotMatch(@"\.service-answer-meta\s*\{[^}]*height:\s*42px;", styles);
         Assert.Contains(".service-answer-card-grid--checks", styles);
         Assert.Contains(".service-answer-steps", styles);
         Assert.Contains(".service-detail-section--cnc-machining", styles);

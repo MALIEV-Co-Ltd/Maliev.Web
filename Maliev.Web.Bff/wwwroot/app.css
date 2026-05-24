@@ -3398,18 +3398,24 @@ html[data-theme="dark"] .workflow-step {
 }
 
 .service-answer-meta {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 34px;
   margin-bottom: 8px;
-  padding: 0;
+  padding: 0 12px;
   color: var(--service-accent-ink);
   background: color-mix(in srgb, var(--service-soft) 82%, white);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: .8rem;
+  font-size: .72rem;
   font-weight: 800;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .service-answer-steps {
