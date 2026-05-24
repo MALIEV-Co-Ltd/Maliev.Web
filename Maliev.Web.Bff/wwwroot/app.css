@@ -7671,6 +7671,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     justify-items: stretch;
   }
 
+  .home-services-media figcaption {
+    width: 100%;
+    max-width: none;
+    text-align: left;
+  }
+
   .home-services-cta {
     justify-content: center;
   }

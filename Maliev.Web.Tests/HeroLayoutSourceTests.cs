@@ -615,6 +615,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-services-tabs {\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains("overflow: visible;\n    border-bottom: 0;", styles);
         Assert.Contains("\"copy\"\n      \"media\"\n      \"proof\";", styles);
+        Assert.Matches(@"@media \(max-width: 680px\)[\s\S]*?\.home-services-media figcaption\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;[^}]*text-align:\s*left;", styles);
         Assert.Contains("machine-feature", source);
         Assert.Contains("id=\"machine-feature-preview\"", source);
         Assert.Contains("aria-labelledby=\"imm-intro-title\"", source);
