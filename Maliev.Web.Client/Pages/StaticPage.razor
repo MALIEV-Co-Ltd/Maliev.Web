@@ -542,7 +542,7 @@ else if (CurrentBlogPost is { } blogPost)
             <div class="detail-sidebar-actions" aria-label="@Text("Blog sidebar actions", "ปุ่มดำเนินการในแถบบทความ")">
                 <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
                 <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
-                <button type="button" class="button secondary blog-pdf-button" @onclick="DownloadBlogPdfAsync">@Text("Download PDF", "ดาวน์โหลด PDF")</button>
+                <a class="button secondary blog-pdf-button" href="@BuildBlogPdfHref(blogPost)" download="@BuildBlogPdfFileName(blogPost)">@Text("Download PDF", "ดาวน์โหลด PDF")</a>
             </div>
         </aside>
     </section>
@@ -1292,11 +1292,6 @@ else
             .Where(material => _selectedMaterialNames.Contains(material.Name))
             .ToList();
 
-    private async Task DownloadBlogPdfAsync()
-    {
-        await JS.InvokeVoidAsync("print");
-    }
-
     private string ReadQueryStringValue(string key)
     {
         var query = new Uri(Navigation.Uri).Query;
@@ -1320,6 +1315,16 @@ else
         }
 
         return string.Empty;
+    }
+
+    private string BuildBlogPdfHref(BlogPostContent post)
+    {
+        return $"/web/v1/blog/{Uri.EscapeDataString(post.Slug)}/ebook.pdf?culture={Uri.EscapeDataString(Preferences.Culture)}";
+    }
+
+    private static string BuildBlogPdfFileName(BlogPostContent post)
+    {
+        return $"{post.Slug}-maliev-practical-note.pdf";
     }
 
     private static bool BlogPostMatchesSearch(BlogPostContent post, string query)

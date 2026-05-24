@@ -23,5 +23,6 @@
     <PackageReference Include="Markdig" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.7" />
     <PackageReference Include="MudBlazor" Version="9.1.0" />
+    <PackageReference Include="QuestPDF" Version="2026.2.3" />
   </ItemGroup>
 </Project>

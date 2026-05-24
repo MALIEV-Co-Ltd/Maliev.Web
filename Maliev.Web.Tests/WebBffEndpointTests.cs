@@ -81,6 +81,41 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies practical notes are downloaded as generated PDF booklets instead of browser print output.
+    /// </summary>
+    [Fact]
+    public async Task GET_BlogEbookPdf_ReturnsGeneratedPdfDownload()
+    {
+        using var client = _factory.CreateClient();
+
+        using var response = await client.GetAsync("/web/v1/blog/fdm-heat-material-choice/ebook.pdf?culture=en");
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("attachment", response.Content.Headers.ContentDisposition?.DispositionType);
+        Assert.Contains("fdm-heat-material-choice", response.Content.Headers.ContentDisposition?.FileName ?? response.Content.Headers.ContentDisposition?.FileNameStar);
+        Assert.True(bytes.Length > 1_000);
+        Assert.Equal((byte)'%', bytes[0]);
+        Assert.Equal((byte)'P', bytes[1]);
+        Assert.Equal((byte)'D', bytes[2]);
+        Assert.Equal((byte)'F', bytes[3]);
+    }
+
+    /// <summary>
+    /// Verifies unknown practical note download slugs fail cleanly.
+    /// </summary>
+    [Fact]
+    public async Task GET_BlogEbookPdf_UnknownSlug_ReturnsNotFound()
+    {
+        using var client = _factory.CreateClient();
+
+        using var response = await client.GetAsync("/web/v1/blog/not-a-real-note/ebook.pdf?culture=en");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    /// <summary>
     /// Verifies quote estimates preserve explicit bulk-discount fields returned by pricing.
     /// </summary>
     [Fact]

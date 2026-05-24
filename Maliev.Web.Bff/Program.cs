@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+QuestPDF.Settings.License = LicenseType.Community;
 
 if (builder.Environment.IsDevelopment())
 {
@@ -131,6 +133,7 @@ builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
+builder.Services.AddSingleton<BlogEbookPdfService>();
 
 var app = builder.Build();
 

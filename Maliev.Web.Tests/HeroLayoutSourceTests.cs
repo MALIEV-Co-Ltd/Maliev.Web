@@ -750,10 +750,13 @@ public sealed class HeroLayoutSourceTests
     /// Verifies the practical notes library has enough researched content and printable article support.
     /// </summary>
     [Fact]
-    public void BlogPostsIncludeExpandedPracticalNotesAndPdfPrintAction()
+    public void BlogPostsIncludeExpandedPracticalNotesAndEbookDownload()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var controller = ReadRepoFile("Maliev.Web.Bff", "Controllers", "BlogController.cs");
+        var pdfService = ReadRepoFile("Maliev.Web.Bff", "Services", "BlogEbookPdfService.cs");
+        var bffProject = ReadRepoFile("Maliev.Web.Bff", "Maliev.Web.Bff.csproj");
 
         Assert.True(SiteContent.BlogPosts.Count >= 53);
         Assert.Equal(SiteContent.BlogPosts.Count, SiteContent.BlogPosts.Select(post => post.Slug).Distinct(StringComparer.Ordinal).Count());
@@ -777,7 +780,19 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Download PDF", source);
         Assert.Contains("ดาวน์โหลด PDF", source);
         Assert.Contains("blog-pdf-button", source);
-        Assert.Contains("InvokeVoidAsync(\"print\")", source);
+        Assert.Contains("BuildBlogPdfHref", source);
+        Assert.Contains("/web/v1/blog/{Uri.EscapeDataString(post.Slug)}/ebook.pdf?culture=", source);
+        Assert.Contains("BuildBlogPdfFileName", source);
+        Assert.DoesNotContain("DownloadBlogPdfAsync", source);
+        Assert.DoesNotContain("InvokeVoidAsync(\"print\")", source);
+        Assert.Contains("[Route(\"web/v{version:apiVersion}/blog\")]", controller);
+        Assert.Contains("[HttpGet(\"{slug}/ebook.pdf\")]", controller);
+        Assert.Contains("BlogEbookPdfService", controller);
+        Assert.Contains("QuestPDF", bffProject);
+        Assert.Contains("PageSizes.A5", pdfService);
+        Assert.Contains("PageSizes.A4", pdfService);
+        Assert.Contains("MALIEV Co., Ltd.", pdfService);
+        Assert.Contains("Before you upload", pdfService);
         Assert.Contains("blog-search-form", source);
         Assert.Contains("blog-category-filter", source);
         Assert.Contains("name=\"category\"", source);
