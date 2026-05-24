@@ -588,7 +588,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature", source);
         Assert.Contains("id=\"machine-feature-preview\"", source);
         Assert.Contains("aria-labelledby=\"imm-intro-title\"", source);
-        Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", source);
+        Assert.Contains("data-selected-variant=\"@SelectedMachineVariant.Key\"", source);
+        Assert.Contains("data-compressor-included=\"@MachineCompressorAriaPressed\"", source);
         Assert.Contains("data-machine-panel=\"intro\"", source);
         Assert.Contains("machine-feature-panel", source);
         Assert.Contains("data-machine-content=\"intro\"", source);
@@ -601,19 +602,22 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature-backdrop", source);
         Assert.Contains("machine-feature-backdrop--light", source);
         Assert.Contains("machine-feature-backdrop--dark", source);
-        Assert.Contains("@key=\"SelectedMachineFeature.Accent\"", source);
-        Assert.Contains("src=\"@SelectedMachineFeature.FeatureImageUrl\"", source);
-        Assert.Contains("src=\"@SelectedMachineFeature.DarkFeatureImageUrl\"", source);
-        Assert.Contains("alt=\"@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)\"", source);
-        Assert.Contains("@SelectedMachineFeature.Body.For(Preferences.Culture)", source);
+        Assert.Contains("@key=\"SelectedMachineVariant.Key\"", source);
+        Assert.Contains("src=\"@SelectedMachineVariant.FeatureImageUrl\"", source);
+        Assert.Contains("src=\"@SelectedMachineVariant.DarkFeatureImageUrl\"", source);
+        Assert.Contains("alt=\"@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)\"", source);
+        Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", source);
         Assert.Contains("/images/products/pneumatic-injection-molding-machines.png", source);
         Assert.Contains("/images/products/pneumatic-injection-molding-machines-dark.png", source);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines.png")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines-dark.png")));
-        Assert.Contains("SiteContent.CaliperInspectionImageUrl", source);
-        Assert.Contains("SiteContent.DesignPlanningImageUrl", source);
-        Assert.Contains("SiteContent.InjectionMoldingLineImageUrl", source);
-        Assert.Contains("MachineFeatureButtonClass(feature)", source);
+        Assert.Contains("machine-configurator", source);
+        Assert.Contains("role=\"radiogroup\"", source);
+        Assert.Contains("role=\"radio\"", source);
+        Assert.Contains("aria-checked=\"@MachineVariantAriaChecked(variant)\"", source);
+        Assert.Contains("25L air compressor", source);
+        Assert.Contains("ToggleMachineCompressor", source);
+        Assert.Contains("MachineVariantButtonClass(variant)", source);
         Assert.Contains("WorkflowStepClass(step)", source);
         Assert.Contains("@ref=\"_machineFeaturePreview\"", source);
         Assert.DoesNotContain("private ElementReference _machineFeatureDetails;", source);
@@ -621,11 +625,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("malievScroll.bindMachineFeatureHandoff", source);
         Assert.Contains("malievScroll.bindWorkflowStepReveal", source);
         Assert.Contains("type=\"button\"", source);
-        Assert.Contains("data-machine-feature=\"@feature.Accent\"", source);
+        Assert.Contains("data-machine-variant=\"@variant.Key\"", source);
         Assert.Contains("data-workflow-accent=\"@step.Accent\"", source);
         Assert.Contains("aria-current=\"@WorkflowAriaCurrent(step)\"", source);
-        Assert.Contains("aria-current=\"@MachineFeatureAriaCurrent(feature)\"", source);
-        Assert.Contains("SelectMachineFeature(feature)", source);
+        Assert.Contains("SelectMachineVariant(variant)", source);
         Assert.DoesNotContain("SelectWorkflowStepAsync(step, _workflowCarousel)", source);
         Assert.Contains("SelectWorkflowStepAsync(step, _machineFeaturePreview)", source);
         Assert.Contains("malievScroll.scrollIntoView", source);
@@ -653,7 +656,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("window.addEventListener('scroll', scheduleHalfwayHandoff", scrollScript);
         Assert.Contains("Math.abs(event.deltaY) > 12", scrollScript);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body);", source);
-        Assert.Contains("private sealed record MachineFeature(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineFeatureStat> Stats);", source);
+        Assert.Contains("private sealed record MachineVariant(\n        string Key,\n        LocalizedText Title,\n        LocalizedText Subtitle,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineStat> Stats);", source);
         Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
         Assert.DoesNotContain("machine-feature-kicker", source);
         Assert.DoesNotContain("PIMM-30 / PIMM-50", source);
@@ -663,13 +666,19 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("h-display machine-feature-title", source);
         Assert.Contains("machine-feature-title-line machine-feature-title-lead", source);
         Assert.DoesNotContain("<br />\n            <span class=\"accent-blue\">@Text(\"machines.\", \"สำหรับล็อตเล็ก\")</span>", source);
-        Assert.Contains("Use the 30g pneumatic machine", source);
-        Assert.Contains("Switch to the 50g machine", source);
+        Assert.Contains("Choose the 30g pneumatic machine", source);
+        Assert.Contains("Choose the 50g pneumatic machine", source);
+        Assert.Contains("30g machine", source);
+        Assert.Contains("50g machine", source);
+        Assert.DoesNotContain("30g trials", source);
+        Assert.DoesNotContain("50g small batches", source);
+        Assert.DoesNotContain("Tooling setup", source);
+        Assert.DoesNotContain("Run and tune", source);
         Assert.Contains("machine-stat-grid", source);
-        Assert.Contains("@foreach (var stat in SelectedMachineFeature.Stats)", source);
+        Assert.Contains("@foreach (var stat in SelectedMachineVariant.Stats)", source);
         Assert.Contains("new(SiteContent.Text(\"30g\", \"30g\"), SiteContent.Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\"))", source);
         Assert.Contains("new(SiteContent.Text(\"50g\", \"50g\"), SiteContent.Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\"))", source);
-        Assert.Contains("new(SiteContent.Text(\"300/350°C\", \"300/350°C\"), SiteContent.Text(\"melt window\", \"ช่วงอุณหภูมิ\"))", source);
+        Assert.Contains("new(SiteContent.Text(\"350°C\", \"350°C\"), SiteContent.Text(\"max melt\", \"อุณหภูมิสูงสุด\"))", source);
         Assert.DoesNotContain("<div><strong>30g/50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>50g</strong><small>@Text(\"shot capacity\", \"ปริมาตรฉีดต่อครั้ง\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>300/350°C</strong><small>@Text(\"max melt\", \"อุณหภูมิสูงสุด\")</small></div>", source);
@@ -712,8 +721,13 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
         Assert.Contains("width: 100vw;", styles);
         Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
-        Assert.Contains(".machine-feature-point-button", styles);
-        Assert.Contains(".machine-feature-point-button.is-active", styles);
+        Assert.Contains(".machine-configurator", styles);
+        Assert.Contains(".machine-variant-button", styles);
+        Assert.Contains(".machine-variant-button.is-selected", styles);
+        Assert.Contains(".machine-addon-option", styles);
+        Assert.Contains(".machine-addon-option.is-selected", styles);
+        Assert.Contains(".machine-config-summary", styles);
+        Assert.DoesNotContain(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature .h-display", styles);
         Assert.Contains(".machine-feature-title", styles);
         Assert.Contains("html:lang(th) .machine-feature-title-lead", styles);
@@ -772,10 +786,10 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the pneumatic injection machine controls rotate only machine-specific content.
+    /// Verifies the pneumatic injection machine configurator limits selection to machine variants and the compressor add-on.
     /// </summary>
     [Fact]
-    public void HomeMachineFeatureButtonsControlOnlyPneumaticInjectionFeature()
+    public void HomeMachineConfiguratorLimitsMachineSelectionAndCompressorAddon()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var machineStart = source.IndexOf("<section id=\"machine-feature-preview\"", StringComparison.Ordinal);
@@ -789,22 +803,29 @@ public sealed class HeroLayoutSourceTests
 
         var machineSection = source[machineStart..homeWorkStart];
 
-        Assert.Contains("data-selected-feature=\"@SelectedMachineFeature.Accent\"", machineSection);
-        Assert.Contains("@key=\"SelectedMachineFeature.Accent\"", machineSection);
-        Assert.Contains("src=\"@SelectedMachineFeature.FeatureImageUrl\"", machineSection);
-        Assert.Contains("src=\"@SelectedMachineFeature.DarkFeatureImageUrl\"", machineSection);
-        Assert.Contains("alt=\"@SelectedMachineFeature.FeatureImageAlt.For(Preferences.Culture)\"", machineSection);
-        Assert.Contains("@SelectedMachineFeature.Body.For(Preferences.Culture)", machineSection);
-        Assert.Contains("@foreach (var stat in SelectedMachineFeature.Stats)", machineSection);
-        Assert.Contains("@foreach (var feature in MachineFeatures)", machineSection);
-        Assert.Contains("MachineFeatureButtonClass(feature)", machineSection);
-        Assert.Contains("MachineFeatureAriaCurrent(feature)", machineSection);
-        Assert.Contains("@onclick=\"() => SelectMachineFeature(feature)\"", machineSection);
+        Assert.Contains("data-selected-variant=\"@SelectedMachineVariant.Key\"", machineSection);
+        Assert.Contains("data-compressor-included=\"@MachineCompressorAriaPressed\"", machineSection);
+        Assert.Contains("@key=\"SelectedMachineVariant.Key\"", machineSection);
+        Assert.Contains("src=\"@SelectedMachineVariant.FeatureImageUrl\"", machineSection);
+        Assert.Contains("src=\"@SelectedMachineVariant.DarkFeatureImageUrl\"", machineSection);
+        Assert.Contains("alt=\"@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)\"", machineSection);
+        Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", machineSection);
+        Assert.Contains("@foreach (var stat in SelectedMachineVariant.Stats)", machineSection);
+        Assert.Contains("@foreach (var variant in MachineVariants)", machineSection);
+        Assert.Contains("MachineVariantButtonClass(variant)", machineSection);
+        Assert.Contains("MachineVariantAriaChecked(variant)", machineSection);
+        Assert.Contains("@onclick=\"() => SelectMachineVariant(variant)\"", machineSection);
+        Assert.Contains("ToggleMachineCompressor", machineSection);
+        Assert.Contains("25L air compressor", machineSection);
+        Assert.Contains("SelectedMachineConfigurationHref", machineSection);
+        Assert.Contains("SelectedMachinePackageLabel", machineSection);
         Assert.DoesNotContain("ProcessSteps", machineSection);
         Assert.DoesNotContain("_workflowCarousel", machineSection);
+        Assert.DoesNotContain("data-machine-feature", machineSection);
+        Assert.DoesNotContain("MachineFeatureButtonClass", machineSection);
         Assert.DoesNotContain("SelectWorkflowStepAsync", machineSection);
 
-        var machineFeaturesStart = source.IndexOf("private readonly IReadOnlyList<MachineFeature> MachineFeatures", StringComparison.Ordinal);
+        var machineFeaturesStart = source.IndexOf("private readonly IReadOnlyList<MachineVariant> MachineVariants", StringComparison.Ordinal);
         var processStepsStart = source.IndexOf("private readonly IReadOnlyList<ProcessStep> ProcessSteps", StringComparison.Ordinal);
 
         Assert.True(machineFeaturesStart >= 0);
@@ -812,11 +833,15 @@ public sealed class HeroLayoutSourceTests
 
         var machineFeatures = source[machineFeaturesStart..processStepsStart];
 
-        Assert.Contains("30g trials", machineFeatures);
-        Assert.Contains("50g small batches", machineFeatures);
-        Assert.Contains("Tooling setup", machineFeatures);
-        Assert.Contains("Run and tune", machineFeatures);
-        Assert.Contains("MALIEV 30g and 50g pneumatic injection molding machine variants", machineFeatures);
+        Assert.Contains("30g machine", machineFeatures);
+        Assert.Contains("50g machine", machineFeatures);
+        Assert.Contains("Compact trials and inserts", machineFeatures);
+        Assert.Contains("More shot volume", machineFeatures);
+        Assert.DoesNotContain("30g trials", machineFeatures);
+        Assert.DoesNotContain("50g small batches", machineFeatures);
+        Assert.DoesNotContain("Tooling setup", machineFeatures);
+        Assert.DoesNotContain("Run and tune", machineFeatures);
+        Assert.DoesNotContain("MALIEV 30g and 50g pneumatic injection molding machine variants", machineFeatures);
         Assert.DoesNotContain("Upload your file", machineFeatures);
         Assert.DoesNotContain("Review DFM", machineFeatures);
         Assert.DoesNotContain("Adjust price", machineFeatures);
@@ -854,8 +879,9 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("rgb(var(--machine-feature-surface-rgb) / .98)", styles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .72);", machineStyles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .74);", machineStyles);
-        Assert.Contains("background: var(--machine-feature-active-bg);", machineStyles);
-        Assert.Contains("color: var(--machine-feature-active-text);", machineStyles);
+        Assert.Contains(".machine-variant-button.is-selected", machineStyles);
+        Assert.Contains(".machine-addon-option.is-selected", machineStyles);
+        Assert.Contains("border-color: var(--blue);", machineStyles);
         Assert.Contains(".machine-feature-backdrop--dark", machineStyles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light", machineStyles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark", machineStyles);

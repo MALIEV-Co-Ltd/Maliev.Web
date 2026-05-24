@@ -2594,45 +2594,137 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   line-height: 1.35;
 }
 
-.machine-feature-points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.machine-configurator {
+  display: grid;
+  gap: 12px;
 }
 
-.machine-feature-point-button {
-  display: inline-flex;
+.machine-configurator-group {
+  display: grid;
+  gap: 9px;
+}
+
+.machine-configurator-label {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.machine-variant-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.machine-variant-button,
+.machine-addon-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 8px 10px;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
   font: inherit;
   color: var(--ink-2);
-  text-decoration: none;
+  text-align: left;
   background: rgb(var(--machine-feature-panel-rgb) / .74);
-  border: 1px solid rgb(var(--machine-feature-border-rgb) / .08);
+  border: 1px solid rgb(var(--machine-feature-border-rgb) / .10);
   border-radius: var(--radius);
-  font-size: .84rem;
-  font-weight: 600;
   cursor: pointer;
+  box-shadow: rgba(17, 24, 39, .08) 0 14px 36px -30px;
   transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
 }
 
-.machine-feature-point-button:is(:hover, :focus-visible),
-.machine-feature-point-button.is-active {
-  color: var(--machine-feature-active-text);
-  background: var(--machine-feature-active-bg);
-  border-color: var(--machine-feature-active-bg);
-  box-shadow: rgba(17, 24, 39, .18) 0 14px 32px -24px;
+.machine-variant-button {
+  min-height: 92px;
+}
+
+.machine-addon-option {
+  min-height: 74px;
+}
+
+.machine-variant-button:is(:hover, :focus-visible),
+.machine-addon-option:is(:hover, :focus-visible),
+.machine-variant-button.is-selected,
+.machine-addon-option.is-selected {
+  color: var(--ink);
+  background: rgb(var(--machine-feature-panel-rgb) / .92);
+  border-color: var(--blue);
+  box-shadow: rgba(52, 55, 65, .16) 0 18px 42px -28px;
   transform: translateY(-1px);
   outline: none;
 }
 
-.machine-feature-point-number {
-  color: inherit;
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  letter-spacing: .04em;
+.machine-variant-option-copy,
+.machine-addon-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.machine-variant-option-copy strong,
+.machine-addon-copy strong {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.machine-variant-option-copy small,
+.machine-addon-copy small {
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
+.machine-variant-option-check {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgb(var(--machine-feature-border-rgb) / .22);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.machine-variant-button.is-selected .machine-variant-option-check {
+  background: var(--blue);
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 4px rgb(var(--machine-feature-panel-rgb));
+}
+
+.machine-addon-state {
+  color: var(--blue-ink);
+  font-size: .78rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.machine-config-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: rgb(var(--machine-feature-panel-rgb) / .58);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+}
+
+.machine-config-summary span {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.machine-config-summary strong {
+  color: var(--ink);
+  font-size: .9rem;
+  line-height: 1.3;
+  text-align: right;
 }
 
 .machine-actions {
@@ -6600,6 +6692,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .machine-variant-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .workflow-step:nth-child(odd) {
     grid-column: 1;
   }
@@ -7771,6 +7867,19 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .machine-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .machine-variant-options {
+    grid-template-columns: 1fr;
+  }
+
+  .machine-config-summary {
+    display: grid;
+    justify-items: start;
+  }
+
+  .machine-config-summary strong {
+    text-align: left;
   }
 
   .machine-stat-grid div {
