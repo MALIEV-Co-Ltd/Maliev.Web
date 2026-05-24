@@ -736,10 +736,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-size: clamp(3rem, 4.15vw, 3.75rem);", styles);
         Assert.Contains(".machine-variant-button {\n    min-height: 72px;", styles);
         Assert.Contains(".machine-addon-option {\n    min-height: 62px;", styles);
-        Assert.Contains(".machine-feature-panel {\n    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);\n  }\n\n  .machine-feature-copy {\n    grid-column: 2;", styles);
+        Assert.Contains("grid-template-areas:\n      \"media\"\n      \"content\";", styles);
+        Assert.Contains(".machine-feature-panel {\n    grid-area: content;", styles);
+        Assert.Contains(".machine-feature-intro-copy {\n    display: none;", styles);
+        Assert.Contains(".machine-feature-details-copy,\n  .machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
+        Assert.Contains("height: clamp(320px, 54vw, 560px);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains("object-fit: contain;", styles);
         Assert.Contains("object-position: left bottom;", styles);
+        Assert.Contains("object-position: center bottom;", styles);
         Assert.Contains("transition: opacity .48s ease-in-out;", styles);
         Assert.Contains(".machine-feature-backdrop.machine-feature-backdrop--dark {\n  opacity: 0;", styles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light {\n  opacity: 0;", styles);
@@ -748,8 +754,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("transform: translateX(-5vw);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
-        Assert.Contains("width: 100vw;", styles);
-        Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
+        Assert.Contains("width: 100%;", styles);
+        Assert.Contains("margin-inline: 0;", styles);
         Assert.Contains(".machine-configurator", styles);
         Assert.Contains(".machine-variant-button", styles);
         Assert.Contains(".machine-variant-button.is-selected", styles);

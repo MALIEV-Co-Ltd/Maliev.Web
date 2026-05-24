@@ -7390,41 +7390,65 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     padding-bottom: 80px;
   }
 
+  .machine-feature-scroller {
+    height: auto;
+  }
+
   .machine-feature {
+    position: relative;
+    display: grid;
+    grid-template-areas:
+      "media"
+      "content";
+    height: auto;
     min-height: auto;
     padding: 0;
+    overflow: visible;
   }
 
   .machine-feature-panel {
+    grid-area: content;
     min-height: auto;
     grid-template-columns: 1fr;
-    gap: 34px;
-    align-items: end;
-    padding: 0 24px 42px;
+    gap: 24px;
+    align-items: start;
+    padding: clamp(28px, 5vw, 54px) 24px 52px;
   }
 
   .machine-feature-copy {
     grid-column: 1;
-    align-self: end;
-    justify-self: end;
-    max-width: min(760px, 82vw);
+    align-self: start;
+    justify-self: stretch;
+    max-width: min(760px, 100%);
     margin-bottom: 0;
-    text-align: right;
+    text-align: left;
+  }
+
+  .machine-feature-intro-copy {
+    display: none;
+  }
+
+  .machine-feature-details-copy,
+  .machine-feature[data-machine-panel="details"] .machine-feature-details-copy {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
   }
 
   .machine-feature-title {
-    max-width: min(760px, 82vw);
+    max-width: min(760px, 100%);
   }
 
   .machine-feature-backdrop {
+    grid-area: media;
     display: block;
     position: relative;
-    width: 100vw;
-    max-width: none;
-    height: min(58vw, 520px);
-    margin-inline: calc(50% - 50vw);
-    object-fit: cover;
-    object-position: left bottom;
+    width: 100%;
+    max-width: 100%;
+    height: clamp(320px, 54vw, 560px);
+    margin-inline: 0;
+    object-fit: contain;
+    object-position: center bottom;
   }
 
   .machine-stat-grid {
@@ -8182,11 +8206,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-copy {
-    max-width: min(360px, 86vw);
+    max-width: min(100%, 560px);
   }
 
   .machine-feature-title {
-    max-width: min(360px, 86vw);
+    max-width: min(100%, 560px);
   }
 
   .machine-feature-title {
@@ -8198,11 +8222,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-backdrop {
-    width: 100vw;
-    max-width: none;
-    height: 320px;
-    margin-inline: calc(50% - 50vw);
-    object-position: left top;
+    width: 100%;
+    max-width: 100%;
+    height: clamp(260px, 68vw, 360px);
+    margin-inline: 0;
+    object-position: center bottom;
   }
 
   .machine-stat-grid {
