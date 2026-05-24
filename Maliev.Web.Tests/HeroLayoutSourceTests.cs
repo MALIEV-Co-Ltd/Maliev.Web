@@ -2504,7 +2504,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
         Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
-        Assert.Contains("background: transparent", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: transparent;", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
+        Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
 
     /// <summary>

@@ -45,6 +45,7 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
+  --landing-gizmo-canvas-bg: transparent;
   --machine-feature-surface-rgb: 247 248 251;
   --machine-feature-grid-rgb: 23 23 23;
   --machine-feature-panel-rgb: 255 255 255;
@@ -126,6 +127,7 @@ html[data-theme="dark"] {
   --quote-border: rgba(91, 167, 255, .32);
   --gizmo-surface: linear-gradient(180deg, #121821 0%, #0b0f15 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .16) 0%, rgba(91, 167, 255, .06) 34%, transparent 66%);
+  --landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075) 0%, rgba(91, 167, 255, .055) 48%, rgba(244, 246, 248, .035) 100%);
   --machine-feature-surface-rgb: 13 16 21;
   --machine-feature-grid-rgb: 244 246 248;
   --machine-feature-panel-rgb: 20 25 32;
@@ -1441,7 +1443,7 @@ html:lang(th) .h1 {
   overflow: visible;
   border-radius: 0;
   box-shadow: none;
-  background: transparent;
+  background: var(--landing-gizmo-canvas-bg);
 }
 
 .manufacturing-gizmo--service {
@@ -1466,6 +1468,7 @@ html:lang(th) .h1 {
 
 .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {
   pointer-events: none;
+  background: var(--landing-gizmo-canvas-bg);
 }
 
 .manufacturing-gizmo-canvas:focus,
