@@ -3554,6 +3554,17 @@ html[data-theme="dark"] .workflow-step {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.blog-card-body {
+  flex: 1;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  align-content: stretch;
+}
+
+.blog-card-body .card-link {
+  align-self: end;
+  justify-self: start;
+}
+
 .blog-library-section {
   display: grid;
   gap: 24px;

@@ -826,6 +826,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".blog-library-tools", styles);
         Assert.Contains(".blog-category-list", styles);
         Assert.Contains(".blog-category-chip.is-active", styles);
+        Assert.Contains(".blog-card-body {\n  flex: 1;\n  grid-template-rows: auto auto minmax(0, 1fr) auto;", styles);
+        Assert.Contains(".blog-card-body .card-link {\n  align-self: end;\n  justify-self: start;", styles);
         Assert.Contains(".pagination-link", styles);
         Assert.Contains("@media print", styles);
         Assert.Contains(".article-detail-layout.blog-detail", styles);
