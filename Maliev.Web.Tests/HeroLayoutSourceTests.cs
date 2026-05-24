@@ -474,6 +474,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("trust-grid", source);
         Assert.Contains("section-link", source);
         Assert.Contains(".section-link {\n  display: inline-flex;\n  align-items: center;", styles);
+        Assert.Contains(".section-heading .section-link {\n  justify-self: end;\n  width: fit-content;\n  max-width: 100%;", styles);
         Assert.Contains("border-radius: 999px;", styles);
         Assert.Contains(".section-link::after", styles);
         Assert.Contains("content: \"→\";", styles);

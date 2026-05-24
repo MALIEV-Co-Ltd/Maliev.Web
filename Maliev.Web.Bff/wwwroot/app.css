@@ -440,6 +440,12 @@ main {
   white-space: nowrap;
 }
 
+.section-heading .section-link {
+  justify-self: end;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .section-link::after {
   content: "→";
   font-size: .95em;
