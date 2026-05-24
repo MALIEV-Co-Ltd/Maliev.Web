@@ -85,33 +85,46 @@
 </section>
 
 <section class="section home-services-section" aria-labelledby="services-title">
-    <div class="section-heading">
-        <div>
-            <h2 id="services-title" class="home-services-title">
-                <span class="home-services-title-lead">@Text("Seven services. One workshop.", "เจ็ดบริการในเวิร์กช็อปเดียว")</span>
-                <span class="home-services-title-muted">@Text("Vertically integrated so your part never waits for a vendor.", "เชื่อมงานครบในที่เดียว เพื่อให้ชิ้นงานไม่ต้องรอผู้รับเหมาหลายราย")</span>
-            </h2>
+    <div class="home-services-shell">
+        <div class="home-services-head">
+            <h2 id="services-title" class="home-services-title">@Text("Our manufacturing services", "บริการผลิตของเรา")</h2>
         </div>
-        <a class="section-link" href="/services">@Text("All capabilities", "ดูทุกความสามารถ")</a>
-    </div>
-    <div class="service-grid">
-        @foreach (var service in _services)
-        {
-            <a class="@ServiceCardClass(service)" href="/services/@service.Slug">
-                <div class="service-card-media">
-                    <img src="@service.ImageUrl" alt="@service.Title.For(Preferences.Culture)" loading="lazy" />
-                    @if (IsPrimaryService(service))
-                    {
-                        <span class="chip">@PrimaryServiceBadgeText</span>
-                    }
-                </div>
-                <div class="service-card-body">
-                    <h3>@service.Title.For(Preferences.Culture)</h3>
-                    <p>@service.Summary.For(Preferences.Culture)</p>
-                    <span class="card-link">@Text("Explore", "ดูเพิ่มเติม")</span>
-                </div>
-            </a>
-        }
+        <div class="home-services-tabs" role="tablist" aria-label="@Text("Manufacturing services", "บริการผลิต")">
+            @foreach (var service in _services)
+            {
+                <button class="@HomeServiceTabClass(service)"
+                        id="@HomeServiceTabId(service)"
+                        type="button"
+                        role="tab"
+                        aria-selected="@HomeServiceAriaSelected(service)"
+                        aria-controls="home-services-panel"
+                        @onclick="() => SelectHomeService(service)">
+                    @service.Title.For(Preferences.Culture)
+                </button>
+            }
+        </div>
+        <div id="home-services-panel"
+             class="home-services-panel"
+             role="tabpanel"
+             aria-labelledby="@HomeServiceTabId(SelectedHomeService)">
+            <div class="home-services-panel-copy">
+                <h3>@SelectedHomeService.Title.For(Preferences.Culture)</h3>
+                <p>@SelectedHomeService.Summary.For(Preferences.Culture)</p>
+                <a class="home-services-cta" href="/services/@SelectedHomeService.Slug">@Text("Learn more", "เรียนรู้เพิ่มเติม")</a>
+            </div>
+            <ul class="home-services-proof-list" aria-label="@Text("Service highlights", "จุดเด่นของบริการ")">
+                @foreach (var spec in SelectedHomeService.Specs)
+                {
+                    <li>@spec.For(Preferences.Culture)</li>
+                }
+            </ul>
+            <figure class="home-services-media">
+                <img src="@SelectedHomeService.ImageUrl"
+                     alt="@SelectedHomeService.Title.For(Preferences.Culture)"
+                     loading="lazy" />
+                <figcaption>@SelectedHomeService.ProofTitle.For(Preferences.Culture)</figcaption>
+            </figure>
+        </div>
     </div>
 </section>
 
@@ -280,6 +293,7 @@
     private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
     private string _heroServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
     private string _highlightServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
+    private string _selectedHomeServiceSlug = SiteContent.Services[0].Slug;
     private bool _hasExplicitHeroTarget;
     private int _heroVariantIndex;
     private string _selectedWorkflowAccent = "upload";
@@ -440,16 +454,34 @@
 
     private string QuoteDropzoneFormatsPanelLabel => Text("Supported QuoteEngine file formats", "รายการไฟล์ที่ QuoteEngine รองรับ");
 
-    private string PrimaryServiceBadgeText => Text("Recommended", "แนะนำ");
+    private ServicePageContent SelectedHomeService => _services.FirstOrDefault(
+        service => string.Equals(service.Slug, _selectedHomeServiceSlug, StringComparison.OrdinalIgnoreCase))
+        ?? _services.FirstOrDefault()
+        ?? SiteContent.Services[0];
 
-    private string ServiceCardClass(ServicePageContent service)
+    private void SelectHomeService(ServicePageContent service)
     {
-        return IsPrimaryService(service) ? "service-card primary" : "service-card";
+        _selectedHomeServiceSlug = service.Slug;
     }
 
-    private bool IsPrimaryService(ServicePageContent service)
+    private bool IsSelectedHomeService(ServicePageContent service)
     {
-        return string.Equals(service.Slug, _highlightServiceSlug, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(service.Slug, _selectedHomeServiceSlug, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string HomeServiceTabClass(ServicePageContent service)
+    {
+        return IsSelectedHomeService(service) ? "home-services-tab is-active" : "home-services-tab";
+    }
+
+    private string HomeServiceAriaSelected(ServicePageContent service)
+    {
+        return IsSelectedHomeService(service) ? "true" : "false";
+    }
+
+    private static string HomeServiceTabId(ServicePageContent service)
+    {
+        return $"home-service-tab-{service.Slug}";
     }
 
     private async Task SelectWorkflowStepAsync(ProcessStep step, ElementReference scrollTarget)
@@ -499,6 +531,7 @@
         _services = TryTakeMatchingServicesOrder(out var serviceOrder) && serviceOrder is not null
             ? PromoteHighlightedService(OrderByPersistedKeys(SiteContent.Services, serviceOrder.Slugs, service => service.Slug))
             : PromoteHighlightedService(RandomizeSupportingServices());
+        _selectedHomeServiceSlug = _services.FirstOrDefault()?.Slug ?? SiteContent.Services[0].Slug;
 
         _caseStudies = ApplicationState.TryTakeFromJson<string[]>(CaseStudiesOrderStateKey, out var caseStudyOrder) && caseStudyOrder is not null
             ? OrderByPersistedKeys(SiteContent.CaseStudies, caseStudyOrder, caseStudy => caseStudy.Slug)
