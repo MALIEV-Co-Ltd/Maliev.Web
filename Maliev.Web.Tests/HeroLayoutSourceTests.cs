@@ -578,6 +578,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-family: var(--maliev-font-sans);", styles);
         Assert.Contains("font-size: clamp(2rem, 3vw, 2.85rem);", styles);
         Assert.Contains(".home-services-tabs {\n  display: flex;\n  justify-content: center;", styles);
+        Assert.Contains("overflow-x: auto;\n  overflow-y: hidden;", styles);
         Assert.Contains(".home-services-tab::after", styles);
         Assert.Contains(".home-services-panel {\n  display: grid;\n  grid-template-columns: minmax(0, .86fr) minmax(280px, 1fr) minmax(260px, .88fr);", styles);
         Assert.Contains(".home-services-proof-list li::before", styles);

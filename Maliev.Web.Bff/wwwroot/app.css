@@ -833,6 +833,7 @@ main {
   justify-content: center;
   gap: clamp(18px, 3vw, 46px);
   overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 1px solid var(--rule);
   scrollbar-width: thin;
 }
