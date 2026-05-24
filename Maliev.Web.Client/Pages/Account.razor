@@ -13,14 +13,32 @@
 <section class="section account-dashboard">
     @if (_loading)
     {
-        <p class="load-message">@Text("Loading account...", "กำลังโหลดบัญชี...")</p>
+        <div class="account-loading-panel" role="status" aria-live="polite" aria-busy="true">
+            <span class="account-loading-spinner" aria-hidden="true"></span>
+            <div class="account-loading-copy">
+                <h2>@Text("Preparing your account", "กำลังเตรียมบัญชีของคุณ")</h2>
+                <p>@Text("Loading profile, saved addresses, orders, and preferences.", "กำลังโหลดโปรไฟล์ ที่อยู่ คำสั่งซื้อ และการตั้งค่า")</p>
+            </div>
+            <div class="account-loading-skeleton" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     }
-    else if (!string.IsNullOrWhiteSpace(_error))
+    else if (_accountUnavailable)
     {
-        <div class="empty-state compact">
-            <h2>@Text("Account is unavailable", "ไม่สามารถโหลดบัญชีได้")</h2>
-            <p>@_error</p>
-            <a class="button primary" href="/auth/sign-in">@Text("Sign in again", "เข้าสู่ระบบอีกครั้ง")</a>
+        <div class="account-unavailable-panel" role="alert">
+            <span class="account-unavailable-icon" aria-hidden="true">!</span>
+            <div class="account-unavailable-copy">
+                <span class="card-meta">@Text("Account status", "สถานะบัญชี")</span>
+                <h2>@Text("Account details are temporarily unavailable.", "รายละเอียดบัญชียังไม่พร้อมใช้งานชั่วคราว")</h2>
+                <p>@Text("We could not load your account details right now. Please try again in a moment or sign in again.", "ขณะนี้ไม่สามารถโหลดรายละเอียดบัญชีได้ โปรดลองอีกครั้งในสักครู่หรือเข้าสู่ระบบใหม่")</p>
+                <div class="account-unavailable-actions">
+                    <a class="button secondary" href="/account">@Text("Try again", "ลองอีกครั้ง")</a>
+                    <a class="button primary" href="/auth/sign-in">@Text("Sign in again", "เข้าสู่ระบบอีกครั้ง")</a>
+                </div>
+            </div>
         </div>
     }
     else
@@ -70,7 +88,7 @@
 
 @code {
     private CustomerAccountProfileDto? _profile;
-    private string? _error;
+    private bool _accountUnavailable;
     private bool _loading = true;
     private string DisplayName => string.IsNullOrWhiteSpace(_profile?.DisplayName) ? _profile?.Email ?? "MALIEV customer" : _profile.DisplayName;
 
@@ -81,9 +99,9 @@
         {
             _profile = await Api.GetAccountProfileAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _error = ex.Message;
+            _accountUnavailable = true;
         }
         finally
         {

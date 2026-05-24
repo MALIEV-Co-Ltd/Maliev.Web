@@ -100,7 +100,8 @@ builder.AddAuthenticatedServiceClient<IUploadServiceClient, UploadServiceClient>
 builder.AddAuthenticatedServiceClient<IOrderServiceClient, OrderServiceClient>("OrderService");
 builder.AddAuthenticatedServiceClient<IPaymentServiceClient, PaymentServiceClient>("PaymentService");
 builder.AddAuthenticatedServiceClient<IDeliveryServiceClient, DeliveryServiceClient>("DeliveryService");
-builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>("CustomerService");
+builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>("CustomerService")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
 builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");

@@ -2075,6 +2075,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("UseAuthorization", program);
         Assert.Contains("IAuthServiceClient, AuthServiceClient", program);
         Assert.Contains("ICustomerServiceClient, CustomerServiceClient", program);
+        Assert.Contains("AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>(\"CustomerService\")\n    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));", program);
         Assert.Contains("ICountryServiceClient, CountryServiceClient", program);
         Assert.Contains("customer_id", authController);
         Assert.Contains("principal_id", authController);
@@ -2098,6 +2099,34 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@attribute [Authorize]", preferences);
         Assert.Contains("@attribute [Authorize]", orders);
         Assert.DoesNotContain("SiteContent.QuoteProfileUrl", layout);
+    }
+
+    /// <summary>
+    /// Verifies the account landing page uses polished loading and sanitized error states.
+    /// </summary>
+    [Fact]
+    public void AccountLandingPageUsesDesignedLoadingAndSanitizedErrorStates()
+    {
+        var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("account-loading-panel", account);
+        Assert.Contains("role=\"status\"", account);
+        Assert.Contains("account-loading-spinner", account);
+        Assert.Contains("account-loading-skeleton", account);
+        Assert.Contains("account-unavailable-panel", account);
+        Assert.Contains("Account details are temporarily unavailable.", account);
+        Assert.Contains("_accountUnavailable = true;", account);
+        Assert.DoesNotContain("class=\"load-message\"", account);
+        Assert.DoesNotContain("_error = ex.Message", account);
+        Assert.DoesNotContain("<p>@_error</p>", account);
+
+        Assert.Contains(".account-loading-panel", styles);
+        Assert.Contains(".account-loading-spinner", styles);
+        Assert.Contains("@keyframes account-spinner", styles);
+        Assert.Contains(".account-loading-skeleton", styles);
+        Assert.Contains(".account-unavailable-panel", styles);
+        Assert.Contains(".account-unavailable-icon", styles);
     }
 
     /// <summary>

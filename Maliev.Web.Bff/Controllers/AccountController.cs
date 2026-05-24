@@ -18,6 +18,8 @@ namespace Maliev.Web.Bff.Controllers;
 [Route("web/v{version:apiVersion}/account")]
 public sealed class AccountController(ICustomerServiceClient customerClient, ICountryServiceClient countryClient) : ControllerBase
 {
+    private const string AccountUnavailableDetail = "We could not load your account details right now. Please try again in a moment.";
+
     /// <summary>Gets the current browser customer session.</summary>
     [HttpGet("session")]
     [AllowAnonymous]
@@ -48,14 +50,26 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can resolve your customer profile.", StatusCodes.Status401Unauthorized));
         }
 
-        using var response = await customerClient.GetCustomerAsync(customerId.Value, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response;
+        try
         {
-            return DownstreamProblem(response, "Customer profile is temporarily unavailable.");
+            response = await customerClient.GetCustomerAsync(customerId.Value, cancellationToken);
+        }
+        catch (Exception ex) when (IsDownstreamUnavailable(ex, cancellationToken))
+        {
+            return AccountUnavailableProblem();
         }
 
-        using var document = await ReadJsonAsync(response, cancellationToken);
-        return Ok(MapProfile(document.RootElement, customerId.Value));
+        using (response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                return DownstreamProblem(response, AccountUnavailableDetail);
+            }
+
+            using var document = await ReadJsonAsync(response, cancellationToken);
+            return Ok(MapProfile(document.RootElement, customerId.Value));
+        }
     }
 
     /// <summary>Updates the signed-in customer profile in CustomerService.</summary>
@@ -417,6 +431,26 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             ? StatusCodes.Status404NotFound
             : StatusCodes.Status503ServiceUnavailable;
         return StatusCode(status, AccountProblem("Account service unavailable", detail, status));
+    }
+
+    private ObjectResult AccountUnavailableProblem()
+    {
+        return StatusCode(
+            StatusCodes.Status503ServiceUnavailable,
+            AccountProblem("Account service unavailable", AccountUnavailableDetail, StatusCodes.Status503ServiceUnavailable));
+    }
+
+    private static bool IsDownstreamUnavailable(Exception exception, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
+
+        return exception is HttpRequestException
+            || exception is TimeoutException
+            || exception is TaskCanceledException
+            || exception.GetType().FullName == "Polly.Timeout.TimeoutRejectedException";
     }
 
     private static ProblemDetails AccountProblem(string title, string detail, int status)
