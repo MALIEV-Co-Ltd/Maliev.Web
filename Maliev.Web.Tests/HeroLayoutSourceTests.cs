@@ -459,6 +459,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ThreeDimensionalPrinterImageUrl", content);
         Assert.Contains("ThreeDimensionalScannerImageUrl", content);
         Assert.Contains("InjectionMoldingLineImageUrl", content);
+        Assert.Contains("DeviationAnalysisMapImageUrl", content);
+        Assert.Contains("https://gomeasure3d.com/wp-content/uploads/2019/09/geomagic-control-x-deviation-analysis-800w.jpg", content);
         Assert.Contains("founded in Thailand", content);
         Assert.Contains("12,000+", content);
         Assert.Contains("parts produced", content);
@@ -597,8 +599,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-services-panel {\n  display: grid;\n  grid-template-columns: minmax(0, .86fr) minmax(280px, 1fr) minmax(260px, .88fr);", styles);
         Assert.Contains(".home-services-proof-list li::before", styles);
         Assert.Contains(".home-services-media img", styles);
-        Assert.Contains("object-fit: contain;", styles);
+        Assert.Contains("height: clamp(220px, 18vw, 260px);", styles);
+        Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains("border: 1px solid var(--rule);", styles);
         Assert.Contains(".home-services-panel {\n    grid-template-columns: 1fr;", styles);
+        Assert.Contains(".home-services-media {\n    justify-items: start;\n    width: min(100%, 540px);", styles);
+        Assert.Contains("height: clamp(250px, 42vw, 340px);", styles);
         Assert.Contains(".home-services-tabs {\n    gap: 28px;", styles);
         Assert.Contains("machine-feature", source);
         Assert.Contains("id=\"machine-feature-preview\"", source);

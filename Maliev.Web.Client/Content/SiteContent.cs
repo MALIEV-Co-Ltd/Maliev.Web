@@ -28,6 +28,7 @@ internal static class SiteContent
     internal const string DesignPlanningImageUrl = "https://images.unsplash.com/photo-1761864293839-95dcd7d2a6b3?auto=format&fit=crop&w=1200&q=80";
     internal const string InjectionMoldingLineImageUrl = "https://images.unsplash.com/photo-1730705788367-dbd288c40ee7?auto=format&fit=crop&w=1200&q=80";
     private const string FactoryPipeProductionImageUrl = "https://images.unsplash.com/photo-1699799678681-3c156c3c5553?auto=format&fit=crop&w=1200&q=80";
+    internal const string DeviationAnalysisMapImageUrl = "https://gomeasure3d.com/wp-content/uploads/2019/09/geomagic-control-x-deviation-analysis-800w.jpg";
 
     internal static string ResolveBlogImageUrl(BlogPostContent post)
     {
@@ -122,7 +123,7 @@ internal static class SiteContent
             Text("Scan-to-CAD comparison and measurement reports for parts that need evidence before acceptance.", "ตรวจเทียบสแกนกับ CAD และรายงานวัดผลสำหรับชิ้นงานที่ต้องมีหลักฐานก่อนรับงาน"),
             Text("Know what changed before deciding what to remake.", "รู้ความต่างก่อนตัดสินใจผลิตใหม่"),
             Text("Use inspection when tolerance, wear, fit, or supplier comparison matters.", "ใช้การตรวจเมื่อต้องควบคุม tolerance การสึก การประกอบ หรือเทียบ Supplier"),
-            CaliperInspectionImageUrl,
+            DeviationAnalysisMapImageUrl,
             false,
             [Text("Scan comparison", "เทียบข้อมูลสแกน"), Text("Critical dimensions", "มิติสำคัญ"), Text("Report-ready findings", "ผลตรวจพร้อมรายงาน")])
     ];

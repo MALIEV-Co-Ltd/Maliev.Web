@@ -970,15 +970,17 @@ main {
   justify-items: center;
   gap: 14px;
   margin: 0;
+  width: min(100%, 380px);
   min-width: 0;
 }
 
 .home-services-media img {
   display: block;
-  width: min(100%, 360px);
-  aspect-ratio: 4 / 2.7;
-  object-fit: contain;
-  background: var(--paper-2);
+  width: 100%;
+  height: clamp(220px, 18vw, 260px);
+  object-fit: cover;
+  background: var(--paper);
+  border: 1px solid var(--rule);
   border-radius: 6px;
 }
 
@@ -7328,11 +7330,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .home-services-media {
     justify-items: start;
+    width: min(100%, 540px);
   }
 
   .home-services-media img {
     width: min(100%, 540px);
-    aspect-ratio: 16 / 9;
+    height: clamp(250px, 42vw, 340px);
     object-fit: cover;
   }
 
