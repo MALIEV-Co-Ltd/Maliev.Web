@@ -383,7 +383,7 @@ else if (Path == "blog")
                 <label for="blog-search">@Text("Search posts", "ค้นหาบทความ")</label>
                 @if (HasActiveBlogCategory)
                 {
-                    <input type="hidden" name="category" value="@BlogCategoryKey" />
+                    <input type="hidden" name="category" value="@BlogCategoryQueryValue" />
                 }
                 <div class="blog-search-row">
                     <input id="blog-search"
@@ -399,13 +399,24 @@ else if (Path == "blog")
                 </div>
             </form>
             <div class="blog-category-filter" aria-label="@Text("Filter practical notes by topic", "กรองบทความตามหัวข้อ")">
-                <span class="blog-category-filter-label">@Text("Filter by topic", "กรองตามหัวข้อ")</span>
+                <div class="blog-category-filter-head">
+                    <span class="blog-category-filter-label">@Text("Filter by topic", "กรองตามหัวข้อ")</span>
+                    @if (HasActiveBlogCategory)
+                    {
+                        <a class="blog-category-clear" href="@BuildBlogCategoryHref(AllBlogCategoryFilter)">@Text("Clear filters", "ล้างตัวกรอง")</a>
+                    }
+                    else
+                    {
+                        <span class="blog-category-hint">@Text("Select one or more", "เลือกได้มากกว่าหนึ่ง")</span>
+                    }
+                </div>
                 <div class="blog-category-list">
                     @foreach (var filter in BlogCategoryFilters)
                     {
                         <a class="@BlogCategoryFilterClass(filter)"
                            href="@BuildBlogCategoryHref(filter.Key)"
-                           aria-current="@(filter.Key == BlogCategoryKey ? "true" : null)">
+                           aria-pressed="@BlogCategoryFilterIsActive(filter).ToString().ToLowerInvariant()">
+                            <span class="blog-category-chip-dot" aria-hidden="true"></span>
                             @filter.Label.For(Preferences.Culture)
                         </a>
                     }
@@ -822,11 +833,14 @@ else
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
     private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
     private string BlogSearch => ReadQueryStringValue("q").Trim();
-    private string BlogCategoryKey => NormalizeBlogCategoryKey(ReadQueryStringValue("category"));
-    private BlogCategoryFilter SelectedBlogCategoryFilter =>
-        BlogCategoryFilters.First(filter => filter.Key == BlogCategoryKey);
-    private bool HasActiveBlogCategory => BlogCategoryKey != AllBlogCategoryFilter;
-    private string BlogSearchClearHref => BuildBlogHref(string.Empty, BlogCategoryKey, 1);
+    private IReadOnlyList<string> BlogCategoryKeys => NormalizeBlogCategoryKeys(ReadQueryStringValue("category"));
+    private IReadOnlyList<BlogCategoryFilter> SelectedBlogCategoryFilters =>
+        BlogCategoryFilters
+            .Where(filter => BlogCategoryKeys.Contains(filter.Key, StringComparer.Ordinal))
+            .ToList();
+    private bool HasActiveBlogCategory => BlogCategoryKeys.Count > 0;
+    private string BlogCategoryQueryValue => string.Join(",", BlogCategoryKeys);
+    private string BlogSearchClearHref => BuildBlogHref(string.Empty, BlogCategoryKeys, 1);
     private int BlogPage
     {
         get
@@ -843,12 +857,12 @@ else
         get
         {
             var query = BlogSearch;
-            var category = SelectedBlogCategoryFilter;
+            var categories = SelectedBlogCategoryFilters;
 
             return SiteContent.BlogPosts
                 .Where(post =>
                     (string.IsNullOrWhiteSpace(query) || BlogPostMatchesSearch(post, query))
-                    && BlogPostMatchesCategory(post, category))
+                    && (categories.Count == 0 || categories.Any(category => BlogPostMatchesCategory(post, category))))
                 .ToList();
         }
     }
@@ -1364,26 +1378,48 @@ else
     private string BuildBlogPageHref(int page)
     {
         var safePage = Math.Clamp(page, 1, TotalBlogPages);
-        return BuildBlogHref(BlogSearch, BlogCategoryKey, safePage);
+        return BuildBlogHref(BlogSearch, BlogCategoryKeys, safePage);
     }
 
     private string BuildBlogCategoryHref(string categoryKey)
     {
-        return BuildBlogHref(BlogSearch, categoryKey, 1);
+        var normalizedCategoryKey = categoryKey.Trim().ToLowerInvariant();
+        if (normalizedCategoryKey == AllBlogCategoryFilter)
+        {
+            return BuildBlogHref(BlogSearch, [], 1);
+        }
+
+        if (!BlogCategoryFilters.Any(filter => filter.Key == normalizedCategoryKey && filter.Key != AllBlogCategoryFilter))
+        {
+            return BuildBlogHref(BlogSearch, BlogCategoryKeys, 1);
+        }
+
+        var selectedCategoryKeys = BlogCategoryKeys.ToList();
+        var existingIndex = selectedCategoryKeys.FindIndex(key => key.Equals(normalizedCategoryKey, StringComparison.Ordinal));
+        if (existingIndex >= 0)
+        {
+            selectedCategoryKeys.RemoveAt(existingIndex);
+        }
+        else
+        {
+            selectedCategoryKeys.Add(normalizedCategoryKey);
+        }
+
+        return BuildBlogHref(BlogSearch, selectedCategoryKeys, 1);
     }
 
-    private string BuildBlogHref(string search, string categoryKey, int page)
+    private string BuildBlogHref(string search, IEnumerable<string> categoryKeys, int page)
     {
         var segments = new List<string>();
-        var normalizedCategoryKey = NormalizeBlogCategoryKey(categoryKey);
+        var normalizedCategoryKeys = NormalizeBlogCategoryKeys(string.Join(",", categoryKeys));
         if (!string.IsNullOrWhiteSpace(search))
         {
             segments.Add($"q={Uri.EscapeDataString(search.Trim())}");
         }
 
-        if (normalizedCategoryKey != AllBlogCategoryFilter)
+        if (normalizedCategoryKeys.Count > 0)
         {
-            segments.Add($"category={Uri.EscapeDataString(normalizedCategoryKey)}");
+            segments.Add($"category={Uri.EscapeDataString(string.Join(",", normalizedCategoryKeys))}");
         }
 
         if (page > 1)
@@ -1394,15 +1430,30 @@ else
         return segments.Count == 0 ? "/blog" : $"/blog?{string.Join("&", segments)}";
     }
 
-    private string NormalizeBlogCategoryKey(string categoryKey)
+    private IReadOnlyList<string> NormalizeBlogCategoryKeys(string categoryKeys)
     {
-        var key = categoryKey.Trim().ToLowerInvariant();
-        return BlogCategoryFilters.Any(filter => filter.Key == key) ? key : AllBlogCategoryFilter;
+        var requestedKeys = categoryKeys
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(key => key.ToLowerInvariant())
+            .Where(key => key != AllBlogCategoryFilter)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return BlogCategoryFilters
+            .Where(filter => filter.Key != AllBlogCategoryFilter && requestedKeys.Contains(filter.Key))
+            .Select(filter => filter.Key)
+            .ToList();
     }
 
     private string BlogCategoryFilterClass(BlogCategoryFilter filter)
     {
-        return filter.Key == BlogCategoryKey ? "blog-category-chip is-active" : "blog-category-chip";
+        return BlogCategoryFilterIsActive(filter) ? "blog-category-chip is-active" : "blog-category-chip";
+    }
+
+    private bool BlogCategoryFilterIsActive(BlogCategoryFilter filter)
+    {
+        return filter.Key == AllBlogCategoryFilter
+            ? !HasActiveBlogCategory
+            : BlogCategoryKeys.Contains(filter.Key, StringComparer.Ordinal);
     }
 
     private static string PaginationLinkClass(bool disabled)
