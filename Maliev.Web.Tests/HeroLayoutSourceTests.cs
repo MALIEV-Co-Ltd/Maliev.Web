@@ -710,6 +710,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("max-width: 480px;", styles);
         Assert.Contains("text-align: right;", styles);
         Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);
+        Assert.Contains("@media (min-width: 961px) and (max-height: 920px)", styles);
+        Assert.Contains("padding-block: clamp(32px, 5svh, 54px);", styles);
+        Assert.Contains("font-size: clamp(3rem, 4.15vw, 3.75rem);", styles);
+        Assert.Contains(".machine-variant-button {\n    min-height: 72px;", styles);
+        Assert.Contains(".machine-addon-option {\n    min-height: 62px;", styles);
         Assert.Contains(".machine-feature-panel {\n    grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);\n  }\n\n  .machine-feature-copy {\n    grid-column: 2;", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("object-fit: cover;", styles);

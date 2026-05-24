@@ -6949,6 +6949,87 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 }
 
+@media (min-width: 961px) and (max-height: 920px) {
+  .machine-feature-panel {
+    align-items: center;
+    padding-block: clamp(32px, 5svh, 54px);
+  }
+
+  .machine-feature-copy {
+    gap: clamp(12px, 1.8vh, 16px);
+    max-width: min(430px, 37vw);
+  }
+
+  .machine-feature-title {
+    font-size: clamp(3rem, 4.15vw, 3.75rem);
+    line-height: .95;
+  }
+
+  html:lang(th) .machine-feature-title {
+    font-size: clamp(2.85rem, 3.9vw, 3.45rem);
+  }
+
+  .machine-feature .lede {
+    line-height: 1.38;
+  }
+
+  .machine-stat-grid,
+  .machine-configurator {
+    gap: 10px;
+  }
+
+  .machine-configurator-group {
+    gap: 7px;
+  }
+
+  .machine-variant-options {
+    gap: 8px;
+  }
+
+  .machine-stat-grid div {
+    gap: 3px;
+    padding: 12px 14px;
+  }
+
+  .machine-stat-grid strong {
+    font-size: clamp(1.35rem, 1.85vw, 1.72rem);
+  }
+
+  .machine-stat-grid small,
+  .machine-variant-option-copy small,
+  .machine-addon-copy small {
+    font-size: .76rem;
+    line-height: 1.25;
+  }
+
+  .machine-variant-button,
+  .machine-addon-option {
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  .machine-variant-button {
+    min-height: 72px;
+  }
+
+  .machine-addon-option {
+    min-height: 62px;
+  }
+
+  .machine-variant-option-copy strong,
+  .machine-addon-copy strong {
+    font-size: .94rem;
+  }
+
+  .machine-config-summary {
+    padding: 9px 12px;
+  }
+
+  .machine-actions {
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 960px) {
   .site-header {
     grid-template-columns: auto 1fr;
