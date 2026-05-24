@@ -3574,6 +3574,7 @@ html[data-theme="dark"] .workflow-step {
 .blog-library-section {
   display: grid;
   gap: 24px;
+  padding-top: clamp(64px, 7vw, 96px);
 }
 
 .blog-library-tools {
@@ -3583,7 +3584,7 @@ html[data-theme="dark"] .workflow-step {
   align-items: end;
 }
 
-.blog-library-tools h2 {
+.blog-library-tools h1 {
   margin: 6px 0 0;
   max-width: 720px;
   font-size: clamp(2rem, 4.4vw, 4rem);

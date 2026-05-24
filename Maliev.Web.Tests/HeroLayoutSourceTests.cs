@@ -793,6 +793,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("fdm-print-orientation", SiteContent.BlogPosts.Select(post => post.Slug));
         Assert.Contains("order-ready-checklist", SiteContent.BlogPosts.Select(post => post.Slug));
         Assert.Contains("Practical Notes", source);
+        Assert.Contains("ShouldRenderPageHero", source);
+        Assert.Contains("!string.Equals(Path, \"blog\", StringComparison.Ordinal)", source);
+        Assert.Contains("<h1 id=\"blog-library-title\">@Text(\"Practical Notes\", \"บทความเชิงปฏิบัติ\")</h1>", source);
+        Assert.DoesNotContain("blog-hero-title", source);
         Assert.DoesNotContain("Browse practical notes", source);
         Assert.Contains("Download PDF", source);
         Assert.Contains("ดาวน์โหลด PDF", source);
@@ -836,6 +840,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("BuildBlogPageHref", source);
         Assert.Contains("ResolveBlogImageUrl", source);
         Assert.Contains(".blog-library-tools", styles);
+        Assert.Contains(".blog-library-section {\n  display: grid;\n  gap: 24px;\n  padding-top: clamp(64px, 7vw, 96px);", styles);
+        Assert.Contains(".blog-library-tools h1", styles);
+        Assert.DoesNotContain(".blog-library-tools h2", styles);
         Assert.Contains(".blog-category-list", styles);
         Assert.Contains(".blog-category-chip.is-active", styles);
         Assert.Contains(".blog-category-filter-head", styles);
@@ -1856,10 +1863,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
         Assert.Contains("@page \"/blog/{Slug}\"", source);
         Assert.Contains("SiteContent.BlogPosts", source);
-        Assert.Contains("blog-hero-title", source);
+        Assert.Contains("ShouldRenderPageHero", source);
         Assert.DoesNotContain("blog-hero-logo", source);
-        Assert.Contains("\"blog\" => Text(\"Journal\", \"บทความ\")", source);
-        Assert.Contains("Text(\"Journal\", \"บทความ\")", source);
+        Assert.Contains("\"blog\" => Text(\"Practical Notes\", \"บทความเชิงปฏิบัติ\")", source);
+        Assert.DoesNotContain("\"blog\" => Text(\"Journal\", \"บทความ\")", source);
         Assert.DoesNotContain("<img class=\"blog-hero-logo\"", source);
         Assert.DoesNotContain("\"blog\" => Text(\"MALIEV Journal\", \"บทความ MALIEV\")", source);
         Assert.Contains("@page \"/shipping-returns\"", source);

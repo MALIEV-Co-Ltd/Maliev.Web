@@ -28,31 +28,27 @@
     <meta property="og:url" content="@CanonicalUrl" />
 </HeadContent>
 
-<section class="page-hero compact">
-    @if (Path == "blog")
-    {
-        <h1 class="blog-hero-title">@Text("Journal", "บทความ")</h1>
-    }
-    else
-    {
+@if (ShouldRenderPageHero)
+{
+    <section class="page-hero compact">
         <h1>@Title</h1>
-    }
-    <p>@Body</p>
-    <div class="quote-actions">
-        <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
-        <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
-            @if (SecondaryActionUsesLogo)
-            {
-                <span>@SecondaryActionPrefix</span>
-                <img class="button-logo-mark" src="/images/logo.svg" alt="" aria-hidden="true" />
-            }
-            else
-            {
-                @SecondaryAction
-            }
-        </a>
-    </div>
-</section>
+        <p>@Body</p>
+        <div class="quote-actions">
+            <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+            <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
+                @if (SecondaryActionUsesLogo)
+                {
+                    <span>@SecondaryActionPrefix</span>
+                    <img class="button-logo-mark" src="/images/logo.svg" alt="" aria-hidden="true" />
+                }
+                else
+                {
+                    @SecondaryAction
+                }
+            </a>
+        </div>
+    </section>
+}
 
 @if (Path == "materials")
 {
@@ -376,7 +372,7 @@ else if (Path == "blog")
         <div class="blog-library-tools">
             <div>
                 <span class="card-meta">@Text("Manufacturing notes", "บันทึกงานผลิต")</span>
-                <h2 id="blog-library-title">@Text("Practical Notes", "บทความเชิงปฏิบัติ")</h2>
+                <h1 id="blog-library-title">@Text("Practical Notes", "บทความเชิงปฏิบัติ")</h1>
                 <p>@Text("Search the full library by process, material, fit, quoting, or production topic.", "ค้นหาคลังบทความตามกระบวนการ วัสดุ การประกอบ การเสนอราคา หรือหัวข้องานผลิต")</p>
             </div>
             <form class="blog-search-form" action="/blog" method="get" role="search">
@@ -925,7 +921,7 @@ else
         "materials" => Text("Materials", "วัสดุ"),
         "industries" => Text("Industries", "อุตสาหกรรม"),
         "case-studies" => Text("Case studies", "ผลงาน"),
-        "blog" => Text("Journal", "บทความ"),
+        "blog" => Text("Practical Notes", "บทความเชิงปฏิบัติ"),
         "account/quotes" => Text("Saved quotes", "ใบเสนอราคาที่บันทึกไว้"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => BlogPostTitle,
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CaseStudyTitle,
@@ -1753,6 +1749,8 @@ else
     {
         return activeFilter == filter ? "material-filter active" : "material-filter";
     }
+
+    private bool ShouldRenderPageHero => !string.Equals(Path, "blog", StringComparison.Ordinal);
 
     private string PrimaryAction => Path switch
     {
