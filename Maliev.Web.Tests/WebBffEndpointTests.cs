@@ -270,6 +270,30 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies account pages cannot be rendered without a valid authenticated browser session.
+    /// </summary>
+    [Theory]
+    [InlineData("/account")]
+    [InlineData("/account/profile")]
+    [InlineData("/account/addresses")]
+    [InlineData("/account/preferences")]
+    [InlineData("/account/orders")]
+    public async Task GET_AccountPage_Anonymous_RedirectsToSignIn(string route)
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        using var response = await client.GetAsync(route);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.NotNull(response.Headers.Location);
+        Assert.Equal("/auth/sign-in", response.Headers.Location.LocalPath);
+        Assert.Contains($"returnUrl={Uri.EscapeDataString(route)}", response.Headers.Location.Query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Verifies customer auth form handlers are registered with MVC services required by antiforgery validation.
     /// </summary>
     [Theory]

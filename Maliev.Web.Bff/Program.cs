@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Maliev.Aspire.ServiceDefaults;
 using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
@@ -6,6 +7,7 @@ using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
+using Maliev.Web.Shared.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
@@ -68,6 +70,13 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
     });
 }
 builder.Services.AddPermissionAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(WebAuthorizationPolicies.CustomerAccount, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("user_type", "customer");
+        policy.RequireAssertion(context => HasValidCustomerId(context.User));
+    });
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -218,6 +227,11 @@ static void ApplyMissingSharedSecretValue(IConfiguration target, IConfigurationS
     {
         target[path] = fallbackSection.Value;
     }
+}
+
+static bool HasValidCustomerId(ClaimsPrincipal user)
+{
+    return Guid.TryParse(user.FindFirst("customer_id")?.Value, out _);
 }
 
 /// <summary>

@@ -1,6 +1,6 @@
 @page "/account/orders"
 @page "/account/orders/{OrderId}"
-@attribute [Authorize]
+@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
 @inherits PreferenceAwareComponentBase
 @inject MalievApiClient Api
 

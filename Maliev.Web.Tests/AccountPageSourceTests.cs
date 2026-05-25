@@ -6,6 +6,35 @@ namespace Maliev.Web.Tests;
 public sealed class AccountPageSourceTests
 {
     /// <summary>
+    /// Verifies account pages require a validated MALIEV customer session, not only any auth cookie.
+    /// </summary>
+    [Fact]
+    public void AccountPagesRequireValidatedCustomerSessionPolicy()
+    {
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+        var imports = ReadRepoFile("Maliev.Web.Client", "_Imports.razor");
+        var sharedPolicy = ReadRepoFile("Maliev.Web.Shared", "Security", "WebAuthorizationPolicies.cs");
+        var accountPages = new[]
+        {
+            ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor"),
+            ReadRepoFile("Maliev.Web.Client", "Pages", "AccountProfile.razor"),
+            ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor"),
+            ReadRepoFile("Maliev.Web.Client", "Pages", "AccountPreferences.razor"),
+            ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor")
+        };
+
+        Assert.Contains("namespace Maliev.Web.Shared.Security;", sharedPolicy);
+        Assert.Contains("public const string CustomerAccount", sharedPolicy);
+        Assert.Contains("@using Maliev.Web.Shared.Security", imports);
+        Assert.Contains("WebAuthorizationPolicies.CustomerAccount", program);
+        Assert.Contains("RequireAuthenticatedUser()", program);
+        Assert.Contains("RequireClaim(\"user_type\", \"customer\")", program);
+        Assert.Contains("HasValidCustomerId", program);
+        Assert.All(accountPages, page =>
+            Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", page));
+    }
+
+    /// <summary>
     /// Verifies the account overview hides internal lifecycle status and surfaces useful customer actions.
     /// </summary>
     [Fact]

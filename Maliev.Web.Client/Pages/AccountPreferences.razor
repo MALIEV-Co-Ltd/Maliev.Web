@@ -1,5 +1,5 @@
 @page "/account/preferences"
-@attribute [Authorize]
+@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
 @inherits PreferenceAwareComponentBase
 @inject MalievApiClient Api
 
