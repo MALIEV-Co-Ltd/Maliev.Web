@@ -2761,7 +2761,8 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
-        Assert.Contains("targetY: compact ? -0.08 : wide ? -0.38 : -0.2", source);
+        Assert.Contains("targetY: compact ? -0.08 : wide ? -0.22 : -0.2", source);
+        Assert.DoesNotContain("wide ? -0.38", source);
         Assert.Contains("const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005)", source);
         Assert.Contains("const presentationColumnBias = wide ? 0.045 : 0;", source);
         Assert.DoesNotContain("const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02)", source);
@@ -2917,7 +2918,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-aa\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-clearance\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
