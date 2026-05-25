@@ -2762,6 +2762,29 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the landing hero model uses a CAD-style studio lighting rig.
+    /// </summary>
+    [Fact]
+    public void LandingHeroModelUsesCadStudioLighting()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("configureLandingCadToneMapping(scene, BABYLON);", source);
+        Assert.Contains("configureLandingCadStudioLighting(scene, camera, BABYLON)", source);
+        Assert.Contains("const softbox = new BABYLON.DirectionalLight(\"landing-softbox\"", source);
+        Assert.Contains("const cameraHeadlight = new BABYLON.DirectionalLight(\"landing-camera-headlight\"", source);
+        Assert.Contains("scene.onBeforeRenderObservable.add(() => updateLandingHeadlight(camera, cameraHeadlight, BABYLON));", source);
+        Assert.Contains("updateLandingHeadlight(camera, cameraHeadlight, BABYLON);", source);
+        Assert.Contains("scene.imageProcessingConfiguration.toneMappingEnabled = true;", source);
+        Assert.Contains("scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;", source);
+        Assert.Contains("plastic.specularIntensity = 0.86;", source);
+        Assert.Contains("plastic.environmentIntensity = 0.72;", source);
+        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.15 : 0.95;", source);
+        Assert.Contains("lights.softbox.intensity = dark ? 0.72 : 0.58;", source);
+        Assert.DoesNotContain("scene.environmentIntensity = dark ? 0.55 : 0.42;", source);
+    }
+
+    /// <summary>
     /// Verifies horizontal hover motion rotates the hero model toward the pointer direction.
     /// </summary>
     [Fact]
@@ -2877,7 +2900,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-hero-backdrop\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-lighting\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

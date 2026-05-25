@@ -310,7 +310,8 @@ async function createLandingHeroScene(state, BABYLON) {
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = BABYLON.Color4.FromHexString("#ffffff00");
   scene.skipPointerMovePicking = true;
-  scene.environmentIntensity = 0.42;
+  scene.environmentIntensity = 0.66;
+  configureLandingCadToneMapping(scene, BABYLON);
 
   const camera = new BABYLON.ArcRotateCamera(
     "landing-camera",
@@ -325,19 +326,7 @@ async function createLandingHeroScene(state, BABYLON) {
   camera.inputs.clear();
   configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
-  const fill = new BABYLON.HemisphericLight("landing-fill", new BABYLON.Vector3(-0.5, 1, 0.2), scene);
-
-  const key = new BABYLON.DirectionalLight("landing-key", new BABYLON.Vector3(-0.5, -0.75, -0.45), scene);
-  key.position = new BABYLON.Vector3(4.5, 6, 5);
-
-  const rim = new BABYLON.PointLight("landing-rim", new BABYLON.Vector3(-3.4, 2.1, -2.5), scene);
-
-  // Bounce: low-angle fill from below to prevent models from going black against dark backgrounds
-  const bounce = new BABYLON.PointLight("landing-bounce", new BABYLON.Vector3(0, -4, 2), scene);
-
-  // Edge: right-side directional to carve a separation rim on the side facing the dark background
-  const edge = new BABYLON.DirectionalLight("landing-edge", new BABYLON.Vector3(0.9, 0.2, -0.5), scene);
-  edge.position = new BABYLON.Vector3(-5, 1, 3);
+  const lights = configureLandingCadStudioLighting(scene, camera, BABYLON);
 
   const root = new BABYLON.TransformNode("landing-model-root", scene);
   const modelParts = splitModelUrl(state.modelUrl);
@@ -361,7 +350,7 @@ async function createLandingHeroScene(state, BABYLON) {
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
-    { fill, key, rim, bounce, edge },
+    lights,
     BABYLON);
   state.themeApplicator();
   observeDocumentTheme(state);
@@ -640,17 +629,79 @@ function splitModelUrl(modelUrl) {
 function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   const plastic = new BABYLON.PBRMaterial("injection-molded-plastic", scene);
   plastic.metallic = 0;
-  plastic.roughness = 0.37;
-  plastic.microSurface = 0.64;
+  plastic.roughness = 0.34;
+  plastic.microSurface = 0.7;
+  plastic.specularIntensity = 0.86;
+  plastic.environmentIntensity = 0.72;
   plastic.clearCoat.isEnabled = true;
-  plastic.clearCoat.intensity = 0.22;
-  plastic.clearCoat.roughness = 0.44;
+  plastic.clearCoat.intensity = 0.28;
+  plastic.clearCoat.roughness = 0.38;
 
   for (const mesh of meshes) {
     mesh.material = plastic;
   }
 
   return plastic;
+}
+
+function configureLandingCadToneMapping(scene, BABYLON) {
+  if (!scene.imageProcessingConfiguration) {
+    return;
+  }
+
+  scene.imageProcessingConfiguration.toneMappingEnabled = true;
+  scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+  scene.imageProcessingConfiguration.exposure = 1.16;
+  scene.imageProcessingConfiguration.contrast = 1.08;
+}
+
+function configureLandingCadStudioLighting(scene, camera, BABYLON) {
+  const fill = new BABYLON.HemisphericLight("landing-fill", new BABYLON.Vector3(-0.2, 1, 0.18), scene);
+  fill.diffuse = BABYLON.Color3.FromHexString("#f4f7fb");
+  fill.specular = BABYLON.Color3.FromHexString("#ffffff");
+
+  const key = new BABYLON.DirectionalLight("landing-key", new BABYLON.Vector3(-0.48, -0.76, -0.43), scene);
+  key.position = new BABYLON.Vector3(4.8, 6.2, 5.4);
+  key.diffuse = BABYLON.Color3.FromHexString("#fff7eb");
+  key.specular = BABYLON.Color3.FromHexString("#ffffff");
+
+  const softbox = new BABYLON.DirectionalLight("landing-softbox", new BABYLON.Vector3(0.62, -0.46, -0.28), scene);
+  softbox.position = new BABYLON.Vector3(-5.6, 4.2, 3.4);
+  softbox.diffuse = BABYLON.Color3.FromHexString("#dcecff");
+  softbox.specular = BABYLON.Color3.FromHexString("#f6fbff");
+
+  const rim = new BABYLON.DirectionalLight("landing-rim", new BABYLON.Vector3(0.35, -0.18, 0.92), scene);
+  rim.position = new BABYLON.Vector3(-3.8, 2.4, -4.2);
+  rim.diffuse = BABYLON.Color3.FromHexString("#9fd0ff");
+  rim.specular = BABYLON.Color3.FromHexString("#ffffff");
+
+  const bounce = new BABYLON.PointLight("landing-bounce", new BABYLON.Vector3(0, -3.2, 2.4), scene);
+  bounce.range = 8;
+
+  const cameraHeadlight = new BABYLON.DirectionalLight("landing-camera-headlight", new BABYLON.Vector3(0, -0.08, 1), scene);
+  cameraHeadlight.diffuse = BABYLON.Color3.FromHexString("#f7fbff");
+  cameraHeadlight.specular = BABYLON.Color3.FromHexString("#ffffff");
+  updateLandingHeadlight(camera, cameraHeadlight, BABYLON);
+  scene.onBeforeRenderObservable.add(() => updateLandingHeadlight(camera, cameraHeadlight, BABYLON));
+
+  return { fill, key, softbox, rim, bounce, cameraHeadlight };
+}
+
+function updateLandingHeadlight(camera, cameraHeadlight, BABYLON) {
+  const fallback = new BABYLON.Vector3(0, -0.08, 1);
+  if (!camera?.position || !camera?.target) {
+    cameraHeadlight.direction = fallback;
+    return;
+  }
+
+  const direction = camera.target.subtract(camera.position);
+  if (!Number.isFinite(direction.lengthSquared()) || direction.lengthSquared() <= 0.0001) {
+    cameraHeadlight.direction = fallback;
+    return;
+  }
+
+  cameraHeadlight.position = camera.position.clone();
+  cameraHeadlight.direction = direction.normalize();
 }
 
 function frameImportedModel(meshes, root, BABYLON) {
@@ -803,29 +854,32 @@ function observeDocumentTheme(state) {
 function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
-  scene.environmentIntensity = dark ? 0.55 : 0.42;
+  scene.environmentIntensity = dark ? 0.84 : 0.66;
+  scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#243045" : "#eef4ff");
 
-  // Hemisphere fill: boost ground colour in dark mode so undersides don't go pitch-black
-  lights.fill.intensity = dark ? 1.35 : 1.25;
-  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#1a2438" : "#c8d4e8");
+  lights.fill.intensity = dark ? 1.02 : 0.88;
+  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#182033" : "#d6e2f2");
 
-  lights.key.intensity = dark ? 2.4 : 2.1;
+  lights.key.intensity = dark ? 2.1 : 1.72;
 
-  lights.rim.intensity = dark ? 1.5 : 0.64;
-  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#8fc3ff" : "#f6f6f6");
+  lights.softbox.intensity = dark ? 0.72 : 0.58;
+  lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#b8d9ff" : "#d8e9ff");
 
-  // Bounce light from below - creates depth and prevents base from vanishing into dark background
-  lights.bounce.intensity = dark ? 0.9 : 0.25;
-  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#304878" : "#dce8f8");
+  lights.rim.intensity = dark ? 1.55 : 1.05;
+  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#95caff" : "#b9dcff");
 
-  // Edge light from the right - carves a visible separation rim against the dark canvas
-  lights.edge.intensity = dark ? 1.8 : 0.6;
-  lights.edge.diffuse = BABYLON.Color3.FromHexString(dark ? "#7ab8e0" : "#f0f4ff");
+  lights.bounce.intensity = dark ? 0.68 : 0.38;
+  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#38527e" : "#e4edf8");
+
+  lights.cameraHeadlight.intensity = dark ? 1.15 : 0.95;
+  lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#eff7ff" : "#f7fbff");
 
   if (plasticMaterial) {
-    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#242a31" : "#171717");
-    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#d7e5f5" : "#f5f5f5");
-    plasticMaterial.clearCoat.intensity = dark ? 0.3 : 0.22;
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#2a323d" : "#24282e");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#e4f0ff" : "#edf3fb");
+    plasticMaterial.specularIntensity = dark ? 0.94 : 0.86;
+    plasticMaterial.environmentIntensity = dark ? 0.84 : 0.72;
+    plasticMaterial.clearCoat.intensity = dark ? 0.36 : 0.28;
   }
 }
 
