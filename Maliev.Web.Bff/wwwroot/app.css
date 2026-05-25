@@ -45,7 +45,7 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
-  --landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%, rgba(255, 255, 255, .98) 42%, rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%);
+  --landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%, rgba(255, 255, 255, .98) 42%, rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%), #ffffff;
   --machine-feature-surface-rgb: 247 248 251;
   --machine-feature-grid-rgb: 23 23 23;
   --machine-feature-panel-rgb: 255 255 255;
@@ -129,7 +129,8 @@ html[data-theme="dark"] {
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(91, 167, 255, .16) 0%, rgba(91, 167, 255, .06) 34%, transparent 66%);
   --landing-gizmo-canvas-bg:
     radial-gradient(circle at 100% 0%, rgba(91, 167, 255, .22) 0%, rgba(91, 167, 255, .13) 28%, rgba(91, 167, 255, .05) 50%, transparent 72%),
-    linear-gradient(225deg, rgba(244, 246, 248, .06) 0%, rgba(91, 167, 255, .045) 44%, rgba(244, 246, 248, .025) 100%);
+    linear-gradient(225deg, rgba(244, 246, 248, .06) 0%, rgba(91, 167, 255, .045) 44%, rgba(244, 246, 248, .025) 100%),
+    linear-gradient(180deg, #11263d 0%, #101d2d 48%, #0f1824 100%);
   --machine-feature-surface-rgb: 13 16 21;
   --machine-feature-grid-rgb: 244 246 248;
   --machine-feature-panel-rgb: 20 25 32;

@@ -2666,6 +2666,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
         Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
         Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
+        Assert.Contains("linear-gradient(180deg, #11263d 0%, #101d2d 48%, #0f1824 100%);", styles);
         Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
 
@@ -2812,15 +2813,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
         Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
         Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
+        Assert.Contains("linear-gradient(180deg, #11263d 0%, #101d2d 48%, #0f1824 100%);", styles);
         Assert.Contains(".landing-hero {\n  position: relative;", styles);
         Assert.Contains("isolation: isolate;\n  display: grid;", styles);
         Assert.Contains("overflow: visible;", styles);
         Assert.Contains(".manufacturing-gizmo--landing {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  right: auto;\n  width: 100vw;\n  height: 100%;\n  transform: translateX(-50%);", styles);
         Assert.Contains("z-index: 0;\n  pointer-events: none;", styles);
         Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: min(46vh, 470px);\n    min-height: 440px;\n    overflow: visible;\n    transform: none;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: min(46vh, 470px);\n    min-height: 440px;\n    overflow: hidden;\n    transform: none;", styles);
         Assert.Contains("@media (max-width: 680px)", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;\n    transform: none;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: clamp(240px, 58vw, 360px);\n    min-height: 0;\n    overflow: hidden;\n    transform: none;", styles);
         Assert.DoesNotContain("--landing-gizmo-canvas-bg: transparent;", styles);
     }
 
