@@ -2640,7 +2640,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
         Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
         Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
+        Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
         Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
 
@@ -2785,7 +2786,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
         Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
+        Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
         Assert.Contains(".landing-hero {\n  position: relative;", styles);
         Assert.Contains("isolation: isolate;\n  display: grid;", styles);
         Assert.Contains("overflow: visible;", styles);
