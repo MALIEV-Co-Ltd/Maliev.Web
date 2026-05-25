@@ -329,6 +329,7 @@ async function createLandingHeroScene(state, BABYLON) {
 
   const lights = configureLandingCadStudioLighting(scene, camera, BABYLON);
   configureSceneAntialiasing(scene, camera, BABYLON);
+  configureCadAmbientOcclusion(scene, camera, BABYLON);
 
   const root = new BABYLON.TransformNode("landing-model-root", scene);
   const modelParts = splitModelUrl(state.modelUrl);
@@ -632,13 +633,13 @@ function splitModelUrl(modelUrl) {
 function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   const plastic = new BABYLON.PBRMaterial("injection-molded-plastic", scene);
   plastic.metallic = 0;
-  plastic.roughness = 0.42;
-  plastic.microSurface = 0.62;
-  plastic.specularIntensity = 0.46;
-  plastic.environmentIntensity = 0.58;
-  plastic.clearCoat.isEnabled = true;
-  plastic.clearCoat.intensity = 0.08;
-  plastic.clearCoat.roughness = 0.64;
+  plastic.roughness = 0.74;
+  plastic.microSurface = 0.34;
+  plastic.specularIntensity = 0.2;
+  plastic.environmentIntensity = 0.36;
+  plastic.clearCoat.isEnabled = false;
+  plastic.clearCoat.intensity = 0;
+  plastic.clearCoat.roughness = 0.82;
   plastic.metadata = { cadMeshes: meshes };
 
   for (const mesh of meshes) {
@@ -654,17 +655,39 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
 
 function configureCadMeshEdges(meshes, dark, BABYLON) {
   const edgeColor = dark
-    ? new BABYLON.Color4(0.34, 0.39, 0.47, 0.58)
-    : new BABYLON.Color4(0.34, 0.39, 0.47, 0.5);
+    ? new BABYLON.Color4(0.1, 0.13, 0.18, 0.82)
+    : new BABYLON.Color4(0.2, 0.23, 0.3, 0.78);
 
   for (const mesh of meshes) {
     if (typeof mesh.enableEdgesRendering !== "function") {
       continue;
     }
 
-    mesh.enableEdgesRendering(0.68);
-    mesh.edgesWidth = dark ? 0.82 : 0.7;
+    mesh.enableEdgesRendering(0.42);
+    mesh.edgesWidth = dark ? 1.18 : 1.12;
     mesh.edgesColor = edgeColor;
+  }
+}
+
+function configureCadAmbientOcclusion(scene, camera, BABYLON) {
+  if (!BABYLON.SSAO2RenderingPipeline || !scene.enableGeometryBufferRenderer || !camera) {
+    return null;
+  }
+
+  try {
+    scene.enableGeometryBufferRenderer();
+    const ssao = new BABYLON.SSAO2RenderingPipeline(
+      "landing-cad-ambient-occlusion",
+      scene,
+      { ssaoRatio: 0.56, blurRatio: 0.5 },
+      [camera]);
+    ssao.radius = 1.18;
+    ssao.totalStrength = 0.58;
+    ssao.base = 0.08;
+    ssao.expensiveBlur = false;
+    return ssao;
+  } catch {
+    return null;
   }
 }
 
@@ -685,8 +708,8 @@ function configureLandingCadToneMapping(scene, BABYLON) {
 
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  scene.imageProcessingConfiguration.exposure = 1.16;
-  scene.imageProcessingConfiguration.contrast = 1.08;
+  scene.imageProcessingConfiguration.exposure = 1.06;
+  scene.imageProcessingConfiguration.contrast = 1.18;
 }
 
 function configureLandingCadStudioLighting(scene, camera, BABYLON) {
@@ -909,11 +932,11 @@ function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#f2f7ff" : "#f6f9fc");
 
   if (plasticMaterial) {
-    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#aeb7c2" : "#909aa6");
-    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#d8e1eb" : "#b8c2cd");
-    plasticMaterial.specularIntensity = dark ? 0.52 : 0.46;
-    plasticMaterial.environmentIntensity = dark ? 0.66 : 0.5;
-    plasticMaterial.clearCoat.intensity = dark ? 0.1 : 0.08;
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#a7b1bd" : "#b4bec9");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#8995a3" : "#d5dbe3");
+    plasticMaterial.specularIntensity = dark ? 0.23 : 0.2;
+    plasticMaterial.environmentIntensity = dark ? 0.46 : 0.36;
+    plasticMaterial.clearCoat.intensity = 0;
     configureCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? [], dark, BABYLON);
   }
 }
