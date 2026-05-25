@@ -91,31 +91,28 @@ window.malievScroll = {
 
     const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
     const introTitle = section.querySelector('.machine-feature-title--reveal');
-    let touchStartY = 0;
-    let isSwitching = false;
 
-    const revealIntroTitle = () => {
-      introTitle?.classList.add('is-visible');
-    };
-
+    // Reveal intro title once it enters the viewport
     if (introTitle) {
       if (prefersReducedMotion() || typeof IntersectionObserver !== 'function') {
-        revealIntroTitle();
+        introTitle.classList.add('is-visible');
       } else {
         const titleObserver = new IntersectionObserver(entries => {
           if (entries.some(entry => entry.isIntersecting)) {
-            revealIntroTitle();
+            introTitle.classList.add('is-visible');
             titleObserver.disconnect();
           }
         }, {
           root: null,
-          threshold: 0.35,
-          rootMargin: '0px 0px -12% 0px'
+          threshold: 0.2,
+          rootMargin: '0px 0px -8% 0px'
         });
 
         titleObserver.observe(introTitle);
       }
     }
+
+    const scroller = section.closest('.machine-feature-scroller') ?? section.parentElement;
 
     const readHeaderOffset = () => {
       const cssOffset = window.getComputedStyle(document.documentElement).getPropertyValue('--site-header-height');
@@ -127,52 +124,119 @@ window.malievScroll = {
       return document.querySelector('.site-header')?.getBoundingClientRect?.().height ?? 72;
     };
 
-    const sectionIsReadyForHandoff = () => {
-      const rect = section.getBoundingClientRect();
-      const headerOffset = readHeaderOffset();
-      const viewportBottom = window.innerHeight;
-      const tolerance = Math.max(10, Math.min(28, viewportBottom * .035));
-      return rect.top <= headerOffset + tolerance && rect.top >= headerOffset - tolerance && rect.bottom >= viewportBottom - tolerance;
+    // Set data-machine-panel from both the scroll driver and keyboard handler.
+    const switchMachinePanel = nextPanel => {
+      if (section.dataset.machinePanel !== nextPanel) {
+        section.dataset.machinePanel = nextPanel;
+      }
     };
 
-    const switchMachinePanel = direction => {
-      if (isSwitching || !sectionIsReadyForHandoff()) {
+    const readMachineScrollState = () => {
+      if (!scroller) {
+        return null;
+      }
+
+      const scrollSpace = scroller.offsetHeight - section.offsetHeight;
+      // Not enough scroll space means the scroller is in auto-height mode.
+      if (scrollSpace < 80) {
+        return null;
+      }
+
+      const headerOffset = readHeaderOffset();
+      const rect = scroller.getBoundingClientRect();
+      const scrolled = headerOffset - rect.top;
+      const progress = Math.max(0, Math.min(1, scrolled / scrollSpace));
+      const stickyStart = rect.top + window.scrollY - headerOffset;
+      const stickyTolerance = Math.max(32, Math.min(96, window.innerHeight * 0.1));
+      const stickyIsActive = rect.top <= headerOffset + stickyTolerance && rect.bottom >= window.innerHeight - 24;
+
+      return { headerOffset, progress, rect, scrollSpace, stickyIsActive, stickyStart };
+    };
+
+    let snapPanel = null;
+    let snapTimeoutId = null;
+
+    // Compute scroll progress through the scroller and pick the correct panel.
+    // Progress 0 = section just became sticky; 1 = scroller about to scroll out.
+    const updatePanel = () => {
+      if (snapPanel) {
+        switchMachinePanel(snapPanel);
+        return;
+      }
+
+      const state = readMachineScrollState();
+      if (!state) {
+        return;
+      }
+
+      const nextPanel = state.progress >= 0.5 ? 'details' : 'intro';
+      switchMachinePanel(nextPanel);
+    };
+
+    const snapMachinePanel = nextPanel => {
+      const state = readMachineScrollState();
+      if (!state) {
         return false;
       }
 
-      const currentPanel = section.dataset.machinePanel === 'details' ? 'details' : 'intro';
-      const nextPanel = direction > 0 ? 'details' : 'intro';
-      if (currentPanel === nextPanel) {
-        return false;
-      }
+      switchMachinePanel(nextPanel);
+      snapPanel = nextPanel;
+      window.clearTimeout(snapTimeoutId);
+      snapTimeoutId = window.setTimeout(() => {
+        snapPanel = null;
+        snapTimeoutId = null;
+        updatePanel();
+      }, prefersReducedMotion() ? 80 : 720);
 
-      isSwitching = true;
-      section.dataset.machinePanel = nextPanel;
-      window.setTimeout(() => {
-        isSwitching = false;
-      }, prefersReducedMotion() ? 80 : 560);
-
+      const targetProgress = nextPanel === 'details' ? Math.max(0, (state.scrollSpace - 48) / state.scrollSpace) : 0;
+      const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+      window.scrollTo({
+        top: Math.max(0, state.stickyStart + targetProgress * state.scrollSpace),
+        behavior
+      });
       return true;
     };
 
-    section.addEventListener('wheel', event => {
-      if (Math.abs(event.deltaY) > 12 && switchMachinePanel(event.deltaY)) {
-        event.preventDefault();
+    let rafId = null;
+    const onScroll = () => {
+      if (rafId !== null) {
+        return;
       }
-    }, { passive: false });
 
-    section.addEventListener('touchstart', event => {
-      touchStartY = event.touches?.[0]?.clientY ?? 0;
-    }, { passive: true });
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        updatePanel();
+      });
+    };
 
-    section.addEventListener('touchmove', event => {
-      const currentY = event.touches?.[0]?.clientY ?? touchStartY;
-      const deltaY = touchStartY - currentY;
-      if (Math.abs(deltaY) > 28 && switchMachinePanel(deltaY)) {
-        event.preventDefault();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    window.requestAnimationFrame(updatePanel);
+
+    const onWheel = event => {
+      if (prefersReducedMotion() || Math.abs(event.deltaY) < 12 || Math.abs(event.deltaY) < Math.abs(event.deltaX)) {
+        return;
       }
-    }, { passive: false });
 
+      const state = readMachineScrollState();
+      if (!state?.stickyIsActive) {
+        return;
+      }
+
+      const currentPanel = snapPanel ?? section.dataset.machinePanel ?? (state.progress >= 0.5 ? 'details' : 'intro');
+      const nextPanel = event.deltaY > 0 ? 'details' : 'intro';
+      if (currentPanel === nextPanel) {
+        return;
+      }
+
+      event.preventDefault();
+      snapMachinePanel(nextPanel);
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+
+    // Keyboard: jump to the correct scroll position when arrow/page keys are pressed
+    // while the section is in its sticky zone.
     window.addEventListener('keydown', event => {
       const directionByKey = {
         ArrowDown: 1,
@@ -182,13 +246,23 @@ window.malievScroll = {
         PageUp: -1
       };
       const direction = directionByKey[event.key];
-      if (!direction) {
+      if (!direction || !scroller) {
         return;
       }
 
-      if (switchMachinePanel(direction)) {
-        event.preventDefault();
+      const state = readMachineScrollState();
+      if (!state?.stickyIsActive) {
+        return;
       }
+
+      const currentPanel = snapPanel ?? section.dataset.machinePanel ?? (state.progress >= 0.5 ? 'details' : 'intro');
+      const nextPanel = direction > 0 ? 'details' : 'intro';
+      if (currentPanel === nextPanel) {
+        return;
+      }
+
+      snapMachinePanel(nextPanel);
+      event.preventDefault();
     });
   }
 };

@@ -2448,11 +2448,9 @@ html[data-theme="dark"] .form-status--error {
 
 .machine-feature-scroller {
   position: relative;
-  /* Creates scroll space so the sticky section can animate while native scroll works normally.
-     120svh ≈ section height (100svh) + ~20svh for the intro→details transition.
-     The low threshold (0.08) triggers details after one short gesture; the short tail
-     (~18 svh remaining) means 1–2 more gestures exit to the next section. */
-  height: 120svh;
+  /* One viewport of scroll distance lets a wheel gesture snap cleanly
+     between the intro and details panels while the sticky image stays fixed. */
+  height: 200svh;
 }
 
 .machine-feature {
@@ -2462,7 +2460,7 @@ html[data-theme="dark"] .form-status--error {
   display: block;
   height: calc(100svh - var(--site-header-height, 72px));
   overflow: clip;
-  scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
+  scroll-margin-top: var(--site-header-height, 72px);
   padding: 0;
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
