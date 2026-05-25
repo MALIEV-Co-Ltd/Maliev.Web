@@ -2636,6 +2636,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("babylonjs-loaders@9.6.0", source);
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
+        Assert.Contains("Math.PI / 1.95", source);
+        Assert.DoesNotContain("Math.PI / 2.65", source);
         Assert.Contains("state.landingFrame = frameImportedModel", source);
         Assert.Contains("const normalizedHeroModelSize = 2.28;", source);
         Assert.Contains("normalizeImportedModelDimensions(displayBounds, root, frameMeshes);", source);
@@ -2671,7 +2673,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("addIdleLevitation", source);
         Assert.Contains("root.position.y", source);
         Assert.Contains("Math.sin", source);
-        Assert.Contains("const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02)", source);
+        Assert.Contains("const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005)", source);
         Assert.Contains("Math.sin(elapsed * 0.00055) * 0.025", source);
         Assert.DoesNotContain("Math.sin(elapsed * 0.0012) * 0.055", source);
         Assert.DoesNotContain("* 0.24", source);
@@ -2756,9 +2758,11 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
-        Assert.Contains("targetY: compact ? -0.08 : wide ? -0.42 : -0.2", source);
-        Assert.Contains("const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02)", source);
+        Assert.Contains("targetY: compact ? -0.08 : wide ? -0.38 : -0.2", source);
+        Assert.Contains("const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005)", source);
+        Assert.Contains("const presentationColumnBias = wide ? 0.045 : 0;", source);
         Assert.DoesNotContain("const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02)", source);
+        Assert.DoesNotContain("const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02)", source);
     }
 
     /// <summary>
@@ -2910,7 +2914,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-position\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-presentation\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

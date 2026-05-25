@@ -316,7 +316,7 @@ async function createLandingHeroScene(state, BABYLON) {
   const camera = new BABYLON.ArcRotateCamera(
     "landing-camera",
     -Math.PI / 2.55,
-    Math.PI / 2.65,
+    Math.PI / 1.95,
     5.15,
     new BABYLON.Vector3(0, 0.08, 0),
     scene);
@@ -355,7 +355,7 @@ async function createLandingHeroScene(state, BABYLON) {
   state.themeApplicator();
   observeDocumentTheme(state);
 
-  const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02);
+  const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005);
   root.rotation.copyFrom(baseRotation);
 
   // Snapshot the world AABB *after* baseRotation is applied. This is the single
@@ -439,6 +439,7 @@ function getLandingHeroViewportMetrics(host) {
   const effectiveAspect = rightCenterFraction != null
     ? 2 * (1 - rightCenterFraction) * aspect
     : aspect;
+  const presentationColumnBias = wide ? 0.045 : 0;
 
   // `fill` is the fraction of the viewport's smaller half-angle that the
   // model's silhouette (rotated, scaled, world-space) should occupy. Higher
@@ -449,13 +450,13 @@ function getLandingHeroViewportMetrics(host) {
   return {
     aspect,
     effectiveAspect,
-    rightCenterFraction,
+    rightCenterFraction: rightCenterFraction == null ? null : clamp(rightCenterFraction + presentationColumnBias, 0.52, 0.9),
     fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.48 : wide ? 0.45 : 0.46,
     fill: narrowTall ? 0.62 : compact ? 0.68 : balancedTablet ? 0.74 : wide ? 0.76 : 0.74,
     minRadius: narrowTall ? 3.6 : compact ? 2.8 : balancedTablet ? 3.4 : 3.6,
     maxRadius: narrowTall ? 12 : compact ? 11 : 11,
     fallbackRadius: narrowTall ? 6.4 : compact ? 5.6 : balancedTablet ? 5.4 : wide ? 5.6 : 5.6,
-    targetY: compact ? -0.08 : wide ? -0.42 : -0.2
+    targetY: compact ? -0.08 : wide ? -0.38 : -0.2
   };
 }
 
