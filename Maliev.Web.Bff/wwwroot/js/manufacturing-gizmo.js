@@ -631,17 +631,38 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   plastic.metallic = 0;
   plastic.roughness = 0.42;
   plastic.microSurface = 0.62;
-  plastic.specularIntensity = 0.72;
-  plastic.environmentIntensity = 0.86;
+  plastic.specularIntensity = 0.46;
+  plastic.environmentIntensity = 0.58;
   plastic.clearCoat.isEnabled = true;
-  plastic.clearCoat.intensity = 0.16;
-  plastic.clearCoat.roughness = 0.52;
+  plastic.clearCoat.intensity = 0.08;
+  plastic.clearCoat.roughness = 0.64;
+  plastic.metadata = { cadMeshes: meshes };
 
   for (const mesh of meshes) {
     mesh.material = plastic;
+    mesh.useVertexColors = false;
+    mesh.hasVertexAlpha = false;
   }
 
+  configureCadMeshEdges(meshes, false, BABYLON);
+
   return plastic;
+}
+
+function configureCadMeshEdges(meshes, dark, BABYLON) {
+  const edgeColor = dark
+    ? new BABYLON.Color4(0.34, 0.39, 0.47, 0.58)
+    : new BABYLON.Color4(0.34, 0.39, 0.47, 0.5);
+
+  for (const mesh of meshes) {
+    if (typeof mesh.enableEdgesRendering !== "function") {
+      continue;
+    }
+
+    mesh.enableEdgesRendering(0.68);
+    mesh.edgesWidth = dark ? 0.82 : 0.7;
+    mesh.edgesColor = edgeColor;
+  }
 }
 
 function configureLandingCadToneMapping(scene, BABYLON) {
@@ -854,32 +875,33 @@ function observeDocumentTheme(state) {
 function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
-  scene.environmentIntensity = dark ? 1.05 : 0.92;
-  scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#3a4351" : "#f4f7fb");
+  scene.environmentIntensity = dark ? 0.72 : 0.58;
+  scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#2d3642" : "#eef2f6");
 
-  lights.fill.intensity = dark ? 1.24 : 1.02;
-  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#2f3a4b" : "#e2e9f2");
+  lights.fill.intensity = dark ? 0.96 : 0.76;
+  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#273240" : "#d9e1ea");
 
-  lights.key.intensity = dark ? 2.65 : 2.15;
+  lights.key.intensity = dark ? 2.2 : 1.72;
 
-  lights.softbox.intensity = dark ? 1.18 : 0.96;
-  lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#d4e8ff" : "#e9f3ff");
+  lights.softbox.intensity = dark ? 0.86 : 0.62;
+  lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#c3dbf4" : "#d9e7f6");
 
-  lights.rim.intensity = dark ? 1.72 : 1.18;
-  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#bddfff" : "#d6eaff");
+  lights.rim.intensity = dark ? 1.44 : 0.95;
+  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#a7ccef" : "#bfd7ee");
 
-  lights.bounce.intensity = dark ? 0.88 : 0.56;
-  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#70839f" : "#eef4fa");
+  lights.bounce.intensity = dark ? 0.58 : 0.36;
+  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#596b83" : "#e1e8ef");
 
-  lights.cameraHeadlight.intensity = dark ? 1.65 : 1.35;
-  lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#ffffff" : "#fbfdff");
+  lights.cameraHeadlight.intensity = dark ? 1.08 : 0.78;
+  lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#f2f7ff" : "#f6f9fc");
 
   if (plasticMaterial) {
-    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#c6ccd5" : "#d2d7de");
-    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#f3f7fb" : "#f8fafc");
-    plasticMaterial.specularIntensity = dark ? 0.78 : 0.72;
-    plasticMaterial.environmentIntensity = dark ? 0.98 : 0.86;
-    plasticMaterial.clearCoat.intensity = dark ? 0.2 : 0.16;
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#aeb7c2" : "#909aa6");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#d8e1eb" : "#b8c2cd");
+    plasticMaterial.specularIntensity = dark ? 0.52 : 0.46;
+    plasticMaterial.environmentIntensity = dark ? 0.66 : 0.5;
+    plasticMaterial.clearCoat.intensity = dark ? 0.1 : 0.08;
+    configureCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? [], dark, BABYLON);
   }
 }
 

@@ -2778,11 +2778,19 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingEnabled = true;", source);
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;", source);
         Assert.Contains("plastic.roughness = 0.42;", source);
-        Assert.Contains("plastic.specularIntensity = 0.72;", source);
-        Assert.Contains("plastic.environmentIntensity = 0.86;", source);
-        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.65 : 1.35;", source);
-        Assert.Contains("lights.softbox.intensity = dark ? 1.18 : 0.96;", source);
-        Assert.Contains("plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? \"#c6ccd5\" : \"#d2d7de\");", source);
+        Assert.Contains("plastic.specularIntensity = 0.46;", source);
+        Assert.Contains("plastic.environmentIntensity = 0.58;", source);
+        Assert.Contains("mesh.useVertexColors = false;", source);
+        Assert.Contains("mesh.hasVertexAlpha = false;", source);
+        Assert.Contains("configureCadMeshEdges(meshes, false, BABYLON);", source);
+        Assert.Contains("configureCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? [], dark, BABYLON);", source);
+        Assert.Contains("mesh.enableEdgesRendering(0.68);", source);
+        Assert.Contains("const edgeColor = dark", source);
+        Assert.Contains("mesh.edgesColor = edgeColor;", source);
+        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.08 : 0.78;", source);
+        Assert.Contains("lights.softbox.intensity = dark ? 0.86 : 0.62;", source);
+        Assert.Contains("plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? \"#aeb7c2\" : \"#909aa6\");", source);
+        Assert.Contains("plasticMaterial.environmentIntensity = dark ? 0.66 : 0.5;", source);
         Assert.DoesNotContain("scene.environmentIntensity = dark ? 0.55 : 0.42;", source);
     }
 
@@ -2902,7 +2910,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-gray\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-visible\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
