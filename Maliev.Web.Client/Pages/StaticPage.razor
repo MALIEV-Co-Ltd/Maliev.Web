@@ -30,23 +30,26 @@
 
 @if (ShouldRenderPageHero)
 {
-    <section class="page-hero compact">
+    <section class="@PageHeroClass">
         <h1>@Title</h1>
         <p>@Body</p>
-        <div class="quote-actions">
-            <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
-            <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
-                @if (SecondaryActionUsesLogo)
-                {
-                    <span>@SecondaryActionPrefix</span>
-                    <img class="button-logo-mark" src="/images/logo.svg" alt="" aria-hidden="true" />
-                }
-                else
-                {
-                    @SecondaryAction
-                }
-            </a>
-        </div>
+        @if (ShouldRenderPageHeroActions)
+        {
+            <div class="quote-actions">
+                <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+                <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
+                    @if (SecondaryActionUsesLogo)
+                    {
+                        <span>@SecondaryActionPrefix</span>
+                        <img class="button-logo-mark" src="/images/logo.svg" alt="" aria-hidden="true" />
+                    }
+                    else
+                    {
+                        @SecondaryAction
+                    }
+                </a>
+            </div>
+        }
     </section>
 }
 
@@ -1780,6 +1783,12 @@ else
     }
 
     private bool ShouldRenderPageHero => !string.Equals(Path, "blog", StringComparison.Ordinal);
+
+    private bool ShouldRenderPageHeroActions => CurrentBlogPost is null;
+
+    private string PageHeroClass => CurrentBlogPost is null
+        ? "page-hero compact"
+        : "page-hero compact blog-article-hero";
 
     private string PrimaryAction => Path switch
     {

@@ -1110,6 +1110,10 @@ html:lang(th) .h1 {
   gap: 18px;
 }
 
+.page-hero.blog-article-hero {
+  border-bottom: 0;
+}
+
 .services-hero-title {
   display: flex;
   flex-wrap: wrap;
