@@ -5809,6 +5809,10 @@ html[data-theme="dark"] .auth-google-icon {
   align-content: center;
 }
 
+.address-default-checkbox {
+  align-self: end;
+}
+
 .checkbox-label input {
   width: 18px;
   min-height: 18px;

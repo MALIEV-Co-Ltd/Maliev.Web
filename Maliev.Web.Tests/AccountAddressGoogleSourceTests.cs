@@ -67,6 +67,20 @@ public sealed class AccountAddressGoogleSourceTests
     }
 
     /// <summary>
+    /// Verifies the default-address checkbox aligns with the address type select control, not the whole label row.
+    /// </summary>
+    [Fact]
+    public void AccountAddresses_AlignsDefaultAddressWithTypeSelect()
+    {
+        var page = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("class=\"checkbox-label address-default-checkbox\"", page, StringComparison.Ordinal);
+        Assert.Contains(".address-default-checkbox", styles, StringComparison.Ordinal);
+        Assert.Contains("align-self: end;", styles, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies the Web BFF forwards and maps CustomerService address metadata.
     /// </summary>
     [Fact]
