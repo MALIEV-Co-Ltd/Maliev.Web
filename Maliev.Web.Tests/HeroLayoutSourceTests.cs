@@ -1533,6 +1533,31 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the public header lets the landing hero backdrop bleed through only while the page is at the top.
+    /// </summary>
+    [Fact]
+    public void HeaderBleedsLandingHeroBackdropAtPageTop()
+    {
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
+
+        Assert.Contains("@inject IJSRuntime JS", layout);
+        Assert.Contains("malievScroll.bindHeroHeaderBleed", layout);
+        Assert.Contains(".site-header.site-header--hero-bleed", styles);
+        Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
+        Assert.Contains("box-shadow: none;", styles);
+        Assert.Contains("bindHeroHeaderBleed: function ()", script);
+        Assert.Contains("document.querySelector('.landing-hero')", script);
+        Assert.Contains("site-header--hero-bleed", script);
+        Assert.Contains("window.scrollY <= 24", script);
+        Assert.Contains("MutationObserver", script);
+        Assert.Contains("requestAnimationFrame", script);
+        Assert.Contains("document.readyState === 'loading'", script);
+        Assert.Contains("window.malievScroll.bindHeroHeaderBleed()", script);
+    }
+
+    /// <summary>
     /// Verifies the public layout includes the service-bounded customer chatbot widget.
     /// </summary>
     [Fact]

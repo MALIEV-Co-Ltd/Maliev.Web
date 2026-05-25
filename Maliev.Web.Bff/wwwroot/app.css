@@ -248,6 +248,13 @@ main {
   background: var(--header-surface);
   box-shadow: var(--header-shadow);
   backdrop-filter: saturate(180%) blur(14px);
+  transition: background .22s ease-in-out, box-shadow .22s ease-in-out, backdrop-filter .22s ease-in-out;
+}
+
+.site-header.site-header--hero-bleed {
+  background: var(--landing-gizmo-canvas-bg);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .brand {

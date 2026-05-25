@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject PreferenceService Preferences
 @inject CartState Cart
+@inject IJSRuntime JS
 
 <MudThemeProvider Theme="@_malievTheme" IsDarkMode="@IsDarkMode" />
 <MudPopoverProvider />
@@ -295,6 +296,16 @@
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
         _selectedTheme = Preferences.Theme;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync("malievScroll.bindHeroHeaderBleed");
     }
 
     private async Task ChangeCultureAsync(string culture)

@@ -82,6 +82,63 @@ window.malievScroll = {
     window.requestAnimationFrame(revealWhenVisible);
   },
 
+  bindHeroHeaderBleed: function () {
+    const root = document.documentElement;
+    if (root.dataset.heroHeaderBleedBound === 'true') {
+      return;
+    }
+
+    root.dataset.heroHeaderBleedBound = 'true';
+
+    let frame = null;
+    const updateHeaderState = () => {
+      const header = document.querySelector('.site-header');
+      if (!header) {
+        root.dataset.heroHeaderBleed = 'false';
+        return;
+      }
+
+      const hero = document.querySelector('.landing-hero');
+      if (!hero) {
+        header.classList.remove('site-header--hero-bleed');
+        root.dataset.heroHeaderBleed = 'false';
+        return;
+      }
+
+      const heroRect = hero.getBoundingClientRect();
+      const headerHeight = header.getBoundingClientRect().height || 66;
+      const heroTouchesHeader = heroRect.top <= headerHeight + 2 && heroRect.bottom > headerHeight + 24;
+      const shouldBleed = window.scrollY <= 24 && heroTouchesHeader;
+
+      header.classList.toggle('site-header--hero-bleed', shouldBleed);
+      root.dataset.heroHeaderBleed = shouldBleed ? 'true' : 'false';
+    };
+
+    const scheduleUpdate = () => {
+      if (frame !== null) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        updateHeaderState();
+      });
+    };
+
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
+
+    if (typeof MutationObserver === 'function') {
+      const observer = new MutationObserver(scheduleUpdate);
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    scheduleUpdate();
+  },
+
   bindMachineFeatureHandoff: function (section) {
     if (!section || section.dataset.machineHandoffBound === 'true') {
       return;
@@ -266,3 +323,9 @@ window.malievScroll = {
     });
   }
 };
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => window.malievScroll.bindHeroHeaderBleed(), { once: true });
+} else {
+  window.malievScroll.bindHeroHeaderBleed();
+}
