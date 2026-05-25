@@ -28,7 +28,7 @@ internal sealed class MalievApiClient(HttpClient httpClient)
 
     internal async Task<ProductDetailDto?> GetProductAsync(string handle, CancellationToken cancellationToken = default)
     {
-        return await GetJsonAsync<ProductDetailDto>($"web/v1/catalog/products/{Uri.EscapeDataString(handle)}", cancellationToken);
+        return await GetOptionalJsonAsync<ProductDetailDto>($"web/v1/catalog/products/{Uri.EscapeDataString(handle)}", cancellationToken);
     }
 
     internal async Task<QuoteReferenceDataDto> GetQuoteReferenceDataAsync(CancellationToken cancellationToken = default)
@@ -163,6 +163,13 @@ internal sealed class MalievApiClient(HttpClient httpClient)
     }
 
     private async Task<T?> GetJsonAsync<T>(string path, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.GetAsync(path, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<T>(cancellationToken);
+    }
+
+    private async Task<T?> GetOptionalJsonAsync<T>(string path, CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync(path, cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound)

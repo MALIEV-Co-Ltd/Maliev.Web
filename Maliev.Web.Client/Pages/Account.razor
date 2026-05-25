@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inherits PreferenceAwareComponentBase
 @inject MalievApiClient Api
+@inject NavigationManager Navigation
 
 <PageTitle>@Text("Account", "บัญชี") - MALIEV</PageTitle>
 
@@ -166,6 +167,10 @@
         {
             _profile = await Api.GetAccountProfileAsync();
         }
+        catch (MalievApiException ex) when (IsAccountAccessFailure(ex.StatusCode))
+        {
+            RedirectToSignIn();
+        }
         catch (Exception)
         {
             _accountUnavailable = true;
@@ -179,6 +184,17 @@
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private void RedirectToSignIn()
+    {
+        var returnUrl = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        Navigation.NavigateTo($"/auth/sign-in?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+
+    private static bool IsAccountAccessFailure(System.Net.HttpStatusCode statusCode)
+    {
+        return statusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden or System.Net.HttpStatusCode.NotFound;
     }
 
     private static bool IsSignedNdaStatus(string? status)

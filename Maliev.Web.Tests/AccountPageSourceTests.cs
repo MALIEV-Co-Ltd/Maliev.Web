@@ -56,6 +56,21 @@ public sealed class AccountPageSourceTests
     }
 
     /// <summary>
+    /// Verifies invalid account sessions are redirected to sign-in instead of rendering a blank customer profile.
+    /// </summary>
+    [Fact]
+    public void AccountOverviewRedirectsInvalidAccountSessionFailuresToSignIn()
+    {
+        var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
+
+        Assert.Contains("@inject NavigationManager Navigation", account);
+        Assert.Contains("catch (MalievApiException ex) when (IsAccountAccessFailure(ex.StatusCode))", account);
+        Assert.Contains("RedirectToSignIn();", account);
+        Assert.Contains("Navigation.NavigateTo($\"/auth/sign-in?returnUrl={Uri.EscapeDataString(returnUrl)}\", forceLoad: true);", account);
+        Assert.Contains("statusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden or System.Net.HttpStatusCode.NotFound", account);
+    }
+
+    /// <summary>
     /// Verifies the editable profile form uses customer-facing validation and constrained selectors.
     /// </summary>
     [Fact]

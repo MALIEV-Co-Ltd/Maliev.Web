@@ -62,6 +62,14 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
         using (response)
         {
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return Unauthorized(AccountProblem(
+                    "Customer session invalid",
+                    "Sign in again so MALIEV can resolve your customer profile.",
+                    StatusCodes.Status401Unauthorized));
+            }
+
             if (!response.IsSuccessStatusCode)
             {
                 return DownstreamProblem(response, AccountUnavailableDetail);
