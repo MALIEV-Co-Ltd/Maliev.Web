@@ -641,15 +641,25 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature-backdrop", source);
         Assert.Contains("machine-feature-backdrop--light", source);
         Assert.Contains("machine-feature-backdrop--dark", source);
-        Assert.Contains("@key=\"SelectedMachineVariant.Key\"", source);
-        Assert.Contains("src=\"@SelectedMachineVariant.FeatureImageUrl\"", source);
-        Assert.Contains("src=\"@SelectedMachineVariant.DarkFeatureImageUrl\"", source);
-        Assert.Contains("alt=\"@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)\"", source);
+        Assert.Contains("@key=\"SelectedMachineImageKey\"", source);
+        Assert.Contains("src=\"@SelectedMachineFeatureImageUrl\"", source);
+        Assert.Contains("src=\"@SelectedMachineDarkFeatureImageUrl\"", source);
+        Assert.Contains("alt=\"@SelectedMachineFeatureImageAlt.For(Preferences.Culture)\"", source);
         Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", source);
         Assert.Contains("/images/products/pneumatic-injection-molding-machines.png", source);
         Assert.Contains("/images/products/pneumatic-injection-molding-machines-dark.png", source);
+        Assert.Contains("/images/products/pneumatic-injection-molding-machines-compressor.png", source);
+        Assert.Contains("/images/products/pneumatic-injection-molding-machines-compressor-dark.png", source);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines.png")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines-dark.png")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines-compressor.png")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "products", "pneumatic-injection-molding-machines-compressor-dark.png")));
+        Assert.Contains("private string SelectedMachineFeatureImageUrl => _includeAirCompressor", source);
+        Assert.Contains("? SelectedMachineVariant.CompressorFeatureImageUrl", source);
+        Assert.Contains("private string SelectedMachineDarkFeatureImageUrl => _includeAirCompressor", source);
+        Assert.Contains("? SelectedMachineVariant.CompressorDarkFeatureImageUrl", source);
+        Assert.Contains("private LocalizedText SelectedMachineFeatureImageAlt => _includeAirCompressor", source);
+        Assert.Contains("? SelectedMachineVariant.CompressorFeatureImageAlt", source);
         Assert.Contains("machine-configurator", source);
         Assert.Contains("role=\"radiogroup\"", source);
         Assert.Contains("role=\"radio\"", source);
@@ -700,7 +710,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("classList.add('is-visible')", scrollScript);
         Assert.DoesNotContain("window.addEventListener('scroll', scheduleHalfwayHandoff", scrollScript);
         Assert.Contains("private sealed record ProcessStep(\n        string Number,\n        string Accent,\n        LocalizedText Title,\n        LocalizedText Body);", source);
-        Assert.Contains("private sealed record MachineVariant(\n        string Key,\n        LocalizedText Title,\n        LocalizedText Subtitle,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        IReadOnlyList<MachineStat> Stats);", source);
+        Assert.Contains("private sealed record MachineVariant(\n        string Key,\n        LocalizedText Title,\n        LocalizedText Subtitle,\n        LocalizedText Body,\n        string FeatureImageUrl,\n        string DarkFeatureImageUrl,\n        string CompressorFeatureImageUrl,\n        string CompressorDarkFeatureImageUrl,\n        LocalizedText FeatureImageAlt,\n        LocalizedText CompressorFeatureImageAlt,\n        IReadOnlyList<MachineStat> Stats);", source);
         Assert.DoesNotContain("https://shop.maliev.com/cdn/shop/files/machine-portrait.21.png", source);
         Assert.DoesNotContain("machine-feature-kicker", source);
         Assert.DoesNotContain("PIMM-30 / PIMM-50", source);
@@ -971,10 +981,10 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("data-selected-variant=\"@SelectedMachineVariant.Key\"", machineSection);
         Assert.Contains("data-compressor-included=\"@MachineCompressorAriaPressed\"", machineSection);
-        Assert.Contains("@key=\"SelectedMachineVariant.Key\"", machineSection);
-        Assert.Contains("src=\"@SelectedMachineVariant.FeatureImageUrl\"", machineSection);
-        Assert.Contains("src=\"@SelectedMachineVariant.DarkFeatureImageUrl\"", machineSection);
-        Assert.Contains("alt=\"@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)\"", machineSection);
+        Assert.Contains("@key=\"SelectedMachineImageKey\"", machineSection);
+        Assert.Contains("src=\"@SelectedMachineFeatureImageUrl\"", machineSection);
+        Assert.Contains("src=\"@SelectedMachineDarkFeatureImageUrl\"", machineSection);
+        Assert.Contains("alt=\"@SelectedMachineFeatureImageAlt.For(Preferences.Culture)\"", machineSection);
         Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", machineSection);
         Assert.Contains("@foreach (var stat in SelectedMachineVariant.Stats)", machineSection);
         Assert.Contains("@foreach (var variant in MachineVariants)", machineSection);
@@ -1001,8 +1011,8 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("30g machine", machineFeatures);
         Assert.Contains("50g machine", machineFeatures);
-        Assert.Contains("Compact trials and inserts", machineFeatures);
-        Assert.Contains("More shot volume", machineFeatures);
+        Assert.Contains("Desktop trials and inserts", machineFeatures);
+        Assert.Contains("More desktop shot volume", machineFeatures);
         Assert.DoesNotContain("30g trials", machineFeatures);
         Assert.DoesNotContain("50g small batches", machineFeatures);
         Assert.DoesNotContain("Tooling setup", machineFeatures);

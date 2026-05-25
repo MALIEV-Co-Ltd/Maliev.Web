@@ -161,13 +161,13 @@
          data-compressor-included="@MachineCompressorAriaPressed"
          data-machine-panel="intro">
     <img class="machine-feature-backdrop machine-feature-backdrop--light"
-         @key="SelectedMachineVariant.Key"
-         src="@SelectedMachineVariant.FeatureImageUrl"
-         alt="@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)"
+         @key="SelectedMachineImageKey"
+         src="@SelectedMachineFeatureImageUrl"
+         alt="@SelectedMachineFeatureImageAlt.For(Preferences.Culture)"
          loading="lazy" />
     <img class="machine-feature-backdrop machine-feature-backdrop--dark"
-         src="@SelectedMachineVariant.DarkFeatureImageUrl"
-         alt="@SelectedMachineVariant.FeatureImageAlt.For(Preferences.Culture)"
+         src="@SelectedMachineDarkFeatureImageUrl"
+         alt="@SelectedMachineFeatureImageAlt.For(Preferences.Culture)"
          loading="lazy" />
     <div class="machine-feature-panel">
         <div class="machine-feature-copy machine-feature-intro-copy" data-machine-content="intro">
@@ -359,6 +359,20 @@
         variant => string.Equals(variant.Key, _selectedMachineVariantKey, StringComparison.OrdinalIgnoreCase))
         ?? MachineVariants[0];
 
+    private string SelectedMachineImageKey => $"{SelectedMachineVariant.Key}:{(_includeAirCompressor ? "compressor" : "machine")}";
+
+    private string SelectedMachineFeatureImageUrl => _includeAirCompressor
+        ? SelectedMachineVariant.CompressorFeatureImageUrl
+        : SelectedMachineVariant.FeatureImageUrl;
+
+    private string SelectedMachineDarkFeatureImageUrl => _includeAirCompressor
+        ? SelectedMachineVariant.CompressorDarkFeatureImageUrl
+        : SelectedMachineVariant.DarkFeatureImageUrl;
+
+    private LocalizedText SelectedMachineFeatureImageAlt => _includeAirCompressor
+        ? SelectedMachineVariant.CompressorFeatureImageAlt
+        : SelectedMachineVariant.FeatureImageAlt;
+
     private readonly IReadOnlyList<MachineVariant> MachineVariants =
     [
         new(
@@ -368,7 +382,10 @@
             SiteContent.Text("Use the 30g pneumatic machine as a desktop plastics lab for home workshops, recycled material trials, compact parts, sample shots, and small inserts before scaling into a larger shot volume.", "ใช้เครื่องระบบลมรุ่น 30g เป็นห้องทดลองพลาสติกบนโต๊ะสำหรับเวิร์กช็อปที่บ้าน ทดลองวัสดุรีไซเคิล ชิ้นงานกะทัดรัด งานตัวอย่าง และอินเสิร์ตก่อนขยับไปปริมาตรฉีดที่ใหญ่ขึ้น"),
             "/images/products/pneumatic-injection-molding-machines.png",
             "/images/products/pneumatic-injection-molding-machines-dark.png",
+            "/images/products/pneumatic-injection-molding-machines-compressor.png",
+            "/images/products/pneumatic-injection-molding-machines-compressor-dark.png",
             SiteContent.Text("MALIEV 30g pneumatic injection molding machine", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g"),
+            SiteContent.Text("MALIEV 30g pneumatic injection molding machine with 25L air compressor", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 30g พร้อมปั๊มลม 25L"),
             [
                 new(SiteContent.Text("30g", "30g"), SiteContent.Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")),
                 new(SiteContent.Text("300°C", "300°C"), SiteContent.Text("max melt", "อุณหภูมิสูงสุด")),
@@ -382,7 +399,10 @@
             SiteContent.Text("Use the 50g pneumatic machine for larger desktop tooling work, recycled resin trials, small home-workshop production, and hotter engineering materials without moving into factory-scale equipment.", "ใช้เครื่องระบบลมรุ่น 50g สำหรับงานแม่พิมพ์ตั้งโต๊ะที่ใหญ่ขึ้น ทดลองเม็ดพลาสติกรีไซเคิล ผลิตงานในเวิร์กช็อปที่บ้าน และวัสดุวิศวกรรมที่ต้องใช้อุณหภูมิสูงขึ้น โดยยังไม่ต้องขยับไปเครื่องระดับโรงงาน"),
             "/images/products/pneumatic-injection-molding-machines.png",
             "/images/products/pneumatic-injection-molding-machines-dark.png",
+            "/images/products/pneumatic-injection-molding-machines-compressor.png",
+            "/images/products/pneumatic-injection-molding-machines-compressor-dark.png",
             SiteContent.Text("MALIEV 50g pneumatic injection molding machine", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 50g"),
+            SiteContent.Text("MALIEV 50g pneumatic injection molding machine with 25L air compressor", "เครื่องฉีดพลาสติกระบบลม MALIEV รุ่น 50g พร้อมปั๊มลม 25L"),
             [
                 new(SiteContent.Text("50g", "50g"), SiteContent.Text("shot capacity", "ปริมาตรฉีดต่อครั้ง")),
                 new(SiteContent.Text("350°C", "350°C"), SiteContent.Text("max melt", "อุณหภูมิสูงสุด")),
@@ -710,7 +730,10 @@
         LocalizedText Body,
         string FeatureImageUrl,
         string DarkFeatureImageUrl,
+        string CompressorFeatureImageUrl,
+        string CompressorDarkFeatureImageUrl,
         LocalizedText FeatureImageAlt,
+        LocalizedText CompressorFeatureImageAlt,
         IReadOnlyList<MachineStat> Stats);
 
     private sealed record MachineStat(
