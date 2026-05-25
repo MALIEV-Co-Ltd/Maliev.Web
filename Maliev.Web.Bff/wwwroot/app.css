@@ -2437,13 +2437,23 @@ html[data-theme="dark"] .form-status--error {
   min-width: 0;
 }
 
-.machine-feature {
+.machine-feature-scroller {
   position: relative;
+  /* Creates scroll space so the sticky section can animate while native scroll works normally.
+     120svh ≈ section height (100svh) + ~20svh for the intro→details transition.
+     The low threshold (0.08) triggers details after one short gesture; the short tail
+     (~18 svh remaining) means 1–2 more gestures exit to the next section. */
+  height: 120svh;
+}
+
+.machine-feature {
+  position: sticky;
+  top: var(--site-header-height, 72px);
   isolation: isolate;
   display: block;
+  height: calc(100svh - var(--site-header-height, 72px));
   overflow: clip;
   scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);
-  min-height: calc(100svh - var(--site-header-height, 72px));
   padding: 0;
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
@@ -2468,11 +2478,13 @@ html[data-theme="dark"] .form-status--error {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, min(38vw, 540px));
-  align-items: end;
+  align-items: center;
   justify-content: center;
   gap: clamp(20px, 3vw, 48px);
-  min-height: calc(100svh - var(--site-header-height, 72px));
-  padding: 112px max(32px, calc((100vw - var(--container)) / 2 + 32px));
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: clamp(42px, 6svh, 72px) max(32px, calc((100vw - var(--container)) / 2 + 32px));
   overflow: hidden;
   scroll-margin-top: var(--site-header-height, 72px);
 }
@@ -2483,8 +2495,8 @@ html[data-theme="dark"] .form-status--error {
 
 .machine-feature-title {
   max-width: 720px;
-  font-size: clamp(3.8rem, 4.85vw, 4.65rem);
-  line-height: .98;
+  font-size: clamp(3.15rem, 4.2vw, 4.1rem);
+  line-height: .95;
 }
 
 .machine-feature-title--intro {
@@ -2538,9 +2550,9 @@ html:lang(th) .machine-feature-title-lead {
   align-content: end;
   align-self: end;
   justify-self: end;
-  gap: 22px;
-  max-width: 480px;
-  margin-bottom: clamp(36px, 5.5vh, 72px);
+  gap: clamp(12px, 1.7svh, 18px);
+  max-width: min(440px, 37vw);
+  margin-bottom: 0;
   min-width: 0;
   z-index: 2;
 }
@@ -2553,6 +2565,9 @@ html:lang(th) .machine-feature-title-lead {
 }
 
 .machine-feature-details-copy {
+  align-self: center;
+  align-content: center;
+  margin-bottom: 0;
   opacity: 0;
   pointer-events: none;
   transform: translateY(42px);
@@ -2580,13 +2595,18 @@ html:lang(th) .machine-feature-title-lead {
 
 .machine-feature-backdrop {
   position: absolute;
-  inset: 0;
+  top: auto;
+  right: auto;
+  bottom: clamp(-132px, -12svh, -96px);
+  left: 0;
   z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: auto;
+  max-width: none;
+  height: min(941px, calc(100% + 8px));
+  object-fit: contain;
   object-position: left bottom;
   opacity: 1;
+  filter: contrast(1.04) saturate(1.02);
   transform: translateZ(0);
   transition: opacity .48s ease-in-out;
   will-change: opacity;
@@ -2607,14 +2627,14 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .machine-stat-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .machine-stat-grid div {
   display: grid;
-  gap: 5px;
+  gap: 3px;
   min-width: 0;
-  padding: 16px;
+  padding: 12px 14px;
   background: rgb(var(--machine-feature-panel-rgb) / .72);
   border: 1px solid rgb(var(--machine-feature-border-rgb) / .08);
   border-radius: var(--radius);
@@ -2623,24 +2643,24 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 
 .machine-stat-grid strong {
   color: var(--ink);
-  font-size: clamp(1.5rem, 2.1vw, 2rem);
+  font-size: clamp(1.35rem, 1.85vw, 1.72rem);
   line-height: 1;
 }
 
 .machine-stat-grid small {
   color: var(--muted);
-  font-size: .82rem;
-  line-height: 1.35;
+  font-size: .78rem;
+  line-height: 1.25;
 }
 
 .machine-configurator {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .machine-configurator-group {
   display: grid;
-  gap: 9px;
+  gap: 7px;
 }
 
 .machine-configurator-label {
@@ -2655,7 +2675,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .machine-variant-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .machine-variant-button,
@@ -2663,10 +2683,10 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   min-width: 0;
-  padding: 14px;
+  padding: 11px 12px;
   font: inherit;
   color: var(--ink-2);
   text-align: left;
@@ -2679,11 +2699,11 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 .machine-variant-button {
-  min-height: 92px;
+  min-height: 76px;
 }
 
 .machine-addon-option {
-  min-height: 74px;
+  min-height: 64px;
 }
 
 .machine-variant-button:is(:hover, :focus-visible),
@@ -2708,15 +2728,15 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .machine-variant-option-copy strong,
 .machine-addon-copy strong {
   color: var(--ink);
-  font-size: 1rem;
+  font-size: .94rem;
   line-height: 1.2;
 }
 
 .machine-variant-option-copy small,
 .machine-addon-copy small {
   color: var(--muted);
-  font-size: .8rem;
-  line-height: 1.35;
+  font-size: .76rem;
+  line-height: 1.25;
 }
 
 .machine-variant-option-check {
@@ -2746,7 +2766,7 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
-  padding: 12px 14px;
+  padding: 9px 12px;
   background: rgb(var(--machine-feature-panel-rgb) / .58);
   border-left: 3px solid var(--blue);
   border-radius: var(--radius);
@@ -2769,15 +2789,16 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 .machine-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
-  width: min(100%, 430px);
-  margin-top: 4px;
+  width: min(100%, 410px);
+  margin-top: 0;
 }
 
 .machine-actions .button {
-  min-height: 52px;
-  border-radius: 10px;
+  min-height: 46px;
+  border-radius: 8px;
+  font-size: .88rem;
   font-weight: 750;
 }
 
@@ -2833,7 +2854,6 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   max-width: var(--container);
   margin-bottom: clamp(46px, 5vw, 72px);
 }
-
 
 .process-lede h2 {
   max-width: 760px;
@@ -7501,10 +7521,12 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     grid-area: media;
     display: block;
     position: relative;
+    inset: auto;
     width: 100%;
     max-width: 100%;
     height: clamp(320px, 54vw, 560px);
     margin-inline: 0;
+    filter: none;
     object-fit: contain;
     object-position: center bottom;
   }

@@ -726,9 +726,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("display: block;", styles);
         Assert.Contains("scroll-margin-top: calc(var(--site-header-height, 72px) + 18px);", styles);
         Assert.Contains(".machine-feature-panel", styles);
-        Assert.Contains("min-height: calc(100svh - var(--site-header-height, 72px));", styles);
+        Assert.Contains("height: 100%;", styles);
+        Assert.Contains("min-height: 100%;", styles);
+        Assert.Contains("padding: clamp(42px, 6svh, 72px) max(32px, calc((100vw - var(--container)) / 2 + 32px));", styles);
         Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(320px, min(38vw, 540px));", styles);
-        Assert.Contains("align-items: end;", styles);
+        Assert.Contains("align-items: center;", styles);
         Assert.DoesNotContain(".machine-feature-panel--details", styles);
         Assert.Contains(".machine-feature-details-copy", styles);
         Assert.Contains(".machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
@@ -738,9 +740,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("transform: translateX(44px);", styles);
         Assert.Contains(".machine-feature-title--reveal.is-visible", styles);
         Assert.Contains(".machine-feature-title--intro > span", styles);
-        Assert.Contains("max-width: 480px;", styles);
+        Assert.Contains("max-width: min(440px, 37vw);", styles);
         Assert.Contains("text-align: right;", styles);
-        Assert.Contains("margin-bottom: clamp(36px, 5.5vh, 72px);", styles);
+        Assert.Contains("margin-bottom: 0;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-height: 920px)", styles);
         Assert.Contains("padding-block: clamp(32px, 5svh, 54px);", styles);
         Assert.Contains("font-size: clamp(3rem, 4.15vw, 3.75rem);", styles);
@@ -752,7 +754,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-details-copy,\n  .machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
         Assert.Contains("height: clamp(320px, 54vw, 560px);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
-        Assert.Contains("object-fit: cover;", styles);
+        Assert.Contains("height: min(941px, calc(100% + 8px));", styles);
+        Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", styles);
+        Assert.Contains("width: auto;", styles);
+        Assert.Contains("max-width: none;", styles);
         Assert.Contains("object-fit: contain;", styles);
         Assert.Contains("object-position: left bottom;", styles);
         Assert.Contains("object-position: center bottom;", styles);
@@ -764,6 +769,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("transform: translateX(-5vw);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
+        Assert.Contains("filter: contrast(1.04) saturate(1.02);", styles);
         Assert.Contains("width: 100%;", styles);
         Assert.Contains("margin-inline: 0;", styles);
         Assert.Contains(".machine-configurator", styles);
@@ -774,7 +780,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-config-summary", styles);
         Assert.Contains(".machine-actions {\n  display: grid;", styles);
         Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);", styles);
-        Assert.Contains(".machine-actions .button {\n  min-height: 52px;", styles);
+        Assert.Contains(".machine-actions .button {\n  min-height: 46px;", styles);
         Assert.Contains(".machine-actions .button.primary {\n  justify-content: space-between;", styles);
         Assert.Contains(".machine-actions .button.primary::after", styles);
         Assert.Matches(
@@ -795,7 +801,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-stat-grid", styles);
         Assert.Contains(".workflow-step:is(:hover, :focus-visible)", styles);
         Assert.Contains(".workflow-step.is-active", styles);
-        Assert.Contains("font-size: clamp(1.5rem, 2.1vw, 2rem);", styles);
+        Assert.Contains("font-size: clamp(1.35rem, 1.85vw, 1.72rem);", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains(".machine-stat-grid div {\n    min-height: 80px;", styles);
         Assert.Contains("font-size: clamp(1.25rem, 6vw, 1.55rem);", styles);
@@ -1001,6 +1007,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark", machineStyles);
         Assert.DoesNotContain("background: #f7f8fb;", machineStyles);
         Assert.DoesNotContain("rgba(247, 248, 251", styles);
+        Assert.Contains("height: min(941px, calc(100% + 8px));", machineStyles);
+        Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", machineStyles);
+        Assert.Contains("width: auto;", machineStyles);
+        Assert.Contains("max-width: none;", machineStyles);
+        Assert.Contains("object-fit: contain;", machineStyles);
+        Assert.DoesNotContain("object-fit: cover;", machineStyles);
         Assert.DoesNotContain("rgba(var(--machine-feature", styles);
     }
 
