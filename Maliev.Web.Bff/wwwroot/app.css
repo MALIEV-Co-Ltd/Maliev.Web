@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+  --site-header-height: 66px;
   --paper: #ffffff;
   --paper-2: #f6f7f9;
   --paper-3: #eef0f3;
@@ -2465,12 +2466,12 @@ html[data-theme="dark"] .form-status--error {
 
 .machine-feature {
   position: sticky;
-  top: var(--site-header-height, 72px);
+  top: var(--site-header-height);
   isolation: isolate;
   display: block;
-  height: calc(100svh - var(--site-header-height, 72px));
+  height: calc(100svh - var(--site-header-height));
   overflow: clip;
-  scroll-margin-top: var(--site-header-height, 72px);
+  scroll-margin-top: var(--site-header-height);
   padding: 0;
   background: rgb(var(--machine-feature-surface-rgb));
   color: var(--ink);
@@ -2494,7 +2495,7 @@ html[data-theme="dark"] .form-status--error {
 .machine-feature-panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, min(38vw, 540px));
+  grid-template-columns: minmax(0, 1fr) minmax(520px, min(44vw, 680px));
   align-items: center;
   justify-content: center;
   gap: clamp(20px, 3vw, 48px);
@@ -2555,6 +2556,12 @@ html:lang(th) .machine-feature-title-lead {
   overflow-wrap: normal;
 }
 
+html:lang(th) .machine-feature-title--intro > span {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
 .machine-feature p,
 .machine-feature .lede {
   color: var(--muted);
@@ -2578,6 +2585,8 @@ html:lang(th) .machine-feature-title-lead {
   gap: 0;
   align-self: end;
   justify-self: end;
+  max-width: min(680px, 45vw);
+  margin-bottom: clamp(88px, 12svh, 132px);
   text-align: right;
 }
 
@@ -7760,6 +7769,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 @media (max-width: 680px) {
+  :root {
+    --site-header-height: 60px;
+  }
+
   body {
     font-size: 15px;
   }

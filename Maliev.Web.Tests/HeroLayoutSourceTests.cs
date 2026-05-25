@@ -634,8 +634,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("data-machine-content=\"intro\"", source);
         Assert.Contains("data-machine-content=\"details\"", source);
         Assert.DoesNotContain("machine-feature-panel machine-feature-panel--details", source);
-        Assert.Contains("@Text(\"Pneumatic\", \"เครื่องฉีดพลาสติก\")", source);
-        Assert.Contains("@Text(\"Injection Molding Machine\", \"ระบบลม\")", source);
+        Assert.Contains("<span>@Text(\"Pneumatic\", \"เครื่องฉีดพลาสติก\")</span>", source);
+        Assert.Contains("<span class=\"accent-blue\">@Text(\"Injection Molding Machine\", \"ระบบลม\")</span>", source);
         Assert.Contains("machine-feature-title--intro machine-feature-title--reveal", source);
         Assert.Contains("machine-feature-title machine-feature-title--intro", source);
         Assert.Contains("machine-feature-backdrop", source);
@@ -746,8 +746,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-panel", styles);
         Assert.Contains("height: 100%;", styles);
         Assert.Contains("min-height: 100%;", styles);
+        Assert.Contains("--site-header-height: 66px;", styles);
         Assert.Contains("padding: clamp(42px, 6svh, 72px) max(32px, calc((100vw - var(--container)) / 2 + 32px));", styles);
-        Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(320px, min(38vw, 540px));", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(520px, min(44vw, 680px));", styles);
         Assert.Contains("align-items: center;", styles);
         Assert.DoesNotContain(".machine-feature-panel--details", styles);
         Assert.Contains(".machine-feature-details-copy", styles);
@@ -759,6 +760,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-title--reveal.is-visible", styles);
         Assert.Contains(".machine-feature-title--intro > span", styles);
         Assert.Contains("max-width: min(440px, 37vw);", styles);
+        Assert.Contains("max-width: min(680px, 45vw);", styles);
+        Assert.Contains("margin-bottom: clamp(88px, 12svh, 132px);", styles);
         Assert.Contains("text-align: right;", styles);
         Assert.Contains("margin-bottom: 0;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-height: 920px)", styles);
@@ -814,6 +817,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature .h-display", styles);
         Assert.Contains(".machine-feature-title", styles);
         Assert.Contains("html:lang(th) .machine-feature-title-lead", styles);
+        Assert.Contains("html:lang(th) .machine-feature-title--intro > span", styles);
         Assert.Contains("white-space: nowrap;", styles);
         Assert.Contains("word-break: keep-all;", styles);
         Assert.Contains(".machine-stat-grid", styles);
