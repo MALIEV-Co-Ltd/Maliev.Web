@@ -2609,10 +2609,10 @@ html:lang(th) .machine-feature-title-lead {
   bottom: clamp(-132px, -12svh, -96px);
   left: 0;
   z-index: 0;
-  width: auto;
+  width: 100%;
   max-width: none;
-  height: min(941px, calc(100% + 8px));
-  object-fit: contain;
+  height: calc(100% + clamp(132px, 16svh, 180px));
+  object-fit: cover;
   object-position: left bottom;
   opacity: 1;
   filter: contrast(1.04) saturate(1.02);

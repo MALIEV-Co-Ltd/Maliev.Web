@@ -758,11 +758,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-feature-details-copy,\n  .machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
         Assert.Contains("height: clamp(320px, 54vw, 560px);", styles);
         Assert.Contains(".machine-feature-backdrop", styles);
-        Assert.Contains("height: min(941px, calc(100% + 8px));", styles);
+        Assert.Contains("height: calc(100% + clamp(132px, 16svh, 180px));", styles);
         Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", styles);
-        Assert.Contains("width: auto;", styles);
+        Assert.Contains("width: 100%;", styles);
         Assert.Contains("max-width: none;", styles);
-        Assert.Contains("object-fit: contain;", styles);
+        Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
         Assert.Contains("object-position: center bottom;", styles);
         Assert.Contains("transition: opacity .48s ease-in-out;", styles);
@@ -1009,6 +1009,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("rgb(var(--machine-feature-surface-rgb) / .98)", styles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .72);", machineStyles);
         Assert.Contains("background: rgb(var(--machine-feature-panel-rgb) / .74);", machineStyles);
+        Assert.Contains("height: calc(100% + clamp(132px, 16svh, 180px));", machineStyles);
+        Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", machineStyles);
+        Assert.Contains("width: 100%;", machineStyles);
+        Assert.Contains("max-width: none;", machineStyles);
+        Assert.Contains("object-fit: cover;", machineStyles);
         Assert.Contains(".machine-variant-button.is-selected", machineStyles);
         Assert.Contains(".machine-addon-option.is-selected", machineStyles);
         Assert.Contains("border-color: var(--blue);", machineStyles);
@@ -1017,12 +1022,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark", machineStyles);
         Assert.DoesNotContain("background: #f7f8fb;", machineStyles);
         Assert.DoesNotContain("rgba(247, 248, 251", styles);
-        Assert.Contains("height: min(941px, calc(100% + 8px));", machineStyles);
-        Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", machineStyles);
-        Assert.Contains("width: auto;", machineStyles);
-        Assert.Contains("max-width: none;", machineStyles);
-        Assert.Contains("object-fit: contain;", machineStyles);
-        Assert.DoesNotContain("object-fit: cover;", machineStyles);
         Assert.DoesNotContain("rgba(var(--machine-feature", styles);
     }
 
