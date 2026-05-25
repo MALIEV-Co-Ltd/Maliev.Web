@@ -77,7 +77,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             }
 
             using var document = await ReadJsonAsync(response, cancellationToken);
-            return Ok(MapProfile(document.RootElement, customerId.Value));
+            using var companyDocument = await ReadLinkedCompanyAsync(document.RootElement, cancellationToken);
+            return Ok(MapProfile(document.RootElement, customerId.Value, companyDocument?.RootElement));
         }
     }
 
@@ -95,12 +96,35 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can update your profile.", StatusCodes.Status401Unauthorized));
         }
 
+        using var currentResponse = await customerClient.GetCustomerAsync(customerId.Value, cancellationToken);
+        if (currentResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return Unauthorized(AccountProblem(
+                "Customer session invalid",
+                "Sign in again so MALIEV can resolve your customer profile.",
+                StatusCodes.Status401Unauthorized));
+        }
+
+        if (!currentResponse.IsSuccessStatusCode)
+        {
+            return DownstreamProblem(currentResponse, AccountUnavailableDetail);
+        }
+
+        using var currentDocument = await ReadJsonAsync(currentResponse, cancellationToken);
+        var companyMutation = await UpsertCompanyAsync(currentDocument.RootElement, request, cancellationToken);
+        using var mutatedCompanyDocument = companyMutation.Document;
+        if (companyMutation.Failure is not null)
+        {
+            return companyMutation.Failure;
+        }
+
         using var response = await customerClient.UpdateCustomerAsync(customerId.Value, new
         {
             firstName = request.FirstName,
             lastName = request.LastName,
             email = request.Email,
             mobile = request.Mobile,
+            companyId = companyMutation.CompanyId,
             preferredLanguage = NormalizeLanguage(request.PreferredLanguage),
             timezone = string.IsNullOrWhiteSpace(request.Timezone) ? "Asia/Bangkok" : request.Timezone,
             xmin = request.Version
@@ -112,7 +136,10 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         }
 
         using var document = await ReadJsonAsync(response, cancellationToken);
-        return Ok(MapProfile(document.RootElement, customerId.Value));
+        using var linkedCompanyDocument = mutatedCompanyDocument is null
+            ? await ReadLinkedCompanyAsync(document.RootElement, cancellationToken)
+            : null;
+        return Ok(MapProfile(document.RootElement, customerId.Value, mutatedCompanyDocument?.RootElement ?? linkedCompanyDocument?.RootElement));
     }
 
     /// <summary>Gets the signed-in customer address book from CustomerService.</summary>
@@ -341,6 +368,119 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             .Any(id => id == addressId);
     }
 
+    private async Task<JsonDocument?> ReadLinkedCompanyAsync(JsonElement customerRoot, CancellationToken cancellationToken)
+    {
+        var companyId = GetGuid(customerRoot, "companyId", "CompanyId");
+        if (!companyId.HasValue)
+        {
+            return null;
+        }
+
+        using var response = await customerClient.GetCompanyAsync(companyId.Value, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return await ReadJsonAsync(response, cancellationToken);
+    }
+
+    private async Task<CompanyMutation> UpsertCompanyAsync(
+        JsonElement currentCustomerRoot,
+        CustomerAccountProfileUpdateRequest request,
+        CancellationToken cancellationToken)
+    {
+        var currentCompanyId = GetGuid(currentCustomerRoot, "companyId", "CompanyId");
+        if (!HasCompanyInput(request))
+        {
+            return new CompanyMutation(null, currentCompanyId, null);
+        }
+
+        var companyName = NormalizeOptional(request.CompanyName);
+        if (!currentCompanyId.HasValue && string.IsNullOrWhiteSpace(companyName))
+        {
+            return new CompanyMutation(
+                null,
+                null,
+                BadRequest(AccountProblem(
+                    "Company name required",
+                    "Add a company name before saving company tax or billing details.",
+                    StatusCodes.Status400BadRequest)));
+        }
+
+        if (currentCompanyId.HasValue)
+        {
+            using var existingResponse = await customerClient.GetCompanyAsync(currentCompanyId.Value, cancellationToken);
+            if (!existingResponse.IsSuccessStatusCode)
+            {
+                return new CompanyMutation(null, currentCompanyId, DownstreamProblem(existingResponse, "Company details could not be loaded."));
+            }
+
+            using var existingDocument = await ReadJsonAsync(existingResponse, cancellationToken);
+            var version = request.CompanyVersion != 0
+                ? request.CompanyVersion
+                : GetUInt(existingDocument.RootElement, "xmin", "Xmin", "version", "Version");
+            var companyFieldsLoaded = request.CompanyVersion != 0;
+
+            using var updateResponse = await customerClient.UpdateCompanyAsync(currentCompanyId.Value, new
+            {
+                name = companyName ?? GetString(existingDocument.RootElement, "name", "Name"),
+                vatNumber = NormalizeCompanyField(
+                    request.CompanyVatNumber,
+                    existingDocument.RootElement,
+                    companyFieldsLoaded,
+                    "vatNumber",
+                    "VatNumber"),
+                registrationNumber = NormalizeCompanyField(
+                    request.CompanyRegistrationNumber,
+                    existingDocument.RootElement,
+                    companyFieldsLoaded,
+                    "registrationNumber",
+                    "RegistrationNumber"),
+                contactEmail = NormalizeCompanyField(
+                    request.CompanyContactEmail,
+                    existingDocument.RootElement,
+                    companyFieldsLoaded,
+                    "contactEmail",
+                    "ContactEmail"),
+                contactPhone = NormalizeCompanyField(
+                    request.CompanyContactPhone,
+                    existingDocument.RootElement,
+                    companyFieldsLoaded,
+                    "contactPhone",
+                    "ContactPhone"),
+                xmin = version
+            }, cancellationToken);
+
+            if (!updateResponse.IsSuccessStatusCode)
+            {
+                return new CompanyMutation(null, currentCompanyId, DownstreamProblem(updateResponse, "Company details could not be updated."));
+            }
+
+            var updatedDocument = await ReadJsonAsync(updateResponse, cancellationToken);
+            return new CompanyMutation(updatedDocument, currentCompanyId, null);
+        }
+
+        using var createResponse = await customerClient.CreateCompanyAsync(new
+        {
+            name = companyName,
+            vatNumber = NormalizeOptional(request.CompanyVatNumber),
+            registrationNumber = NormalizeOptional(request.CompanyRegistrationNumber),
+            contactEmail = NormalizeOptional(request.CompanyContactEmail) ?? NormalizeOptional(request.Email),
+            contactPhone = NormalizeOptional(request.CompanyContactPhone) ?? NormalizeOptional(request.Mobile),
+            segment = GetString(currentCustomerRoot, "segment", "Segment") ?? "Retail",
+            tier = GetString(currentCustomerRoot, "tier", "Tier") ?? "Bronze"
+        }, cancellationToken);
+
+        if (!createResponse.IsSuccessStatusCode)
+        {
+            return new CompanyMutation(null, null, DownstreamProblem(createResponse, "Company details could not be created."));
+        }
+
+        var createdDocument = await ReadJsonAsync(createResponse, cancellationToken);
+        return new CompanyMutation(createdDocument, GetGuid(createdDocument.RootElement, "id", "Id"), null);
+    }
+
     private Guid? GetClaimGuid(params string[] claimTypes)
     {
         foreach (var claimType in claimTypes)
@@ -378,11 +518,14 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         return GetGuid(document.RootElement, "id", "Id") ?? Guid.Empty;
     }
 
-    private CustomerAccountProfileDto MapProfile(JsonElement root, Guid fallbackCustomerId)
+    private CustomerAccountProfileDto MapProfile(JsonElement root, Guid fallbackCustomerId, JsonElement? companyRoot = null)
     {
         var firstName = GetString(root, "firstName", "FirstName");
         var lastName = GetString(root, "lastName", "LastName");
         var displayName = GetString(root, "name", "Name", "displayName", "DisplayName");
+        var companyId = companyRoot.HasValue
+            ? GetGuid(companyRoot.Value, "id", "Id") ?? GetGuid(root, "companyId", "CompanyId")
+            : GetGuid(root, "companyId", "CompanyId");
         if (string.IsNullOrWhiteSpace(displayName))
         {
             displayName = $"{firstName} {lastName}".Trim();
@@ -398,7 +541,17 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             Email = GetString(root, "email", "Email") ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
             ProfileImageUrl = GetString(root, "profileImageUrl", "profile_image_url", "ProfileImageUrl") ?? User.FindFirstValue("profile_image_url"),
             Mobile = GetString(root, "mobile", "Mobile"),
-            CompanyName = GetString(root, "companyName", "CompanyName"),
+            CompanyName = companyRoot.HasValue
+                ? GetString(companyRoot.Value, "name", "Name") ?? GetString(root, "companyName", "CompanyName")
+                : GetString(root, "companyName", "CompanyName"),
+            CompanyId = companyId,
+            CompanyVatNumber = companyRoot.HasValue ? GetString(companyRoot.Value, "vatNumber", "VatNumber") : null,
+            CompanyRegistrationNumber = companyRoot.HasValue ? GetString(companyRoot.Value, "registrationNumber", "RegistrationNumber") : null,
+            CompanyContactEmail = companyRoot.HasValue ? GetString(companyRoot.Value, "contactEmail", "ContactEmail") : null,
+            CompanyContactPhone = companyRoot.HasValue
+                ? GetString(companyRoot.Value, "contactPhone", "ContactPhone") ?? GetString(root, "companyPhone", "CompanyPhone")
+                : GetString(root, "companyPhone", "CompanyPhone"),
+            CompanyVersion = companyRoot.HasValue ? GetUInt(companyRoot.Value, "xmin", "Xmin", "version", "Version") : 0,
             Segment = GetString(root, "segment", "Segment") ?? string.Empty,
             Tier = GetString(root, "tier", "Tier") ?? string.Empty,
             NdaStatus = GetString(root, "ndaStatus", "NDAStatus") ?? string.Empty,
@@ -480,6 +633,31 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         return language.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en";
     }
 
+    private static bool HasCompanyInput(CustomerAccountProfileUpdateRequest request)
+    {
+        return !string.IsNullOrWhiteSpace(request.CompanyName)
+            || !string.IsNullOrWhiteSpace(request.CompanyVatNumber)
+            || !string.IsNullOrWhiteSpace(request.CompanyRegistrationNumber)
+            || !string.IsNullOrWhiteSpace(request.CompanyContactEmail)
+            || !string.IsNullOrWhiteSpace(request.CompanyContactPhone);
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string? NormalizeCompanyField(string? requestedValue, JsonElement existingCompanyRoot, bool allowClear, params string[] existingNames)
+    {
+        var normalized = NormalizeOptional(requestedValue);
+        if (allowClear || normalized is not null)
+        {
+            return normalized;
+        }
+
+        return GetString(existingCompanyRoot, existingNames);
+    }
+
     private static string? GetString(JsonElement root, params string[] names)
     {
         foreach (var name in names)
@@ -558,4 +736,6 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
 
         return null;
     }
+
+    private sealed record CompanyMutation(JsonDocument? Document, Guid? CompanyId, IActionResult? Failure);
 }

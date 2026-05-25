@@ -28,6 +28,15 @@ public interface ICustomerServiceClient
     /// <summary>Updates a customer by id.</summary>
     Task<HttpResponseMessage> UpdateCustomerAsync(Guid customerId, object request, CancellationToken cancellationToken);
 
+    /// <summary>Gets a company by id.</summary>
+    Task<HttpResponseMessage> GetCompanyAsync(Guid companyId, CancellationToken cancellationToken);
+
+    /// <summary>Creates a company.</summary>
+    Task<HttpResponseMessage> CreateCompanyAsync(object request, CancellationToken cancellationToken);
+
+    /// <summary>Updates a company by id.</summary>
+    Task<HttpResponseMessage> UpdateCompanyAsync(Guid companyId, object request, CancellationToken cancellationToken);
+
     /// <summary>Registers a customer account.</summary>
     Task<HttpResponseMessage> RegisterCustomerAsync(object request, CancellationToken cancellationToken);
 
@@ -108,6 +117,15 @@ internal sealed class CustomerServiceClient(HttpClient httpClient) : ICustomerSe
 
     public Task<HttpResponseMessage> UpdateCustomerAsync(Guid customerId, object request, CancellationToken cancellationToken) =>
         httpClient.PatchAsJsonAsync($"/customer/v1/customers/{customerId}", request, cancellationToken);
+
+    public Task<HttpResponseMessage> GetCompanyAsync(Guid companyId, CancellationToken cancellationToken) =>
+        httpClient.GetAsync($"/customer/v1/companies/{companyId}", cancellationToken);
+
+    public Task<HttpResponseMessage> CreateCompanyAsync(object request, CancellationToken cancellationToken) =>
+        httpClient.PostAsJsonAsync("/customer/v1/companies", request, cancellationToken);
+
+    public Task<HttpResponseMessage> UpdateCompanyAsync(Guid companyId, object request, CancellationToken cancellationToken) =>
+        httpClient.PatchAsJsonAsync($"/customer/v1/companies/{companyId}", request, cancellationToken);
 
     public Task<HttpResponseMessage> RegisterCustomerAsync(object request, CancellationToken cancellationToken) =>
         httpClient.PostAsJsonAsync("/customer/v1/customers/register", request, cancellationToken);

@@ -68,6 +68,40 @@
                         @Text("Mobile", "โทรศัพท์มือถือ")
                         <InputText @bind-Value="_form.Mobile" />
                     </label>
+                </div>
+                <section class="account-form-section">
+                    <div class="account-form-section-head">
+                        <div>
+                            <span class="card-meta">@Text("Company", "บริษัท")</span>
+                            <h3>@Text("Company details", "ข้อมูลบริษัท")</h3>
+                        </div>
+                        <p>@Text("Use this for quotes, invoices, and matching your customer account to company records.", "ใช้สำหรับใบเสนอราคา ใบกำกับภาษี และเชื่อมบัญชีลูกค้ากับข้อมูลบริษัท")</p>
+                    </div>
+                    <div class="account-profile-fields">
+                        <label class="account-profile-field account-profile-field-wide">
+                            @Text("Company name", "ชื่อบริษัท")
+                            <InputText maxlength="255" @bind-Value="_form.CompanyName" />
+                        </label>
+                        <label class="account-profile-field">
+                            @Text("VAT / tax ID", "เลขประจำตัวผู้เสียภาษี")
+                            <InputText maxlength="50" @bind-Value="_form.CompanyVatNumber" />
+                        </label>
+                        <label class="account-profile-field">
+                            @Text("Registration number", "เลขทะเบียนบริษัท")
+                            <InputText maxlength="100" @bind-Value="_form.CompanyRegistrationNumber" />
+                        </label>
+                        <label class="account-profile-field">
+                            @Text("Company email", "อีเมลบริษัท")
+                            <InputText type="email" maxlength="255" @bind-Value="_form.CompanyContactEmail" />
+                            <ValidationMessage For="@(() => _form.CompanyContactEmail)" class="field-validation-error" />
+                        </label>
+                        <label class="account-profile-field">
+                            @Text("Company phone", "โทรศัพท์บริษัท")
+                            <InputText maxlength="20" @bind-Value="_form.CompanyContactPhone" />
+                        </label>
+                    </div>
+                </section>
+                <div class="account-profile-fields">
                     <div class="account-field account-profile-field">
                         @Text("Preferred language", "ภาษาที่ต้องการ")
                         <div class="language-dropdown">
@@ -154,9 +188,15 @@
             _form.LastName = profile.LastName;
             _form.Email = profile.Email;
             _form.Mobile = profile.Mobile;
+            _form.CompanyName = profile.CompanyName;
+            _form.CompanyVatNumber = profile.CompanyVatNumber;
+            _form.CompanyRegistrationNumber = profile.CompanyRegistrationNumber;
+            _form.CompanyContactEmail = profile.CompanyContactEmail;
+            _form.CompanyContactPhone = profile.CompanyContactPhone;
             _form.PreferredLanguage = NormalizeLanguage(profile.PreferredLanguage);
             _form.Timezone = NormalizeTimezone(profile.Timezone);
             _form.Version = profile.Version;
+            _form.CompanyVersion = profile.CompanyVersion;
         }
         catch (Exception ex)
         {
@@ -179,6 +219,12 @@
             _form.Timezone = NormalizeTimezone(_form.Timezone);
             var profile = await Api.UpdateAccountProfileAsync(_form);
             _form.Version = profile.Version;
+            _form.CompanyName = profile.CompanyName;
+            _form.CompanyVatNumber = profile.CompanyVatNumber;
+            _form.CompanyRegistrationNumber = profile.CompanyRegistrationNumber;
+            _form.CompanyContactEmail = profile.CompanyContactEmail;
+            _form.CompanyContactPhone = profile.CompanyContactPhone;
+            _form.CompanyVersion = profile.CompanyVersion;
             _emailChangeRequested = false;
             _status = Text("Profile saved.", "บันทึกโปรไฟล์แล้ว");
         }

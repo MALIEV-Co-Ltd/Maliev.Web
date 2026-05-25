@@ -5308,6 +5308,42 @@ html[data-theme="dark"] .auth-google-icon {
   min-width: 0;
 }
 
+.account-profile-field-wide {
+  grid-column: 1 / -1;
+}
+
+.account-form-section {
+  display: grid;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--rule) 82%, transparent);
+}
+
+.account-form-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .56fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.account-form-section-head h3,
+.account-form-section-head p {
+  margin: 0;
+}
+
+.account-form-section-head h3 {
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 1.04rem;
+  line-height: 1.25;
+}
+
+.account-form-section-head p {
+  color: var(--muted);
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
 .email-change-prompt {
   display: flex;
   flex-wrap: wrap;
@@ -8451,6 +8487,11 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .account-form-header {
     grid-template-columns: 1fr;
+  }
+
+  .account-form-section-head {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .account-form-alert {

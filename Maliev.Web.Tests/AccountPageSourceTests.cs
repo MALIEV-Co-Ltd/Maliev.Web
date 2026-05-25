@@ -157,6 +157,13 @@ public sealed class AccountPageSourceTests
         Assert.Contains("class=\"auth-error account-form-alert\"", profile);
         Assert.Contains("class=\"account-profile-fields\"", profile);
         Assert.Contains("class=\"account-profile-field\"", profile);
+        Assert.Contains("class=\"account-form-section\"", profile);
+        Assert.Contains("@Text(\"Company details\", \"ข้อมูลบริษัท\")", profile);
+        Assert.Contains("@bind-Value=\"_form.CompanyName\"", profile);
+        Assert.Contains("@bind-Value=\"_form.CompanyVatNumber\"", profile);
+        Assert.Contains("@bind-Value=\"_form.CompanyRegistrationNumber\"", profile);
+        Assert.Contains("@bind-Value=\"_form.CompanyContactEmail\"", profile);
+        Assert.Contains("@bind-Value=\"_form.CompanyContactPhone\"", profile);
         Assert.Contains("class=\"button primary account-profile-save\"", profile);
         Assert.DoesNotContain("class=\"success-message\"", profile);
 
@@ -185,8 +192,15 @@ public sealed class AccountPageSourceTests
         Assert.Contains("[Required]", dtos);
         Assert.Contains("[EmailAddress]", dtos);
         Assert.Contains("[StringLength(320)]", dtos);
+        Assert.Contains("public string? CompanyName { get; set; }", dtos);
+        Assert.Contains("public string? CompanyVatNumber { get; set; }", dtos);
+        Assert.Contains("public string? CompanyRegistrationNumber { get; set; }", dtos);
+        Assert.Contains("public string? CompanyContactEmail { get; set; }", dtos);
+        Assert.Contains("public string? CompanyContactPhone { get; set; }", dtos);
 
         Assert.Contains(".account-form-header", styles);
+        Assert.Contains(".account-form-section", styles);
+        Assert.Contains(".account-form-section-head", styles);
         Assert.Contains(".account-form-alert", styles);
         Assert.Contains(".account-profile-fields", styles);
         Assert.Contains(".account-profile-save", styles);

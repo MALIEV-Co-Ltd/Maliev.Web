@@ -58,6 +58,24 @@ public sealed class CustomerAccountProfileDto
     /// <summary>Gets or sets the company name linked to the customer.</summary>
     public string? CompanyName { get; set; }
 
+    /// <summary>Gets or sets the company identifier linked to the customer.</summary>
+    public Guid? CompanyId { get; set; }
+
+    /// <summary>Gets or sets the company VAT or tax identifier.</summary>
+    public string? CompanyVatNumber { get; set; }
+
+    /// <summary>Gets or sets the company registration number.</summary>
+    public string? CompanyRegistrationNumber { get; set; }
+
+    /// <summary>Gets or sets the company contact email address.</summary>
+    public string? CompanyContactEmail { get; set; }
+
+    /// <summary>Gets or sets the company contact phone number.</summary>
+    public string? CompanyContactPhone { get; set; }
+
+    /// <summary>Gets or sets the concurrency token from the linked company.</summary>
+    public uint CompanyVersion { get; set; }
+
     /// <summary>Gets or sets the customer-facing segment.</summary>
     public string Segment { get; set; } = string.Empty;
 
@@ -97,6 +115,27 @@ public sealed class CustomerAccountProfileUpdateRequest
     /// <summary>Gets or sets the customer mobile phone number.</summary>
     public string? Mobile { get; set; }
 
+    /// <summary>Gets or sets the company name to link or update.</summary>
+    [StringLength(255)]
+    public string? CompanyName { get; set; }
+
+    /// <summary>Gets or sets the company VAT or tax identifier.</summary>
+    [StringLength(50)]
+    public string? CompanyVatNumber { get; set; }
+
+    /// <summary>Gets or sets the company registration number.</summary>
+    [StringLength(100)]
+    public string? CompanyRegistrationNumber { get; set; }
+
+    /// <summary>Gets or sets the company contact email address.</summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string? CompanyContactEmail { get; set; }
+
+    /// <summary>Gets or sets the company contact phone number.</summary>
+    [StringLength(20)]
+    public string? CompanyContactPhone { get; set; }
+
     /// <summary>Gets or sets the preferred language code.</summary>
     public string PreferredLanguage { get; set; } = "th";
 
@@ -105,6 +144,9 @@ public sealed class CustomerAccountProfileUpdateRequest
 
     /// <summary>Gets or sets the concurrency token from CustomerService.</summary>
     public uint Version { get; set; }
+
+    /// <summary>Gets or sets the concurrency token from the linked company.</summary>
+    public uint CompanyVersion { get; set; }
 }
 
 /// <summary>
