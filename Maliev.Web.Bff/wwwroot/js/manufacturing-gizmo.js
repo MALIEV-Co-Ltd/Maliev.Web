@@ -41,7 +41,8 @@ export function mountManufacturingGizmo(canvas, modelUrl = "", enableHoverMotion
     cameraConfigurator: null,
     themeObserver: null,
     themeApplicator: null,
-    landingFrame: null
+    landingFrame: null,
+    highQualityRendering: Boolean(modelUrl)
   };
 
   instances.set(canvas, state);
@@ -246,17 +247,18 @@ function loadBabylonLoaders() {
   return babylonLoadersRuntime;
 }
 
-function createEngine(canvas, BABYLON) {
+function createEngine(canvas, BABYLON, options = {}) {
+  const highQuality = Boolean(options.highQuality);
   const engine = new BABYLON.Engine(canvas, true, {
     alpha: true,
     antialias: true,
     premultipliedAlpha: false,
     stencil: false,
     preserveDrawingBuffer: false,
-    powerPreference: "low-power"
+    powerPreference: highQuality ? "high-performance" : "low-power"
   }, false);
 
-  configureHardwareScaling(engine);
+  configureHardwareScaling(engine, getRenderPixelRatio(highQuality));
   return engine;
 }
 
@@ -306,7 +308,7 @@ function createGizmoScene(state, BABYLON) {
 async function createLandingHeroScene(state, BABYLON) {
   const { canvas } = state;
   allowNativeContextMenu(state);
-  const engine = createEngine(canvas, BABYLON);
+  const engine = createEngine(canvas, BABYLON, { highQuality: true });
   restoreNativeCanvasBehavior(state);
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = BABYLON.Color4.FromHexString("#ffffff00");
@@ -1168,11 +1170,11 @@ function axisMaterial(scene, BABYLON, name, hex) {
   return material;
 }
 
-function getRenderPixelRatio() {
+function getRenderPixelRatio(highQuality = false) {
   const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
   const mobile = window.matchMedia("(max-width: 680px)").matches;
-  const maxRatio = 2;
-  const minimumRatio = mobile ? 1.5 : 1.2;
+  const maxRatio = highQuality ? 2.5 : 2;
+  const minimumRatio = highQuality ? (mobile ? 1.75 : 2) : (mobile ? 1.5 : 1.2);
 
   return Math.min(maxRatio, Math.max(minimumRatio, deviceRatio));
 }
@@ -1192,7 +1194,7 @@ function resizeScene(state, force = false) {
   const width = Math.round(rect.width);
   const height = Math.round(rect.height);
   const pixelRatio = window.devicePixelRatio || 1;
-  const renderRatio = getRenderPixelRatio();
+  const renderRatio = getRenderPixelRatio(state.highQualityRendering);
   const expectedCanvasWidth = Math.round(width * renderRatio);
   const expectedCanvasHeight = Math.round(height * renderRatio);
   const canvas = state.canvas;

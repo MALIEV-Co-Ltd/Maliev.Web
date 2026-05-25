@@ -2614,6 +2614,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("requestAnimationFrame", source);
         Assert.Contains("alpha: true", source);
         Assert.Contains("antialias: true", source);
+        Assert.Contains("highQualityRendering: Boolean(modelUrl)", source);
+        Assert.Contains("createEngine(canvas, BABYLON, { highQuality: true });", source);
         Assert.Contains("configureSceneAntialiasing(scene, camera, BABYLON);", source);
         Assert.Contains("new BABYLON.FxaaPostProcess(\"canvas-fxaa\", 1.0, camera);", source);
         Assert.Contains("fxaa.samples = Math.min(4, Math.max(1, maxSamples));", source);
@@ -2622,14 +2624,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("setHardwareScalingLevel", source);
         Assert.Contains("engine.setHardwareScalingLevel(1 / renderRatio)", source);
         Assert.Contains("resizeRenderRatio: 0", source);
-        Assert.Contains("const renderRatio = getRenderPixelRatio();", source);
-        Assert.Contains("const minimumRatio = mobile ? 1.5 : 1.2;", source);
+        Assert.Contains("const renderRatio = getRenderPixelRatio(state.highQualityRendering);", source);
+        Assert.Contains("const minimumRatio = highQuality ? (mobile ? 1.75 : 2) : (mobile ? 1.5 : 1.2);", source);
+        Assert.Contains("const maxRatio = highQuality ? 2.5 : 2;", source);
         Assert.Contains("state.engine.resize(true);", source);
         Assert.Contains("resizeScene(state, true);", source);
         Assert.Contains("canvas.width", source);
         Assert.Contains("state.resizeRenderRatio === renderRatio", source);
         Assert.Contains("ResizeObserver", source);
-        Assert.Contains("powerPreference: \"low-power\"", source);
+        Assert.Contains("powerPreference: highQuality ? \"high-performance\" : \"low-power\"", source);
 
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         Assert.Contains(".manufacturing-gizmo--landing", styles);
@@ -2981,7 +2984,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-shadow-rig\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-hero-aa\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
