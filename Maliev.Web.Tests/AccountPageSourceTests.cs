@@ -45,6 +45,60 @@ public sealed class AccountPageSourceTests
         Assert.Contains(".account-quick-actions", styles);
     }
 
+    /// <summary>
+    /// Verifies the editable profile form uses customer-facing validation and constrained selectors.
+    /// </summary>
+    [Fact]
+    public void AccountProfileUsesValidatedCustomerFriendlyControls()
+    {
+        var profile = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountProfile.razor");
+        var dtos = ReadRepoFile("Maliev.Web.Shared", "Account", "AccountDtos.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("<DataAnnotationsValidator />", profile);
+        Assert.Contains("novalidate", profile);
+        Assert.Contains("OnInvalidSubmit=\"HandleInvalidSubmit\"", profile);
+        Assert.Contains("class=\"account-form-header\"", profile);
+        Assert.Contains("class=\"auth-status account-form-alert\"", profile);
+        Assert.Contains("class=\"auth-error account-form-alert\"", profile);
+        Assert.DoesNotContain("class=\"success-message\"", profile);
+
+        Assert.Contains("id=\"profile-email\"", profile);
+        Assert.Contains("required", profile);
+        Assert.Contains("autocomplete=\"email\"", profile);
+        Assert.Contains("@bind-Value:event=\"oninput\"", profile);
+        Assert.Contains("ValidationMessage For=\"@(() => _form.Email)\"", profile);
+        Assert.Contains("@Text(\"Need to change it?\", \"ต้องการเปลี่ยนใช่ไหม\")", profile);
+        Assert.Contains("@Text(\"Change email\", \"เปลี่ยนอีเมล\")", profile);
+
+        Assert.Contains("class=\"language-dropdown\"", profile);
+        Assert.Contains("class=\"language-dropdown-trigger\"", profile);
+        Assert.Contains("class=\"language-dropdown-menu\"", profile);
+        Assert.Contains("LanguageOptions", profile);
+        Assert.Contains("ToggleLanguageDropdown", profile);
+        Assert.Contains("SelectLanguage", profile);
+        Assert.DoesNotContain("<InputSelect @bind-Value=\"_form.PreferredLanguage\">", profile);
+
+        Assert.Contains("class=\"timezone-select\"", profile);
+        Assert.Contains("TimezoneOptions", profile);
+        Assert.Contains("<InputSelect class=\"timezone-select\" @bind-Value=\"_form.Timezone\">", profile);
+        Assert.DoesNotContain("<InputText @bind-Value=\"_form.Timezone\" />", profile);
+
+        Assert.Contains("using System.ComponentModel.DataAnnotations;", dtos);
+        Assert.Contains("[Required]", dtos);
+        Assert.Contains("[EmailAddress]", dtos);
+        Assert.Contains("[StringLength(320)]", dtos);
+
+        Assert.Contains(".account-form-header", styles);
+        Assert.Contains(".account-form-alert", styles);
+        Assert.Contains(".field-validation-error", styles);
+        Assert.Contains(".email-change-prompt", styles);
+        Assert.Contains(".language-dropdown", styles);
+        Assert.Contains(".language-dropdown-trigger", styles);
+        Assert.Contains(".language-dropdown-item", styles);
+        Assert.Contains(".timezone-select", styles);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();

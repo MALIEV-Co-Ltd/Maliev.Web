@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Maliev.Web.Shared.Account;
 
 /// <summary>
@@ -78,6 +80,9 @@ public sealed class CustomerAccountProfileUpdateRequest
     public string LastName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the customer email address.</summary>
+    [Required]
+    [EmailAddress]
+    [StringLength(320)]
     public string Email { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the customer mobile phone number.</summary>

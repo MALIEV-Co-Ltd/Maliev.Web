@@ -26,16 +26,22 @@
         }
         else
         {
-            @if (!string.IsNullOrWhiteSpace(_status))
-            {
-                <p class="success-message">@_status</p>
-            }
-            @if (!string.IsNullOrWhiteSpace(_error))
-            {
-                <p class="load-message">@_error</p>
-            }
-
-            <EditForm Model="_form" OnValidSubmit="SaveAsync" FormName="account-profile-form" class="account-form">
+            <EditForm Model="_form" OnValidSubmit="SaveAsync" OnInvalidSubmit="HandleInvalidSubmit" FormName="account-profile-form" class="account-form" novalidate>
+                <DataAnnotationsValidator />
+                <div class="account-form-header">
+                    <div>
+                        <span class="card-meta">@Text("Profile", "โปรไฟล์")</span>
+                        <h2>@Text("Contact details", "รายละเอียดการติดต่อ")</h2>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(_status))
+                    {
+                        <div class="auth-status account-form-alert" role="status">@_status</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_error))
+                    {
+                        <div class="auth-error account-form-alert" role="alert">@_error</div>
+                    }
+                </div>
                 <div class="form-grid two">
                     <label>
                         @Text("First name", "ชื่อ")
@@ -49,7 +55,16 @@
                 <div class="form-grid two">
                     <label>
                         @Text("Email", "อีเมล")
-                        <InputText type="email" @bind-Value="_form.Email" />
+                        <InputText id="profile-email" type="email" autocomplete="email" required @bind-Value="_form.Email" @bind-Value:event="oninput" />
+                        <ValidationMessage For="@(() => _form.Email)" class="field-validation-error" />
+                        <span class="email-change-prompt">
+                            <span>@Text("Need to change it?", "ต้องการเปลี่ยนใช่ไหม")</span>
+                            <button class="button secondary" type="button" @onclick="PrepareEmailChange">@Text("Change email", "เปลี่ยนอีเมล")</button>
+                        </span>
+                        @if (_emailChangeRequested)
+                        {
+                            <span class="auth-field-help">@Text("Edit the email above, then save your profile. This updates the email we use for future account communication.", "แก้ไขอีเมลด้านบนแล้วบันทึกโปรไฟล์ ระบบจะใช้อีเมลนี้สำหรับการติดต่อบัญชีในอนาคต")</span>
+                        }
                     </label>
                     <label>
                         @Text("Mobile", "โทรศัพท์มือถือ")
@@ -57,16 +72,41 @@
                     </label>
                 </div>
                 <div class="form-grid two">
-                    <label>
+                    <div class="account-field">
                         @Text("Preferred language", "ภาษาที่ต้องการ")
-                        <InputSelect @bind-Value="_form.PreferredLanguage">
-                            <option value="en">English</option>
-                            <option value="th">ไทย</option>
-                        </InputSelect>
-                    </label>
+                        <div class="language-dropdown">
+                            <button class="language-dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="@_languageDropdownOpen" @onclick="ToggleLanguageDropdown">
+                                <span class="language-option-code">@SelectedLanguage.Code</span>
+                                <span class="language-option-copy">
+                                    <strong>@SelectedLanguage.Label</strong>
+                                    <span>@Text(SelectedLanguage.DescriptionEn, SelectedLanguage.DescriptionTh)</span>
+                                </span>
+                            </button>
+                            @if (_languageDropdownOpen)
+                            {
+                                <div class="language-dropdown-menu" role="listbox" aria-label="@Text("Preferred language", "ภาษาที่ต้องการ")">
+                                    @foreach (var option in LanguageOptions)
+                                    {
+                                        <button class="@LanguageOptionClass(option.Value)" type="button" role="option" aria-selected="@IsLanguageSelected(option.Value)" @onclick="() => SelectLanguage(option.Value)">
+                                            <span class="language-option-code">@option.Code</span>
+                                            <span class="language-option-copy">
+                                                <strong>@option.Label</strong>
+                                                <span>@Text(option.DescriptionEn, option.DescriptionTh)</span>
+                                            </span>
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                     <label>
                         @Text("Timezone", "เขตเวลา")
-                        <InputText @bind-Value="_form.Timezone" />
+                        <InputSelect class="timezone-select" @bind-Value="_form.Timezone">
+                            @foreach (var option in TimezoneOptions)
+                            {
+                                <option value="@option.Value">@option.Label</option>
+                            }
+                        </InputSelect>
                     </label>
                 </div>
                 <button class="button primary" type="submit" disabled="@_saving">@Text("Save profile", "บันทึกโปรไฟล์")</button>
@@ -79,8 +119,29 @@
     private readonly CustomerAccountProfileUpdateRequest _form = new();
     private bool _loading = true;
     private bool _saving;
+    private bool _emailChangeRequested;
+    private bool _languageDropdownOpen;
     private string? _status;
     private string? _error;
+
+    private static readonly IReadOnlyList<LanguageOption> LanguageOptions =
+    [
+        new("en", "EN", "English", "Use English for website labels and account messages.", "ใช้ภาษาอังกฤษสำหรับป้ายกำกับและข้อความบัญชี"),
+        new("th", "TH", "ไทย", "Use Thai for website labels and account messages.", "ใช้ภาษาไทยสำหรับป้ายกำกับและข้อความบัญชี")
+    ];
+
+    private static readonly IReadOnlyList<TimezoneOption> TimezoneOptions =
+    [
+        new("Asia/Bangkok", "Asia/Bangkok (GMT+7)"),
+        new("Asia/Singapore", "Asia/Singapore (GMT+8)"),
+        new("Asia/Hong_Kong", "Asia/Hong Kong (GMT+8)"),
+        new("Asia/Tokyo", "Asia/Tokyo (GMT+9)"),
+        new("Europe/London", "Europe/London (GMT+0/+1)"),
+        new("Europe/Berlin", "Europe/Berlin (GMT+1/+2)"),
+        new("America/Los_Angeles", "America/Los Angeles (GMT-8/-7)"),
+        new("America/New_York", "America/New York (GMT-5/-4)"),
+        new("UTC", "UTC")
+    ];
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,10 +158,8 @@
             _form.LastName = profile.LastName;
             _form.Email = profile.Email;
             _form.Mobile = profile.Mobile;
-            _form.PreferredLanguage = string.IsNullOrWhiteSpace(profile.PreferredLanguage)
-                ? (Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en")
-                : profile.PreferredLanguage;
-            _form.Timezone = string.IsNullOrWhiteSpace(profile.Timezone) ? "Asia/Bangkok" : profile.Timezone;
+            _form.PreferredLanguage = NormalizeLanguage(profile.PreferredLanguage);
+            _form.Timezone = NormalizeTimezone(profile.Timezone);
             _form.Version = profile.Version;
         }
         catch (Exception ex)
@@ -120,8 +179,11 @@
         _status = null;
         try
         {
+            _form.PreferredLanguage = NormalizeLanguage(_form.PreferredLanguage);
+            _form.Timezone = NormalizeTimezone(_form.Timezone);
             var profile = await Api.UpdateAccountProfileAsync(_form);
             _form.Version = profile.Version;
+            _emailChangeRequested = false;
             _status = Text("Profile saved.", "บันทึกโปรไฟล์แล้ว");
         }
         catch (Exception ex)
@@ -134,8 +196,69 @@
         }
     }
 
+    private void PrepareEmailChange()
+    {
+        _emailChangeRequested = true;
+        _status = null;
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        _status = null;
+        _error = null;
+    }
+
+    private void ToggleLanguageDropdown()
+    {
+        _languageDropdownOpen = !_languageDropdownOpen;
+    }
+
+    private void SelectLanguage(string language)
+    {
+        _form.PreferredLanguage = NormalizeLanguage(language);
+        _languageDropdownOpen = false;
+        _status = null;
+    }
+
+    private bool IsLanguageSelected(string language)
+    {
+        return string.Equals(_form.PreferredLanguage, language, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string LanguageOptionClass(string language)
+    {
+        return IsLanguageSelected(language) ? "language-dropdown-item active" : "language-dropdown-item";
+    }
+
+    private LanguageOption SelectedLanguage =>
+        LanguageOptions.FirstOrDefault(option => IsLanguageSelected(option.Value)) ?? LanguageOptions[0];
+
+    private string NormalizeLanguage(string? language)
+    {
+        if (LanguageOptions.Any(option => string.Equals(option.Value, language, StringComparison.OrdinalIgnoreCase)))
+        {
+            return language!.ToLowerInvariant();
+        }
+
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? "th" : "en";
+    }
+
+    private static string NormalizeTimezone(string? timezone)
+    {
+        if (TimezoneOptions.Any(option => string.Equals(option.Value, timezone, StringComparison.OrdinalIgnoreCase)))
+        {
+            return timezone!;
+        }
+
+        return "Asia/Bangkok";
+    }
+
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
+
+    private sealed record LanguageOption(string Value, string Code, string Label, string DescriptionEn, string DescriptionTh);
+
+    private sealed record TimezoneOption(string Value, string Label);
 }
