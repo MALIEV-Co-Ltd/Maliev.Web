@@ -111,7 +111,7 @@
                 <div class="form-grid two">
                     <label>
                         @Text("Type", "ประเภท")
-                        <InputSelect @bind-Value="_form.Type">
+                        <InputSelect @bind-Value="FormAddressType">
                             <option value="Shipping">@Text("Shipping", "จัดส่ง")</option>
                             <option value="Billing">@Text("Billing", "ออกบิล")</option>
                         </InputSelect>
@@ -148,10 +148,6 @@
                         <InputText @bind-Value="_form.RecipientPhone" name="recipientPhone" aria-label="@Text("Mobile Number", "เบอร์มือถือ")" />
                     </label>
                 </div>
-                <label class="form-full">
-                    @Text("Note to driver", "หมายเหตุถึงคนขับ")
-                    <InputTextArea @bind-Value="_form.DriverNote" name="driverNote" aria-label="@Text("Note to driver", "หมายเหตุถึงคนขับ")" />
-                </label>
                 <label class="form-full">
                     @Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")
                     <InputText @bind-Value="_form.AddressLine1" name="addressLine1" aria-label="@Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")" />
@@ -196,6 +192,13 @@
                         <InputText @bind-Value="_form.PostalCode" name="postalCode" disabled="@PostalCodeLocked" aria-label="@Text("Postal code", "รหัสไปรษณีย์")" />
                     </label>
                 </div>
+                @if (IsShippingAddress)
+                {
+                    <label class="form-full">
+                        @Text("Note to driver", "หมายเหตุถึงคนขับ")
+                        <InputTextArea @bind-Value="_form.DriverNote" name="driverNote" aria-label="@Text("Note to driver", "หมายเหตุถึงคนขับ")" />
+                    </label>
+                }
                 <div class="account-form-actions">
                     <button class="button primary" type="submit" disabled="@_saving">@(_editingAddressId.HasValue ? Text("Save address", "บันทึกที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</button>
                     @if (_editingAddressId.HasValue)
@@ -224,11 +227,24 @@
     private string? _error;
     private bool IsGoogleAddress => string.Equals(_form.AddressSource, "GooglePlace", StringComparison.OrdinalIgnoreCase)
         || string.Equals(_form.AddressSource, "GoogleMapPin", StringComparison.OrdinalIgnoreCase);
+    private bool IsShippingAddress => string.Equals(_form.Type, "Shipping", StringComparison.OrdinalIgnoreCase);
     private bool ProvinceLocked => IsGoogleAddress && !string.IsNullOrWhiteSpace(_form.StateProvince);
     private bool PostalCodeLocked => IsGoogleAddress && !string.IsNullOrWhiteSpace(_form.PostalCode);
     private Guid DefaultCountryId => _countries.FirstOrDefault(country => string.Equals(country.Iso2, "TH", StringComparison.OrdinalIgnoreCase))?.Id
         ?? _countries.FirstOrDefault()?.Id
         ?? Guid.Empty;
+    private string FormAddressType
+    {
+        get => _form.Type;
+        set
+        {
+            _form.Type = string.IsNullOrWhiteSpace(value) ? "Shipping" : value;
+            if (!IsShippingAddress)
+            {
+                _form.DriverNote = null;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -284,6 +300,11 @@
         _saving = true;
         _error = null;
         _status = null;
+        if (!IsShippingAddress)
+        {
+            _form.DriverNote = null;
+        }
+
         try
         {
             if (_editingAddressId.HasValue)

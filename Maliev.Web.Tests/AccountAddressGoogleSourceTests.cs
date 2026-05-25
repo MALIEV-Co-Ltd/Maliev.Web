@@ -38,6 +38,35 @@ public sealed class AccountAddressGoogleSourceTests
     }
 
     /// <summary>
+    /// Verifies the driver note is treated as shipping-only delivery instructions after the address fields.
+    /// </summary>
+    [Fact]
+    public void AccountAddresses_ShowsDriverNoteOnlyForShippingAfterAddressFields()
+    {
+        var page = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+
+        Assert.Contains("@bind-Value=\"FormAddressType\"", page, StringComparison.Ordinal);
+        Assert.Contains("@if (IsShippingAddress)", page, StringComparison.Ordinal);
+        Assert.Contains("private bool IsShippingAddress", page, StringComparison.Ordinal);
+        Assert.Contains("private string FormAddressType", page, StringComparison.Ordinal);
+        Assert.Contains("_form.DriverNote = null;", page, StringComparison.Ordinal);
+
+        var typeIndex = page.IndexOf("@bind-Value=\"FormAddressType\"", StringComparison.Ordinal);
+        var contactIndex = page.IndexOf("Recipient Name", StringComparison.Ordinal);
+        var countryIndex = page.IndexOf("Country / region", StringComparison.Ordinal);
+        var postalIndex = page.IndexOf("Postal code", StringComparison.Ordinal);
+        var noteIndex = page.IndexOf("Note to driver", StringComparison.Ordinal);
+        var actionsIndex = page.IndexOf("account-form-actions", StringComparison.Ordinal);
+
+        Assert.True(typeIndex >= 0);
+        Assert.True(contactIndex > typeIndex);
+        Assert.True(countryIndex > contactIndex);
+        Assert.True(postalIndex > countryIndex);
+        Assert.True(noteIndex > postalIndex);
+        Assert.True(actionsIndex > noteIndex);
+    }
+
+    /// <summary>
     /// Verifies the Web BFF forwards and maps CustomerService address metadata.
     /// </summary>
     [Fact]
