@@ -2338,6 +2338,22 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the account orders empty state is aligned beside the account navigation without card framing.
+    /// </summary>
+    [Fact]
+    public void AccountOrdersEmptyStateIsUnframedBesideNavigation()
+    {
+        var orders = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("class=\"empty-state compact account-orders-empty\"", orders);
+        Assert.Contains(".account-orders-empty", styles);
+        Assert.Contains(".account-orders-empty {\n  display: grid;\n  gap: 12px;\n  max-width: 620px;\n  padding: 0;\n  background: transparent;\n  border-radius: 0;\n  box-shadow: none;\n  overflow: visible;", styles);
+        Assert.Contains(".account-orders-empty h2,\n.account-orders-empty p {\n  margin: 0;\n}", styles);
+        Assert.DoesNotContain("account-orders-empty {\n  padding: 28px;", styles);
+    }
+
+    /// <summary>
     /// Verifies the account landing page uses polished loading and sanitized error states.
     /// </summary>
     [Fact]

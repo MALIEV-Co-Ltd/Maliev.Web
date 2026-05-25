@@ -21,25 +21,31 @@
     </div>
 
     <div class="account-stack">
-        <div class="account-panel">
-            @if (_loading)
-            {
+        @if (_loading)
+        {
+            <div class="account-panel">
                 <p class="load-message">@Text("Loading orders...", "กำลังโหลดคำสั่งซื้อ...")</p>
-            }
-            else if (!string.IsNullOrWhiteSpace(_error))
-            {
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="account-panel">
                 <p class="load-message">@_error</p>
-            }
-            else if (!string.IsNullOrWhiteSpace(OrderId))
-            {
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(OrderId))
+        {
+            <div class="account-panel">
                 <div class="empty-state compact">
                     <h2>@Text("Order detail is not available yet", "ยังไม่มีรายละเอียดคำสั่งซื้อนี้")</h2>
                     <p>@Text("This route is reserved for storefront order details. Manufacturing order details remain in the quote engine.", "เส้นทางนี้เตรียมไว้สำหรับรายละเอียดคำสั่งซื้อร้านค้า ส่วนรายละเอียดคำสั่งผลิตอยู่ในระบบราคา")</p>
                     <a class="button secondary" href="/account/orders">@Text("Back to orders", "กลับไปคำสั่งซื้อ")</a>
                 </div>
-            }
-            else if (_orders?.ShopOrders.Count > 0)
-            {
+            </div>
+        }
+        else if (_orders?.ShopOrders.Count > 0)
+        {
+            <div class="account-panel">
                 <div class="order-list">
                     @foreach (var order in _orders.ShopOrders)
                     {
@@ -51,19 +57,19 @@
                         </a>
                     }
                 </div>
-            }
-            else
-            {
-                <div class="empty-state compact">
-                    <h2>@Text("No shop orders yet", "ยังไม่มีคำสั่งซื้อร้านค้า")</h2>
-                    <p>@Text("Machine, product, and spare-part orders will appear here after storefront checkout is connected. Manufacturing projects are already separated into the quote engine.", "คำสั่งซื้อเครื่องจักร สินค้า และอะไหล่จะแสดงที่นี่หลังเชื่อมต่อ checkout ร้านค้า ส่วนโปรเจกต์งานผลิตแยกอยู่ในระบบราคาแล้ว")</p>
-                    <div class="quote-actions">
-                        <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
-                        <a class="button secondary" href="@_orders?.ManufacturingOrdersUrl">@Text("Open manufacturing orders", "เปิดคำสั่งผลิต")</a>
-                    </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state compact account-orders-empty">
+                <h2>@Text("No shop orders yet", "ยังไม่มีคำสั่งซื้อร้านค้า")</h2>
+                <p>@Text("Machine, product, and spare-part orders will appear here after storefront checkout is connected. Manufacturing projects are already separated into the quote engine.", "คำสั่งซื้อเครื่องจักร สินค้า และอะไหล่จะแสดงที่นี่หลังเชื่อมต่อ checkout ร้านค้า ส่วนโปรเจกต์งานผลิตแยกอยู่ในระบบราคาแล้ว")</p>
+                <div class="quote-actions">
+                    <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
+                    <a class="button secondary" href="@_orders?.ManufacturingOrdersUrl">@Text("Open manufacturing orders", "เปิดคำสั่งผลิต")</a>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </section>
 

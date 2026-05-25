@@ -5876,6 +5876,22 @@ html[data-theme="dark"] .auth-google-icon {
   max-width: 620px;
 }
 
+.account-orders-empty {
+  display: grid;
+  gap: 12px;
+  max-width: 620px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.account-orders-empty h2,
+.account-orders-empty p {
+  margin: 0;
+}
+
 #blazor-error-ui {
   display: none;
   position: fixed;
