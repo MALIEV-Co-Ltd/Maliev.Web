@@ -2814,6 +2814,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("configureCadAmbientOcclusion(scene, camera, BABYLON);", source);
         Assert.Contains("new BABYLON.SSAO2RenderingPipeline(\"landing-cad-ambient-occlusion\"", source);
         Assert.Contains("ssao.totalStrength = 0.58;", source);
+        Assert.Contains("configureLandingCadShadows(scene, lights.key, state.landingFrame, renderMeshes, BABYLON);", source);
+        Assert.Contains("scene.shadowsEnabled = true;", source);
+        Assert.Contains("const shadowGenerator = new BABYLON.ShadowGenerator(2048, keyLight);", source);
+        Assert.Contains("shadowGenerator.useBlurExponentialShadowMap = true;", source);
+        Assert.Contains("shadowGenerator.blurKernel = 22;", source);
+        Assert.Contains("shadowGenerator.addShadowCaster(mesh, false);", source);
+        Assert.Contains("BABYLON.MeshBuilder.CreateGround(\"landing-shadow-catcher\"", source);
+        Assert.Contains("shadowCatcher.receiveShadows = true;", source);
+        Assert.Contains("shadowMaterial.opacityTexture = createLandingShadowOpacityTexture(scene, BABYLON);", source);
+        Assert.Contains("function createLandingShadowOpacityTexture(scene, BABYLON)", source);
+        Assert.Contains("gradient.addColorStop(1, \"rgba(255, 255, 255, 0)\");", source);
+        Assert.Contains("shadowMaterial.alpha = dark ? 0.18 : 0.1;", source);
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingEnabled = true;", source);
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;", source);
         Assert.Contains("scene.imageProcessingConfiguration.exposure = 1.06;", source);
@@ -2824,17 +2836,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("plastic.clearCoat.isEnabled = false;", source);
         Assert.Contains("mesh.useVertexColors = false;", source);
         Assert.Contains("mesh.hasVertexAlpha = false;", source);
-        Assert.Contains("configureCadMeshEdges(meshes, false, BABYLON);", source);
-        Assert.Contains("configureCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? [], dark, BABYLON);", source);
-        Assert.Contains("mesh.enableEdgesRendering(0.42);", source);
-        Assert.Contains("mesh.edgesWidth = dark ? 1.18 : 1.12;", source);
-        Assert.Contains("const edgeColor = dark", source);
-        Assert.Contains("mesh.edgesColor = edgeColor;", source);
-        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.08 : 0.78;", source);
-        Assert.Contains("lights.softbox.intensity = dark ? 0.86 : 0.62;", source);
-        Assert.Contains("plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? \"#a7b1bd\" : \"#b4bec9\");", source);
-        Assert.Contains("plasticMaterial.specularIntensity = dark ? 0.23 : 0.2;", source);
-        Assert.Contains("plasticMaterial.environmentIntensity = dark ? 0.46 : 0.36;", source);
+        Assert.Contains("disableCadMeshEdges(meshes);", source);
+        Assert.Contains("disableCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? []);", source);
+        Assert.Contains("mesh.disableEdgesRendering();", source);
+        Assert.Contains("mesh.edgesWidth = 0;", source);
+        Assert.DoesNotContain("configureCadMeshEdges", source);
+        Assert.DoesNotContain("mesh.enableEdgesRendering(0.42);", source);
+        Assert.DoesNotContain("mesh.edgesColor = edgeColor;", source);
+        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 0.62 : 0.34;", source);
+        Assert.Contains("lights.softbox.intensity = dark ? 0.72 : 0.42;", source);
+        Assert.Contains("plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? \"#9ea8b4\" : \"#8f99a6\");", source);
+        Assert.Contains("plasticMaterial.specularIntensity = dark ? 0.28 : 0.24;", source);
+        Assert.Contains("plasticMaterial.environmentIntensity = dark ? 0.34 : 0.24;", source);
         Assert.DoesNotContain("scene.environmentIntensity = dark ? 0.55 : 0.42;", source);
     }
 
@@ -2954,7 +2967,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-onshape-cad\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-shadow-rig\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

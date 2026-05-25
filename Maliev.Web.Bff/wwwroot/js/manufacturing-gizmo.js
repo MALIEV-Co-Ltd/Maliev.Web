@@ -350,14 +350,6 @@ async function createLandingHeroScene(state, BABYLON) {
     : null;
 
   state.landingFrame = frameImportedModel(renderMeshes, root, BABYLON);
-  state.themeApplicator = () => applyLandingHeroTheme(
-    scene,
-    plasticMaterial,
-    lights,
-    BABYLON);
-  state.themeApplicator();
-  observeDocumentTheme(state);
-
   const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005);
   root.rotation.copyFrom(baseRotation);
 
@@ -368,6 +360,16 @@ async function createLandingHeroScene(state, BABYLON) {
     ...state.landingFrame,
     worldBounds: captureWorldAabb(state.landingFrame?.meshes ?? renderMeshes, BABYLON)
   };
+
+  const shadows = configureLandingCadShadows(scene, lights.key, state.landingFrame, renderMeshes, BABYLON);
+  state.themeApplicator = () => applyLandingHeroTheme(
+    scene,
+    plasticMaterial,
+    lights,
+    shadows,
+    BABYLON);
+  state.themeApplicator();
+  observeDocumentTheme(state);
 
   configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
@@ -648,24 +650,18 @@ function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
     mesh.hasVertexAlpha = false;
   }
 
-  configureCadMeshEdges(meshes, false, BABYLON);
+  disableCadMeshEdges(meshes);
 
   return plastic;
 }
 
-function configureCadMeshEdges(meshes, dark, BABYLON) {
-  const edgeColor = dark
-    ? new BABYLON.Color4(0.1, 0.13, 0.18, 0.82)
-    : new BABYLON.Color4(0.2, 0.23, 0.3, 0.78);
-
+function disableCadMeshEdges(meshes) {
   for (const mesh of meshes) {
-    if (typeof mesh.enableEdgesRendering !== "function") {
-      continue;
+    if (typeof mesh.disableEdgesRendering === "function") {
+      mesh.disableEdgesRendering();
     }
 
-    mesh.enableEdgesRendering(0.42);
-    mesh.edgesWidth = dark ? 1.18 : 1.12;
-    mesh.edgesColor = edgeColor;
+    mesh.edgesWidth = 0;
   }
 }
 
@@ -689,6 +685,78 @@ function configureCadAmbientOcclusion(scene, camera, BABYLON) {
   } catch {
     return null;
   }
+}
+
+function configureLandingCadShadows(scene, keyLight, frame, meshes, BABYLON) {
+  if (!BABYLON.ShadowGenerator || !frame?.worldBounds || !keyLight) {
+    return null;
+  }
+
+  scene.shadowsEnabled = true;
+  keyLight.shadowEnabled = true;
+  keyLight.shadowMinZ = 0.4;
+  keyLight.shadowMaxZ = 18;
+
+  const shadowGenerator = new BABYLON.ShadowGenerator(2048, keyLight);
+  shadowGenerator.useBlurExponentialShadowMap = true;
+  shadowGenerator.blurKernel = 22;
+  shadowGenerator.bias = 0.00045;
+  shadowGenerator.normalBias = 0.035;
+  shadowGenerator.transparencyShadow = true;
+
+  for (const mesh of meshes) {
+    if (!mesh.getTotalVertices || mesh.getTotalVertices() <= 0) {
+      continue;
+    }
+
+    mesh.receiveShadows = false;
+    shadowGenerator.addShadowCaster(mesh, false);
+  }
+
+  const bounds = frame.worldBounds;
+  const size = bounds.max.subtract(bounds.min);
+  const center = bounds.min.add(bounds.max).scale(0.5);
+  const footprint = Math.max(size.x, size.z, 1.25);
+  const shadowCatcher = BABYLON.MeshBuilder.CreateGround("landing-shadow-catcher", {
+    width: footprint * 1.88,
+    height: footprint * 1.52,
+    subdivisions: 1
+  }, scene);
+  shadowCatcher.position = new BABYLON.Vector3(
+    center.x + size.x * 0.04,
+    bounds.min.y - Math.max(size.y * 0.035, 0.035),
+    center.z + size.z * 0.08);
+  shadowCatcher.isPickable = false;
+  shadowCatcher.receiveShadows = true;
+
+  const shadowMaterial = new BABYLON.StandardMaterial("landing-shadow-catcher-material", scene);
+  shadowMaterial.diffuseColor = BABYLON.Color3.FromHexString("#f3f6f9");
+  shadowMaterial.specularColor = BABYLON.Color3.Black();
+  shadowMaterial.alpha = 0.1;
+  shadowMaterial.opacityTexture = createLandingShadowOpacityTexture(scene, BABYLON);
+  shadowMaterial.disableLighting = false;
+  shadowMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+  shadowCatcher.material = shadowMaterial;
+
+  return { shadowGenerator, shadowCatcher, shadowMaterial };
+}
+
+function createLandingShadowOpacityTexture(scene, BABYLON) {
+  const texture = new BABYLON.DynamicTexture(
+    "landing-shadow-catcher-opacity",
+    { width: 512, height: 512 },
+    scene,
+    false);
+  const context = texture.getContext();
+  const gradient = context.createRadialGradient(256, 256, 46, 256, 256, 248);
+  gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+  gradient.addColorStop(0.55, "rgba(255, 255, 255, .58)");
+  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+  context.clearRect(0, 0, 512, 512);
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 512, 512);
+  texture.update();
+  return texture;
 }
 
 function configureSceneAntialiasing(scene, camera, BABYLON) {
@@ -908,36 +976,45 @@ function observeDocumentTheme(state) {
   });
 }
 
-function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
+function applyLandingHeroTheme(scene, plasticMaterial, lights, shadows, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
-  scene.environmentIntensity = dark ? 0.72 : 0.58;
+  scene.environmentIntensity = dark ? 0.56 : 0.4;
   scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#2d3642" : "#eef2f6");
 
-  lights.fill.intensity = dark ? 0.96 : 0.76;
+  lights.fill.intensity = dark ? 0.78 : 0.46;
   lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#273240" : "#d9e1ea");
 
-  lights.key.intensity = dark ? 2.2 : 1.72;
+  lights.key.intensity = dark ? 2.35 : 1.95;
 
-  lights.softbox.intensity = dark ? 0.86 : 0.62;
+  lights.softbox.intensity = dark ? 0.72 : 0.42;
   lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#c3dbf4" : "#d9e7f6");
 
-  lights.rim.intensity = dark ? 1.44 : 0.95;
+  lights.rim.intensity = dark ? 1.34 : 0.82;
   lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#a7ccef" : "#bfd7ee");
 
-  lights.bounce.intensity = dark ? 0.58 : 0.36;
+  lights.bounce.intensity = dark ? 0.42 : 0.22;
   lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#596b83" : "#e1e8ef");
 
-  lights.cameraHeadlight.intensity = dark ? 1.08 : 0.78;
+  lights.cameraHeadlight.intensity = dark ? 0.62 : 0.34;
   lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#f2f7ff" : "#f6f9fc");
 
+  if (shadows?.shadowMaterial) {
+    shadows.shadowMaterial.diffuseColor = BABYLON.Color3.FromHexString(dark ? "#27313c" : "#d9dfe7");
+    shadows.shadowMaterial.alpha = dark ? 0.18 : 0.1;
+  }
+
+  if (shadows?.shadowGenerator?.setDarkness) {
+    shadows.shadowGenerator.setDarkness(dark ? 0.34 : 0.28);
+  }
+
   if (plasticMaterial) {
-    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#a7b1bd" : "#b4bec9");
-    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#8995a3" : "#d5dbe3");
-    plasticMaterial.specularIntensity = dark ? 0.23 : 0.2;
-    plasticMaterial.environmentIntensity = dark ? 0.46 : 0.36;
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#9ea8b4" : "#8f99a6");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#8f9ba8" : "#b5bec8");
+    plasticMaterial.specularIntensity = dark ? 0.28 : 0.24;
+    plasticMaterial.environmentIntensity = dark ? 0.34 : 0.24;
     plasticMaterial.clearCoat.intensity = 0;
-    configureCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? [], dark, BABYLON);
+    disableCadMeshEdges(plasticMaterial.metadata?.cadMeshes ?? []);
   }
 }
 
