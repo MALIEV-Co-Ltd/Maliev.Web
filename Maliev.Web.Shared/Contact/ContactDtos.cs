@@ -67,4 +67,8 @@ public sealed class ContactAttachmentDto
 /// <summary>
 /// Contact form submission response.
 /// </summary>
-public sealed record ContactMessageResponse(string MessageId, string Status);
+public sealed record ContactMessageResponse(string MessageId, string Status)
+{
+    /// <summary>Gets the customer-safe contact request reference.</summary>
+    public string PublicReference { get; init; } = string.Empty;
+}

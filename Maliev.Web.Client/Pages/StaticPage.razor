@@ -710,21 +710,40 @@ else if (Path == "contact")
                     <small>@Text($"Up to {MaxContactFiles} files, {MaxContactFileMegabytes} MB each. Use Quote Engine for RFQ CAD packages.", $"สูงสุด {MaxContactFiles} ไฟล์ ไฟล์ละ {MaxContactFileMegabytes} MB หากเป็นชุดไฟล์ CAD เพื่อขอราคาให้ใช้ระบบราคา")</small>
                 </span>
             </label>
-            @if (_selectedContactFileSummaries.Count > 0)
+            @if (_contactFileUploads.Count > 0)
             {
                 <ul class="contact-file-list" aria-label='@Text("Selected support files", "ไฟล์ประกอบที่เลือก")'>
-                    @foreach (var file in _selectedContactFileSummaries)
+                    @foreach (var file in _contactFileUploads)
                     {
                         <li>
                             <MudIcon Icon="@Icons.Material.Filled.InsertDriveFile" Size="Size.Small" />
-                            <span>@file</span>
+                            <span class="contact-file-copy">
+                                <span>@file.Summary</span>
+                                <small>@Text(file.StatusTextEn, file.StatusTextTh)</small>
+                            </span>
+                            <span class="contact-file-progress @(file.IsIndeterminate ? "is-indeterminate" : null)"
+                                  role="progressbar"
+                                  aria-label='@Text($"File upload progress for {file.FileName}", $"ความคืบหน้าไฟล์ {file.FileName}")'
+                                  aria-valuemin="0"
+                                  aria-valuemax="100"
+                                  aria-valuenow="@(file.IsIndeterminate ? null : file.Progress)">
+                                <span style="width: @file.Progress%"></span>
+                            </span>
                         </li>
                     }
                 </ul>
             }
             @if (!string.IsNullOrWhiteSpace(_contactStatus))
             {
-                <p class="@ContactStatusClass" role="@ContactStatusRole">@_contactStatus</p>
+                <div class="@ContactStatusClass" role="@ContactStatusRole">
+                    <span class="contact-status-icon" aria-hidden="true">
+                        <MudIcon Icon="@ContactStatusIcon" Size="Size.Small" />
+                    </span>
+                    <span class="contact-status-copy">
+                        <strong>@ContactStatusTitle</strong>
+                        <span>@_contactStatus</span>
+                    </span>
+                </div>
             }
             <button class="button primary contact-submit-button" type="submit" disabled="@_submittingContact" aria-live="polite">
                 @if (_submittingContact)
@@ -816,11 +835,12 @@ else
     private const string AllBlogCategoryFilter = "all";
     private const string MalievMapUrl = "https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand";
     private const string MalievMapEmbedUrl = MalievMapUrl + "&output=embed";
-    private readonly List<string> _selectedContactFileSummaries = [];
+    private readonly List<ContactFileUploadState> _contactFileUploads = [];
     private bool _submittingContact;
     private bool _showContactMapDialog;
     private bool _pendingMaterialComparisonScroll;
     private ElementReference _materialCompareWorkbench;
+    private string? _contactStatusTitle;
     private string? _contactStatus;
     private ContactFormStatus _contactStatusKind = ContactFormStatus.None;
     private const string AllMaterialsFilter = "all";
@@ -938,12 +958,21 @@ else
 
     private string ContactStatusClass => _contactStatusKind switch
     {
-        ContactFormStatus.Success => "form-status form-status--success",
-        ContactFormStatus.Error => "form-status form-status--error",
-        _ => "form-status"
+        ContactFormStatus.Success => "form-status contact-status-card form-status--success",
+        ContactFormStatus.Error => "form-status contact-status-card form-status--error",
+        _ => "form-status contact-status-card"
     };
 
     private string ContactStatusRole => _contactStatusKind == ContactFormStatus.Error ? "alert" : "status";
+
+    private string ContactStatusTitle => _contactStatusTitle ?? Text("Contact request update", "อัปเดตคำขอติดต่อ");
+
+    private string ContactStatusIcon => _contactStatusKind switch
+    {
+        ContactFormStatus.Success => Icons.Material.Filled.CheckCircle,
+        ContactFormStatus.Error => Icons.Material.Filled.Error,
+        _ => Icons.Material.Filled.Info
+    };
 
     private string ContactSubmitLabel => _submittingContact
         ? Text("Sending...", "กำลังส่ง...")
@@ -1813,14 +1842,34 @@ else
         await InvokeAsync(StateHasChanged);
         try
         {
+            _contact.Files = _contactFileUploads
+                .Where(file => file.CanSubmit)
+                .Select(file => new ContactAttachmentDto
+                {
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    Base64Content = file.Base64Content
+                })
+                .ToList();
+            SetContactFileStage(ContactFileUploadStage.Sending);
+            await InvokeAsync(StateHasChanged);
+
             var response = await Api.SubmitContactMessageAsync(_contact);
+            SetContactFileStage(ContactFileUploadStage.Submitted);
+            var publicReference = ResolveContactReference(response);
+
             SetContactStatus(
-                Text($"Message received. Reference {response.MessageId}.", $"ได้รับข้อความแล้ว เลขอ้างอิง {response.MessageId}"),
+                Text("Request received", "ได้รับคำขอแล้ว"),
+                Text(
+                    $"We sent a confirmation copy to {_contact.Email}. Your request {publicReference} is now in the MALIEV contact queue.",
+                    $"เราส่งสำเนายืนยันไปที่ {_contact.Email} แล้ว คำขอ {publicReference} อยู่ในคิวติดต่อของ MALIEV"),
                 ContactFormStatus.Success);
         }
         catch (Exception)
         {
+            SetContactFileStage(ContactFileUploadStage.Ready);
             SetContactStatus(
+                Text("Message was not sent", "ยังส่งข้อความไม่ได้"),
                 Text(
                     "We could not send the message right now. Please try again, or email info@maliev.com / LINE @maliev if this is urgent.",
                     "ขณะนี้ยังส่งข้อความไม่ได้ กรุณาลองใหม่อีกครั้ง หรืออีเมล info@maliev.com / LINE @maliev หากเป็นเรื่องเร่งด่วน"),
@@ -1836,7 +1885,7 @@ else
     {
         ClearContactStatus();
         _contact.Files.Clear();
-        _selectedContactFileSummaries.Clear();
+        _contactFileUploads.Clear();
 
         IReadOnlyList<IBrowserFile> files;
         try
@@ -1846,6 +1895,7 @@ else
         catch (InvalidOperationException)
         {
             SetContactStatus(
+                Text("Too many files selected", "เลือกไฟล์มากเกินไป"),
                 Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through the Quote Engine.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่านระบบราคา"),
                 ContactFormStatus.Error);
             return;
@@ -1853,39 +1903,74 @@ else
 
         foreach (var file in files)
         {
+            var fileUpload = new ContactFileUploadState(
+                file.Name,
+                string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+                file.Size);
+            _contactFileUploads.Add(fileUpload);
+            await InvokeAsync(StateHasChanged);
+
             if (file.Size > MaxContactFileBytes)
             {
+                fileUpload.MarkFailed();
                 SetContactStatus(
+                    Text("File is too large", "ไฟล์ใหญ่เกินไป"),
                     Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through the Quote Engine.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่านระบบราคา"),
                     ContactFormStatus.Error);
                 _contact.Files.Clear();
-                _selectedContactFileSummaries.Clear();
                 return;
             }
 
             await using var stream = file.OpenReadStream(MaxContactFileBytes);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
-            _contact.Files.Add(new ContactAttachmentDto
+            var readBuffer = new byte[64 * 1024];
+            long totalRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = await stream.ReadAsync(readBuffer)) > 0)
             {
-                FileName = file.Name,
-                ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
-                Base64Content = Convert.ToBase64String(buffer.ToArray())
-            });
-            _selectedContactFileSummaries.Add($"{file.Name} ({FormatBytes(file.Size)})");
+                await buffer.WriteAsync(readBuffer.AsMemory(0, bytesRead));
+                totalRead += bytesRead;
+                fileUpload.UpdateProgress(file.Size == 0 ? 100 : (int)Math.Min(100, totalRead * 100 / file.Size));
+                await InvokeAsync(StateHasChanged);
+            }
+
+            fileUpload.MarkReady(Convert.ToBase64String(buffer.ToArray()));
         }
     }
 
     private void ClearContactStatus()
     {
+        _contactStatusTitle = null;
         _contactStatus = null;
         _contactStatusKind = ContactFormStatus.None;
     }
 
-    private void SetContactStatus(string status, ContactFormStatus kind)
+    private void SetContactStatus(string title, string status, ContactFormStatus kind)
     {
+        _contactStatusTitle = title;
         _contactStatus = status;
         _contactStatusKind = kind;
+    }
+
+    private void SetContactFileStage(ContactFileUploadStage stage)
+    {
+        foreach (var file in _contactFileUploads.Where(file => file.CanChangeSubmitStage))
+        {
+            file.SetStage(stage);
+        }
+    }
+
+    private static string ResolveContactReference(ContactMessageResponse response)
+    {
+        if (!string.IsNullOrWhiteSpace(response.PublicReference))
+        {
+            return response.PublicReference;
+        }
+
+        return int.TryParse(response.MessageId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericId)
+            ? FormattableString.Invariant($"MLV-C-{numericId:000000}")
+            : response.MessageId;
     }
 
     private enum ContactFormStatus
@@ -1893,6 +1978,88 @@ else
         None,
         Success,
         Error
+    }
+
+    private enum ContactFileUploadStage
+    {
+        Preparing,
+        Ready,
+        Sending,
+        Submitted,
+        Failed
+    }
+
+    private sealed class ContactFileUploadState(string fileName, string contentType, long size)
+    {
+        public string FileName { get; } = fileName;
+
+        public string ContentType { get; } = contentType;
+
+        public long Size { get; } = size;
+
+        public string Base64Content { get; private set; } = string.Empty;
+
+        public int Progress { get; private set; }
+
+        public ContactFileUploadStage Stage { get; private set; } = ContactFileUploadStage.Preparing;
+
+        public string Summary => $"{FileName} ({FormatBytes(Size)})";
+
+        public bool IsIndeterminate => Stage == ContactFileUploadStage.Sending;
+
+        public bool CanSubmit => Stage is ContactFileUploadStage.Ready or ContactFileUploadStage.Submitted;
+
+        public bool CanChangeSubmitStage => Stage is
+            ContactFileUploadStage.Ready or
+            ContactFileUploadStage.Sending or
+            ContactFileUploadStage.Submitted;
+
+        public string StatusTextEn => Stage switch
+        {
+            ContactFileUploadStage.Preparing => $"Preparing {Progress}%",
+            ContactFileUploadStage.Ready => "Ready to send",
+            ContactFileUploadStage.Sending => "Sending with message",
+            ContactFileUploadStage.Submitted => "Sent",
+            ContactFileUploadStage.Failed => "Cannot attach",
+            _ => "Ready"
+        };
+
+        public string StatusTextTh => Stage switch
+        {
+            ContactFileUploadStage.Preparing => $"กำลังเตรียม {Progress}%",
+            ContactFileUploadStage.Ready => "พร้อมส่ง",
+            ContactFileUploadStage.Sending => "กำลังส่งพร้อมข้อความ",
+            ContactFileUploadStage.Submitted => "ส่งแล้ว",
+            ContactFileUploadStage.Failed => "แนบไฟล์ไม่ได้",
+            _ => "พร้อมส่ง"
+        };
+
+        public void UpdateProgress(int progress)
+        {
+            Progress = Math.Clamp(progress, 0, 100);
+        }
+
+        public void MarkReady(string base64Content)
+        {
+            Base64Content = base64Content;
+            Progress = 100;
+            Stage = ContactFileUploadStage.Ready;
+        }
+
+        public void MarkFailed()
+        {
+            Progress = 100;
+            Stage = ContactFileUploadStage.Failed;
+        }
+
+        public void SetStage(ContactFileUploadStage stage)
+        {
+            Stage = stage;
+            if (stage is ContactFileUploadStage.Ready or ContactFileUploadStage.Submitted)
+            {
+                Progress = 100;
+            }
+        }
     }
 
     private bool IsThaiCulture => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);

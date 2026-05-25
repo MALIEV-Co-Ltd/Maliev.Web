@@ -1929,6 +1929,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SubmitContactMessageAsync", source);
         Assert.Contains("SiteContent.QuoteNewUrl", source);
         Assert.Contains("class=\"@ContactStatusClass\" role=\"@ContactStatusRole\"", source);
+        Assert.Contains("@ContactStatusTitle", source);
+        Assert.Contains("contact-file-progress", source);
+        Assert.Contains("SetContactFileStage(ContactFileUploadStage.Sending)", source);
+        Assert.Contains("We sent a confirmation copy", source);
         Assert.Contains("form-status--error", source);
         Assert.Contains("We could not send the message right now.", source);
         Assert.Contains("aria-busy=\"@_submittingContact\"", source);

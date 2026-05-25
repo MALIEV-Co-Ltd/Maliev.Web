@@ -91,6 +91,7 @@ public sealed class ContactMessageBoundaryTests
         }, CancellationToken.None);
 
         Assert.Equal("42", response.MessageId);
+        Assert.Equal("MLV-C-000042", response.PublicReference);
         Assert.Equal("Received", response.Status);
         Assert.NotNull(requestBody);
         Assert.Contains("\"contactType\":0", requestBody, StringComparison.Ordinal);

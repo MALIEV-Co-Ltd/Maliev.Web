@@ -33,7 +33,10 @@ internal sealed class ContactServiceClient(HttpClient httpClient) : IContactServ
 
             var created = await response.Content.ReadFromJsonAsync<ContactServiceCreateResponse>(cancellationToken)
                 ?? throw new BackendUnavailableException("ContactService", "ContactService returned an empty contact response.");
-            return new ContactMessageResponse(created.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), MapStatus(created.Status));
+            return new ContactMessageResponse(created.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), MapStatus(created.Status))
+            {
+                PublicReference = FormatPublicReference(created.Id)
+            };
         }
     }
 
@@ -75,6 +78,11 @@ internal sealed class ContactServiceClient(HttpClient httpClient) : IContactServ
         }
 
         return "Received";
+    }
+
+    private static string FormatPublicReference(int contactId)
+    {
+        return FormattableString.Invariant($"MLV-C-{contactId:000000}");
     }
 }
 

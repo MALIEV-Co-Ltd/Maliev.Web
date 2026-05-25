@@ -1,0 +1,108 @@
+.contact-form .contact-file-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 10px;
+    align-items: start;
+}
+
+.contact-file-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.contact-file-copy span {
+    overflow-wrap: anywhere;
+    color: var(--ink);
+}
+
+.contact-file-copy small {
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+.contact-file-progress {
+    position: relative;
+    grid-column: 2;
+    height: 6px;
+    overflow: hidden;
+    background: #dfe7f3;
+    border-radius: 999px;
+}
+
+.contact-file-progress span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    background: var(--blue);
+    border-radius: inherit;
+    transition: width .18s ease;
+}
+
+.contact-file-progress.is-indeterminate span {
+    width: 44%;
+    animation: contact-progress-sweep 1s ease-in-out infinite;
+}
+
+.contact-status-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid #a7f3d0;
+    border-left: 4px solid #16a34a;
+    background: #f0fdf4;
+}
+
+.contact-status-card.form-status--error {
+    border-color: #fecaca;
+    border-left-color: #dc2626;
+    background: #fff1f2;
+}
+
+.contact-status-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: #047857;
+    background: #dcfce7;
+    border-radius: 999px;
+}
+
+.contact-status-card.form-status--error .contact-status-icon {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.contact-status-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.contact-status-copy strong {
+    color: var(--ink);
+    font-size: .98rem;
+}
+
+.contact-status-copy span {
+    color: #166534;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.contact-status-card.form-status--error .contact-status-copy span {
+    color: #991b1b;
+}
+
+@keyframes contact-progress-sweep {
+    0% {
+        transform: translateX(-120%);
+    }
+
+    100% {
+        transform: translateX(240%);
+    }
+}
