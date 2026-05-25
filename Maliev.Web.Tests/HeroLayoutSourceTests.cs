@@ -848,7 +848,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("private bool ShouldRenderPageHeroActions => CurrentBlogPost is null;", source);
         Assert.Contains("private string PageHeroClass => CurrentBlogPost is null", source);
         Assert.Contains("page-hero compact blog-article-hero", source);
-        Assert.Contains(".page-hero.blog-article-hero {\n  border-bottom: 0;", styles);
+        Assert.Contains(".page-hero.blog-article-hero {\n  padding-bottom: clamp(36px, 4vw, 48px);\n  border-bottom: 0;", styles);
+        Assert.Contains(".page-hero.compact.blog-article-hero + .article-detail-layout.blog-detail {\n  padding-top: clamp(22px, 2.8vw, 34px);", styles);
         Assert.Contains("<h1 id=\"blog-library-title\">@Text(\"Practical Notes\", \"บทความเชิงปฏิบัติ\")</h1>", source);
         Assert.DoesNotContain("blog-hero-title", source);
         Assert.DoesNotContain("Browse practical notes", source);

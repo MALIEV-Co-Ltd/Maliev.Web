@@ -1111,7 +1111,12 @@ html:lang(th) .h1 {
 }
 
 .page-hero.blog-article-hero {
+  padding-bottom: clamp(36px, 4vw, 48px);
   border-bottom: 0;
+}
+
+.page-hero.compact.blog-article-hero + .article-detail-layout.blog-detail {
+  padding-top: clamp(22px, 2.8vw, 34px);
 }
 
 .services-hero-title {
