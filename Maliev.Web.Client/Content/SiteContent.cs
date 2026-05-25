@@ -15,6 +15,9 @@ internal static class SiteContent
     internal static string QuoteProfileUrl => $"{QuoteEngineUrl}/profile";
 
     internal static string QuoteOrdersUrl => $"{QuoteEngineUrl}/orders";
+
+    internal static string QuoteNdasUrl => $"{QuoteEngineUrl}/ndas";
+
     internal const string FdmThermoplasticsImageUrl = "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80";
     internal const string PowderBedNylonImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg";
     internal const string SlaResinImageUrl = "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900";

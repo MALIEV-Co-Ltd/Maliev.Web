@@ -101,6 +101,12 @@
                 <h3>@Text("Shop orders", "คำสั่งซื้อร้านค้า")</h3>
                 <p>@Text("Review storefront orders separately from manufacturing projects.", "ดูคำสั่งซื้อร้านค้าแยกจากโปรเจกต์งานผลิต")</p>
             </a>
+            <a class="account-action-card" href="@SiteContent.QuoteNdasUrl">
+                <span class="card-meta">@Text("Confidentiality", "ความลับ")</span>
+                <h3>@Text("NDA agreement", "ข้อตกลง NDA")</h3>
+                <p>@NdaCardCopy</p>
+                <span class="button secondary">@NdaActionLabel</span>
+            </a>
             <a class="account-action-card" href="/account/preferences">
                 <span class="card-meta">@Text("Preferences", "การตั้งค่า")</span>
                 <h3>@Text("Language and display", "ภาษาและการแสดงผล")</h3>
@@ -117,6 +123,23 @@
     private string DisplayName => string.IsNullOrWhiteSpace(_profile?.DisplayName) ? _profile?.Email ?? "MALIEV customer" : _profile.DisplayName;
     private string CustomerTierLabel => string.IsNullOrWhiteSpace(_profile?.Tier) ? Text("Member", "สมาชิก") : _profile.Tier;
     private string CustomerSegmentLabel => string.IsNullOrWhiteSpace(_profile?.Segment) ? Text("Customer", "ลูกค้า") : _profile.Segment;
+    private string NdaStatusLabel => _profile?.NdaStatus?.Trim().ToUpperInvariant() switch
+    {
+        "SIGNED" or "ACTIVE" => Text("Signed NDA", "NDA ลงนามแล้ว"),
+        "DRAFT" => Text("Draft NDA", "NDA ฉบับร่าง"),
+        "EXPIRED" => Text("Expired NDA", "NDA หมดอายุ"),
+        "REVOKED" => Text("Revoked NDA", "NDA ถูกยกเลิก"),
+        _ => Text("No signed NDA", "ยังไม่มี NDA ที่ลงนาม")
+    };
+    private string NdaActionLabel => HasSignedNda ? Text("View NDA agreement", "ดูข้อตกลง NDA") : Text("Open NDA records", "เปิดรายการ NDA");
+    private string NdaCardCopy => HasSignedNda
+        ? Text(
+            $"Protected by {NdaStatusLabel}. View your signed agreement in the quote portal.",
+            $"ได้รับการคุ้มครองด้วยสถานะ {NdaStatusLabel} ดูข้อตกลงที่ลงนามในพอร์ทัลราคา")
+        : Text(
+            "NDA records and manufacturing documents are kept with your quote workspace.",
+            "รายการ NDA และเอกสารงานผลิตจะอยู่กับพื้นที่เสนอราคาของคุณ");
+    private bool HasSignedNda => IsSignedNdaStatus(_profile?.NdaStatus);
     private string CompanyLabel => string.IsNullOrWhiteSpace(_profile?.CompanyName) ? Text("Not linked", "ยังไม่ได้เชื่อมโยง") : _profile.CompanyName;
     private string MobileLabel => string.IsNullOrWhiteSpace(_profile?.Mobile) ? Text("Not added", "ยังไม่ได้เพิ่ม") : _profile.Mobile;
     private string ResetPasswordHref => string.IsNullOrWhiteSpace(_profile?.Email)
@@ -156,5 +179,11 @@
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+    }
+
+    private static bool IsSignedNdaStatus(string? status)
+    {
+        return string.Equals(status, "Signed", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase);
     }
 }

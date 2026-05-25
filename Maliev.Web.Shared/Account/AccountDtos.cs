@@ -58,6 +58,9 @@ public sealed class CustomerAccountProfileDto
     /// <summary>Gets or sets the customer-facing tier.</summary>
     public string Tier { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the customer-facing NDA status.</summary>
+    public string NdaStatus { get; set; } = string.Empty;
+
     /// <summary>Gets or sets the preferred language code.</summary>
     public string PreferredLanguage { get; set; } = string.Empty;
 

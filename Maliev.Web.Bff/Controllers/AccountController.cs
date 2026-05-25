@@ -391,6 +391,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             CompanyName = GetString(root, "companyName", "CompanyName"),
             Segment = GetString(root, "segment", "Segment") ?? string.Empty,
             Tier = GetString(root, "tier", "Tier") ?? string.Empty,
+            NdaStatus = GetString(root, "ndaStatus", "NDAStatus") ?? string.Empty,
             PreferredLanguage = GetString(root, "preferredLanguage", "PreferredLanguage") ?? string.Empty,
             Timezone = GetString(root, "timezone", "Timezone") ?? string.Empty,
             Version = GetUInt(root, "xmin", "Xmin", "version", "Version")

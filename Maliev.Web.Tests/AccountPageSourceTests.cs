@@ -15,6 +15,7 @@ public sealed class AccountPageSourceTests
         var forgotPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthForgotPassword.razor");
         var dtos = ReadRepoFile("Maliev.Web.Shared", "Account", "AccountDtos.cs");
         var controller = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AccountController.cs");
+        var siteContent = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("account-profile-card", account);
@@ -22,6 +23,11 @@ public sealed class AccountPageSourceTests
         Assert.Contains("AvatarInitials", account);
         Assert.Contains("CustomerTierLabel", account);
         Assert.Contains("CustomerSegmentLabel", account);
+        Assert.Contains("NdaStatusLabel", account);
+        Assert.Contains("NdaCardCopy", account);
+        Assert.Contains("SiteContent.QuoteNdasUrl", account);
+        Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
+        Assert.Contains("@Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"Customer tier\", \"ระดับลูกค้า\")", account);
         Assert.Contains("@Text(\"Change email\", \"เปลี่ยนอีเมล\")", account);
         Assert.Contains("@Text(\"Reset password\", \"รีเซ็ตรหัสผ่าน\")", account);
@@ -31,10 +37,14 @@ public sealed class AccountPageSourceTests
 
         Assert.Contains("public string Tier { get; set; } = string.Empty;", dtos);
         Assert.Contains("public string Segment { get; set; } = string.Empty;", dtos);
+        Assert.Contains("public string NdaStatus { get; set; } = string.Empty;", dtos);
         Assert.DoesNotContain("Gets or sets the customer status.", dtos);
         Assert.Contains("Tier = GetString(root, \"tier\", \"Tier\") ?? string.Empty", controller);
         Assert.Contains("Segment = GetString(root, \"segment\", \"Segment\") ?? string.Empty", controller);
+        Assert.Contains("NdaStatus = GetString(root, \"ndaStatus\", \"NDAStatus\") ?? string.Empty", controller);
         Assert.DoesNotContain("Status = GetString(root, \"status\", \"Status\")", controller);
+
+        Assert.Contains("QuoteNdasUrl => $\"{QuoteEngineUrl}/ndas\"", siteContent);
 
         Assert.Contains("[SupplyParameterFromQuery]\n    public string? Email", forgotPassword);
         Assert.Contains("value=\"@Email\"", forgotPassword);
