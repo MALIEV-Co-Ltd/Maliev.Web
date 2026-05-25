@@ -455,7 +455,7 @@ function getLandingHeroViewportMetrics(host) {
     minRadius: narrowTall ? 3.6 : compact ? 2.8 : balancedTablet ? 3.4 : 3.6,
     maxRadius: narrowTall ? 12 : compact ? 11 : 11,
     fallbackRadius: narrowTall ? 6.4 : compact ? 5.6 : balancedTablet ? 5.4 : wide ? 5.6 : 5.6,
-    targetY: compact ? -0.04 : wide ? -0.16 : -0.08
+    targetY: compact ? -0.08 : wide ? -0.42 : -0.2
   };
 }
 
