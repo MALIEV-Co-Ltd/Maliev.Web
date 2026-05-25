@@ -446,7 +446,7 @@ function getLandingHeroViewportMetrics(host) {
   const effectiveAspect = rightCenterFraction != null
     ? 2 * (1 - rightCenterFraction) * aspect
     : aspect;
-  const presentationColumnBias = wide ? 0.045 : 0;
+  const presentationColumnBias = wide ? 0.018 : 0;
 
   // `fill` is the fraction of the viewport's smaller half-angle that the
   // model's silhouette (rotated, scaled, world-space) should occupy. Higher
