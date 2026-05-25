@@ -764,13 +764,11 @@ main {
   border-radius: 4px;
   box-shadow: rgba(52, 55, 65, .08) 0 0 0 1px;
   cursor: pointer;
-  transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, background-color .22s ease-in-out;
+  transition: box-shadow .22s ease-in-out;
 }
 
 .industry-sector-card:is(:hover, :focus-visible) {
-  background: color-mix(in srgb, var(--paper-2) 92%, var(--paper));
   box-shadow: rgba(52, 55, 65, .12) 0 0 0 1px, rgba(52, 55, 65, .08) 0 18px 36px -28px;
-  transform: translateY(-2px);
 }
 
 .industry-sector-card:focus-visible {

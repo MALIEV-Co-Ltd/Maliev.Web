@@ -331,6 +331,14 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+        var industryCardStylesStart = styles.IndexOf(".industry-sector-card {", StringComparison.Ordinal);
+        var industryCardHoverStylesStart = styles.IndexOf(".industry-sector-card:is(:hover, :focus-visible)", StringComparison.Ordinal);
+        var industryCardFocusStylesStart = styles.IndexOf(".industry-sector-card:focus-visible", StringComparison.Ordinal);
+        Assert.True(industryCardStylesStart >= 0);
+        Assert.True(industryCardHoverStylesStart > industryCardStylesStart);
+        Assert.True(industryCardFocusStylesStart > industryCardHoverStylesStart);
+        var industryCardStyles = styles[industryCardStylesStart..industryCardHoverStylesStart];
+        var industryCardHoverStyles = styles[industryCardHoverStylesStart..industryCardFocusStylesStart];
 
         Assert.Contains("home-services-shell", source);
         Assert.Contains("home-services-tabs", source);
@@ -443,8 +451,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("text-align: left;", styles);
         Assert.Contains("cursor: pointer;", styles);
         Assert.Contains(".industry-sector-card:is(:hover, :focus-visible)", styles);
-        Assert.Contains("transform: translateY(-2px);", styles);
-        Assert.Contains("transition: box-shadow .22s ease-in-out, transform .22s ease-in-out, background-color .22s ease-in-out;", styles);
+        Assert.Contains("transition: box-shadow .22s ease-in-out;", industryCardStyles);
+        Assert.DoesNotContain("transform", industryCardStyles);
+        Assert.DoesNotContain("background-color", industryCardStyles);
+        Assert.Contains("box-shadow:", industryCardHoverStyles);
+        Assert.DoesNotContain("transform", industryCardHoverStyles);
+        Assert.DoesNotContain("background:", industryCardHoverStyles);
         Assert.DoesNotContain(".landing-hero::after", styles);
         Assert.DoesNotContain(".industry-sector-list li {\n  display: grid;\n  place-items: center;", styles);
         Assert.Contains(".industry-sector-list {\n    grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
