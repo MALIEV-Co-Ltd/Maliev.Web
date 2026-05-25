@@ -10,10 +10,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
-using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-QuestPDF.Settings.License = LicenseType.Community;
 
 if (builder.Environment.IsDevelopment())
 {
@@ -109,6 +107,8 @@ builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClien
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
 builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService")
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
+builder.AddAuthenticatedServiceClient<IPdfServiceClient, PdfServiceClient>("PdfService")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(30));
 builder.AddServiceClient<IChatbotServiceClient, ChatbotServiceClient>("ChatbotService")
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(45));
 
@@ -133,7 +133,7 @@ builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
-builder.Services.AddSingleton<BlogEbookPdfService>();
+builder.Services.AddScoped<BlogEbookPdfService>();
 
 var app = builder.Build();
 

@@ -9,59 +9,38 @@ public sealed class BlogEbookPdfSourceTests
     /// Verifies the PDF cover is print-friendly and links readers back to the public blog post.
     /// </summary>
     [Fact]
-    public void BlogEbookPdfCoverUsesPrintableLogoTitleAndBlogQr()
+    public void BlogEbookPdfIsRenderedByPdfServiceNotWebBff()
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "Services", "BlogEbookPdfService.cs");
+        var client = ReadRepoFile("Maliev.Web.Bff", "Clients", "PdfServiceClient.cs");
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+        var project = ReadRepoFile("Maliev.Web.Bff", "Maliev.Web.Bff.csproj");
 
-        Assert.Contains("LogoPath", source);
-        Assert.Contains(".Svg(LogoPath)", source);
-        Assert.Contains("BlogPostUrl", source);
-        Assert.Contains("QRCodeWriter", source);
-        Assert.Contains("ComposeQrCode", source);
-        Assert.Contains("page.Size(PageSizes.A4);", source);
-        Assert.Contains("post.Title.For(cultureName)", source);
-        Assert.DoesNotContain(".Background(DarkPanel)\r\n                    .Padding(32)", source);
-        Assert.DoesNotContain(".Background(DarkPanel)\n                    .Padding(32)", source);
-        Assert.DoesNotContain("ExtendVertical", source);
-        Assert.DoesNotContain("column.Item().Text(\"MALIEV\").FontSize(20).Bold()", source);
+        Assert.Contains("IPdfServiceClient", source);
+        Assert.Contains("RenderBlogPracticalNoteAsync", source);
+        Assert.Contains("builder.AddAuthenticatedServiceClient<IPdfServiceClient, PdfServiceClient>(\"PdfService\")", program);
+        Assert.Contains("/pdf/v1/blog-practical-notes/render", client);
+        Assert.DoesNotContain("QuestPDF", project);
+        Assert.DoesNotContain("ZXing", project);
+        Assert.DoesNotContain("using QuestPDF", source);
+        Assert.DoesNotContain("using ZXing", source);
     }
 
     /// <summary>
-    /// Verifies article images and navigable table-of-contents entries are part of the PDF structure.
+    /// Verifies the Web BFF includes localized content and image bytes in the PdfService request.
     /// </summary>
     [Fact]
-    public void BlogEbookPdfIncludesImagesAndNavigableContents()
+    public void BlogEbookPdfMapsLocalizedContentAndImagesForPdfService()
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "Services", "BlogEbookPdfService.cs");
 
-        Assert.Contains("ComposeArticleImage", source);
-        Assert.Contains("section.Image is { } image", source);
-        Assert.Contains(".Image(imagePath)", source);
-        Assert.Contains("SemanticTableOfContents", source);
-        Assert.Contains("SemanticTableOfContentsItem", source);
-        Assert.Contains("SemanticHeader1", source);
-        Assert.Contains("SemanticHeader2", source);
-        Assert.Contains("PDFUA_Conformance = PDFUA_Conformance.PDFUA_1", source);
-        Assert.Contains("SectionLink(sectionId)", source);
-        Assert.Contains("BeginPageNumberOfSection(sectionId)", source);
+        Assert.Contains("Title = post.Title.For(normalizedCulture)", source);
+        Assert.Contains("Summary = post.Summary.For(normalizedCulture)", source);
+        Assert.Contains("PublicUrl = $\"{PublicSiteBaseUrl}/blog/{Uri.EscapeDataString(post.Slug)}\"", source);
+        Assert.Contains("CoverImage = await MapImage(post.ImageUrl", source);
+        Assert.Contains("Image = section.Image is null ? null : await MapImage(", source);
+        Assert.Contains("await File.ReadAllBytesAsync(imagePath, cancellationToken)", source);
         Assert.DoesNotContain("TrimToLength", source);
-    }
-
-    /// <summary>
-    /// Verifies footer branding and CTA URLs stay consistent across generated pages.
-    /// </summary>
-    [Fact]
-    public void BlogEbookPdfUsesMalievFooterAndHttpsCtaLinks()
-    {
-        var source = ReadRepoFile("Maliev.Web.Bff", "Services", "BlogEbookPdfService.cs");
-
-        Assert.Contains("private const string QuoteUrl = \"https://quote.maliev.com/projects/new\";", source);
-        Assert.Contains("private const string MaterialsUrl = \"https://www.maliev.com/materials\";", source);
-        Assert.Contains("ComposeFooter(page);", source);
-        Assert.Contains("Hyperlink(url)", source);
-        Assert.DoesNotContain("ComposeFooter(page, post.Category.For(cultureName))", source);
-        Assert.DoesNotContain("ComposeFooter(page, \"Practical note\")", source);
-        Assert.DoesNotContain("ContactCard(item, \"Compare materials\", \"www.maliev.com/materials\")", source);
     }
 
     private static string ReadRepoFile(params string[] pathSegments)
@@ -72,16 +51,25 @@ public sealed class BlogEbookPdfSourceTests
 
     private static string FindRepoRoot()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory is not null)
+        foreach (var startDirectory in new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() })
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Maliev.Web.slnx")))
-            {
-                return directory.FullName;
-            }
+            var directory = new DirectoryInfo(startDirectory);
 
-            directory = directory.Parent;
+            while (directory is not null)
+            {
+                if (File.Exists(Path.Combine(directory.FullName, "Maliev.Web.slnx")))
+                {
+                    return directory.FullName;
+                }
+
+                var siblingCandidate = Path.Combine(directory.FullName, "Maliev.Web");
+                if (File.Exists(Path.Combine(siblingCandidate, "Maliev.Web.slnx")))
+                {
+                    return siblingCandidate;
+                }
+
+                directory = directory.Parent;
+            }
         }
 
         throw new DirectoryNotFoundException("Could not locate Maliev.Web repository root.");

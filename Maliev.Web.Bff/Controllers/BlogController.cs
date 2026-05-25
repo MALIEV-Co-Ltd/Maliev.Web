@@ -21,12 +21,14 @@ public sealed class BlogController(BlogEbookPdfService pdfService) : ControllerB
     /// </summary>
     /// <param name="slug">The practical note slug.</param>
     /// <param name="culture">The requested culture.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The generated PDF file.</returns>
     [HttpGet("{slug}/ebook.pdf")]
     [Produces("application/pdf")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetEbook(string slug, [FromQuery] string? culture)
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetEbook(string slug, [FromQuery] string? culture, CancellationToken cancellationToken)
     {
         var post = SiteContent.BlogPosts.FirstOrDefault(item => item.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
         if (post is null)
@@ -34,9 +36,19 @@ public sealed class BlogController(BlogEbookPdfService pdfService) : ControllerB
             return NotFound();
         }
 
-        var normalizedCulture = SupportedCultures.Normalize(culture);
-        var pdfBytes = pdfService.Generate(post, normalizedCulture);
-        return File(pdfBytes, "application/pdf", $"{SanitizeFileName(post.Slug)}-maliev-practical-note.pdf");
+        try
+        {
+            var normalizedCulture = SupportedCultures.Normalize(culture);
+            var pdfBytes = await pdfService.GenerateAsync(post, normalizedCulture, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"{SanitizeFileName(post.Slug)}-maliev-practical-note.pdf");
+        }
+        catch (BackendUnavailableException)
+        {
+            return Problem(
+                title: "Practical note PDF is temporarily unavailable",
+                detail: "We could not render this practical note PDF right now. Please refresh the page or contact MALIEV.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     private static string SanitizeFileName(string value)

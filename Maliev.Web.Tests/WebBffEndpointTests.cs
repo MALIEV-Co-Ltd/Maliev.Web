@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Account;
 using Maliev.Web.Shared.Chatbot;
@@ -39,12 +40,14 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 services.RemoveAll<ICheckoutDraftService>();
                 services.RemoveAll<IContactMessageService>();
                 services.RemoveAll<ICustomerChatbotService>();
+                services.RemoveAll<IPdfServiceClient>();
                 services.AddSingleton<ICommerceCatalogService, FakeCommerceCatalogService>();
                 services.AddSingleton<IManufacturingCatalogService, FakeManufacturingCatalogService>();
                 services.AddSingleton<IWebQuoteService, FakeWebQuoteService>();
                 services.AddSingleton<ICheckoutDraftService, FakeCheckoutDraftService>();
                 services.AddSingleton<IContactMessageService, FakeContactMessageService>();
                 services.AddSingleton<ICustomerChatbotService, FakeCustomerChatbotService>();
+                services.AddSingleton<IPdfServiceClient, FakePdfServiceClient>();
             }));
     }
 
@@ -95,7 +98,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
         Assert.Equal("attachment", response.Content.Headers.ContentDisposition?.DispositionType);
         Assert.Contains("fdm-heat-material-choice", response.Content.Headers.ContentDisposition?.FileName ?? response.Content.Headers.ContentDisposition?.FileNameStar);
-        Assert.True(bytes.Length > 1_000);
+        Assert.Equal(FakePdfServiceClient.PdfBytes, bytes);
         Assert.Equal((byte)'%', bytes[0]);
         Assert.Equal((byte)'P', bytes[1]);
         Assert.Equal((byte)'D', bytes[2]);
@@ -475,6 +478,24 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 Language = "en",
                 CreatedAt = DateTimeOffset.Parse("2026-05-17T00:00:00+07:00")
             });
+        }
+    }
+
+    private sealed class FakePdfServiceClient : IPdfServiceClient
+    {
+        public static readonly byte[] PdfBytes = [(byte)'%', (byte)'P', (byte)'D', (byte)'F'];
+
+        public Task<byte[]> RenderBlogPracticalNoteAsync(BlogPracticalNotePdfRequest request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("fdm-heat-material-choice", request.Slug);
+            Assert.Equal(SupportedCultures.DefaultCulture, request.CultureName);
+            Assert.Contains("FDM", request.Title, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal("https://www.maliev.com/blog/fdm-heat-material-choice", request.PublicUrl);
+            Assert.NotEmpty(request.Sections);
+            Assert.NotEmpty(request.Takeaways);
+            Assert.NotNull(request.CoverImage);
+            Assert.NotEmpty(request.CoverImage.Bytes);
+            return Task.FromResult(PdfBytes);
         }
     }
 }

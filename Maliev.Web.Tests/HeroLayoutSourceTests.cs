@@ -878,11 +878,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("[Route(\"web/v{version:apiVersion}/blog\")]", controller);
         Assert.Contains("[HttpGet(\"{slug}/ebook.pdf\")]", controller);
         Assert.Contains("BlogEbookPdfService", controller);
-        Assert.Contains("QuestPDF", bffProject);
-        Assert.Contains("PageSizes.A4", pdfService);
-        Assert.DoesNotContain("PageSizes.A5", pdfService);
-        Assert.Contains("MALIEV Co., Ltd.", pdfService);
-        Assert.Contains("Before you upload", pdfService);
+        Assert.DoesNotContain("QuestPDF", bffProject);
+        Assert.DoesNotContain("ZXing", bffProject);
+        Assert.Contains("IPdfServiceClient", pdfService);
+        Assert.Contains("RenderBlogPracticalNoteAsync", pdfService);
         Assert.Contains("blog-search-form", source);
         Assert.Contains("blog-category-filter", source);
         Assert.Contains("blog-category-filter-head", source);
@@ -3033,16 +3032,25 @@ public sealed class HeroLayoutSourceTests
 
     private static string FindRepoRoot()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory is not null)
+        foreach (var startDirectory in new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() })
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Maliev.Web.slnx")))
-            {
-                return directory.FullName;
-            }
+            var directory = new DirectoryInfo(startDirectory);
 
-            directory = directory.Parent;
+            while (directory is not null)
+            {
+                if (File.Exists(Path.Combine(directory.FullName, "Maliev.Web.slnx")))
+                {
+                    return directory.FullName;
+                }
+
+                var siblingCandidate = Path.Combine(directory.FullName, "Maliev.Web");
+                if (File.Exists(Path.Combine(siblingCandidate, "Maliev.Web.slnx")))
+                {
+                    return siblingCandidate;
+                }
+
+                directory = directory.Parent;
+            }
         }
 
         throw new DirectoryNotFoundException("Could not locate Maliev.Web repository root.");
