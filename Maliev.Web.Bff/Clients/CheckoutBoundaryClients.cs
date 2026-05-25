@@ -69,6 +69,9 @@ public interface ICountryServiceClient
 {
     /// <summary>Gets a country by ISO 3166-1 alpha-2 code.</summary>
     Task<HttpResponseMessage> GetCountryByIso2Async(string iso2, CancellationToken cancellationToken);
+
+    /// <summary>Gets a page of active countries.</summary>
+    Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken);
 }
 
 internal sealed class OrderServiceClient(HttpClient httpClient) : IOrderServiceClient
@@ -138,4 +141,7 @@ internal sealed class CountryServiceClient(HttpClient httpClient) : ICountryServ
 {
     public Task<HttpResponseMessage> GetCountryByIso2Async(string iso2, CancellationToken cancellationToken) =>
         httpClient.GetAsync($"/country/v1/countries/iso2/{Uri.EscapeDataString(iso2)}", cancellationToken);
+
+    public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
+        httpClient.GetAsync("/country/v1/countries?pageSize=1000&sortBy=name&sortOrder=asc", cancellationToken);
 }

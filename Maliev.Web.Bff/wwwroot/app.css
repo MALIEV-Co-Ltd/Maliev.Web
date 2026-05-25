@@ -5003,20 +5003,41 @@ html[data-theme="dark"] .auth-google-icon {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 46px;
   gap: 10px;
+  align-items: start;
 }
 
 .account-google-address-autocomplete {
-  min-height: 42px;
+  min-height: 46px;
+  overflow: visible;
+  border-radius: var(--radius);
+  background: var(--control-surface);
+  box-shadow: var(--shadow-border);
+  color-scheme: light;
+}
+
+.account-google-address-autocomplete .maliev-google-place-autocomplete,
+.maliev-google-place-autocomplete {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  border-radius: var(--radius);
+  background: var(--control-surface);
+  color: var(--ink);
+  color-scheme: light;
+  --gmpx-color-primary: var(--accent);
+  --gmpx-color-on-surface: var(--ink);
+  --gmpx-color-on-surface-variant: var(--muted);
+  --gmpx-color-surface: var(--control-surface);
+  --gmpx-color-surface-container: var(--control-surface);
 }
 
 .account-google-address-autocomplete:empty::before {
   display: flex;
   align-items: center;
-  min-height: 42px;
+  min-height: 46px;
   padding: 10px 12px;
   border-radius: var(--radius);
   background: var(--control-surface);
-  box-shadow: var(--shadow-border);
   color: var(--muted);
   content: "Search for your location";
 }

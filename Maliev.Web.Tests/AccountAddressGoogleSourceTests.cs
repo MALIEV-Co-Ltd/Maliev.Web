@@ -21,6 +21,8 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("Place name", page, StringComparison.Ordinal);
         Assert.Contains("Mobile Number", page, StringComparison.Ordinal);
         Assert.Contains("Note to driver", page, StringComparison.Ordinal);
+        Assert.Contains("Country / region", page, StringComparison.Ordinal);
+        Assert.Contains("GetAddressCountriesAsync", page, StringComparison.Ordinal);
         Assert.Contains("disabled=\"@ProvinceLocked\"", page, StringComparison.Ordinal);
         Assert.Contains("disabled=\"@PostalCodeLocked\"", page, StringComparison.Ordinal);
 
@@ -28,6 +30,9 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("web/v1/address/google-config", picker, StringComparison.Ordinal);
         Assert.Contains("PlaceAutocompleteElement", script, StringComparison.Ordinal);
         Assert.Contains("gmp-select", script, StringComparison.Ordinal);
+        Assert.Contains("options.includedRegionCodes = config.includedRegionCodes", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("[\"th\"]", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("region: \"th\"", script, StringComparison.Ordinal);
         Assert.Contains("GoogleMapPin", script, StringComparison.Ordinal);
         Assert.Contains("maliev-google-address-picker.js", app, StringComparison.Ordinal);
     }
@@ -44,6 +49,8 @@ public sealed class AccountAddressGoogleSourceTests
 
         Assert.Contains("[Route(\"web/v{version:apiVersion}/address\")]", addressController, StringComparison.Ordinal);
         Assert.Contains("[HttpGet(\"google-config\")]", addressController, StringComparison.Ordinal);
+        Assert.Contains("[HttpGet(\"countries\")]", addressController, StringComparison.Ordinal);
+        Assert.Contains("GetCountriesAsync", addressController, StringComparison.Ordinal);
         Assert.Contains("GoogleMaps", addressController, StringComparison.Ordinal);
 
         foreach (var field in new[]
@@ -64,6 +71,14 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("public string? PlaceLabel", dtos, StringComparison.Ordinal);
         Assert.Contains("public string? DriverNote", dtos, StringComparison.Ordinal);
         Assert.Contains("public string AddressSource", dtos, StringComparison.Ordinal);
+
+        var googleDtos = ReadRepoFile("Maliev.Web.Shared", "Account", "GoogleAddressDtos.cs");
+        var css = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("public string? CountryIso2", googleDtos, StringComparison.Ordinal);
+        Assert.Contains("AddressCountryOptionDto", googleDtos, StringComparison.Ordinal);
+        Assert.Contains("color-scheme: light", css, StringComparison.Ordinal);
+        Assert.Contains("maliev-google-place-autocomplete", css, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(params string[] pathSegments)

@@ -167,6 +167,9 @@ public sealed class ContactMessageBoundaryTests
                 Content = JsonContent.Create(new { id = countryId, iso2 = "TH", isActive = true })
             });
         }
+
+        public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
     private sealed class ThrowingCountryServiceClient(Exception exception) : ICountryServiceClient
@@ -176,6 +179,9 @@ public sealed class ContactMessageBoundaryTests
             Assert.Equal("TH", iso2);
             return Task.FromException<HttpResponseMessage>(exception);
         }
+
+        public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
+            Task.FromException<HttpResponseMessage>(exception);
     }
 
     private sealed class StubHttpMessageHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> handler) : HttpMessageHandler

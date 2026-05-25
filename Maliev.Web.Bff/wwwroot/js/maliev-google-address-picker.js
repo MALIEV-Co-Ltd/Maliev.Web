@@ -41,6 +41,11 @@
         return match?.longText || match?.long_name || match?.shortText || match?.short_name || null;
     }
 
+    function componentShortText(components, type) {
+        const match = component(components, type);
+        return match?.shortText || match?.short_name || match?.longText || match?.long_name || null;
+    }
+
     function firstComponentText(components, types) {
         for (const type of types) {
             const value = componentText(components, type);
@@ -72,6 +77,7 @@
             city: firstComponentText(components, ["administrative_area_level_2", "locality", "sublocality_level_1"]),
             stateProvince: componentText(components, "administrative_area_level_1"),
             postalCode: componentText(components, "postal_code"),
+            countryIso2: componentShortText(components, "country"),
             latitude: Number.isFinite(lat) ? lat : null,
             longitude: Number.isFinite(lng) ? lng : null
         };
@@ -87,11 +93,17 @@
         const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
         container.replaceChildren();
 
-        const autocomplete = new PlaceAutocompleteElement({
-            includedRegionCodes: config.includedRegionCodes?.length ? config.includedRegionCodes : ["th"]
-        });
+        const options = {};
+        if (Array.isArray(config.includedRegionCodes) && config.includedRegionCodes.length > 0) {
+            options.includedRegionCodes = config.includedRegionCodes;
+        }
+
+        const autocomplete = new PlaceAutocompleteElement(options);
         autocomplete.placeholder = "Search for your location";
         autocomplete.classList.add("maliev-google-place-autocomplete");
+        autocomplete.style.colorScheme = "light";
+        autocomplete.style.display = "block";
+        autocomplete.style.width = "100%";
         container.appendChild(autocomplete);
 
         const handler = async event => {
@@ -152,7 +164,7 @@
                 : latLng;
             marker.position = literal;
 
-            const response = await geocoder.geocode({ location: literal, region: "th" });
+            const response = await geocoder.geocode({ location: literal });
             const result = response.results?.[0];
             if (!result) {
                 await dotNetReference.invokeMethodAsync("NotifyGoogleAddressSelected", {

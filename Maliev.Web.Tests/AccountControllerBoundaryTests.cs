@@ -74,5 +74,8 @@ public sealed class AccountControllerBoundaryTests
     {
         public Task<HttpResponseMessage> GetCountryByIso2Async(string iso2, CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 }
