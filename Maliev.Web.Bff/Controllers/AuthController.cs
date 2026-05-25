@@ -65,6 +65,7 @@ public sealed class AuthController(
         var email = external.Principal.FindFirstValue(ClaimTypes.Email);
         var name = external.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
         var googleUserId = external.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var profileImageUrl = GetExternalProfileImageUrl(external.Principal);
 
         await HttpContext.SignOutAsync(ExternalScheme);
 
@@ -79,6 +80,7 @@ public sealed class AuthController(
             full_name = name,
             google_user_id = googleUserId,
             email_verified = true,
+            profile_image_url = profileImageUrl,
             preferred_language = Request.Cookies["maliev.culture"] ?? "th",
             timezone = "Asia/Bangkok"
         }, cancellationToken);
@@ -241,6 +243,11 @@ public sealed class AuthController(
             claims.Add(new Claim(ClaimTypes.Name, user.Name));
         }
 
+        if (!string.IsNullOrWhiteSpace(user.ProfileImageUrl))
+        {
+            claims.Add(new Claim("profile_image_url", user.ProfileImageUrl));
+        }
+
         foreach (var permission in CustomerAccountPermissions)
         {
             claims.Add(new Claim("permission", permission));
@@ -267,6 +274,13 @@ public sealed class AuthController(
         return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? returnUrl
             : "/account";
+    }
+
+    private static string? GetExternalProfileImageUrl(ClaimsPrincipal principal)
+    {
+        return principal.FindFirstValue("picture")
+            ?? principal.FindFirstValue("urn:google:picture")
+            ?? principal.FindFirstValue("profile_image_url");
     }
 
     /// <summary>
@@ -339,5 +353,8 @@ public sealed class AuthController(
 
         [JsonPropertyName("name")]
         public string? Name { get; set; }
+
+        [JsonPropertyName("profile_image_url")]
+        public string? ProfileImageUrl { get; set; }
     }
 }

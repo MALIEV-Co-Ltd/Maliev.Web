@@ -8,8 +8,10 @@ using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
 using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Security;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 
@@ -61,6 +63,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         options.CallbackPath = "/auth/google/signin";
         options.Scope.Add("profile");
         options.Scope.Add("email");
+        options.ClaimActions.MapJsonKey("picture", "picture");
         options.SaveTokens = true;
         options.Events.OnRedirectToAuthorizationEndpoint = context =>
         {

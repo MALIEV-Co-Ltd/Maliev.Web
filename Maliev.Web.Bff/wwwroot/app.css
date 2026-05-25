@@ -5692,6 +5692,12 @@ html[data-theme="dark"] .auth-google-icon {
   font-weight: 760;
 }
 
+.account-avatar-image {
+  display: block;
+  object-fit: cover;
+  padding: 0;
+}
+
 .account-profile-identity {
   display: grid;
   gap: 4px;

@@ -46,7 +46,14 @@
     {
         <div class="account-overview-card account-profile-card">
             <div class="account-profile-header">
-                <div class="account-avatar" aria-hidden="true">@AvatarInitials</div>
+                @if (!string.IsNullOrWhiteSpace(_profile?.ProfileImageUrl))
+                {
+                    <img class="account-avatar account-avatar-image" src="@_profile.ProfileImageUrl" alt="" aria-hidden="true" referrerpolicy="no-referrer" />
+                }
+                else
+                {
+                    <div class="account-avatar" aria-hidden="true">@AvatarInitials</div>
+                }
                 <div class="account-profile-identity">
                     <span class="card-meta">@Text("Signed in as", "เข้าสู่ระบบเป็น")</span>
                     <h2>@DisplayName</h2>

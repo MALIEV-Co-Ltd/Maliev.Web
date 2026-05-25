@@ -21,6 +21,9 @@ public sealed class CustomerAccountSessionDto
 
     /// <summary>Gets or sets the signed-in customer display name.</summary>
     public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the signed-in customer profile image URL.</summary>
+    public string? ProfileImageUrl { get; set; }
 }
 
 /// <summary>
@@ -45,6 +48,9 @@ public sealed class CustomerAccountProfileDto
 
     /// <summary>Gets or sets the customer email address.</summary>
     public string Email { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the customer profile image URL.</summary>
+    public string? ProfileImageUrl { get; set; }
 
     /// <summary>Gets or sets the customer mobile phone number.</summary>
     public string? Mobile { get; set; }

@@ -32,7 +32,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             PrincipalId = GetClaimGuid("principal_id", ClaimTypes.NameIdentifier),
             CustomerId = GetClaimGuid("customer_id"),
             Email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
-            DisplayName = User.FindFirstValue(ClaimTypes.Name) ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty
+            DisplayName = User.FindFirstValue(ClaimTypes.Name) ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
+            ProfileImageUrl = User.FindFirstValue("profile_image_url")
         });
     }
 
@@ -395,6 +396,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             LastName = lastName ?? string.Empty,
             DisplayName = string.IsNullOrWhiteSpace(displayName) ? User.FindFirstValue(ClaimTypes.Name) ?? string.Empty : displayName,
             Email = GetString(root, "email", "Email") ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
+            ProfileImageUrl = GetString(root, "profileImageUrl", "profile_image_url", "ProfileImageUrl") ?? User.FindFirstValue("profile_image_url"),
             Mobile = GetString(root, "mobile", "Mobile"),
             CompanyName = GetString(root, "companyName", "CompanyName"),
             Segment = GetString(root, "segment", "Segment") ?? string.Empty,

@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Maliev.Web.Tests;
 
 /// <summary>
@@ -49,7 +51,9 @@ public sealed class AccountPageSourceTests
 
         Assert.Contains("account-profile-card", account);
         Assert.Contains("account-avatar", account);
+        Assert.Contains("account-avatar-image", account);
         Assert.Contains("AvatarInitials", account);
+        Assert.Contains("_profile?.ProfileImageUrl", account);
         Assert.Contains("CustomerTierLabel", account);
         Assert.Contains("CustomerSegmentLabel", account);
         Assert.Contains("NdaStatusLabel", account);
@@ -67,10 +71,12 @@ public sealed class AccountPageSourceTests
         Assert.Contains("public string Tier { get; set; } = string.Empty;", dtos);
         Assert.Contains("public string Segment { get; set; } = string.Empty;", dtos);
         Assert.Contains("public string NdaStatus { get; set; } = string.Empty;", dtos);
+        Assert.Contains("public string? ProfileImageUrl { get; set; }", dtos);
         Assert.DoesNotContain("Gets or sets the customer status.", dtos);
         Assert.Contains("Tier = GetString(root, \"tier\", \"Tier\") ?? string.Empty", controller);
         Assert.Contains("Segment = GetString(root, \"segment\", \"Segment\") ?? string.Empty", controller);
         Assert.Contains("NdaStatus = GetString(root, \"ndaStatus\", \"NDAStatus\") ?? string.Empty", controller);
+        Assert.Contains("ProfileImageUrl = GetString(root, \"profileImageUrl\", \"profile_image_url\", \"ProfileImageUrl\")", controller);
         Assert.DoesNotContain("Status = GetString(root, \"status\", \"Status\")", controller);
 
         Assert.Contains("QuoteNdasUrl => $\"{QuoteEngineUrl}/ndas\"", siteContent);
@@ -80,8 +86,25 @@ public sealed class AccountPageSourceTests
 
         Assert.Contains(".account-profile-card", styles);
         Assert.Contains(".account-avatar", styles);
+        Assert.Contains(".account-avatar-image", styles);
         Assert.Contains(".account-membership-pill", styles);
         Assert.Contains(".account-quick-actions", styles);
+    }
+
+    /// <summary>
+    /// Verifies Google customer sign-in captures the Google picture URL and sends it to the customer profile contract.
+    /// </summary>
+    [Fact]
+    public void GoogleCustomerSignInPersistsProfileImageUrl()
+    {
+        var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
+
+        Assert.Contains("options.ClaimActions.MapJsonKey(\"picture\", \"picture\")", program);
+        Assert.Contains("GetExternalProfileImageUrl(external.Principal)", authController);
+        Assert.Contains("profile_image_url = profileImageUrl", authController);
+        Assert.Contains("new Claim(\"profile_image_url\", user.ProfileImageUrl)", authController);
+        Assert.Contains("[JsonPropertyName(\"profile_image_url\")]", authController);
     }
 
     /// <summary>
@@ -175,10 +198,16 @@ public sealed class AccountPageSourceTests
         return File.ReadAllText(Path.Combine([root, .. pathSegments]));
     }
 
-    private static string FindRepoRoot()
+    private static string FindRepoRoot([CallerFilePath] string sourceFilePath = "")
     {
-        foreach (var startDirectory in new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() })
+        var sourceDirectory = Path.GetDirectoryName(sourceFilePath);
+        foreach (var startDirectory in new[] { sourceDirectory, AppContext.BaseDirectory, Directory.GetCurrentDirectory() })
         {
+            if (string.IsNullOrWhiteSpace(startDirectory))
+            {
+                continue;
+            }
+
             var directory = new DirectoryInfo(startDirectory);
 
             while (directory is not null)
