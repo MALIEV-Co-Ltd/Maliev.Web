@@ -7592,6 +7592,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     padding-top: 42px;
     padding-bottom: 52px;
     text-align: center;
+    overflow: hidden;
+    background: var(--landing-gizmo-canvas-bg);
   }
 
   .landing-hero-copy {
@@ -7609,25 +7611,44 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .metric-strip {
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: initial;
+    justify-items: center;
     gap: clamp(28px, 6vw, 56px);
     margin-top: 22px;
+    width: min(100%, 640px);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .metric-strip div {
+    min-width: 0;
+    justify-items: center;
   }
 
   .landing-hero-visual {
     position: relative;
-    width: min(100%, 820px);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     min-height: 440px;
+    overflow: hidden;
   }
 
   .manufacturing-gizmo--landing {
     position: relative;
     inset: auto;
-    width: 100%;
+    width: 100vw;
     height: min(46vh, 470px);
     min-height: 440px;
-    overflow: visible;
+    overflow: hidden;
     transform: none;
+  }
+
+  .manufacturing-gizmo--landing,
+  .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {
+    background: transparent;
   }
 }
 
@@ -7775,7 +7796,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     padding-top: 24px;
     padding-bottom: 34px;
     text-align: center;
-    overflow: visible;
+    overflow: hidden;
+    background: var(--landing-gizmo-canvas-bg);
   }
 
   .landing-hero-copy {
@@ -7881,24 +7903,31 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     position: relative;
     grid-area: visual;
     justify-self: center;
-    width: min(100%, 360px);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     min-height: 0;
     overflow: hidden;
   }
 
   .manufacturing-gizmo {
-    height: clamp(140px, 40vw, 180px);
+    height: clamp(240px, 58vw, 360px);
     min-height: 0;
   }
 
   .manufacturing-gizmo--landing {
     position: relative;
     inset: auto;
-    width: 100%;
-    height: clamp(140px, 40vw, 180px);
+    width: 100vw;
+    height: clamp(240px, 58vw, 360px);
     min-height: 0;
     overflow: hidden;
     transform: none;
+  }
+
+  .manufacturing-gizmo--landing,
+  .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {
+    background: transparent;
   }
 
   .manufacturing-gizmo--service {
@@ -7913,7 +7942,9 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     text-align: center;
     gap: 10px;
     margin-top: 24px;
-    width: 100%;
+    margin-inline: auto;
+    width: min(100%, 560px);
+    justify-items: center;
   }
 
   .metric-strip div {
