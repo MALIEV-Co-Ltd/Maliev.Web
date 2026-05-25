@@ -58,7 +58,8 @@ public sealed class AccountPageSourceTests
         Assert.Contains("CustomerSegmentLabel", account);
         Assert.Contains("NdaStatusLabel", account);
         Assert.Contains("NdaCardCopy", account);
-        Assert.Contains("SiteContent.QuoteNdasUrl", account);
+        Assert.Contains("QuoteEngineNdasHref", account);
+        Assert.Contains("/auth/quote-engine?returnUrl=/ndas", account);
         Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"Customer tier\", \"ระดับลูกค้า\")", account);
@@ -105,6 +106,22 @@ public sealed class AccountPageSourceTests
         Assert.Contains("profile_image_url = profileImageUrl", authController);
         Assert.Contains("new Claim(\"profile_image_url\", user.ProfileImageUrl)", authController);
         Assert.Contains("[JsonPropertyName(\"profile_image_url\")]", authController);
+    }
+
+    /// <summary>
+    /// Verifies Web routes QuoteEngine account links through a signed session handoff instead of sending customers as anonymous users.
+    /// </summary>
+    [Fact]
+    public void AccountNdaLinkUsesQuoteEngineSessionHandoff()
+    {
+        var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
+        var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+
+        Assert.Contains("QuoteEngineNdasHref", account, StringComparison.Ordinal);
+        Assert.Contains("/auth/quote-engine?returnUrl=/ndas", account, StringComparison.Ordinal);
+        Assert.Contains("[HttpGet(\"quote-engine\")]", authController, StringComparison.Ordinal);
+        Assert.Contains("CustomerSessionHandoffToken", authController, StringComparison.Ordinal);
+        Assert.Contains("/auth/web-handoff", authController, StringComparison.Ordinal);
     }
 
     /// <summary>

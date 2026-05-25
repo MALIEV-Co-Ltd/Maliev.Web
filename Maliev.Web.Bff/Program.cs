@@ -146,6 +146,7 @@ builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
+builder.Services.AddScoped<CustomerSessionHandoffToken>();
 builder.Services.AddScoped<BlogEbookPdfService>();
 
 var app = builder.Build();

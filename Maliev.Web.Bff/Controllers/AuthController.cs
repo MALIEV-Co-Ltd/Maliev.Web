@@ -4,6 +4,8 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Maliev.Web.Bff.Clients;
+using Maliev.Web.Bff.Security;
+using Maliev.Web.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -20,6 +22,7 @@ public sealed class AuthController(
     IAuthServiceClient authClient,
     ICustomerServiceClient customerClient,
     IConfiguration configuration,
+    CustomerSessionHandoffToken sessionHandoffToken,
     ILogger<AuthController> logger) : Controller
 {
     private const string ExternalScheme = "MalievExternal";
@@ -99,6 +102,32 @@ public sealed class AuthController(
 
         await SignInCustomerAsync(session.User);
         return LocalRedirect(NormalizeReturnUrl(returnUrl));
+    }
+
+    /// <summary>
+    /// Creates a short-lived customer session handoff and redirects to the QuoteEngine.
+    /// </summary>
+    [HttpGet("quote-engine")]
+    [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
+    public IActionResult QuoteEngine([FromQuery] string? returnUrl = null)
+    {
+        if (!Guid.TryParse(User.FindFirstValue("customer_id"), out var customerId))
+        {
+            return RedirectWithError("/auth/sign-in", "Sign in again before opening the quote portal.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var token = sessionHandoffToken.Create(new CustomerSessionHandoffPayload(
+            customerId,
+            User.FindFirstValue("principal_id") ?? User.FindFirstValue(ClaimTypes.NameIdentifier),
+            User.FindFirstValue(ClaimTypes.Email),
+            User.FindFirstValue(ClaimTypes.Name),
+            now,
+            now.AddMinutes(2)));
+        var quoteEngineUrl = ResolveQuoteEngineUrl();
+        var quoteReturnUrl = NormalizeQuoteEngineReturnUrl(returnUrl);
+        var redirect = $"{quoteEngineUrl}/auth/web-handoff?token={Uri.EscapeDataString(token)}&returnUrl={Uri.EscapeDataString(quoteReturnUrl)}";
+        return Redirect(redirect);
     }
 
     /// <summary>
@@ -274,6 +303,25 @@ public sealed class AuthController(
         return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? returnUrl
             : "/account";
+    }
+
+    private string ResolveQuoteEngineUrl()
+    {
+        var configured = configuration["QuoteEngine:BaseUrl"]
+            ?? configuration["QuoteEngine__BaseUrl"]
+            ?? Environment.GetEnvironmentVariable("QuoteEngine__BaseUrl")
+            ?? Environment.GetEnvironmentVariable("QUOTEENGINE_BASE_URL")
+            ?? "https://quote.maliev.com";
+        return configured.TrimEnd('/');
+    }
+
+    private static string NormalizeQuoteEngineReturnUrl(string? returnUrl)
+    {
+        return !string.IsNullOrWhiteSpace(returnUrl) &&
+            returnUrl.StartsWith("/", StringComparison.Ordinal) &&
+            !returnUrl.StartsWith("//", StringComparison.Ordinal)
+            ? returnUrl
+            : "/projects/new";
     }
 
     private static string? GetExternalProfileImageUrl(ClaimsPrincipal principal)
