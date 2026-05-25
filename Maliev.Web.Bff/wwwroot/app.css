@@ -2811,10 +2811,10 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
 }
 
 .machine-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);
-  gap: 8px;
-  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
   width: min(100%, 410px);
   margin-top: 0;
 }
@@ -2826,13 +2826,15 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   font-weight: 750;
 }
 
-.machine-actions .button.primary {
+.machine-actions .machine-configure-button {
+  flex: 0 0 auto;
   justify-content: space-between;
-  padding-inline: 18px;
+  min-width: 132px;
+  padding-inline: 16px;
   box-shadow: rgba(10, 114, 239, .24) 0 14px 30px -22px;
 }
 
-.machine-actions .button.primary::after {
+.machine-actions .machine-configure-button::after {
   content: "";
   flex: 0 0 auto;
   width: 8px;
@@ -2843,10 +2845,22 @@ html[data-theme="dark"] .machine-feature-backdrop--dark {
   transform: rotate(45deg);
 }
 
-.machine-actions .button.secondary {
+.machine-tooling-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--ink);
-  background: color-mix(in srgb, var(--paper) 82%, transparent);
-  border: 1px solid color-mix(in srgb, var(--blue) 18%, var(--rule));
+  font-size: .88rem;
+  font-weight: 750;
+  line-height: 1.25;
+  text-decoration: none;
+  border: 0;
+}
+
+.machine-tooling-link:is(:hover, :focus-visible) {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .process-grid {
@@ -8821,7 +8835,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-actions {
-    grid-template-columns: 1fr;
+    align-items: stretch;
     gap: 10px;
     width: 100%;
     padding: 10px;
@@ -8832,17 +8846,16 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-actions .button {
-    width: 100%;
     min-height: 50px;
   }
 
-  .machine-actions .button.primary {
+  .machine-actions .machine-configure-button {
     padding-inline: 16px;
   }
 
-  .machine-actions .button.secondary {
+  .machine-tooling-link {
     justify-content: center;
-    background: transparent;
+    min-height: 38px;
   }
 
   .machine-stat-grid div {

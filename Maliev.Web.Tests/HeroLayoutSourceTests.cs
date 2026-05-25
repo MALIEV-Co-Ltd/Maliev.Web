@@ -735,9 +735,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@Text(\"Pneumatic\", \"เครื่องฉีดพลาสติก\")", source);
         Assert.Contains("@Text(\"Injection Molding Machine\", \"ระบบลม\")", source);
         Assert.DoesNotContain("สำหรับล็อตเล็ก", source);
-        Assert.Contains("desktop plastics lab", source);
-        Assert.Contains("home workshops", source);
-        Assert.Contains("recycled material trials", source);
+        Assert.Contains("private string _selectedMachineVariantKey = \"50g\";", source);
+        Assert.Contains("Recommended shop choice", source);
+        Assert.Contains("better default for most shops", source);
+        Assert.Contains("350°C melt range", source);
+        Assert.Contains("Entry desktop trials", source);
+        Assert.DoesNotContain("private string _selectedMachineVariantKey = \"30g\";", source);
+        Assert.DoesNotContain("desktop plastics lab", source);
         Assert.Contains("30g machine", source);
         Assert.Contains("50g machine", source);
         Assert.DoesNotContain("30g trials", source);
@@ -763,6 +767,13 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("height: 120svh;", styles);
         Assert.Contains("position: sticky;", styles);
         Assert.Contains(".machine-feature", styles);
+        Assert.Contains("@Text(\"Configure\", \"ตั้งค่า\")", source);
+        Assert.Contains("machine-configure-button", source);
+        Assert.Contains("machine-tooling-link", source);
+        Assert.Contains("@Text(\"Plan tooling with us\", \"วางแผนทูลลิ่งกับเรา\")", source);
+        Assert.DoesNotContain("Configure selected machine", source);
+        Assert.DoesNotContain("ตั้งค่าเครื่องที่เลือก", source);
+        Assert.DoesNotContain("class=\"button secondary\" href=\"/contact\"", source);
         Assert.Contains("display: block;", styles);
         Assert.Contains("scroll-margin-top: var(--site-header-height, 72px);", styles);
         Assert.Contains(".machine-feature-panel", styles);
@@ -840,22 +851,24 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".machine-addon-option", styles);
         Assert.Contains(".machine-addon-option.is-selected", styles);
         Assert.Contains(".machine-config-summary", styles);
-        Assert.Contains(".machine-actions {\n  display: grid;", styles);
-        Assert.Contains("grid-template-columns: minmax(0, 1fr) minmax(0, .86fr);", styles);
+        Assert.Contains(".machine-actions {\n  display: flex;", styles);
+        Assert.Contains("flex-wrap: wrap;", styles);
         Assert.Contains(".machine-actions .button {\n  min-height: 46px;", styles);
-        Assert.Contains(".machine-actions .button.primary {\n  justify-content: space-between;", styles);
-        Assert.Contains(".machine-actions .button.primary::after", styles);
+        Assert.Contains(".machine-actions .machine-configure-button {\n  flex: 0 0 auto;", styles);
+        Assert.Contains("min-width: 132px;", styles);
+        Assert.Contains(".machine-actions .machine-configure-button::after", styles);
+        Assert.Contains(".machine-tooling-link", styles);
+        Assert.Contains("border: 0;", styles);
+        Assert.DoesNotContain(".machine-actions .button.secondary", styles);
         Assert.Matches(
-            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions\s*\{[^}]*grid-template-columns:\s*1fr;[^}]*gap:\s*10px;[^}]*padding:\s*10px;",
+            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions\s*\{[^}]*align-items:\s*stretch;[^}]*gap:\s*10px;[^}]*padding:\s*10px;",
             styles);
         Assert.Matches(
-            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions \.button\s*\{[^}]*width:\s*100%;",
-            styles);
-        Assert.Matches(
-            @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions \.button\.secondary\s*\{[^}]*justify-content:\s*center;",
+            @"@media \(max-width: 680px\)[\s\S]*?\.machine-tooling-link\s*\{[^}]*justify-content:\s*center;",
             styles);
         Assert.DoesNotContain(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature .h-display", styles);
+        Assert.DoesNotContain(".machine-actions .button {\n    width: 100%;", styles);
         Assert.Contains(".machine-feature-title", styles);
         Assert.Contains("html:lang(th) .machine-feature-title-lead", styles);
         Assert.Contains("html:lang(th) .machine-feature-title--intro > span", styles);
@@ -997,6 +1010,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("src=\"@SelectedMachineFeatureImageUrl\"", machineSection);
         Assert.Contains("src=\"@SelectedMachineDarkFeatureImageUrl\"", machineSection);
         Assert.Contains("alt=\"@SelectedMachineFeatureImageAlt.For(Preferences.Culture)\"", machineSection);
+        Assert.Contains("private string _selectedMachineVariantKey = \"50g\";", source);
         Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", machineSection);
         Assert.Contains("@foreach (var stat in SelectedMachineVariant.Stats)", machineSection);
         Assert.Contains("@foreach (var variant in MachineVariants)", machineSection);
@@ -1012,6 +1026,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("data-machine-feature", machineSection);
         Assert.DoesNotContain("MachineFeatureButtonClass", machineSection);
         Assert.DoesNotContain("SelectWorkflowStepAsync", machineSection);
+        Assert.Contains("machine-configure-button", machineSection);
+        Assert.Contains("@Text(\"Configure\", \"ตั้งค่า\")", machineSection);
+        Assert.Contains("machine-tooling-link", machineSection);
+        Assert.DoesNotContain("Configure selected machine", machineSection);
+        Assert.DoesNotContain("class=\"button secondary\" href=\"/contact\"", machineSection);
 
         var machineFeaturesStart = source.IndexOf("private readonly IReadOnlyList<MachineVariant> MachineVariants", StringComparison.Ordinal);
         var processStepsStart = source.IndexOf("private readonly IReadOnlyList<ProcessStep> ProcessSteps", StringComparison.Ordinal);
@@ -1023,8 +1042,12 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("30g machine", machineFeatures);
         Assert.Contains("50g machine", machineFeatures);
-        Assert.Contains("Desktop trials and inserts", machineFeatures);
-        Assert.Contains("More desktop shot volume", machineFeatures);
+        Assert.Contains("Entry desktop trials", machineFeatures);
+        Assert.Contains("Recommended shop choice", machineFeatures);
+        Assert.Contains("better default for most shops", machineFeatures);
+        Assert.Contains("350°C melt range", machineFeatures);
+        Assert.DoesNotContain("Desktop trials and inserts", machineFeatures);
+        Assert.DoesNotContain("More desktop shot volume", machineFeatures);
         Assert.DoesNotContain("30g trials", machineFeatures);
         Assert.DoesNotContain("50g small batches", machineFeatures);
         Assert.DoesNotContain("Tooling setup", machineFeatures);

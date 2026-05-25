@@ -225,8 +225,8 @@
                 </div>
             </div>
             <div class="quote-actions machine-actions">
-                <a class="button primary" href="@SelectedMachineConfigurationHref">@Text("Configure selected machine", "ตั้งค่าเครื่องที่เลือก")</a>
-                <a class="button secondary" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
+                <a class="button primary machine-configure-button" href="@SelectedMachineConfigurationHref">@Text("Configure", "ตั้งค่า")</a>
+                <a class="machine-tooling-link" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
             </div>
         </div>
     </div>
@@ -322,7 +322,7 @@
     private bool _hasExplicitHeroTarget;
     private int _heroVariantIndex;
     private string _selectedWorkflowAccent = "upload";
-    private string _selectedMachineVariantKey = "30g";
+    private string _selectedMachineVariantKey = "50g";
     private bool _includeAirCompressor;
     private ElementReference _machineFeaturePreview;
     private ElementReference _workflowCarousel;
@@ -378,8 +378,8 @@
         new(
             "30g",
             SiteContent.Text("30g machine", "เครื่อง 30g"),
-            SiteContent.Text("Desktop trials and inserts", "ตั้งโต๊ะ รีไซเคิล และอินเสิร์ต"),
-            SiteContent.Text("Use the 30g pneumatic machine as a desktop plastics lab for home workshops, recycled material trials, compact parts, sample shots, and small inserts before scaling into a larger shot volume.", "ใช้เครื่องระบบลมรุ่น 30g เป็นห้องทดลองพลาสติกบนโต๊ะสำหรับเวิร์กช็อปที่บ้าน ทดลองวัสดุรีไซเคิล ชิ้นงานกะทัดรัด งานตัวอย่าง และอินเสิร์ตก่อนขยับไปปริมาตรฉีดที่ใหญ่ขึ้น"),
+            SiteContent.Text("Entry desktop trials", "ทดลองตั้งโต๊ะเริ่มต้น"),
+            SiteContent.Text("Use the 30g pneumatic machine for first-shot validation, small inserts, material tests, and very compact home-workshop parts when minimum footprint matters most.", "ใช้เครื่องระบบลมรุ่น 30g สำหรับตรวจช็อตแรก อินเสิร์ตขนาดเล็ก ทดสอบวัสดุ และชิ้นงานเวิร์กช็อปที่กะทัดรัดมากเมื่อพื้นที่ติดตั้งสำคัญที่สุด"),
             "/images/products/pneumatic-injection-molding-machines.png",
             "/images/products/pneumatic-injection-molding-machines-dark.png",
             "/images/products/pneumatic-injection-molding-machines-compressor.png",
@@ -395,8 +395,8 @@
         new(
             "50g",
             SiteContent.Text("50g machine", "เครื่อง 50g"),
-            SiteContent.Text("More desktop shot volume", "งานตั้งโต๊ะที่ใหญ่ขึ้น"),
-            SiteContent.Text("Use the 50g pneumatic machine for larger desktop tooling work, recycled resin trials, small home-workshop production, and hotter engineering materials without moving into factory-scale equipment.", "ใช้เครื่องระบบลมรุ่น 50g สำหรับงานแม่พิมพ์ตั้งโต๊ะที่ใหญ่ขึ้น ทดลองเม็ดพลาสติกรีไซเคิล ผลิตงานในเวิร์กช็อปที่บ้าน และวัสดุวิศวกรรมที่ต้องใช้อุณหภูมิสูงขึ้น โดยยังไม่ต้องขยับไปเครื่องระดับโรงงาน"),
+            SiteContent.Text("Recommended shop choice", "ตัวเลือกแนะนำสำหรับเวิร์กช็อป"),
+            SiteContent.Text("Choose the 50g pneumatic machine as the better default for most shops: more shot volume, a 350°C melt range, and enough capacity for larger inserts, recycled-resin trials, and small-batch tooling without stepping into factory-scale equipment.", "เลือกเครื่องระบบลมรุ่น 50g เป็นตัวเลือกหลักที่ดีกว่าสำหรับเวิร์กช็อปส่วนใหญ่ ได้ปริมาตรฉีดมากขึ้น ช่วงหลอมถึง 350°C และรองรับอินเสิร์ตที่ใหญ่ขึ้น ทดลองเม็ดรีไซเคิล และงานแม่พิมพ์ล็อตเล็กโดยยังไม่ต้องใช้เครื่องระดับโรงงาน"),
             "/images/products/pneumatic-injection-molding-machines.png",
             "/images/products/pneumatic-injection-molding-machines-dark.png",
             "/images/products/pneumatic-injection-molding-machines-compressor.png",
@@ -496,7 +496,7 @@
             var machine = SelectedMachineVariant.Title.For(Preferences.Culture);
             return _includeAirCompressor
                 ? $"{machine} + {Text("25L air compressor", "ปั๊มลม 25L")}"
-                : $"{machine} {Text("machine only", "เฉพาะเครื่อง")}";
+                : $"{machine} {Text("only", "เฉพาะเครื่อง")}";
         }
     }
 
