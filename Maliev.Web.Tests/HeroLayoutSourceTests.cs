@@ -426,7 +426,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".industry-sector-band", styles);
         Assert.Contains(".industry-sector-band {\n  width: 100%;\n  padding: clamp(76px, 7vw, 112px) 32px;\n  background: var(--paper);", styles);
         Assert.Contains(".home-services-section {\n  padding-top: clamp(82px, 8vw, 124px);\n  padding-bottom: clamp(88px, 8vw, 132px);\n  max-width: none;\n  background: var(--paper);", styles);
-        Assert.Contains(".home-services-shell {\n  display: grid;\n  gap: clamp(34px, 4vw, 52px);", styles);
+        Assert.Contains(".home-services-shell {\n  display: grid;\n  gap: clamp(26px, 3vw, 38px);", styles);
         Assert.Contains(".industry-sector-list {\n  display: grid;\n  grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
         Assert.Contains(".industry-sector-list li", styles);
         Assert.Contains(".industry-sector-card", styles);
@@ -598,14 +598,18 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".home-services-title {\n  margin: 0;\n  color: var(--ink);", styles);
         Assert.Contains("font-family: var(--maliev-font-sans);", styles);
         Assert.Contains("font-size: clamp(2rem, 3vw, 2.85rem);", styles);
+        Assert.Contains("gap: clamp(26px, 3vw, 38px);", styles);
         Assert.Contains(".home-services-tabs {\n  display: flex;\n  justify-content: center;", styles);
+        Assert.Contains("gap: clamp(16px, 2.4vw, 34px);", styles);
         Assert.Contains(".home-services-tab {\n  position: relative;", styles);
         Assert.Contains("color: var(--muted);", styles);
         Assert.Contains(".home-services-tab.is-active {\n  color: var(--ink);", styles);
         Assert.Contains("overflow-x: auto;\n  overflow-y: hidden;", styles);
         Assert.Contains(".home-services-tab::after", styles);
-        Assert.Contains(".home-services-panel {\n  display: grid;\n  grid-template-columns: minmax(0, .86fr) minmax(280px, 1fr) minmax(260px, .88fr);", styles);
+        Assert.Contains(".home-services-panel {\n  display: grid;\n  grid-template-columns: minmax(0, .94fr) minmax(240px, .78fr) minmax(260px, .88fr);", styles);
         Assert.Contains("grid-template-areas: \"copy proof media\";", styles);
+        Assert.Contains("gap: clamp(22px, 3vw, 44px);", styles);
+        Assert.DoesNotContain("gap: clamp(34px, 5vw, 76px);", styles);
         Assert.Contains(".home-services-proof-list li::before", styles);
         Assert.Contains(".home-services-media img", styles);
         Assert.Contains("height: clamp(220px, 18vw, 260px);", styles);
