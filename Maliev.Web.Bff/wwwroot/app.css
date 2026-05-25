@@ -7802,65 +7802,85 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-scroller {
-    height: auto;
+    height: 200svh;
   }
 
   .machine-feature {
-    position: relative;
-    display: grid;
-    grid-template-areas:
-      "media"
-      "content";
-    height: auto;
-    min-height: auto;
+    position: sticky;
+    top: var(--site-header-height);
+    display: block;
+    height: calc(100svh - var(--site-header-height));
+    min-height: calc(100svh - var(--site-header-height));
     padding: 0;
-    overflow: visible;
+    overflow: clip;
   }
 
   .machine-feature-panel {
-    grid-area: content;
-    min-height: auto;
+    grid-area: auto;
+    height: 100%;
+    min-height: 100%;
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: clamp(16px, 3vw, 24px);
+    align-content: start;
     align-items: start;
-    padding: clamp(28px, 5vw, 54px) 24px 52px;
+    justify-items: center;
+    padding: clamp(34px, 7svh, 72px) 24px clamp(28px, 6svh, 52px);
   }
 
   .machine-feature-copy {
     grid-column: 1;
+    grid-row: 1;
     align-self: start;
-    justify-self: stretch;
-    max-width: min(760px, 100%);
+    justify-self: center;
+    align-content: start;
+    max-width: min(680px, 100%);
     margin-bottom: 0;
-    text-align: left;
+    text-align: center;
   }
 
   .machine-feature-intro-copy {
-    display: none;
+    display: grid;
+    justify-self: center;
+    max-width: min(680px, 100%);
+    margin-bottom: 0;
+    text-align: center;
   }
 
-  .machine-feature-details-copy,
-  .machine-feature[data-machine-panel="details"] .machine-feature-details-copy {
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
+  .machine-feature-details-copy {
+    align-self: start;
+    align-content: start;
+    justify-self: center;
+    max-height: calc(100svh - var(--site-header-height) - clamp(68px, 12svh, 118px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 8px;
+    text-align: center;
   }
 
-  .machine-feature-title {
-    max-width: min(760px, 100%);
+  .machine-feature-title,
+  .machine-feature-title--intro {
+    max-width: min(680px, 100%);
+    text-align: center;
+  }
+
+  .machine-feature-title--reveal {
+    transform: translateY(-22px);
+  }
+
+  .machine-feature-title--reveal.is-visible {
+    transform: translateY(0);
   }
 
   .machine-feature-backdrop {
-    grid-area: media;
     display: block;
-    position: relative;
-    inset: auto;
+    position: absolute;
+    inset: 0;
     width: 100%;
-    max-width: 100%;
-    height: clamp(320px, 54vw, 560px);
+    max-width: none;
+    height: 100%;
     margin-inline: 0;
-    filter: none;
-    object-fit: contain;
+    filter: contrast(1.04) saturate(1.02);
+    object-fit: cover;
     object-position: center bottom;
   }
 
@@ -8691,9 +8711,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-panel {
-    padding-left: 18px;
-    padding-right: 18px;
-    padding-bottom: 32px;
+    padding: clamp(24px, 7svh, 42px) 18px 28px;
   }
 
   .machine-feature-copy {
@@ -8712,11 +8730,16 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     font-size: clamp(2.5rem, 10vw, 3.15rem);
   }
 
+  .machine-feature-details-copy {
+    max-height: calc(100svh - var(--site-header-height) - clamp(58px, 11svh, 92px));
+  }
+
   .machine-feature-backdrop {
     width: 100%;
-    max-width: 100%;
-    height: clamp(260px, 68vw, 360px);
+    max-width: none;
+    height: 100%;
     margin-inline: 0;
+    object-fit: cover;
     object-position: center bottom;
   }
 

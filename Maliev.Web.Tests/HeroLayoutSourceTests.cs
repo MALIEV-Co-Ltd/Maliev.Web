@@ -769,11 +769,30 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-size: clamp(3rem, 4.15vw, 3.75rem);", styles);
         Assert.Contains(".machine-variant-button {\n    min-height: 72px;", styles);
         Assert.Contains(".machine-addon-option {\n    min-height: 62px;", styles);
-        Assert.Contains("grid-template-areas:\n      \"media\"\n      \"content\";", styles);
-        Assert.Contains(".machine-feature-panel {\n    grid-area: content;", styles);
-        Assert.Contains(".machine-feature-intro-copy {\n    display: none;", styles);
-        Assert.Contains(".machine-feature-details-copy,\n  .machine-feature[data-machine-panel=\"details\"] .machine-feature-details-copy", styles);
-        Assert.Contains("height: clamp(320px, 54vw, 560px);", styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature\s*\{[^}]*position:\s*sticky;[^}]*height:\s*calc\(100svh - var\(--site-header-height\)\);[^}]*overflow:\s*clip;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-panel\s*\{[^}]*align-content:\s*start;[^}]*justify-items:\s*center;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-copy\s*\{[^}]*justify-self:\s*center;[^}]*text-align:\s*center;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-intro-copy\s*\{[^}]*display:\s*grid;[^}]*text-align:\s*center;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-details-copy\s*\{[^}]*align-self:\s*start;[^}]*align-content:\s*start;[^}]*justify-self:\s*center;[^}]*max-height:\s*calc\(100svh - var\(--site-header-height\) - clamp\(68px, 12svh, 118px\)\);[^}]*overflow-y:\s*auto;[^}]*text-align:\s*center;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-title--intro\s*\{[^}]*text-align:\s*center;",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-title--reveal\s*\{[^}]*transform:\s*translateY\(-22px\);",
+            styles);
+        Assert.Matches(
+            @"@media \(max-width: 960px\)[\s\S]*?\.machine-feature-backdrop\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*height:\s*100%;[^}]*object-fit:\s*cover;",
+            styles);
         Assert.Contains(".machine-feature-backdrop", styles);
         Assert.Contains("height: calc(100% + clamp(132px, 16svh, 180px));", styles);
         Assert.Contains("bottom: clamp(-132px, -12svh, -96px);", styles);
