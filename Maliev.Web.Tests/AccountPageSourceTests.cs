@@ -155,6 +155,9 @@ public sealed class AccountPageSourceTests
         Assert.Contains("class=\"account-form-header\"", profile);
         Assert.Contains("class=\"auth-status account-form-alert\"", profile);
         Assert.Contains("class=\"auth-error account-form-alert\"", profile);
+        Assert.Contains("class=\"account-profile-fields\"", profile);
+        Assert.Contains("class=\"account-profile-field\"", profile);
+        Assert.Contains("class=\"button primary account-profile-save\"", profile);
         Assert.DoesNotContain("class=\"success-message\"", profile);
 
         Assert.Contains("id=\"profile-email\"", profile);
@@ -185,6 +188,8 @@ public sealed class AccountPageSourceTests
 
         Assert.Contains(".account-form-header", styles);
         Assert.Contains(".account-form-alert", styles);
+        Assert.Contains(".account-profile-fields", styles);
+        Assert.Contains(".account-profile-save", styles);
         Assert.Contains(".field-validation-error", styles);
         Assert.Contains(".email-change-prompt", styles);
         Assert.Contains(".language-dropdown", styles);

@@ -42,18 +42,16 @@
                         <div class="auth-error account-form-alert" role="alert">@_error</div>
                     }
                 </div>
-                <div class="form-grid two">
-                    <label>
+                <div class="account-profile-fields">
+                    <label class="account-profile-field">
                         @Text("First name", "ชื่อ")
                         <InputText @bind-Value="_form.FirstName" />
                     </label>
-                    <label>
+                    <label class="account-profile-field">
                         @Text("Last name", "นามสกุล")
                         <InputText @bind-Value="_form.LastName" />
                     </label>
-                </div>
-                <div class="form-grid two">
-                    <label>
+                    <label class="account-profile-field">
                         @Text("Email", "อีเมล")
                         <InputText id="profile-email" type="email" autocomplete="email" required @bind-Value="_form.Email" @bind-Value:event="oninput" />
                         <ValidationMessage For="@(() => _form.Email)" class="field-validation-error" />
@@ -66,13 +64,11 @@
                             <span class="auth-field-help">@Text("Edit the email above, then save your profile. This updates the email we use for future account communication.", "แก้ไขอีเมลด้านบนแล้วบันทึกโปรไฟล์ ระบบจะใช้อีเมลนี้สำหรับการติดต่อบัญชีในอนาคต")</span>
                         }
                     </label>
-                    <label>
+                    <label class="account-profile-field">
                         @Text("Mobile", "โทรศัพท์มือถือ")
                         <InputText @bind-Value="_form.Mobile" />
                     </label>
-                </div>
-                <div class="form-grid two">
-                    <div class="account-field">
+                    <div class="account-field account-profile-field">
                         @Text("Preferred language", "ภาษาที่ต้องการ")
                         <div class="language-dropdown">
                             <button class="language-dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="@_languageDropdownOpen" @onclick="ToggleLanguageDropdown">
@@ -99,7 +95,7 @@
                             }
                         </div>
                     </div>
-                    <label>
+                    <label class="account-profile-field">
                         @Text("Timezone", "เขตเวลา")
                         <InputSelect class="timezone-select" @bind-Value="_form.Timezone">
                             @foreach (var option in TimezoneOptions)
@@ -109,7 +105,7 @@
                         </InputSelect>
                     </label>
                 </div>
-                <button class="button primary" type="submit" disabled="@_saving">@Text("Save profile", "บันทึกโปรไฟล์")</button>
+                <button class="button primary account-profile-save" type="submit" disabled="@_saving">@Text("Save profile", "บันทึกโปรไฟล์")</button>
             </EditForm>
         }
     </div>
