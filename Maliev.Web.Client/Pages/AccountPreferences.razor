@@ -19,7 +19,7 @@
         <a class="active" href="/account/preferences">@Text("Preferences", "การตั้งค่า")</a>
     </div>
 
-    <div class="account-panel">
+    <div class="account-preferences-panel">
         @if (_loading)
         {
             <p class="load-message">@Text("Loading preferences...", "กำลังโหลดการตั้งค่า...")</p>
@@ -55,7 +55,9 @@
                 </div>
             </div>
 
-            <button class="button primary" type="button" disabled="@_saving" @onclick="SaveAccountPreferencesAsync">@Text("Save account preferences", "บันทึกการตั้งค่าบัญชี")</button>
+            <div class="preference-actions">
+                <button class="button primary" type="button" disabled="@_saving" @onclick="SaveAccountPreferencesAsync">@Text("Save account preferences", "บันทึกการตั้งค่าบัญชี")</button>
+            </div>
         }
     </div>
 </section>

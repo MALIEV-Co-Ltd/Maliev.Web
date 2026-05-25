@@ -5554,6 +5554,13 @@ html[data-theme="dark"] .auth-google-icon {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.account-preferences-panel {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
 .address-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -5790,6 +5797,14 @@ html[data-theme="dark"] .auth-google-icon {
 .segmented-control button.active {
   color: var(--inverse-text);
   background: var(--inverse-surface);
+}
+
+.preference-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding-top: 2px;
 }
 
 .order-list {
