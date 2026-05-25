@@ -2572,6 +2572,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("requestAnimationFrame", source);
         Assert.Contains("alpha: true", source);
         Assert.Contains("antialias: true", source);
+        Assert.Contains("configureSceneAntialiasing(scene, camera, BABYLON);", source);
+        Assert.Contains("new BABYLON.FxaaPostProcess(\"canvas-fxaa\", 1.0, camera);", source);
+        Assert.Contains("fxaa.samples = Math.min(4, Math.max(1, maxSamples));", source);
         Assert.Contains("premultipliedAlpha: false", source);
         Assert.Contains("renderRatio", source);
         Assert.Contains("setHardwareScalingLevel", source);
@@ -2914,7 +2917,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-presentation\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-aa\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

@@ -280,6 +280,7 @@ function createGizmoScene(state, BABYLON) {
   camera.wheelPrecision = 70;
   camera.panningSensibility = 0;
   camera.attachControl(canvas, true);
+  configureSceneAntialiasing(scene, camera, BABYLON);
 
   new BABYLON.HemisphericLight("fill", new BABYLON.Vector3(-0.4, 1, 0.2), scene).intensity = 0.86;
   const key = new BABYLON.DirectionalLight("key", new BABYLON.Vector3(-0.6, -0.8, -0.45), scene);
@@ -327,6 +328,7 @@ async function createLandingHeroScene(state, BABYLON) {
   configureLandingHeroCamera(camera, state.host, BABYLON, state.landingFrame);
 
   const lights = configureLandingCadStudioLighting(scene, camera, BABYLON);
+  configureSceneAntialiasing(scene, camera, BABYLON);
 
   const root = new BABYLON.TransformNode("landing-model-root", scene);
   const modelParts = splitModelUrl(state.modelUrl);
@@ -664,6 +666,16 @@ function configureCadMeshEdges(meshes, dark, BABYLON) {
     mesh.edgesWidth = dark ? 0.82 : 0.7;
     mesh.edgesColor = edgeColor;
   }
+}
+
+function configureSceneAntialiasing(scene, camera, BABYLON) {
+  if (!BABYLON.FxaaPostProcess || !camera) {
+    return;
+  }
+
+  const fxaa = new BABYLON.FxaaPostProcess("canvas-fxaa", 1.0, camera);
+  const maxSamples = scene.getEngine?.().getCaps?.().maxMSAASamples ?? 1;
+  fxaa.samples = Math.min(4, Math.max(1, maxSamples));
 }
 
 function configureLandingCadToneMapping(scene, BABYLON) {
