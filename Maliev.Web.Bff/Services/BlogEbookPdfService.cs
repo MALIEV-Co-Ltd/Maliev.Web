@@ -1,55 +1,69 @@
 using Maliev.Web.Client.Content;
 using Maliev.Web.Shared.Localization;
+using Microsoft.AspNetCore.Hosting;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using ZXing;
+using ZXing.QrCode;
+using ZXing.Rendering;
 
 namespace Maliev.Web.Bff.Services;
 
 /// <summary>
 /// Renders public practical notes as downloadable magazine-style PDF booklets.
 /// </summary>
-public sealed class BlogEbookPdfService
+public sealed class BlogEbookPdfService(IWebHostEnvironment environment)
 {
-    private const int A4WordThreshold = 1_800;
-    private const int A4SectionThreshold = 7;
+    private readonly string _webRootPath = string.IsNullOrWhiteSpace(environment.WebRootPath)
+        ? Path.Combine(environment.ContentRootPath, "wwwroot")
+        : environment.WebRootPath;
 
     internal byte[] Generate(BlogPostContent post, string cultureName)
     {
         var normalizedCulture = SupportedCultures.Normalize(cultureName);
-        var useA4 = ShouldUseA4(post, normalizedCulture);
-        return new BlogEbookDocument(post, normalizedCulture, useA4).GeneratePdf();
+        return new BlogEbookDocument(post, normalizedCulture, _webRootPath).GeneratePdf();
     }
 
-    private static bool ShouldUseA4(BlogPostContent post, string cultureName)
+    private sealed class BlogEbookDocument(BlogPostContent post, string cultureName, string webRootPath) : IDocument
     {
-        var wordCount = CountWords(post.Title.For(cultureName))
-            + CountWords(post.Summary.For(cultureName))
-            + post.Takeaways.Sum(takeaway => CountWords(takeaway.For(cultureName)))
-            + post.Sections.Sum(section =>
-                CountWords(section.Title.For(cultureName))
-                + CountWords(section.Body.For(cultureName))
-                + section.Items.Sum(item => CountWords(item.For(cultureName))));
+        private const string PublicSiteBaseUrl = "https://www.maliev.com";
+        private const string QuoteUrl = "https://quote.maliev.com/projects/new";
+        private const string MaterialsUrl = "https://www.maliev.com/materials";
 
-        return wordCount >= A4WordThreshold || post.Sections.Count >= A4SectionThreshold;
-    }
-
-    private static int CountWords(string value)
-    {
-        return string.IsNullOrWhiteSpace(value)
-            ? 0
-            : value.Split([' ', '\r', '\n', '\t'], StringSplitOptions.RemoveEmptyEntries).Length;
-    }
-
-    private sealed class BlogEbookDocument(BlogPostContent post, string cultureName, bool useA4) : IDocument
-    {
         private static readonly string AccentBlue = Colors.Blue.Darken2;
         private static readonly string BodyText = Colors.Grey.Darken3;
         private static readonly string DarkPanel = Colors.Grey.Darken4;
         private static readonly string Hairline = Colors.Grey.Lighten2;
         private static readonly string SoftPanel = Colors.Grey.Lighten5;
+        private static readonly string WarmPanel = Colors.Grey.Lighten4;
 
-        public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
+        private string BlogPostUrl => $"{PublicSiteBaseUrl}/blog/{Uri.EscapeDataString(post.Slug)}";
+
+        private string LogoPath => Path.Combine(webRootPath, "images", "logo.svg");
+
+        public DocumentMetadata GetMetadata()
+        {
+            return new DocumentMetadata
+            {
+                Title = $"{post.Title.For(cultureName)} - MALIEV Practical Note",
+                Author = "MALIEV Co., Ltd.",
+                Subject = post.Summary.For(cultureName),
+                Keywords = "MALIEV, manufacturing, practical note, quotation, DFM",
+                Language = cultureName == SupportedCultures.ThaiCulture ? "th-TH" : "en-US"
+            };
+        }
+
+        public DocumentSettings GetSettings()
+        {
+            return new DocumentSettings
+            {
+                PDFA_Conformance = PDFA_Conformance.PDFA_3A,
+                PDFUA_Conformance = PDFUA_Conformance.PDFUA_1,
+                ImageCompressionQuality = ImageCompressionQuality.High,
+                ImageRasterDpi = 180
+            };
+        }
 
         public void Compose(IDocumentContainer container)
         {
@@ -63,33 +77,43 @@ public sealed class BlogEbookPdfService
         {
             container.Page(page =>
             {
-                page.Size(useA4 ? PageSizes.A4 : PageSizes.A5);
-                page.Margin(0);
+                page.Size(PageSizes.A4);
+                page.Margin(38);
                 page.DefaultTextStyle(TextStyle);
 
                 page.Content()
-                    .Background(DarkPanel)
-                    .Padding(32)
+                    .Background(Colors.White)
                     .Column(column =>
                     {
-                        column.Item().Text("MALIEV").FontSize(20).Bold().FontColor(Colors.White);
-                        column.Item().PaddingTop(6).Text("Manufacturing Practical Note").FontSize(10).FontColor(Colors.Grey.Lighten2);
+                        column.Item().Row(row =>
+                        {
+                            row.RelativeItem().Width(150).Svg(LogoPath).FitWidth();
+                            row.ConstantItem(160).AlignRight().Text("Manufacturing Practical Note").FontSize(10).Bold().FontColor(AccentBlue);
+                        });
 
-                        column.Item().ExtendVertical();
+                        column.Item().PaddingTop(30).Text(post.Category.For(cultureName).ToUpperInvariant()).FontSize(9).Bold().FontColor(AccentBlue);
+                        column.Item().PaddingTop(8).SemanticHeader1().Text(post.Title.For(cultureName)).FontSize(32).Bold().FontColor(DarkPanel);
+                        column.Item().PaddingTop(12).Text(post.Summary.For(cultureName)).FontSize(13).LineHeight(1.38f).FontColor(BodyText);
 
-                        column.Item().Text(post.Category.For(cultureName).ToUpperInvariant()).FontSize(9).Bold().FontColor(AccentBlue);
-                        column.Item().PaddingTop(8).Text(post.Title.For(cultureName)).FontSize(useA4 ? 34 : 28).Bold().FontColor(Colors.White);
-                        column.Item().PaddingTop(12).Width(useA4 ? 430 : 300).Text(post.Summary.For(cultureName)).FontSize(12).LineHeight(1.35f).FontColor(Colors.Grey.Lighten2);
+                        if (ResolveImagePath(post.ImageUrl) is { } coverImagePath)
+                        {
+                            column.Item().PaddingTop(22).Height(220).Background(WarmPanel).Image(coverImagePath).FitArea();
+                        }
 
-                        column.Item().PaddingTop(28).BorderTop(1).BorderColor(Colors.Grey.Darken2).PaddingTop(16).Row(row =>
+                        column.Item().PaddingTop(28).BorderTop(1).BorderColor(Hairline).PaddingTop(16).Row(row =>
                         {
                             row.RelativeItem().Column(company =>
                             {
-                                company.Item().Text("Prepared by MALIEV Co., Ltd.").FontSize(9).Bold().FontColor(Colors.White);
-                                company.Item().Text("36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand").FontSize(8).FontColor(Colors.Grey.Lighten2);
-                                company.Item().Text("www.maliev.com | info@maliev.com").FontSize(8).FontColor(Colors.Grey.Lighten2);
+                                company.Item().Text("Prepared by MALIEV Co., Ltd.").FontSize(9).Bold().FontColor(DarkPanel);
+                                company.Item().Text("36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand").FontSize(8).FontColor(BodyText);
+                                company.Item().Text("www.maliev.com | info@maliev.com").FontSize(8).FontColor(BodyText);
+                                company.Item().PaddingTop(5).Text(text =>
+                                {
+                                    text.Span("Read online: ").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                    text.Hyperlink(BlogPostUrl, BlogPostUrl).FontSize(8).Underline().FontColor(AccentBlue);
+                                });
                             });
-                            row.ConstantItem(88).AlignRight().Text(useA4 ? "A4 reference edition" : "A5 booklet edition").FontSize(8).FontColor(Colors.Grey.Lighten2);
+                            row.ConstantItem(94).AlignRight().Hyperlink(BlogPostUrl).Element(item => ComposeQrCode(item, BlogPostUrl));
                         });
                     });
             });
@@ -103,21 +127,23 @@ public sealed class BlogEbookPdfService
                 page.Content().Column(column =>
                 {
                     ComposePageEyebrow(column, "Contents");
-                    column.Item().Text("Read before quoting").FontSize(22).Bold().FontColor(DarkPanel);
+                    column.Item().SemanticHeader1().Text("Read before quoting").FontSize(22).Bold().FontColor(DarkPanel);
                     column.Item().PaddingTop(8).Text(post.Summary.For(cultureName)).FontSize(10).LineHeight(1.35f).FontColor(BodyText);
 
-                    column.Item().PaddingTop(18).Column(toc =>
+                    column.Item().PaddingTop(18).SemanticTableOfContents().Column(toc =>
                     {
                         for (var index = 0; index < post.Sections.Count; index++)
                         {
                             var section = post.Sections[index];
-                            toc.Item().PaddingBottom(8).Row(row =>
+                            var sectionId = SectionId(index + 1);
+                            toc.Item().PaddingBottom(8).SemanticTableOfContentsItem().SemanticLink(section.Title.For(cultureName)).SectionLink(sectionId).Row(row =>
                             {
                                 row.ConstantItem(30).Element(item => NumberBadge(item, index + 1));
-                                row.RelativeItem().PaddingLeft(8).BorderBottom(1).BorderColor(Hairline).PaddingBottom(8).Column(item =>
+                                row.RelativeItem().PaddingLeft(8).BorderBottom(1).BorderColor(Hairline).PaddingBottom(8).Text(section.Title.For(cultureName)).FontSize(11).Bold().FontColor(DarkPanel);
+                                row.ConstantItem(34).AlignRight().Text(text =>
                                 {
-                                    item.Item().Text(section.Title.For(cultureName)).FontSize(11).Bold().FontColor(DarkPanel);
-                                    item.Item().PaddingTop(2).Text(TrimToLength(section.Body.For(cultureName), 118)).FontSize(8).FontColor(Colors.Grey.Darken1);
+                                    text.Span("p. ").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                    text.BeginPageNumberOfSection(sectionId).FontSize(8).Bold().FontColor(DarkPanel);
                                 });
                             });
                         }
@@ -125,7 +151,7 @@ public sealed class BlogEbookPdfService
 
                     column.Item().PaddingTop(16).Element(ComposeTakeawayPanel);
                 });
-                ComposeFooter(page, "Practical note");
+                ComposeFooter(page);
             });
         }
 
@@ -141,10 +167,10 @@ public sealed class BlogEbookPdfService
                     for (var index = 0; index < post.Sections.Count; index++)
                     {
                         var section = post.Sections[index];
-                        column.Item().PaddingBottom(18).Element(item => ComposeArticleSection(item, section, index + 1));
+                        column.Item().PaddingBottom(18).PreventPageBreak().Element(item => ComposeArticleSection(item, section, index + 1));
                     }
                 });
-                ComposeFooter(page, post.Category.For(cultureName));
+                ComposeFooter(page);
             });
         }
 
@@ -156,7 +182,7 @@ public sealed class BlogEbookPdfService
                 page.Content().Column(column =>
                 {
                     ComposePageEyebrow(column, "About MALIEV");
-                    column.Item().Text("Manufacturing support from prototype to usable parts").FontSize(22).Bold().FontColor(DarkPanel);
+                    column.Item().SemanticHeader1().Text("Manufacturing support from prototype to usable parts").FontSize(22).Bold().FontColor(DarkPanel);
                     column.Item().PaddingTop(10).Text("MALIEV helps engineering teams prepare manufacturable files, review material and process choices, quote production work, and keep each order traceable from upload through delivery.")
                         .FontSize(10)
                         .LineHeight(1.4f)
@@ -164,9 +190,9 @@ public sealed class BlogEbookPdfService
 
                     column.Item().PaddingTop(20).Row(row =>
                     {
-                        row.RelativeItem().Element(item => ContactCard(item, "Get part price", SiteContent.QuoteNewUrl));
+                        row.RelativeItem().Element(item => ContactCard(item, "Get part price", QuoteUrl));
                         row.ConstantItem(12);
-                        row.RelativeItem().Element(item => ContactCard(item, "Compare materials", "www.maliev.com/materials"));
+                        row.RelativeItem().Element(item => ContactCard(item, "Compare materials", MaterialsUrl));
                     });
 
                     column.Item().PaddingTop(18).Background(SoftPanel).Border(1).BorderColor(Hairline).Padding(14).Column(company =>
@@ -177,13 +203,12 @@ public sealed class BlogEbookPdfService
                         company.Item().Text("Weekdays 10:00-18:00").FontSize(9).FontColor(BodyText);
                     });
 
-                    column.Item().ExtendVertical();
-                    column.Item().BorderTop(1).BorderColor(Hairline).PaddingTop(10).Text("This booklet is a practical guide, not a final manufacturing acceptance document. Include drawings, material requirements, operating conditions, and inspection criteria with your quote request.")
+                    column.Item().PaddingTop(24).BorderTop(1).BorderColor(Hairline).PaddingTop(10).Text("This booklet is a practical guide, not a final manufacturing acceptance document. Include drawings, material requirements, operating conditions, and inspection criteria with your quote request.")
                         .FontSize(8)
                         .LineHeight(1.35f)
                         .FontColor(Colors.Grey.Darken1);
                 });
-                ComposeFooter(page, "MALIEV");
+                ComposeFooter(page);
             });
         }
 
@@ -194,16 +219,16 @@ public sealed class BlogEbookPdfService
 
         private void ConfigureStandardPage(PageDescriptor page)
         {
-            page.Size(useA4 ? PageSizes.A4 : PageSizes.A5);
-            page.Margin(useA4 ? 42 : 30);
+            page.Size(PageSizes.A4);
+            page.Margin(42);
             page.DefaultTextStyle(TextStyle);
         }
 
-        private static void ComposeFooter(PageDescriptor page, string label)
+        private static void ComposeFooter(PageDescriptor page)
         {
             page.Footer().BorderTop(1).BorderColor(Hairline).PaddingTop(8).Row(row =>
             {
-                row.RelativeItem().Text(label).FontSize(7).FontColor(Colors.Grey.Darken1);
+                row.RelativeItem().Text("MALIEV").FontSize(7).Bold().FontColor(Colors.Grey.Darken1);
                 row.RelativeItem().AlignRight().Text(text =>
                 {
                     text.Span("Page ").FontSize(7).FontColor(Colors.Grey.Darken1);
@@ -222,7 +247,7 @@ public sealed class BlogEbookPdfService
 
         private void ComposeTakeawayPanel(IContainer container)
         {
-            container.Background(SoftPanel).Border(1).BorderColor(Hairline).Padding(12).Column(column =>
+            container.PreventPageBreak().Background(SoftPanel).Border(1).BorderColor(Hairline).Padding(12).Column(column =>
             {
                 column.Item().Text("Before you upload").FontSize(13).Bold().FontColor(DarkPanel);
                 column.Item().PaddingTop(8).Column(points =>
@@ -241,13 +266,19 @@ public sealed class BlogEbookPdfService
 
         private void ComposeArticleSection(IContainer container, ArticleSectionContent section, int number)
         {
-            container.Column(column =>
+            var sectionId = SectionId(number);
+            container.SemanticSection().Section(sectionId).Column(column =>
             {
                 column.Item().Row(row =>
                 {
                     row.ConstantItem(34).Element(item => NumberBadge(item, number));
-                    row.RelativeItem().PaddingLeft(10).Text(section.Title.For(cultureName)).FontSize(16).Bold().FontColor(DarkPanel);
+                    row.RelativeItem().PaddingLeft(10).SemanticHeader2().Text(section.Title.For(cultureName)).FontSize(16).Bold().FontColor(DarkPanel);
                 });
+
+                if (section.Image is { } image)
+                {
+                    column.Item().PaddingTop(10).Element(item => ComposeArticleImage(item, image));
+                }
 
                 column.Item().PaddingTop(8).Text(section.Body.For(cultureName)).FontSize(10).LineHeight(1.38f).FontColor(BodyText);
 
@@ -267,6 +298,21 @@ public sealed class BlogEbookPdfService
             });
         }
 
+        private void ComposeArticleImage(IContainer container, ArticleImageContent image)
+        {
+            var imagePath = ResolveImagePath(image.Url);
+            if (imagePath is null)
+            {
+                return;
+            }
+
+            container.SemanticImage(image.Alt.For(cultureName)).Column(column =>
+            {
+                column.Item().Height(150).Background(WarmPanel).Image(imagePath).FitArea();
+                column.Item().PaddingTop(5).SemanticCaption().Text(image.Caption.For(cultureName)).FontSize(8).FontColor(Colors.Grey.Darken1);
+            });
+        }
+
         private static void NumberBadge(IContainer container, int number)
         {
             container
@@ -279,23 +325,52 @@ public sealed class BlogEbookPdfService
                 .FontColor(Colors.White);
         }
 
-        private static void ContactCard(IContainer container, string title, string value)
+        private static void ContactCard(IContainer container, string title, string url)
         {
-            container.Background(DarkPanel).Padding(12).Column(column =>
+            container.Hyperlink(url).Background(SoftPanel).Border(1).BorderColor(Hairline).Padding(12).Row(row =>
             {
-                column.Item().Text(title).FontSize(8).FontColor(Colors.Grey.Lighten2);
-                column.Item().PaddingTop(4).Text(value).FontSize(10).Bold().FontColor(Colors.White);
+                row.RelativeItem().Column(column =>
+                {
+                    column.Item().Text(title).FontSize(9).Bold().FontColor(DarkPanel);
+                    column.Item().PaddingTop(5).Text(text => text.Hyperlink(url, url).FontSize(8).Underline().FontColor(AccentBlue));
+                });
+                row.ConstantItem(58).Element(item => ComposeQrCode(item, url));
             });
         }
 
-        private static string TrimToLength(string value, int maxLength)
+        private string? ResolveImagePath(string url)
         {
-            if (value.Length <= maxLength)
+            if (string.IsNullOrWhiteSpace(url))
             {
-                return value;
+                return null;
             }
 
-            return string.Concat(value.AsSpan(0, maxLength).TrimEnd(), "...");
+            var normalized = url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var imagePath = Path.Combine(webRootPath, normalized);
+            return File.Exists(imagePath) ? imagePath : null;
+        }
+
+        private static void ComposeQrCode(IContainer container)
+        {
+            ComposeQrCode(container, "https://www.maliev.com");
+        }
+
+        private static void ComposeQrCode(IContainer container, string url)
+        {
+            container.Background(Colors.White).Border(1).BorderColor(Hairline).Padding(4).AspectRatio(1).Svg(size =>
+            {
+                var writer = new QRCodeWriter();
+                var width = Math.Max(96, (int)Math.Ceiling(size.Width));
+                var height = Math.Max(96, (int)Math.Ceiling(size.Height));
+                var qrCode = writer.encode(url, BarcodeFormat.QR_CODE, width, height);
+                var renderer = new SvgRenderer { FontName = "Arial" };
+                return renderer.Render(qrCode, BarcodeFormat.QR_CODE, null).Content;
+            });
+        }
+
+        private static string SectionId(int number)
+        {
+            return $"section-{number:00}";
         }
     }
 }

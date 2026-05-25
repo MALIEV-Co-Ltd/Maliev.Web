@@ -879,8 +879,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("[HttpGet(\"{slug}/ebook.pdf\")]", controller);
         Assert.Contains("BlogEbookPdfService", controller);
         Assert.Contains("QuestPDF", bffProject);
-        Assert.Contains("PageSizes.A5", pdfService);
         Assert.Contains("PageSizes.A4", pdfService);
+        Assert.DoesNotContain("PageSizes.A5", pdfService);
         Assert.Contains("MALIEV Co., Ltd.", pdfService);
         Assert.Contains("Before you upload", pdfService);
         Assert.Contains("blog-search-form", source);
