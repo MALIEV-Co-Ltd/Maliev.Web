@@ -81,6 +81,27 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("maliev-google-place-autocomplete", css, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Verifies the map dialog handles missing map IDs and Google provider failures without exposing Google's raw degraded-map overlay.
+    /// </summary>
+    [Fact]
+    public void GoogleAddressMap_HandlesMissingMapIdAndProviderFailure()
+    {
+        var picker = ReadRepoFile("Maliev.Web.Client", "Components", "GoogleAddressPicker.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-google-address-picker.js");
+        var css = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("NotifyGoogleAddressPickerStatus", picker, StringComparison.Ordinal);
+        Assert.Contains("MapUnavailable", picker, StringComparison.Ordinal);
+        Assert.Contains("createAddressMarker", script, StringComparison.Ordinal);
+        Assert.Contains("google.maps.Marker", script, StringComparison.Ordinal);
+        Assert.Contains("config.mapId", script, StringComparison.Ordinal);
+        Assert.Contains("gm_authFailure", script, StringComparison.Ordinal);
+        Assert.Contains("renderMapUnavailable", script, StringComparison.Ordinal);
+        Assert.Contains("document.documentElement.lang", script, StringComparison.Ordinal);
+        Assert.Contains("account-google-map-unavailable", css, StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();

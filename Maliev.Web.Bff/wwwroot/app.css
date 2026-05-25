@@ -5122,6 +5122,28 @@ html[data-theme="dark"] .auth-google-icon {
   aspect-ratio: 16 / 9;
 }
 
+.account-google-map-unavailable {
+  min-height: 360px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 24px;
+  background: var(--paper-2);
+  color: var(--muted);
+  text-align: center;
+}
+
+.account-google-map-unavailable strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.account-google-map-unavailable span {
+  max-width: 360px;
+  line-height: 1.45;
+}
+
 .account-google-map-footer {
   color: var(--muted);
   font-size: .86rem;

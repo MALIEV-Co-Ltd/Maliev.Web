@@ -2,6 +2,7 @@
     const searches = new Map();
     const maps = new Map();
     let loaderPromise;
+    let googleMapsAuthFailed = false;
 
     function loadGoogleMaps(apiKey) {
         if (window.google?.maps?.importLibrary) {
@@ -14,6 +15,14 @@
 
         loaderPromise = new Promise((resolve, reject) => {
             const callbackName = `malievGoogleMapsReady_${Date.now()}`;
+            const previousAuthFailure = window.gm_authFailure;
+            window.gm_authFailure = () => {
+                googleMapsAuthFailed = true;
+                if (typeof previousAuthFailure === "function") {
+                    previousAuthFailure();
+                }
+            };
+
             window[callbackName] = () => {
                 delete window[callbackName];
                 resolve();
@@ -125,64 +134,135 @@
         searches.set(elementId, { autocomplete, handler });
     }
 
+    function notifyStatus(dotNetReference, status) {
+        dotNetReference?.invokeMethodAsync("NotifyGoogleAddressPickerStatus", status).catch(() => { });
+    }
+
+    function renderMapUnavailable(container) {
+        const isThai = (document.documentElement.lang || "").toLowerCase().startsWith("th");
+        const panel = document.createElement("div");
+        panel.className = "account-google-map-unavailable";
+        panel.innerHTML = [
+            `<strong>${isThai ? "ไม่สามารถโหลดแผนที่ได้" : "Map unavailable"}</strong>`,
+            `<span>${isThai ? "ใช้ช่องค้นหาสถานที่หรือกรอกที่อยู่เอง" : "Use the location search field or enter the address manually."}</span>`
+        ].join("");
+        container.replaceChildren(panel);
+    }
+
+    function hasMapProviderError(container) {
+        return googleMapsAuthFailed
+            || Boolean(container.querySelector(".gm-err-container"))
+            || Boolean(container.querySelector(".CizjDb-degraded-map-dialog-view"));
+    }
+
+    async function createAddressMarker(map, position, title, mapId) {
+        if (mapId) {
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+            const advancedMarker = new AdvancedMarkerElement({
+                map,
+                position,
+                gmpDraggable: true,
+                title
+            });
+
+            return {
+                addDragEnd: handler => advancedMarker.addListener("dragend", event => handler(event.latLng)),
+                dispose: () => { advancedMarker.map = null; },
+                setPosition: value => { advancedMarker.position = value; }
+            };
+        }
+
+        if (!google.maps.Marker) {
+            await google.maps.importLibrary("marker");
+        }
+
+        const marker = new google.maps.Marker({
+            map,
+            position,
+            draggable: true,
+            title
+        });
+
+        return {
+            addDragEnd: handler => marker.addListener("dragend", event => handler(event.latLng)),
+            dispose: () => marker.setMap(null),
+            setPosition: value => marker.setPosition(value)
+        };
+    }
+
     async function initializeMap(elementId, dotNetReference, config, current) {
         const container = document.getElementById(elementId);
         if (!container || !config?.apiKey) {
             return;
         }
 
-        await loadGoogleMaps(config.apiKey);
-        const { Map } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-        await google.maps.importLibrary("geocoding");
-
-        const position = {
-            lat: Number(current?.latitude) || Number(config.defaultLatitude) || 13.7563,
-            lng: Number(current?.longitude) || Number(config.defaultLongitude) || 100.5018
-        };
-
-        const map = new Map(container, {
-            center: position,
-            zoom: Number(config.defaultZoom) || 12,
-            mapId: config.mapId || undefined,
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: false
-        });
-
-        const marker = new AdvancedMarkerElement({
-            map,
-            position,
-            gmpDraggable: true,
-            title: "Selected address"
-        });
-
-        const geocoder = new google.maps.Geocoder();
-        const publishLocation = async latLng => {
-            const literal = typeof latLng.lat === "function"
-                ? { lat: latLng.lat(), lng: latLng.lng() }
-                : latLng;
-            marker.position = literal;
-
-            const response = await geocoder.geocode({ location: literal });
-            const result = response.results?.[0];
-            if (!result) {
-                await dotNetReference.invokeMethodAsync("NotifyGoogleAddressSelected", {
-                    source: "GoogleMapPin",
-                    latitude: literal.lat,
-                    longitude: literal.lng
-                });
-                return;
+        try {
+            await loadGoogleMaps(config.apiKey);
+            if (googleMapsAuthFailed) {
+                throw new Error("Google Maps rejected the browser API key for this domain.");
             }
 
-            await dotNetReference.invokeMethodAsync(
-                "NotifyGoogleAddressSelected",
-                normalizeSelection("GoogleMapPin", result, literal, result.address_components));
-        };
+            const { Map } = await google.maps.importLibrary("maps");
+            await google.maps.importLibrary("geocoding");
 
-        marker.addListener("dragend", event => publishLocation(event.latLng));
-        map.addListener("click", event => publishLocation(event.latLng));
-        maps.set(elementId, { map, marker });
+            const position = {
+                lat: Number(current?.latitude) || Number(config.defaultLatitude) || 13.7563,
+                lng: Number(current?.longitude) || Number(config.defaultLongitude) || 100.5018
+            };
+            const mapId = typeof config.mapId === "string" && config.mapId.trim() ? config.mapId.trim() : null;
+            const mapOptions = {
+                center: position,
+                zoom: Number(config.defaultZoom) || 12,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false
+            };
+            if (mapId) {
+                mapOptions.mapId = mapId;
+            }
+
+            const map = new Map(container, mapOptions);
+            const marker = await createAddressMarker(map, position, "Selected address", mapId);
+            const geocoder = new google.maps.Geocoder();
+            const publishLocation = async latLng => {
+                const literal = typeof latLng.lat === "function"
+                    ? { lat: latLng.lat(), lng: latLng.lng() }
+                    : latLng;
+                marker.setPosition(literal);
+
+                const response = await geocoder.geocode({ location: literal });
+                const result = response.results?.[0];
+                if (!result) {
+                    await dotNetReference.invokeMethodAsync("NotifyGoogleAddressSelected", {
+                        source: "GoogleMapPin",
+                        latitude: literal.lat,
+                        longitude: literal.lng
+                    });
+                    return;
+                }
+
+                await dotNetReference.invokeMethodAsync(
+                    "NotifyGoogleAddressSelected",
+                    normalizeSelection("GoogleMapPin", result, literal, result.address_components));
+            };
+
+            const markerDragListener = marker.addDragEnd(publishLocation);
+            const mapClickListener = map.addListener("click", event => publishLocation(event.latLng));
+            const errorTimer = window.setTimeout(() => {
+                if (!maps.has(elementId) || !hasMapProviderError(container)) {
+                    return;
+                }
+
+                renderMapUnavailable(container);
+                notifyStatus(dotNetReference, "MapUnavailable");
+            }, 1200);
+
+            maps.set(elementId, { map, marker, markerDragListener, mapClickListener, errorTimer });
+        } catch (error) {
+            console.warn("MALIEV address map unavailable.", error);
+            renderMapUnavailable(container);
+            notifyStatus(dotNetReference, "MapUnavailable");
+        }
     }
 
     function disposeSearch(elementId) {
@@ -195,8 +275,17 @@
 
     function disposeMap(elementId) {
         const state = maps.get(elementId);
+        if (state?.errorTimer) {
+            window.clearTimeout(state.errorTimer);
+        }
+        if (state?.markerDragListener) {
+            state.markerDragListener.remove();
+        }
+        if (state?.mapClickListener) {
+            state.mapClickListener.remove();
+        }
         if (state?.marker) {
-            state.marker.map = null;
+            state.marker.dispose();
         }
         maps.delete(elementId);
     }

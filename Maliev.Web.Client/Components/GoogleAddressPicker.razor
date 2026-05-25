@@ -113,11 +113,18 @@
         _mapOpen = true;
         StateHasChanged();
         await Task.Yield();
-        await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeMap", _mapElementId, _dotNetReference, _config, new
+        try
         {
-            latitude = Latitude,
-            longitude = Longitude
-        });
+            await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeMap", _mapElementId, _dotNetReference, _config, new
+            {
+                latitude = Latitude,
+                longitude = Longitude
+            });
+        }
+        catch (JSException)
+        {
+            _statusMessage = Text("Google Maps could not load in this browser. Use the search field or manual address fields.", "ไม่สามารถโหลด Google Maps ได้ ใช้ช่องค้นหาหรือกรอกที่อยู่เอง");
+        }
     }
 
     private async Task CloseMapAsync()
@@ -134,6 +141,17 @@
         _statusMessage = null;
         await SelectionChanged.InvokeAsync(selection);
         StateHasChanged();
+    }
+
+    /// <summary>Receives Google picker status changes from JavaScript.</summary>
+    [JSInvokable]
+    public Task NotifyGoogleAddressPickerStatus(string status)
+    {
+        _statusMessage = string.Equals(status, "MapUnavailable", StringComparison.OrdinalIgnoreCase)
+            ? Text("Google Maps could not load in this browser. Use the search field or manual address fields.", "ไม่สามารถโหลด Google Maps ได้ ใช้ช่องค้นหาหรือกรอกที่อยู่เอง")
+            : status;
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
