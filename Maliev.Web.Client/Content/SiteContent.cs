@@ -1,3 +1,4 @@
+using System.Text;
 using Maliev.Web.Shared.Localization;
 
 namespace Maliev.Web.Client.Content;
@@ -5,6 +6,17 @@ namespace Maliev.Web.Client.Content;
 internal static class SiteContent
 {
     private const string DefaultQuoteEngineUrl = "https://quote.maliev.com";
+    private static readonly IReadOnlyDictionary<string, string> BlogPdfCategoryTokens =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["3d"] = "3D",
+            ["cnc"] = "CNC",
+            ["dfm"] = "DFM",
+            ["fdm"] = "FDM",
+            ["mjf"] = "MJF",
+            ["sla"] = "SLA",
+            ["sls"] = "SLS"
+        };
 
     internal static string QuoteEngineUrl => ResolveQuoteEngineUrl();
 
@@ -38,9 +50,98 @@ internal static class SiteContent
         return BlogImageUrl(post.Slug);
     }
 
+    internal static string BuildBlogPdfFileName(BlogPostContent post)
+    {
+        var category = ResolveBlogPdfCategory(post);
+        var topic = ResolveBlogPdfTopic(post);
+
+        return $"Practical note - {category} - {topic} - MALIEV.pdf";
+    }
+
     private static string BlogImageUrl(string slug)
     {
         return $"/images/blog/{slug}.jpg";
+    }
+
+    private static string ResolveBlogPdfCategory(BlogPostContent post)
+    {
+        var slugWords = SplitBlogPdfWords(post.Slug);
+        if (slugWords.Count > 0 && BlogPdfCategoryTokens.TryGetValue(slugWords[0], out var categoryToken))
+        {
+            return categoryToken;
+        }
+
+        var categoryWords = SplitBlogPdfWords(post.Category.En);
+        if (categoryWords.Count > 1 && categoryWords[^1].Equals("guide", StringComparison.OrdinalIgnoreCase))
+        {
+            categoryWords.RemoveAt(categoryWords.Count - 1);
+        }
+
+        return FormatBlogPdfWords(categoryWords, "Practical Note");
+    }
+
+    private static string ResolveBlogPdfTopic(BlogPostContent post)
+    {
+        var slugWords = SplitBlogPdfWords(post.Slug);
+        if (slugWords.Count > 1 && BlogPdfCategoryTokens.ContainsKey(slugWords[0]))
+        {
+            slugWords.RemoveAt(0);
+        }
+
+        return FormatBlogPdfWords(slugWords, "Download");
+    }
+
+    private static List<string> SplitBlogPdfWords(string value)
+    {
+        var words = new List<string>();
+        var currentWord = new StringBuilder();
+
+        foreach (var character in value)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                currentWord.Append(character);
+                continue;
+            }
+
+            AddBlogPdfWord(words, currentWord);
+        }
+
+        AddBlogPdfWord(words, currentWord);
+        return words;
+    }
+
+    private static void AddBlogPdfWord(ICollection<string> words, StringBuilder currentWord)
+    {
+        if (currentWord.Length == 0)
+        {
+            return;
+        }
+
+        words.Add(currentWord.ToString());
+        currentWord.Clear();
+    }
+
+    private static string FormatBlogPdfWords(IEnumerable<string> words, string fallback)
+    {
+        var formattedWords = words
+            .Select(FormatBlogPdfWord)
+            .Where(word => !string.IsNullOrWhiteSpace(word))
+            .ToArray();
+
+        return formattedWords.Length == 0 ? fallback : string.Join(' ', formattedWords);
+    }
+
+    private static string FormatBlogPdfWord(string word)
+    {
+        if (BlogPdfCategoryTokens.TryGetValue(word, out var categoryToken))
+        {
+            return categoryToken;
+        }
+
+        return word.Length == 1
+            ? word.ToUpperInvariant()
+            : string.Concat(char.ToUpperInvariant(word[0]), word[1..].ToLowerInvariant());
     }
 
     internal static readonly IReadOnlyList<MetricItem> HeroMetrics =

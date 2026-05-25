@@ -40,7 +40,7 @@ public sealed class BlogController(BlogEbookPdfService pdfService) : ControllerB
         {
             var normalizedCulture = SupportedCultures.Normalize(culture);
             var pdfBytes = await pdfService.GenerateAsync(post, normalizedCulture, cancellationToken);
-            return File(pdfBytes, "application/pdf", $"{SanitizeFileName(post.Slug)}-maliev-practical-note.pdf");
+            return File(pdfBytes, "application/pdf", SiteContent.BuildBlogPdfFileName(post));
         }
         catch (BackendUnavailableException)
         {
@@ -49,12 +49,5 @@ public sealed class BlogController(BlogEbookPdfService pdfService) : ControllerB
                 detail: "We could not render this practical note PDF right now. Please refresh the page or contact MALIEV.",
                 statusCode: StatusCodes.Status503ServiceUnavailable);
         }
-    }
-
-    private static string SanitizeFileName(string value)
-    {
-        var invalidCharacters = Path.GetInvalidFileNameChars();
-        var safe = new string(value.Select(character => invalidCharacters.Contains(character) ? '-' : character).ToArray());
-        return string.IsNullOrWhiteSpace(safe) ? "maliev-practical-note" : safe;
     }
 }

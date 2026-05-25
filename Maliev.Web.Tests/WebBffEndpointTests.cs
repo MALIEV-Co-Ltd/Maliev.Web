@@ -91,13 +91,15 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     {
         using var client = _factory.CreateClient();
 
-        using var response = await client.GetAsync("/web/v1/blog/fdm-heat-material-choice/ebook.pdf?culture=en");
+        using var response = await client.GetAsync("/web/v1/blog/fdm-print-orientation/ebook.pdf?culture=en");
         var bytes = await response.Content.ReadAsByteArrayAsync();
+        var downloadFileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName?.Trim('"');
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
         Assert.Equal("attachment", response.Content.Headers.ContentDisposition?.DispositionType);
-        Assert.Contains("fdm-heat-material-choice", response.Content.Headers.ContentDisposition?.FileName ?? response.Content.Headers.ContentDisposition?.FileNameStar);
+        Assert.Equal("Practical note - FDM - Print Orientation - MALIEV.pdf", downloadFileName);
         Assert.Equal(FakePdfServiceClient.PdfBytes, bytes);
         Assert.Equal((byte)'%', bytes[0]);
         Assert.Equal((byte)'P', bytes[1]);
@@ -487,10 +489,10 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         public Task<byte[]> RenderBlogPracticalNoteAsync(BlogPracticalNotePdfRequest request, CancellationToken cancellationToken)
         {
-            Assert.Equal("fdm-heat-material-choice", request.Slug);
+            Assert.Equal("fdm-print-orientation", request.Slug);
             Assert.Equal(SupportedCultures.DefaultCulture, request.CultureName);
             Assert.Contains("FDM", request.Title, StringComparison.OrdinalIgnoreCase);
-            Assert.Equal("https://www.maliev.com/blog/fdm-heat-material-choice", request.PublicUrl);
+            Assert.Equal("https://www.maliev.com/blog/fdm-print-orientation", request.PublicUrl);
             Assert.NotEmpty(request.Sections);
             Assert.NotEmpty(request.Takeaways);
             Assert.NotNull(request.CoverImage);
