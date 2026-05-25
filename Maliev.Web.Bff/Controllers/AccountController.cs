@@ -389,7 +389,8 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             Email = GetString(root, "email", "Email") ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
             Mobile = GetString(root, "mobile", "Mobile"),
             CompanyName = GetString(root, "companyName", "CompanyName"),
-            Status = GetString(root, "status", "Status") ?? string.Empty,
+            Segment = GetString(root, "segment", "Segment") ?? string.Empty,
+            Tier = GetString(root, "tier", "Tier") ?? string.Empty,
             PreferredLanguage = GetString(root, "preferredLanguage", "PreferredLanguage") ?? string.Empty,
             Timezone = GetString(root, "timezone", "Timezone") ?? string.Empty,
             Version = GetUInt(root, "xmin", "Xmin", "version", "Version")

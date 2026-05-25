@@ -5397,6 +5397,96 @@ html[data-theme="dark"] .auth-google-icon {
   color: var(--ink);
 }
 
+.account-profile-card {
+  align-content: start;
+  gap: 18px;
+}
+
+.account-profile-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.account-avatar {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--blue) 36%, var(--rule));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blue) 15%, var(--paper));
+  color: var(--blue-ink);
+  font-size: 1.2rem;
+  font-weight: 760;
+}
+
+.account-profile-identity {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.account-profile-identity h2,
+.account-profile-identity p {
+  margin: 0;
+}
+
+.account-profile-identity h2,
+.account-profile-details strong {
+  overflow-wrap: anywhere;
+}
+
+.account-profile-identity p {
+  color: var(--muted);
+}
+
+.account-membership-pill {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--blue) 10%, var(--paper));
+  box-shadow: var(--shadow-border);
+}
+
+.account-membership-pill span,
+.account-profile-details span {
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.account-membership-pill strong {
+  color: var(--blue-ink);
+  font-size: 1.08rem;
+}
+
+.account-profile-details {
+  display: grid;
+  gap: 10px;
+}
+
+.account-profile-details div {
+  display: grid;
+  grid-template-columns: minmax(108px, .44fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+
+.account-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-signout-form {
+  padding-top: 2px;
+}
 .account-action-card h3,
 .account-action-card p,
 .preference-card h2,
@@ -8239,6 +8329,20 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     white-space: nowrap;
   }
 
+  .account-profile-header,
+  .account-profile-details div,
+  .account-membership-pill {
+    grid-template-columns: 1fr;
+  }
+
+  .account-quick-actions {
+    align-items: stretch;
+  }
+
+  .account-quick-actions .button {
+    justify-content: center;
+    width: 100%;
+  }
   .order-row {
     grid-template-columns: 1fr;
   }

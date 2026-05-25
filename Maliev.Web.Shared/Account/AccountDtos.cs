@@ -50,8 +50,11 @@ public sealed class CustomerAccountProfileDto
     /// <summary>Gets or sets the company name linked to the customer.</summary>
     public string? CompanyName { get; set; }
 
-    /// <summary>Gets or sets the customer status.</summary>
-    public string Status { get; set; } = string.Empty;
+    /// <summary>Gets or sets the customer-facing segment.</summary>
+    public string Segment { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the customer-facing tier.</summary>
+    public string Tier { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the preferred language code.</summary>
     public string PreferredLanguage { get; set; } = string.Empty;

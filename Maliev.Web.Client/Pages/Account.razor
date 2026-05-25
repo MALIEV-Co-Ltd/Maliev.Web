@@ -43,19 +43,43 @@
     }
     else
     {
-        <div class="account-overview-card">
-            <span class="card-meta">@Text("Signed in", "เข้าสู่ระบบแล้ว")</span>
-            <h2>@DisplayName</h2>
-            <p>@_profile?.Email</p>
-            <div class="account-status-row">
-                <span>@Text("Customer ID", "รหัสลูกค้า")</span>
-                <strong>@_profile?.CustomerId</strong>
+        <div class="account-overview-card account-profile-card">
+            <div class="account-profile-header">
+                <div class="account-avatar" aria-hidden="true">@AvatarInitials</div>
+                <div class="account-profile-identity">
+                    <span class="card-meta">@Text("Signed in as", "เข้าสู่ระบบเป็น")</span>
+                    <h2>@DisplayName</h2>
+                    <p>@_profile?.Email</p>
+                </div>
             </div>
-            <div class="account-status-row">
-                <span>@Text("Status", "สถานะ")</span>
-                <strong>@(string.IsNullOrWhiteSpace(_profile?.Status) ? Text("Active", "ใช้งานอยู่") : _profile.Status)</strong>
+
+            <div class="account-membership-pill">
+                <span>@Text("Customer tier", "ระดับลูกค้า")</span>
+                <strong>@CustomerTierLabel</strong>
             </div>
-            <form method="post" action="/auth/sign-out">
+
+            <div class="account-profile-details">
+                <div>
+                    <span>@Text("Company", "บริษัท")</span>
+                    <strong>@CompanyLabel</strong>
+                </div>
+                <div>
+                    <span>@Text("Customer type", "ประเภทลูกค้า")</span>
+                    <strong>@CustomerSegmentLabel</strong>
+                </div>
+                <div>
+                    <span>@Text("Mobile", "โทรศัพท์มือถือ")</span>
+                    <strong>@MobileLabel</strong>
+                </div>
+            </div>
+
+            <div class="account-quick-actions">
+                <a class="button primary" href="/account/profile">@Text("Edit profile", "แก้ไขโปรไฟล์")</a>
+                <a class="button secondary" href="/account/profile">@Text("Change email", "เปลี่ยนอีเมล")</a>
+                <a class="button secondary" href="@ResetPasswordHref">@Text("Reset password", "รีเซ็ตรหัสผ่าน")</a>
+            </div>
+
+            <form class="account-signout-form" method="post" action="/auth/sign-out">
                 <AntiforgeryToken />
                 <button type="submit" class="button secondary">@Text("Sign out", "ออกจากระบบ")</button>
             </form>
@@ -91,6 +115,26 @@
     private bool _accountUnavailable;
     private bool _loading = true;
     private string DisplayName => string.IsNullOrWhiteSpace(_profile?.DisplayName) ? _profile?.Email ?? "MALIEV customer" : _profile.DisplayName;
+    private string CustomerTierLabel => string.IsNullOrWhiteSpace(_profile?.Tier) ? Text("Member", "สมาชิก") : _profile.Tier;
+    private string CustomerSegmentLabel => string.IsNullOrWhiteSpace(_profile?.Segment) ? Text("Customer", "ลูกค้า") : _profile.Segment;
+    private string CompanyLabel => string.IsNullOrWhiteSpace(_profile?.CompanyName) ? Text("Not linked", "ยังไม่ได้เชื่อมโยง") : _profile.CompanyName;
+    private string MobileLabel => string.IsNullOrWhiteSpace(_profile?.Mobile) ? Text("Not added", "ยังไม่ได้เพิ่ม") : _profile.Mobile;
+    private string ResetPasswordHref => string.IsNullOrWhiteSpace(_profile?.Email)
+        ? "/auth/forgot-password"
+        : $"/auth/forgot-password?email={Uri.EscapeDataString(_profile.Email)}";
+    private string AvatarInitials
+    {
+        get
+        {
+            var source = DisplayName;
+            var parts = source.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var initials = parts.Length >= 2
+                ? $"{parts[0][0]}{parts[1][0]}"
+                : source.Length > 0 ? source[..1] : "M";
+
+            return initials.ToUpperInvariant();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
