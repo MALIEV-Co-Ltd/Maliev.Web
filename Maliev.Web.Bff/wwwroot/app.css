@@ -8814,12 +8814,14 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .machine-feature-backdrop {
-    width: 100%;
+    inset: auto auto clamp(190px, 18svh, 260px) 50%;
+    width: clamp(900px, 180vw, 1120px);
     max-width: none;
-    height: 100%;
+    height: auto;
     margin-inline: 0;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center bottom;
+    transform: translateX(-28%);
   }
 
   .machine-stat-grid {
