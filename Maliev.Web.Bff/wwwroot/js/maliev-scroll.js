@@ -14,6 +14,30 @@ window.malievScroll = {
     });
   },
 
+  scrollToTopForNavigation: function () {
+    const root = document.documentElement;
+    const body = document.body;
+    const state = window.__malievNavigationScrollState ?? {
+      rootBehavior: root.style.scrollBehavior,
+      bodyBehavior: body.style.scrollBehavior
+    };
+
+    window.__malievNavigationScrollState = state;
+    window.clearTimeout(window.__malievNavigationScrollRestoreId);
+
+    const restoreScrollBehavior = () => {
+      root.style.scrollBehavior = state.rootBehavior;
+      body.style.scrollBehavior = state.bodyBehavior;
+      window.__malievNavigationScrollState = null;
+      window.__malievNavigationScrollRestoreId = null;
+    };
+
+    root.style.scrollBehavior = 'auto';
+    body.style.scrollBehavior = 'auto';
+    window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+    window.__malievNavigationScrollRestoreId = window.setTimeout(restoreScrollBehavior, 800);
+  },
+
   bindWorkflowStepReveal: function (section) {
     if (!section || section.dataset.workflowRevealBound === 'true') {
       return;

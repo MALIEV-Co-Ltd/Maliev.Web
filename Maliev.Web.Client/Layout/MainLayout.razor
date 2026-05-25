@@ -3,6 +3,7 @@
 @inject PreferenceService Preferences
 @inject CartState Cart
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <MudThemeProvider Theme="@_malievTheme" IsDarkMode="@IsDarkMode" />
 <MudPopoverProvider />
@@ -292,6 +293,7 @@
     {
         Cart.Changed += StateHasChanged;
         Preferences.Changed += OnPreferencesChanged;
+        Navigation.LocationChanged += OnLocationChanged;
         await Cart.InitializeAsync();
         await Preferences.InitializeAsync();
         _selectedCulture = Preferences.Culture;
@@ -346,6 +348,26 @@
         _mobileNavOpen = false;
     }
 
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        _mobileNavOpen = false;
+        _ = InvokeAsync(ResetScrollForLocationChangeAsync);
+    }
+
+    private async Task ResetScrollForLocationChangeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("malievScroll.scrollToTopForNavigation");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
     private Task OpenCookieSettingsAsync()
     {
         return _cookieConsent?.ShowPreferencesAsync() ?? Task.CompletedTask;
@@ -355,6 +377,7 @@
     {
         Cart.Changed -= StateHasChanged;
         Preferences.Changed -= OnPreferencesChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private sealed record LocalizedText(string English, string Thai)
