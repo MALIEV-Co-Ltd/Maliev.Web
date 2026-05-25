@@ -19,7 +19,7 @@ public sealed class AddressControllerBoundaryTests
     [Fact]
     public void GetGoogleConfig_NoConfiguredRegion_ReturnsUnrestrictedAutocomplete()
     {
-        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient());
+        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient(), new FakeRegistryServiceClient());
 
         var result = Assert.IsType<OkObjectResult>(controller.GetGoogleConfig().Result);
         var config = Assert.IsType<GoogleAddressConfigResponse>(result.Value);
@@ -45,7 +45,7 @@ public sealed class AddressControllerBoundaryTests
                     new { id = thailandId, iso2 = "TH", name = "Thailand" }
                 }
             }
-        });
+        }, new FakeRegistryServiceClient());
 
         var action = await controller.GetCountryOptions(CancellationToken.None);
 
@@ -65,6 +65,48 @@ public sealed class AddressControllerBoundaryTests
             });
     }
 
+    /// <summary>
+    /// Verifies Thai address autocomplete maps RegistryService administrative locations for customer entry.
+    /// </summary>
+    [Fact]
+    public async Task SearchThaiLocations_ReturnsRegistryServiceOptions()
+    {
+        var locationId = Guid.Parse("1f54cb83-cfa2-4e4c-baa8-e902e458019b");
+        var controller = new AddressController(
+            new ConfigurationBuilder().Build(),
+            new FakeCountryServiceClient(),
+            new FakeRegistryServiceClient
+            {
+                LocationsResponse = new
+                {
+                    data = new[]
+                    {
+                        new
+                        {
+                            id = locationId,
+                            postalCode = "11120",
+                            subDistrictTh = "คลองข่อย",
+                            districtTh = "ปากเกร็ด",
+                            provinceTh = "นนทบุรี",
+                            subDistrictEn = "Khlong Khoi",
+                            districtEn = "Pak Kret",
+                            provinceEn = "Nonthaburi"
+                        }
+                    }
+                }
+            });
+
+        var action = await controller.SearchThaiLocationsAsync("pak", cancellationToken: CancellationToken.None);
+
+        var result = Assert.IsType<OkObjectResult>(action.Result);
+        var locations = Assert.IsType<List<ThaiAddressRegistryLocationDto>>(result.Value);
+        var location = Assert.Single(locations);
+        Assert.Equal(locationId, location.Id);
+        Assert.Equal("11120", location.PostalCode);
+        Assert.Equal("คลองข่อย", location.SubDistrictTh);
+        Assert.Equal("Pak Kret", location.DistrictEn);
+    }
+
     private sealed class FakeCountryServiceClient : ICountryServiceClient
     {
         public object? CountriesResponse { get; init; }
@@ -77,6 +119,19 @@ public sealed class AddressControllerBoundaryTests
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = JsonContent.Create(CountriesResponse ?? new { data = Array.Empty<object>() })
+            });
+        }
+    }
+
+    private sealed class FakeRegistryServiceClient : IRegistryServiceClient
+    {
+        public object? LocationsResponse { get; init; }
+
+        public Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(LocationsResponse ?? new { data = Array.Empty<object>() })
             });
         }
     }

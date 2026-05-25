@@ -77,3 +77,33 @@ public sealed class AddressCountryOptionDto
     /// <summary>Gets or sets the display country name.</summary>
     public string Name { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Thai administrative address option returned by RegistryService.
+/// </summary>
+public sealed class ThaiAddressRegistryLocationDto
+{
+    /// <summary>Gets or sets the registry location identifier.</summary>
+    public Guid Id { get; set; }
+
+    /// <summary>Gets or sets the five-digit postal code.</summary>
+    public string PostalCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the Thai sub-district name.</summary>
+    public string SubDistrictTh { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the Thai district name.</summary>
+    public string DistrictTh { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the Thai province name.</summary>
+    public string ProvinceTh { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the English sub-district name.</summary>
+    public string SubDistrictEn { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the English district name.</summary>
+    public string DistrictEn { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the English province name.</summary>
+    public string ProvinceEn { get; set; } = string.Empty;
+}

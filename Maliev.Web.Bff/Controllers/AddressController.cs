@@ -13,7 +13,10 @@ namespace Maliev.Web.Bff.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/address")]
-public sealed class AddressController(IConfiguration configuration, ICountryServiceClient countryClient) : ControllerBase
+public sealed class AddressController(
+    IConfiguration configuration,
+    ICountryServiceClient countryClient,
+    IRegistryServiceClient registryClient) : ControllerBase
 {
     private static readonly string[] FallbackCountryIso2Codes =
     [
@@ -52,6 +55,50 @@ public sealed class AddressController(IConfiguration configuration, ICountryServ
         }
 
         return Ok(SortCountryOptions(countries));
+    }
+
+    /// <summary>Searches Thai administrative address locations from RegistryService.</summary>
+    [HttpGet("thai-locations")]
+    [RequirePermission("customer.profile.read")]
+    [ProducesResponseType(typeof(List<ThaiAddressRegistryLocationDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<ThaiAddressRegistryLocationDto>>> SearchThaiLocationsAsync(
+        [FromQuery] string? query,
+        [FromQuery] int limit = 8,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedQuery = query?.Trim() ?? string.Empty;
+        if (normalizedQuery.Length < 2)
+        {
+            return Ok(new List<ThaiAddressRegistryLocationDto>());
+        }
+
+        var normalizedLimit = Math.Clamp(limit, 1, 20);
+        try
+        {
+            using var response = await registryClient.SearchThaiLocationsAsync(normalizedQuery, normalizedLimit, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Ok(new List<ThaiAddressRegistryLocationDto>());
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            var data = document.RootElement.TryGetProperty("data", out var dataElement)
+                ? dataElement
+                : document.RootElement;
+
+            return Ok(data.ValueKind == JsonValueKind.Array
+                ? data.EnumerateArray().Select(MapThaiLocation).OfType<ThaiAddressRegistryLocationDto>().ToList()
+                : []);
+        }
+        catch (HttpRequestException)
+        {
+            return Ok(new List<ThaiAddressRegistryLocationDto>());
+        }
+        catch (JsonException)
+        {
+            return Ok(new List<ThaiAddressRegistryLocationDto>());
+        }
     }
 
     private async Task<List<AddressCountryOptionDto>> GetCountriesFromListAsync(CancellationToken cancellationToken)
@@ -143,6 +190,31 @@ public sealed class AddressController(IConfiguration configuration, ICountryServ
             Iso2 = NormalizeIso2(iso2),
             Name = name
         };
+    }
+
+    private static ThaiAddressRegistryLocationDto? MapThaiLocation(JsonElement root)
+    {
+        var location = new ThaiAddressRegistryLocationDto
+        {
+            Id = GetGuid(root, "id", "Id") ?? Guid.Empty,
+            PostalCode = GetString(root, "postalCode", "PostalCode") ?? string.Empty,
+            SubDistrictTh = GetString(root, "subDistrictTh", "SubDistrictTh") ?? string.Empty,
+            DistrictTh = GetString(root, "districtTh", "DistrictTh") ?? string.Empty,
+            ProvinceTh = GetString(root, "provinceTh", "ProvinceTh") ?? string.Empty,
+            SubDistrictEn = GetString(root, "subDistrictEn", "SubDistrictEn") ?? string.Empty,
+            DistrictEn = GetString(root, "districtEn", "DistrictEn") ?? string.Empty,
+            ProvinceEn = GetString(root, "provinceEn", "ProvinceEn") ?? string.Empty
+        };
+
+        return string.IsNullOrWhiteSpace(location.PostalCode)
+            && string.IsNullOrWhiteSpace(location.SubDistrictTh)
+            && string.IsNullOrWhiteSpace(location.SubDistrictEn)
+            && string.IsNullOrWhiteSpace(location.DistrictTh)
+            && string.IsNullOrWhiteSpace(location.DistrictEn)
+            && string.IsNullOrWhiteSpace(location.ProvinceTh)
+            && string.IsNullOrWhiteSpace(location.ProvinceEn)
+                ? null
+                : location;
     }
 
     private static string NormalizeIso2(string? iso2)

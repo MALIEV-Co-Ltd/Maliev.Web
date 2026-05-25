@@ -45,13 +45,18 @@ public sealed class AccountAddressGoogleSourceTests
     {
         var accountController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AccountController.cs");
         var addressController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AddressController.cs");
+        var boundaryClients = ReadRepoFile("Maliev.Web.Bff", "Clients", "CheckoutBoundaryClients.cs");
         var dtos = ReadRepoFile("Maliev.Web.Shared", "Account", "AccountDtos.cs");
 
         Assert.Contains("[Route(\"web/v{version:apiVersion}/address\")]", addressController, StringComparison.Ordinal);
         Assert.Contains("[HttpGet(\"google-config\")]", addressController, StringComparison.Ordinal);
         Assert.Contains("[HttpGet(\"countries\")]", addressController, StringComparison.Ordinal);
+        Assert.Contains("[HttpGet(\"thai-locations\")]", addressController, StringComparison.Ordinal);
         Assert.Contains("GetCountriesAsync", addressController, StringComparison.Ordinal);
+        Assert.Contains("SearchThaiLocationsAsync", addressController, StringComparison.Ordinal);
         Assert.Contains("GoogleMaps", addressController, StringComparison.Ordinal);
+        Assert.Contains("IRegistryServiceClient", boundaryClients, StringComparison.Ordinal);
+        Assert.Contains("/registry/v1/thai/addresses/autocomplete", boundaryClients, StringComparison.Ordinal);
 
         foreach (var field in new[]
         {
@@ -79,6 +84,27 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("AddressCountryOptionDto", googleDtos, StringComparison.Ordinal);
         Assert.Contains("color-scheme: light", css, StringComparison.Ordinal);
         Assert.Contains("maliev-google-place-autocomplete", css, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies the customer address form uses RegistryService Thai-location suggestions in addition to Google Maps.
+    /// </summary>
+    [Fact]
+    public void AccountAddresses_UsesRegistryServiceThaiLocationSuggestions()
+    {
+        var page = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+        var apiClient = ReadRepoFile("Maliev.Web.Client", "Services", "MalievApiClient.cs");
+        var googleDtos = ReadRepoFile("Maliev.Web.Shared", "Account", "GoogleAddressDtos.cs");
+        var css = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("Thai address registry", page, StringComparison.Ordinal);
+        Assert.Contains("SearchRegistryLocationsAsync", page, StringComparison.Ordinal);
+        Assert.Contains("ApplyRegistryLocation", page, StringComparison.Ordinal);
+        Assert.Contains("AddressSource = \"RegistryThaiLocation\"", page, StringComparison.Ordinal);
+        Assert.Contains("GetThaiAddressLocationsAsync", apiClient, StringComparison.Ordinal);
+        Assert.Contains("web/v1/address/thai-locations", apiClient, StringComparison.Ordinal);
+        Assert.Contains("ThaiAddressRegistryLocationDto", googleDtos, StringComparison.Ordinal);
+        Assert.Contains("account-registry-suggestions", css, StringComparison.Ordinal);
     }
 
     /// <summary>

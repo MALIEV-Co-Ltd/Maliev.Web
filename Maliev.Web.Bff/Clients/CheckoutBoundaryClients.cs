@@ -74,6 +74,15 @@ public interface ICountryServiceClient
     Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Downstream RegistryService client used by customer address entry.
+/// </summary>
+public interface IRegistryServiceClient
+{
+    /// <summary>Searches Thai administrative address locations.</summary>
+    Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken);
+}
+
 internal sealed class OrderServiceClient(HttpClient httpClient) : IOrderServiceClient
 {
     public Task<HttpResponseMessage> CreateOrderAsync(object request, CancellationToken cancellationToken) =>
@@ -144,4 +153,10 @@ internal sealed class CountryServiceClient(HttpClient httpClient) : ICountryServ
 
     public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
         httpClient.GetAsync("/country/v1/countries?pageSize=1000&sortBy=name&sortOrder=asc", cancellationToken);
+}
+
+internal sealed class RegistryServiceClient(HttpClient httpClient) : IRegistryServiceClient
+{
+    public Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken) =>
+        httpClient.GetAsync($"/registry/v1/thai/addresses/autocomplete?query={Uri.EscapeDataString(query)}&limit={limit}", cancellationToken);
 }

@@ -103,6 +103,15 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await GetJsonAsync<List<AddressCountryOptionDto>>("web/v1/address/countries", cancellationToken) ?? [];
     }
 
+    internal async Task<IReadOnlyList<ThaiAddressRegistryLocationDto>> GetThaiAddressLocationsAsync(
+        string query,
+        int limit = 8,
+        CancellationToken cancellationToken = default)
+    {
+        var path = $"web/v1/address/thai-locations?query={Uri.EscapeDataString(query)}&limit={limit}";
+        return await GetJsonAsync<List<ThaiAddressRegistryLocationDto>>(path, cancellationToken) ?? [];
+    }
+
     internal async Task<CustomerAddressDto> CreateAccountAddressAsync(CustomerAddressUpsertRequest request, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync("web/v1/account/addresses", request, cancellationToken);

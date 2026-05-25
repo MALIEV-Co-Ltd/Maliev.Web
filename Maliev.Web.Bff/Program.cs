@@ -104,6 +104,7 @@ builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceCli
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
 builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
+builder.AddAuthenticatedServiceClient<IRegistryServiceClient, RegistryServiceClient>("RegistryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
 builder.AddAuthenticatedServiceClient<ICommerceServiceClient, CommerceServiceClient>("CommerceService")
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));

@@ -5080,6 +5080,63 @@ html[data-theme="dark"] .auth-google-icon {
   color: var(--ink);
 }
 
+.address-registry-lookup {
+  display: grid;
+  gap: 8px;
+}
+
+.address-registry-lookup input {
+  width: 100%;
+}
+
+.registry-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.account-registry-suggestions {
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 6px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow-border);
+}
+
+.account-registry-suggestion {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.account-registry-suggestion:hover,
+.account-registry-suggestion:focus-visible {
+  background: var(--paper-2);
+  outline: none;
+}
+
+.account-registry-suggestion span {
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.account-registry-suggestion small {
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.35;
+}
+
 .account-google-map-backdrop {
   position: fixed;
   inset: 0;

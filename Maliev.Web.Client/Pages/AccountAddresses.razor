@@ -81,6 +81,33 @@
                                      FormattedAddress="@_form.FormattedAddress"
                                      Culture="@Preferences.Culture"
                                      SelectionChanged="ApplyGoogleAddressSelection" />
+                <div class="address-registry-lookup">
+                    <label class="form-full">
+                        <span>@Text("Thai address registry", "ทะเบียนที่อยู่ไทย")</span>
+                        <input value="@_registryQuery"
+                               @oninput="SearchRegistryLocationsAsync"
+                               name="thaiAddressRegistry"
+                               autocomplete="off"
+                               aria-label="@Text("Thai address registry", "ทะเบียนที่อยู่ไทย")"
+                               placeholder="@Text("Search sub district, district, province, or postal code", "ค้นหาแขวง/ตำบล เขต/อำเภอ จังหวัด หรือรหัสไปรษณีย์")" />
+                    </label>
+                    @if (_registryLoading)
+                    {
+                        <p class="registry-hint">@Text("Searching RegistryService...", "กำลังค้นหา RegistryService...")</p>
+                    }
+                    else if (_registryLocations.Count > 0)
+                    {
+                        <div class="account-registry-suggestions" role="listbox" aria-label="@Text("Thai address registry suggestions", "รายการที่อยู่จากทะเบียนไทย")">
+                            @foreach (var location in _registryLocations)
+                            {
+                                <button type="button" class="account-registry-suggestion" role="option" @onclick="() => ApplyRegistryLocation(location)">
+                                    <span>@FormatRegistryLocationPrimary(location)</span>
+                                    <small>@FormatRegistryLocationSecondary(location)</small>
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
                 <div class="form-grid two">
                     <label>
                         @Text("Type", "ประเภท")
@@ -184,11 +211,15 @@
 @code {
     private readonly CustomerAddressUpsertRequest _form = new();
     private List<CustomerAddressDto> _addresses = [];
+    private List<ThaiAddressRegistryLocationDto> _registryLocations = [];
     private IReadOnlyList<AddressCountryOptionDto> _countries = [];
     private CustomerAccountProfileDto? _profile;
     private Guid? _editingAddressId;
     private bool _loading = true;
     private bool _saving;
+    private bool _registryLoading;
+    private int _registrySearchVersion;
+    private string _registryQuery = string.Empty;
     private string? _status;
     private string? _error;
     private bool IsGoogleAddress => string.Equals(_form.AddressSource, "GooglePlace", StringComparison.OrdinalIgnoreCase)
@@ -319,6 +350,8 @@
         _form.Latitude = address.Latitude;
         _form.Longitude = address.Longitude;
         _form.Version = address.Version;
+        _registryQuery = string.Empty;
+        _registryLocations = [];
     }
 
     private void ResetForm()
@@ -345,6 +378,9 @@
         _form.Latitude = null;
         _form.Longitude = null;
         _form.Version = 0;
+        _registryQuery = string.Empty;
+        _registryLocations = [];
+        _registryLoading = false;
     }
 
     private void ApplyGoogleAddressSelection(GoogleAddressSelection selection)
@@ -370,6 +406,69 @@
         _form.Longitude = selection.Longitude;
     }
 
+    private async Task SearchRegistryLocationsAsync(ChangeEventArgs args)
+    {
+        _registryQuery = args.Value?.ToString() ?? string.Empty;
+        var query = _registryQuery.Trim();
+        var searchVersion = ++_registrySearchVersion;
+
+        if (query.Length < 2)
+        {
+            _registryLocations = [];
+            _registryLoading = false;
+            return;
+        }
+
+        _registryLoading = true;
+        try
+        {
+            var locations = await Api.GetThaiAddressLocationsAsync(query, 8);
+            if (searchVersion == _registrySearchVersion)
+            {
+                _registryLocations = locations.ToList();
+            }
+        }
+        catch
+        {
+            if (searchVersion == _registrySearchVersion)
+            {
+                _registryLocations = [];
+            }
+        }
+        finally
+        {
+            if (searchVersion == _registrySearchVersion)
+            {
+                _registryLoading = false;
+            }
+        }
+    }
+
+    private void ApplyRegistryLocation(ThaiAddressRegistryLocationDto location)
+    {
+        var useThai = UseThaiRegistryLabels();
+        _form.District = RegistryText(useThai ? location.SubDistrictTh : location.SubDistrictEn, useThai ? location.SubDistrictEn : location.SubDistrictTh);
+        _form.City = RegistryText(useThai ? location.DistrictTh : location.DistrictEn, useThai ? location.DistrictEn : location.DistrictTh);
+        _form.StateProvince = RegistryText(useThai ? location.ProvinceTh : location.ProvinceEn, useThai ? location.ProvinceEn : location.ProvinceTh);
+        _form.PostalCode = location.PostalCode;
+
+        var thailand = _countries.FirstOrDefault(country => string.Equals(country.Iso2, "TH", StringComparison.OrdinalIgnoreCase));
+        if (thailand is not null)
+        {
+            _form.CountryId = thailand.Id;
+        }
+
+        _form.AddressSource = "RegistryThaiLocation";
+        _form.GooglePlaceId = null;
+        _form.FormattedAddress = null;
+        _form.Latitude = null;
+        _form.Longitude = null;
+        _registryQuery = FormatRegistryLocationPrimary(location);
+        _registryLocations = [];
+        _registryLoading = false;
+        _registrySearchVersion++;
+    }
+
     private static string AddressTitle(CustomerAddressDto address)
     {
         return string.IsNullOrWhiteSpace(address.RecipientName) ? address.AddressLine1 : address.RecipientName;
@@ -392,6 +491,46 @@
     private string? CountryName(Guid countryId)
     {
         return _countries.FirstOrDefault(country => country.Id == countryId)?.Name;
+    }
+
+    private bool UseThaiRegistryLabels()
+    {
+        return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase)
+            || ContainsThai(_registryQuery)
+            || ContainsThai(_form.AddressLine1)
+            || ContainsThai(_form.District)
+            || ContainsThai(_form.City)
+            || ContainsThai(_form.StateProvince);
+    }
+
+    private string FormatRegistryLocationPrimary(ThaiAddressRegistryLocationDto location)
+    {
+        var useThai = UseThaiRegistryLabels();
+        var subDistrict = RegistryText(useThai ? location.SubDistrictTh : location.SubDistrictEn, useThai ? location.SubDistrictEn : location.SubDistrictTh);
+        var district = RegistryText(useThai ? location.DistrictTh : location.DistrictEn, useThai ? location.DistrictEn : location.DistrictTh);
+        var province = RegistryText(useThai ? location.ProvinceTh : location.ProvinceEn, useThai ? location.ProvinceEn : location.ProvinceTh);
+        var separator = useThai ? " " : ", ";
+        return string.Join(separator, new[] { subDistrict, district, province, location.PostalCode }.Where(part => !string.IsNullOrWhiteSpace(part)));
+    }
+
+    private string FormatRegistryLocationSecondary(ThaiAddressRegistryLocationDto location)
+    {
+        var useThai = UseThaiRegistryLabels();
+        var subDistrict = RegistryText(useThai ? location.SubDistrictEn : location.SubDistrictTh, useThai ? location.SubDistrictTh : location.SubDistrictEn);
+        var district = RegistryText(useThai ? location.DistrictEn : location.DistrictTh, useThai ? location.DistrictTh : location.DistrictEn);
+        var province = RegistryText(useThai ? location.ProvinceEn : location.ProvinceTh, useThai ? location.ProvinceTh : location.ProvinceEn);
+        var separator = useThai ? ", " : " ";
+        return string.Join(separator, new[] { subDistrict, district, province, location.PostalCode }.Where(part => !string.IsNullOrWhiteSpace(part)));
+    }
+
+    private static string RegistryText(string? preferred, string? fallback)
+    {
+        return !string.IsNullOrWhiteSpace(preferred) ? preferred : fallback ?? string.Empty;
+    }
+
+    private static bool ContainsThai(string? value)
+    {
+        return value?.Any(character => character is >= '\u0E00' and <= '\u0E7F') == true;
     }
 
     private string Text(string en, string th)
