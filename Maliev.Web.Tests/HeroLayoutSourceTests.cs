@@ -2590,8 +2590,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
         Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12)", styles);
-        Assert.Contains("rgba(255, 255, 255, .94) 58%, #ffffff 100%", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
+        Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
         Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
         Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
@@ -2733,8 +2733,8 @@ public sealed class HeroLayoutSourceTests
     {
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12)", styles);
-        Assert.Contains("rgba(255, 255, 255, .94) 58%, #ffffff 100%", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
+        Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
         Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
         Assert.Contains(".landing-hero {\n  position: relative;", styles);
         Assert.Contains("isolation: isolate;\n  display: grid;", styles);
@@ -2777,10 +2777,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("updateLandingHeadlight(camera, cameraHeadlight, BABYLON);", source);
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingEnabled = true;", source);
         Assert.Contains("scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;", source);
-        Assert.Contains("plastic.specularIntensity = 0.86;", source);
-        Assert.Contains("plastic.environmentIntensity = 0.72;", source);
-        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.15 : 0.95;", source);
-        Assert.Contains("lights.softbox.intensity = dark ? 0.72 : 0.58;", source);
+        Assert.Contains("plastic.roughness = 0.42;", source);
+        Assert.Contains("plastic.specularIntensity = 0.72;", source);
+        Assert.Contains("plastic.environmentIntensity = 0.86;", source);
+        Assert.Contains("lights.cameraHeadlight.intensity = dark ? 1.65 : 1.35;", source);
+        Assert.Contains("lights.softbox.intensity = dark ? 1.18 : 0.96;", source);
+        Assert.Contains("plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? \"#c6ccd5\" : \"#d2d7de\");", source);
         Assert.DoesNotContain("scene.environmentIntensity = dark ? 0.55 : 0.42;", source);
     }
 
@@ -2900,7 +2902,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-lighting\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-cad-gray\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);

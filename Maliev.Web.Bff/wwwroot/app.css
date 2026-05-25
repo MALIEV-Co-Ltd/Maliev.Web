@@ -45,7 +45,7 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
-  --landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12) 0%, rgba(219, 235, 255, .56) 22%, rgba(255, 255, 255, .94) 58%, #ffffff 100%);
+  --landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%, rgba(255, 255, 255, .98) 42%, rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%);
   --machine-feature-surface-rgb: 247 248 251;
   --machine-feature-grid-rgb: 23 23 23;
   --machine-feature-panel-rgb: 255 255 255;

@@ -629,13 +629,13 @@ function splitModelUrl(modelUrl) {
 function applyInjectionMoldedPlasticMaterial(meshes, scene, BABYLON) {
   const plastic = new BABYLON.PBRMaterial("injection-molded-plastic", scene);
   plastic.metallic = 0;
-  plastic.roughness = 0.34;
-  plastic.microSurface = 0.7;
-  plastic.specularIntensity = 0.86;
-  plastic.environmentIntensity = 0.72;
+  plastic.roughness = 0.42;
+  plastic.microSurface = 0.62;
+  plastic.specularIntensity = 0.72;
+  plastic.environmentIntensity = 0.86;
   plastic.clearCoat.isEnabled = true;
-  plastic.clearCoat.intensity = 0.28;
-  plastic.clearCoat.roughness = 0.38;
+  plastic.clearCoat.intensity = 0.16;
+  plastic.clearCoat.roughness = 0.52;
 
   for (const mesh of meshes) {
     mesh.material = plastic;
@@ -854,32 +854,32 @@ function observeDocumentTheme(state) {
 function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
-  scene.environmentIntensity = dark ? 0.84 : 0.66;
-  scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#243045" : "#eef4ff");
+  scene.environmentIntensity = dark ? 1.05 : 0.92;
+  scene.ambientColor = BABYLON.Color3.FromHexString(dark ? "#3a4351" : "#f4f7fb");
 
-  lights.fill.intensity = dark ? 1.02 : 0.88;
-  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#182033" : "#d6e2f2");
+  lights.fill.intensity = dark ? 1.24 : 1.02;
+  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#2f3a4b" : "#e2e9f2");
 
-  lights.key.intensity = dark ? 2.1 : 1.72;
+  lights.key.intensity = dark ? 2.65 : 2.15;
 
-  lights.softbox.intensity = dark ? 0.72 : 0.58;
-  lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#b8d9ff" : "#d8e9ff");
+  lights.softbox.intensity = dark ? 1.18 : 0.96;
+  lights.softbox.diffuse = BABYLON.Color3.FromHexString(dark ? "#d4e8ff" : "#e9f3ff");
 
-  lights.rim.intensity = dark ? 1.55 : 1.05;
-  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#95caff" : "#b9dcff");
+  lights.rim.intensity = dark ? 1.72 : 1.18;
+  lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#bddfff" : "#d6eaff");
 
-  lights.bounce.intensity = dark ? 0.68 : 0.38;
-  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#38527e" : "#e4edf8");
+  lights.bounce.intensity = dark ? 0.88 : 0.56;
+  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#70839f" : "#eef4fa");
 
-  lights.cameraHeadlight.intensity = dark ? 1.15 : 0.95;
-  lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#eff7ff" : "#f7fbff");
+  lights.cameraHeadlight.intensity = dark ? 1.65 : 1.35;
+  lights.cameraHeadlight.diffuse = BABYLON.Color3.FromHexString(dark ? "#ffffff" : "#fbfdff");
 
   if (plasticMaterial) {
-    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#2a323d" : "#24282e");
-    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#e4f0ff" : "#edf3fb");
-    plasticMaterial.specularIntensity = dark ? 0.94 : 0.86;
-    plasticMaterial.environmentIntensity = dark ? 0.84 : 0.72;
-    plasticMaterial.clearCoat.intensity = dark ? 0.36 : 0.28;
+    plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#c6ccd5" : "#d2d7de");
+    plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#f3f7fb" : "#f8fafc");
+    plasticMaterial.specularIntensity = dark ? 0.78 : 0.72;
+    plasticMaterial.environmentIntensity = dark ? 0.98 : 0.86;
+    plasticMaterial.clearCoat.intensity = dark ? 0.2 : 0.16;
   }
 }
 
