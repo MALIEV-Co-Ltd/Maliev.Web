@@ -45,7 +45,7 @@
   --quote-border: rgba(23, 23, 23, .18);
   --gizmo-surface: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   --landing-gizmo-surface: radial-gradient(ellipse at 50% 70%, rgba(10, 114, 239, .10) 0%, rgba(10, 114, 239, .04) 35%, transparent 68%);
-  --landing-gizmo-canvas-bg: transparent;
+  --landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12) 0%, rgba(219, 235, 255, .56) 22%, rgba(255, 255, 255, .94) 58%, #ffffff 100%);
   --machine-feature-surface-rgb: 247 248 251;
   --machine-feature-grid-rgb: 23 23 23;
   --machine-feature-panel-rgb: 255 255 255;
@@ -1149,6 +1149,7 @@ html:lang(th) .h1 {
 
 .landing-hero {
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr);
   gap: 48px;
@@ -1160,7 +1161,7 @@ html:lang(th) .h1 {
   min-height: clamp(620px, calc(100svh - 66px), 760px);
   padding-top: 56px;
   padding-bottom: 72px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .landing-hero-copy {
@@ -1447,7 +1448,7 @@ html:lang(th) .h1 {
 }
 
 .landing-hero-visual {
-  position: relative;
+  position: static;
   min-height: 560px;
   overflow: visible;
 }
@@ -1463,9 +1464,17 @@ html:lang(th) .h1 {
 }
 
 .manufacturing-gizmo--landing {
-  height: min(66vh, 620px);
-  min-height: 520px;
-  overflow: visible;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  width: 100vw;
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
   border-radius: 0;
   box-shadow: none;
   background: var(--landing-gizmo-canvas-bg);
@@ -6905,11 +6914,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .landing-hero-visual {
     min-height: clamp(560px, 44vh, 720px);
   }
-
-  .manufacturing-gizmo--landing {
-    height: clamp(560px, 52vh, 720px);
-    min-height: 560px;
-  }
 }
 
 @media (min-width: 2400px) {
@@ -6931,11 +6935,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .landing-hero-visual {
     min-height: clamp(640px, 44vh, 820px);
-  }
-
-  .manufacturing-gizmo--landing {
-    height: clamp(640px, 50vh, 820px);
-    min-height: 640px;
   }
 }
 
@@ -7116,11 +7115,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .landing-hero-visual {
     min-height: 520px;
-  }
-
-  .manufacturing-gizmo--landing {
-    height: min(58vh, 560px);
-    min-height: 500px;
   }
 }
 
@@ -7583,13 +7577,19 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .landing-hero-visual {
+    position: relative;
     width: min(100%, 820px);
     min-height: 440px;
   }
 
   .manufacturing-gizmo--landing {
+    position: relative;
+    inset: auto;
+    width: 100%;
     height: min(46vh, 470px);
     min-height: 440px;
+    overflow: visible;
+    transform: none;
   }
 }
 
@@ -7840,6 +7840,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .landing-hero-visual {
+    position: relative;
     grid-area: visual;
     justify-self: center;
     width: min(100%, 360px);
@@ -7853,9 +7854,13 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .manufacturing-gizmo--landing {
+    position: relative;
+    inset: auto;
+    width: 100%;
     height: clamp(140px, 40vw, 180px);
     min-height: 0;
     overflow: hidden;
+    transform: none;
   }
 
   .manufacturing-gizmo--service {

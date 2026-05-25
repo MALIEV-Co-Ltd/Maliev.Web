@@ -332,6 +332,13 @@ async function createLandingHeroScene(state, BABYLON) {
 
   const rim = new BABYLON.PointLight("landing-rim", new BABYLON.Vector3(-3.4, 2.1, -2.5), scene);
 
+  // Bounce: low-angle fill from below to prevent models from going black against dark backgrounds
+  const bounce = new BABYLON.PointLight("landing-bounce", new BABYLON.Vector3(0, -4, 2), scene);
+
+  // Edge: right-side directional to carve a separation rim on the side facing the dark background
+  const edge = new BABYLON.DirectionalLight("landing-edge", new BABYLON.Vector3(0.9, 0.2, -0.5), scene);
+  edge.position = new BABYLON.Vector3(-5, 1, 3);
+
   const root = new BABYLON.TransformNode("landing-model-root", scene);
   const modelParts = splitModelUrl(state.modelUrl);
   const result = await BABYLON.SceneLoader.ImportMeshAsync("", modelParts.rootUrl, modelParts.fileName, scene);
@@ -354,12 +361,12 @@ async function createLandingHeroScene(state, BABYLON) {
   state.themeApplicator = () => applyLandingHeroTheme(
     scene,
     plasticMaterial,
-    { fill, key, rim },
+    { fill, key, rim, bounce, edge },
     BABYLON);
   state.themeApplicator();
   observeDocumentTheme(state);
 
-  const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02);
+  const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02);
   root.rotation.copyFrom(baseRotation);
 
   // Snapshot the world AABB *after* baseRotation is applied. This is the single
@@ -423,6 +430,27 @@ function getLandingHeroViewportMetrics(host) {
   const balancedTablet = width >= 640 && width <= 920 && height >= 460;
   const wide = width > 920;
 
+  // When the canvas covers the full viewport (desktop >= 961px), compute where
+  // the right column's center falls as a fraction [0, 1] of the canvas width
+  // so the camera can shift its target to keep the model in that column.
+  let rightCenterFraction = null;
+  if (wide && host) {
+    const hero = host.closest(".landing-hero");
+    const copy = hero?.querySelector(".landing-hero-copy");
+    if (copy && host.clientWidth > 0) {
+      const hostRect = host.getBoundingClientRect();
+      const copyRect = copy.getBoundingClientRect();
+      const copyRightNorm = (copyRect.right - hostRect.left) / hostRect.width;
+      rightCenterFraction = clamp((copyRightNorm + 1) / 2, 0.52, 0.88);
+    }
+  }
+
+  // Effective aspect ratio of just the right column so the framing math
+  // sizes the model to fill that sub-region, not the full hero width.
+  const effectiveAspect = rightCenterFraction != null
+    ? 2 * (1 - rightCenterFraction) * aspect
+    : aspect;
+
   // `fill` is the fraction of the viewport's smaller half-angle that the
   // model's silhouette (rotated, scaled, world-space) should occupy. Higher
   // values pack the model tighter into the canvas; lower values add letterbox.
@@ -431,12 +459,14 @@ function getLandingHeroViewportMetrics(host) {
   // collide with the model.
   return {
     aspect,
+    effectiveAspect,
+    rightCenterFraction,
     fov: narrowTall ? 0.5 : compact ? 0.58 : balancedTablet ? 0.48 : wide ? 0.45 : 0.46,
     fill: narrowTall ? 0.62 : compact ? 0.68 : balancedTablet ? 0.74 : wide ? 0.76 : 0.74,
     minRadius: narrowTall ? 3.6 : compact ? 2.8 : balancedTablet ? 3.4 : 3.6,
     maxRadius: narrowTall ? 12 : compact ? 11 : 11,
     fallbackRadius: narrowTall ? 6.4 : compact ? 5.6 : balancedTablet ? 5.4 : wide ? 5.6 : 5.6,
-    targetY: compact ? 0.01 : 0.02
+    targetY: compact ? -0.04 : wide ? -0.16 : -0.08
   };
 }
 
@@ -453,15 +483,17 @@ function applyLandingHeroFraming(camera, worldBounds, metrics, BABYLON) {
   const size = worldBounds.max.subtract(worldBounds.min);
   const center = worldBounds.min.add(worldBounds.max).scale(0.5);
 
-  camera.target = new BABYLON.Vector3(center.x, center.y + metrics.targetY, center.z);
-
   const halfH = Math.max(size.y / 2, 0.0001);
   const halfW = Math.max(Math.max(size.x, size.z) / 2, 0.0001);
   const halfD = Math.max(size.z, size.x) / 2;
 
   const fill = clamp(metrics.fill ?? 0.7, 0.4, 0.9);
   const verticalFov = Math.max(camera.fov, 0.01);
-  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(metrics.aspect, 0.01));
+
+  // When the canvas covers the full hero, frame against the right-column
+  // sub-aspect so the model fills that region rather than the full canvas.
+  const fovAspect = metrics.effectiveAspect ?? metrics.aspect;
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(fovAspect, 0.01));
 
   // Distance at which the model's half-extent occupies `fill` fraction of the
   // viewport's half-angle. Take the larger of the two axes so neither clips.
@@ -475,6 +507,18 @@ function applyLandingHeroFraming(camera, worldBounds, metrics, BABYLON) {
 
   camera.radius = clamp(radius, metrics.minRadius, metrics.maxRadius);
   refreshCameraMatrices(camera);
+
+  // Shift camera target X so the model appears centred in the right column of
+  // the full-hero canvas. Moving target left pushes the model right in screen
+  // space. The span is computed with the full-hero aspect so offset is correct.
+  let targetX = center.x;
+  if (metrics.rightCenterFraction != null) {
+    const fullHfov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(metrics.aspect, 0.01));
+    const halfSpan = Math.tan(fullHfov / 2) * camera.radius;
+    targetX -= (metrics.rightCenterFraction - 0.5) * 2 * halfSpan;
+  }
+
+  camera.target = new BABYLON.Vector3(targetX, center.y + metrics.targetY, center.z);
 }
 
 /**
@@ -759,19 +803,30 @@ function observeDocumentTheme(state) {
 function applyLandingHeroTheme(scene, plasticMaterial, lights, BABYLON) {
   const dark = document.documentElement.dataset.theme === "dark";
   scene.clearColor = BABYLON.Color4.FromHexString("#00000000");
-  scene.environmentIntensity = dark ? 0.34 : 0.42;
+  scene.environmentIntensity = dark ? 0.55 : 0.42;
 
-  lights.fill.intensity = dark ? 0.92 : 1.25;
-  lights.key.intensity = dark ? 1.78 : 2.1;
-  lights.rim.intensity = dark ? 1.18 : 0.64;
+  // Hemisphere fill: boost ground colour in dark mode so undersides don't go pitch-black
+  lights.fill.intensity = dark ? 1.35 : 1.25;
+  lights.fill.groundColor = BABYLON.Color3.FromHexString(dark ? "#1a2438" : "#c8d4e8");
+
+  lights.key.intensity = dark ? 2.4 : 2.1;
+
+  lights.rim.intensity = dark ? 1.5 : 0.64;
   lights.rim.diffuse = BABYLON.Color3.FromHexString(dark ? "#8fc3ff" : "#f6f6f6");
+
+  // Bounce light from below - creates depth and prevents base from vanishing into dark background
+  lights.bounce.intensity = dark ? 0.9 : 0.25;
+  lights.bounce.diffuse = BABYLON.Color3.FromHexString(dark ? "#304878" : "#dce8f8");
+
+  // Edge light from the right - carves a visible separation rim against the dark canvas
+  lights.edge.intensity = dark ? 1.8 : 0.6;
+  lights.edge.diffuse = BABYLON.Color3.FromHexString(dark ? "#7ab8e0" : "#f0f4ff");
 
   if (plasticMaterial) {
     plasticMaterial.albedoColor = BABYLON.Color3.FromHexString(dark ? "#242a31" : "#171717");
     plasticMaterial.reflectivityColor = BABYLON.Color3.FromHexString(dark ? "#d7e5f5" : "#f5f5f5");
     plasticMaterial.clearCoat.intensity = dark ? 0.3 : 0.22;
   }
-
 }
 
 function configureSceneRuntime(state, engine, scene, cameraConfigurator) {

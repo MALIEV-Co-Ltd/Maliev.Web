@@ -2590,7 +2590,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
         Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg: transparent;", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12)", styles);
+        Assert.Contains("rgba(255, 255, 255, .94) 58%, #ffffff 100%", styles);
         Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
         Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
@@ -2670,7 +2671,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("addIdleLevitation", source);
         Assert.Contains("root.position.y", source);
         Assert.Contains("Math.sin", source);
-        Assert.Contains("const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02)", source);
+        Assert.Contains("const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02)", source);
         Assert.Contains("Math.sin(elapsed * 0.00055) * 0.025", source);
         Assert.DoesNotContain("Math.sin(elapsed * 0.0012) * 0.055", source);
         Assert.DoesNotContain("* 0.24", source);
@@ -2697,7 +2698,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("state.resizeHandler = () => scheduleResizeScene(state);", source);
         Assert.Contains("function applyLandingHeroFraming(camera, worldBounds, metrics, BABYLON)", source);
         Assert.Contains("const center = worldBounds.min.add(worldBounds.max).scale(0.5);", source);
-        Assert.Contains("camera.target = new BABYLON.Vector3(center.x, center.y + metrics.targetY, center.z);", source);
+        Assert.Contains("camera.target = new BABYLON.Vector3(targetX, center.y + metrics.targetY, center.z);", source);
         Assert.Contains("const radius = Math.max(verticalRadius, horizontalRadius) + halfD;", source);
         Assert.Contains("camera.radius = clamp(radius, metrics.minRadius, metrics.maxRadius);", source);
         Assert.Contains("function captureWorldAabb(meshes, BABYLON)", source);
@@ -2722,6 +2723,42 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("will-change: transform;", styles);
         Assert.DoesNotContain("targetFill", source);
         Assert.DoesNotContain("safeInset", source);
+    }
+
+    /// <summary>
+    /// Verifies the home hero canvas paints a full-viewport backdrop in both color themes.
+    /// </summary>
+    [Fact]
+    public void LandingHeroCanvasBackdropSpansViewportInBothThemes()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(to left, rgba(10, 114, 239, .12)", styles);
+        Assert.Contains("rgba(255, 255, 255, .94) 58%, #ffffff 100%", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(135deg, rgba(244, 246, 248, .075)", styles);
+        Assert.Contains(".landing-hero {\n  position: relative;", styles);
+        Assert.Contains("isolation: isolate;\n  display: grid;", styles);
+        Assert.Contains("overflow: visible;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  right: auto;\n  width: 100vw;\n  height: 100%;\n  transform: translateX(-50%);", styles);
+        Assert.Contains("z-index: 0;\n  pointer-events: none;", styles);
+        Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: min(46vh, 470px);\n    min-height: 440px;\n    overflow: visible;\n    transform: none;", styles);
+        Assert.Contains("@media (max-width: 680px)", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;\n    transform: none;", styles);
+        Assert.DoesNotContain("--landing-gizmo-canvas-bg: transparent;", styles);
+    }
+
+    /// <summary>
+    /// Verifies the home hero model is lifted and reclined so the front no longer reads as facing downward.
+    /// </summary>
+    [Fact]
+    public void LandingHeroModelPoseLiftsAndReclinesTheModel()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
+
+        Assert.Contains("targetY: compact ? -0.04 : wide ? -0.16 : -0.08", source);
+        Assert.Contains("const baseRotation = new BABYLON.Vector3(-0.12, -0.36, 0.02)", source);
+        Assert.DoesNotContain("const baseRotation = new BABYLON.Vector3(0.06, -0.36, 0.02)", source);
     }
 
     /// <summary>
@@ -2784,18 +2821,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("align-content: start;", styles);
         Assert.Contains("min-height: auto;", styles);
         Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
-        Assert.DoesNotContain(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
-        Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
+        Assert.DoesNotContain(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
+        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
         Assert.Contains(".metric-strip {\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  gap: clamp(34px, 4vw, 58px);", styles);
         Assert.Contains("width: fit-content;\n  max-width: 100%;", styles);
         Assert.Contains(".metric-strip {\n    justify-content: center;\n    gap: clamp(28px, 6vw, 56px);\n    margin-top: 22px;", styles);
         Assert.Contains("@media (min-width: 1600px)", styles);
-        Assert.Contains("height: clamp(560px, 52vh, 720px);", styles);
         Assert.Contains("@media (min-width: 2400px)", styles);
-        Assert.Contains("height: clamp(640px, 50vh, 820px);", styles);
         Assert.Contains("justify-content: center;", styles);
         Assert.Contains("const narrowTall = width < 700 && height >= 500 && aspect < 1.12;", gizmo);
         Assert.Contains("fill: narrowTall ? 0.62 : compact ? 0.68", gizmo);
@@ -2826,8 +2861,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone-primary {\n    grid-template-columns: 38px minmax(0, 1fr);\n    gap: 10px;", styles);
         Assert.Contains(".landing-quote-dropzone-browse {\n    grid-template-columns: minmax(0, 1fr) auto;", styles);
         Assert.Contains(".landing-quote-dropzone-action {\n    justify-self: start;", styles);
-        Assert.Contains(".landing-hero-visual {\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
+        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 360px);\n    min-height: 0;", styles);
+        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100%;\n    height: clamp(140px, 40vw, 180px);\n    min-height: 0;\n    overflow: hidden;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
         Assert.DoesNotContain("grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);
@@ -2842,7 +2877,7 @@ public sealed class HeroLayoutSourceTests
         var component = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "ManufacturingGizmo.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260518-hover-y\"", component);
+        Assert.Contains("ModulePath = \"/js/manufacturing-gizmo.js?v=20260525-hero-backdrop\"", component);
         Assert.DoesNotContain("tabindex", component);
         Assert.Contains(".manufacturing-gizmo-canvas:focus", styles);
         Assert.Contains(".manufacturing-gizmo-canvas:focus-visible", styles);
