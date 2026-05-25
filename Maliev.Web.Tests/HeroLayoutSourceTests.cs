@@ -555,9 +555,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".workflow-step:nth-child(odd) {\n    grid-column: 1;", styles);
         Assert.Contains(".workflow-step:nth-child(even) {\n    grid-column: 2;", styles);
         Assert.Contains(".workflow-step,\n  .workflow-step:nth-child(odd),\n  .workflow-step:nth-child(even) {\n    grid-column: auto;", styles);
-        Assert.Contains("animation-delay: .16s;", processStyles);
-        Assert.Contains("animation-delay: .32s;", processStyles);
-        Assert.Contains("animation-delay: .48s;", processStyles);
+        Assert.Contains("animation-delay: .26s;", processStyles);
+        Assert.Contains("animation-delay: .52s;", processStyles);
+        Assert.Contains("animation-delay: .78s;", processStyles);
+        Assert.DoesNotContain("animation-delay: .16s;", processStyles);
+        Assert.DoesNotContain("animation-delay: .32s;", processStyles);
+        Assert.DoesNotContain("animation-delay: .48s;", processStyles);
         Assert.Contains("background: transparent;", processStyles);
         Assert.Contains("border: 0;", processStyles);
         Assert.Contains("border-radius: 0;", processStyles);
