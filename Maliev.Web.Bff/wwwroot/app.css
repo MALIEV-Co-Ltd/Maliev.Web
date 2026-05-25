@@ -6180,6 +6180,7 @@ html[data-theme="dark"] .auth-google-icon {
   gap: 12px;
   max-width: 620px;
   padding: 0;
+  padding-inline-start: clamp(20px, 3vw, 36px);
   background: transparent;
   border-radius: 0;
   box-shadow: none;
@@ -8548,6 +8549,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
   .account-nav-card a {
     white-space: nowrap;
+  }
+
+  .account-orders-empty {
+    padding-inline-start: 0;
   }
 
   .account-profile-header,

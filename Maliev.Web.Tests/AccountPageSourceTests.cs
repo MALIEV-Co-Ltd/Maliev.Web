@@ -109,6 +109,22 @@ public sealed class AccountPageSourceTests
         Assert.Contains(".timezone-select", styles);
     }
 
+    /// <summary>
+    /// Verifies the borderless shop-order empty state keeps enough space from the account navigation.
+    /// </summary>
+    [Fact]
+    public void AccountOrdersEmptyStateKeepsSpaceFromNavigation()
+    {
+        var orders = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("class=\"empty-state compact account-orders-empty\"", orders);
+        Assert.Contains(".account-orders-empty", styles);
+        Assert.Contains("padding-inline-start: clamp(20px, 3vw, 36px);", styles);
+        Assert.Contains("@media (max-width: 960px)", styles);
+        Assert.Contains("padding-inline-start: 0;", styles);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();
