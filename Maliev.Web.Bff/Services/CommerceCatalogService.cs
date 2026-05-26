@@ -8,8 +8,11 @@ namespace Maliev.Web.Bff.Services;
 
 internal sealed class CommerceCatalogService(
     ICommerceServiceClient commerceServiceClient,
+    IUploadServiceClient uploadServiceClient,
     ILogger<CommerceCatalogService> logger) : ICommerceCatalogService
 {
+    private const string IntranetCollectionMediaPrefix = "api/v1/commerce/collections/media/";
+
     public async Task<IReadOnlyList<ProductCollectionDto>> GetCollectionsAsync(CancellationToken cancellationToken)
     {
         using var response = await SendAsync(
@@ -25,9 +28,38 @@ internal sealed class CommerceCatalogService(
                 Slug = collection.Handle,
                 Name = Localize(collection.Title),
                 Summary = Localize(collection.Description ?? string.Empty),
+                ImageUrl = BuildCollectionImageUrl(collection),
+                ImageAltText = Localize(string.IsNullOrWhiteSpace(collection.ImageAltText) ? collection.Title : collection.ImageAltText),
                 ExpectedProductCount = 0
             })
             .ToList();
+    }
+
+    public async Task<string?> GetCollectionImageRedirectUrlAsync(string collectionSlug, CancellationToken cancellationToken)
+    {
+        using var response = await SendAsync(
+            () => commerceServiceClient.GetCollectionAsync(collectionSlug, cancellationToken),
+            $"collection {collectionSlug}",
+            cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        var collection = await ReadJsonAsync<CommerceCollectionResponse>(response, $"collection {collectionSlug}", cancellationToken);
+        if (!collection.IsPublished || string.IsNullOrWhiteSpace(collection.ImageUrl))
+        {
+            return null;
+        }
+
+        var imageUrl = collection.ImageUrl.Trim();
+        if (!TryExtractCollectionMediaUploadId(imageUrl, out var uploadId))
+        {
+            return imageUrl;
+        }
+
+        return await uploadServiceClient.GetSignedUrlAsync(uploadId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<ProductSummaryDto>> GetProductsAsync(string? collectionSlug, CancellationToken cancellationToken)
@@ -182,6 +214,39 @@ internal sealed class CommerceCatalogService(
         };
     }
 
+    private static string BuildCollectionImageUrl(CommerceCollectionResponse collection)
+    {
+        if (string.IsNullOrWhiteSpace(collection.ImageUrl))
+        {
+            return string.Empty;
+        }
+
+        var imageUrl = collection.ImageUrl.Trim();
+        return TryExtractCollectionMediaUploadId(imageUrl, out _)
+            ? $"/web/v1/catalog/collections/{Uri.EscapeDataString(collection.Handle)}/image"
+            : imageUrl;
+    }
+
+    private static bool TryExtractCollectionMediaUploadId(string imageUrl, out string uploadId)
+    {
+        var normalized = imageUrl.Trim().TrimStart('/');
+        if (!normalized.StartsWith(IntranetCollectionMediaPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            uploadId = string.Empty;
+            return false;
+        }
+
+        var rawUploadId = normalized[IntranetCollectionMediaPrefix.Length..]
+            .Split(['?', '#'], StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault();
+
+        uploadId = string.IsNullOrWhiteSpace(rawUploadId)
+            ? string.Empty
+            : Uri.UnescapeDataString(rawUploadId);
+
+        return !string.IsNullOrWhiteSpace(uploadId);
+    }
+
     private static bool IsPublished(string status)
     {
         return status.Equals("Published", StringComparison.OrdinalIgnoreCase) ||
@@ -256,6 +321,10 @@ internal sealed class CommerceCollectionResponse
     public string Title { get; set; } = string.Empty;
 
     public string? Description { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public string? ImageAltText { get; set; }
 
     public bool IsPublished { get; set; }
 }

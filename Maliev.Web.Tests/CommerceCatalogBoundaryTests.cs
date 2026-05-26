@@ -16,6 +16,7 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly FakeCommerceServiceClient _commerceServiceClient = new();
+    private readonly FakeUploadServiceClient _uploadServiceClient = new();
 
     /// <summary>
     /// Initializes a new instance of the catalog boundary tests.
@@ -28,6 +29,8 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
             {
                 services.RemoveAll<ICommerceServiceClient>();
                 services.AddSingleton<ICommerceServiceClient>(_commerceServiceClient);
+                services.RemoveAll<IUploadServiceClient>();
+                services.AddSingleton<IUploadServiceClient>(_uploadServiceClient);
             }));
     }
 
@@ -52,6 +55,43 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
         Assert.Equal(99000m, product.PriceThb);
         Assert.Equal("https://cdn.maliev.test/pimm-30.jpg", product.ImageUrl);
         Assert.True(product.IsPublished);
+    }
+
+    /// <summary>
+    /// Verifies public shop collections include CommerceService collection images.
+    /// </summary>
+    [Fact]
+    public async Task GET_CatalogCollections_MapsCommerceServiceCollectionImages()
+    {
+        using var client = _factory.CreateClient();
+
+        var collections = await client.GetFromJsonAsync<List<ProductCollectionDto>>(
+            "/web/v1/catalog/collections");
+
+        Assert.NotNull(collections);
+        var collection = Assert.Single(collections);
+        Assert.Equal("injection-molding-machines", collection.Slug);
+        Assert.Equal("Injection molding machines", collection.Name.En);
+        Assert.Equal("/web/v1/catalog/collections/injection-molding-machines/image", collection.ImageUrl);
+        Assert.Equal("Injection molding machine collection", collection.ImageAltText.En);
+    }
+
+    /// <summary>
+    /// Verifies public collection image requests only redirect after resolving a published collection.
+    /// </summary>
+    [Fact]
+    public async Task GET_CatalogCollectionImage_RedirectsPublishedCollectionMedia()
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        using var response = await client.GetAsync("/web/v1/catalog/collections/injection-molding-machines/image");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("collection-upload", _uploadServiceClient.LastSignedUploadId);
+        Assert.Equal("https://signed.maliev.test/collection-upload.jpg", response.Headers.Location?.ToString());
     }
 
     /// <summary>
@@ -90,8 +130,28 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
                         handle = "injection-molding-machines",
                         title = "Injection molding machines",
                         description = "Pneumatic machine listings.",
+                        imageUrl = "api/v1/commerce/collections/media/collection-upload",
+                        imageAltText = "Injection molding machine collection",
                         isPublished = true
                     }
+                })
+            };
+            return Task.FromResult(response);
+        }
+
+        public Task<HttpResponseMessage> GetCollectionAsync(string handle, CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(new
+                {
+                    id = Guid.Parse("9a9279a5-1038-4644-944e-8e950295aef1"),
+                    handle,
+                    title = "Injection molding machines",
+                    description = "Pneumatic machine listings.",
+                    imageUrl = "api/v1/commerce/collections/media/collection-upload",
+                    imageAltText = "Injection molding machine collection",
+                    isPublished = true
                 })
             };
             return Task.FromResult(response);
@@ -193,6 +253,37 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
         public Task<HttpResponseMessage> CreateCheckoutSessionAsync(object request, CancellationToken cancellationToken)
         {
             throw new NotSupportedException("Catalog boundary tests do not exercise checkout sessions.");
+        }
+    }
+
+    private sealed class FakeUploadServiceClient : IUploadServiceClient
+    {
+        public string? LastSignedUploadId { get; private set; }
+
+        public Task<UploadInitiationResponse> InitiateResumableUploadAsync(UploadInitiationRequest request, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not initiate uploads.");
+        }
+
+        public Task<UploadResponse> CompleteResumableUploadAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not complete uploads.");
+        }
+
+        public Task<HttpResponseMessage> ResumeResumableUploadAsync(string uploadId, Stream content, string? contentType, long? contentLength, string contentRange, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not resume uploads.");
+        }
+
+        public Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("Catalog boundary tests do not load upload metadata.");
+        }
+
+        public Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            LastSignedUploadId = uploadId;
+            return Task.FromResult<string?>("https://signed.maliev.test/collection-upload.jpg");
         }
     }
 }

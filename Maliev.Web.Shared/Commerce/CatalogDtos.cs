@@ -16,6 +16,12 @@ public sealed class ProductCollectionDto
     /// <summary>Gets or sets the localized collection summary.</summary>
     public LocalizedText Summary { get; set; } = new();
 
+    /// <summary>Gets or sets the collection image URL.</summary>
+    public string ImageUrl { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localized collection image alt text.</summary>
+    public LocalizedText ImageAltText { get; set; } = new();
+
     /// <summary>Gets or sets the expected migrated product count.</summary>
     public int ExpectedProductCount { get; set; }
 }

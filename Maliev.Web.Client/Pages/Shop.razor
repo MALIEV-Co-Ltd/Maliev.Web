@@ -38,7 +38,19 @@
             @foreach (var collection in _collections)
             {
                 <button class="@CollectionClass(collection.Slug)" type="button" @onclick="() => SelectCollectionAsync(collection.Slug)">
-                    @collection.Name.For(Preferences.Culture)
+                    @if (!string.IsNullOrWhiteSpace(collection.ImageUrl))
+                    {
+                        <span class="shop-collection-image">
+                            <img src="@collection.ImageUrl" alt="@collection.ImageAltText.For(Preferences.Culture)" loading="lazy" />
+                        </span>
+                    }
+                    <span class="shop-collection-copy">
+                        <span class="shop-collection-name">@collection.Name.For(Preferences.Culture)</span>
+                        @if (!string.IsNullOrWhiteSpace(collection.Summary.For(Preferences.Culture)))
+                        {
+                            <span class="shop-collection-summary">@collection.Summary.For(Preferences.Culture)</span>
+                        }
+                    </span>
                 </button>
             }
         </div>
@@ -121,7 +133,7 @@
 
     private string CollectionClass(string? collection)
     {
-        return collection == _selectedCollection ? "filter-chip active" : "filter-chip";
+        return collection == _selectedCollection ? "filter-chip shop-collection-card active" : "filter-chip shop-collection-card";
     }
 
     private string Price(ProductSummaryDto product)

@@ -10,6 +10,9 @@ public interface ICommerceServiceClient
     /// <summary>Lists published CommerceService collections.</summary>
     Task<HttpResponseMessage> ListCollectionsAsync(CancellationToken cancellationToken);
 
+    /// <summary>Gets a published CommerceService collection by handle.</summary>
+    Task<HttpResponseMessage> GetCollectionAsync(string handle, CancellationToken cancellationToken);
+
     /// <summary>Lists published CommerceService storefront products.</summary>
     Task<HttpResponseMessage> ListProductsAsync(string? collection, CancellationToken cancellationToken);
 
@@ -33,6 +36,11 @@ internal sealed class CommerceServiceClient(HttpClient httpClient) : ICommerceSe
     public Task<HttpResponseMessage> ListCollectionsAsync(CancellationToken cancellationToken)
     {
         return httpClient.GetAsync("/commerce/v1/collections", cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> GetCollectionAsync(string handle, CancellationToken cancellationToken)
+    {
+        return httpClient.GetAsync($"/commerce/v1/collections/{Uri.EscapeDataString(handle)}", cancellationToken);
     }
 
     public Task<HttpResponseMessage> ListProductsAsync(string? collection, CancellationToken cancellationToken)

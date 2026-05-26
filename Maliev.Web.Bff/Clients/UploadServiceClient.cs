@@ -14,6 +14,8 @@ internal interface IUploadServiceClient
     Task<HttpResponseMessage> ResumeResumableUploadAsync(string uploadId, Stream content, string? contentType, long? contentLength, string contentRange, CancellationToken cancellationToken);
 
     Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken);
+
+    Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken);
 }
 
 internal sealed class UploadServiceClient(HttpClient httpClient, IHttpClientFactory httpClientFactory, ILogger<UploadServiceClient> logger) : IUploadServiceClient
@@ -83,6 +85,39 @@ internal sealed class UploadServiceClient(HttpClient httpClient, IHttpClientFact
         }
     }
 
+    public async Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await httpClient.PostAsJsonAsync(
+                $"/upload/v1/files/{Uri.EscapeDataString(uploadId)}/signed-url",
+                new { ExpirationMinutes = 60 },
+                cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new BackendUnavailableException("UploadService", $"UploadService returned {(int)response.StatusCode} while resolving catalog media.");
+            }
+
+            var signedUrl = await response.Content.ReadFromJsonAsync<SignedUrlResponse>(cancellationToken);
+            return signedUrl?.SignedUrl;
+        }
+        catch (BackendUnavailableException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)
+        {
+            logger.LogWarning(ex, "UploadService failed while resolving signed URL for upload {UploadId}", uploadId);
+            throw new BackendUnavailableException("UploadService", "UploadService is unavailable while resolving catalog media.", ex);
+        }
+    }
+
     private async Task<TResponse> SendJsonAsync<TRequest, TResponse>(string path, TRequest request, string action, CancellationToken cancellationToken)
     {
         try
@@ -133,4 +168,9 @@ internal sealed record UploadResponse
     public string StoragePath { get; init; } = string.Empty;
 
     public string Status { get; init; } = string.Empty;
+}
+
+internal sealed record SignedUrlResponse
+{
+    public string SignedUrl { get; init; } = string.Empty;
 }

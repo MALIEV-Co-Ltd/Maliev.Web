@@ -377,6 +377,11 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             return Task.FromResult(collections);
         }
 
+        public Task<string?> GetCollectionImageRedirectUrlAsync(string collectionSlug, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<string?>("https://cdn.example.test/collections/machines.jpg");
+        }
+
         public Task<IReadOnlyList<ProductSummaryDto>> GetProductsAsync(string? collectionSlug, CancellationToken cancellationToken)
         {
             IReadOnlyList<ProductSummaryDto> products = _products

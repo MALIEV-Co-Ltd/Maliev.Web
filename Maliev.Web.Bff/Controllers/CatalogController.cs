@@ -31,6 +31,24 @@ public sealed class CatalogController(ICommerceCatalogService catalogService) : 
         }
     }
 
+    /// <summary>Redirects a published collection image to its current storage URL.</summary>
+    [HttpGet("collections/{slug}/image")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetCollectionImage(string slug, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var imageUrl = await catalogService.GetCollectionImageRedirectUrlAsync(slug, cancellationToken);
+            return string.IsNullOrWhiteSpace(imageUrl) ? NotFound() : Redirect(imageUrl);
+        }
+        catch (BackendUnavailableException ex)
+        {
+            return BackendUnavailable(ex);
+        }
+    }
+
     /// <summary>Gets product cards from the catalog source.</summary>
     [HttpGet("products")]
     [ProducesResponseType(typeof(IReadOnlyList<ProductSummaryDto>), StatusCodes.Status200OK)]

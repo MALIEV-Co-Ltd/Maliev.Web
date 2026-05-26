@@ -10,6 +10,9 @@ public interface ICommerceCatalogService
     /// <summary>Gets customer-visible product collections.</summary>
     Task<IReadOnlyList<ProductCollectionDto>> GetCollectionsAsync(CancellationToken cancellationToken);
 
+    /// <summary>Gets a redirect URL for a published collection image.</summary>
+    Task<string?> GetCollectionImageRedirectUrlAsync(string collectionSlug, CancellationToken cancellationToken);
+
     /// <summary>Gets customer-visible product cards.</summary>
     Task<IReadOnlyList<ProductSummaryDto>> GetProductsAsync(string? collectionSlug, CancellationToken cancellationToken);
 

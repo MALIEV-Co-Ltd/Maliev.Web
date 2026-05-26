@@ -4713,7 +4713,7 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 
 .shop-section {
   display: grid;
-  grid-template-columns: minmax(150px, 180px) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   gap: clamp(28px, 4vw, 56px);
   max-width: none;
   padding: clamp(54px, 6vw, 82px) clamp(18px, 4vw, 72px);
@@ -4738,26 +4738,77 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 
 .shop-category-list {
   display: grid;
-  gap: 2px;
+  gap: 10px;
 }
 
 .shop-category-list .filter-chip {
   justify-content: flex-start;
-  min-height: 32px;
-  padding: 0;
+  min-height: 44px;
+  padding: 8px;
   color: var(--ink);
-  background: transparent;
-  border: 0;
-  border-radius: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
   box-shadow: none;
   font-size: .92rem;
   font-weight: 500;
+  text-align: left;
 }
 
 .shop-category-list .filter-chip.active {
   color: var(--blue-ink);
-  background: transparent;
-  border: 0;
+  background: color-mix(in srgb, var(--blue) 9%, var(--paper));
+  border-color: color-mix(in srgb, var(--blue) 46%, var(--rule));
+}
+
+.shop-collection-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.shop-collection-card:first-child {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shop-collection-image {
+  aspect-ratio: 4 / 3;
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--paper-3);
+}
+
+.shop-collection-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shop-collection-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shop-collection-name,
+.shop-collection-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-collection-name {
+  white-space: nowrap;
+}
+
+.shop-collection-summary {
+  color: var(--muted);
+  display: -webkit-box;
+  font-size: .78rem;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .shop-catalog-stage {
@@ -7445,7 +7496,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .shop-section {
-    grid-template-columns: minmax(130px, 160px) minmax(0, 1fr);
+    grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
   }
 
   .process-grid,
@@ -8338,6 +8389,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     display: flex;
     gap: 14px;
     min-width: max-content;
+  }
+
+  .shop-collection-card {
+    width: 250px;
   }
 
   .product-card-featured {
