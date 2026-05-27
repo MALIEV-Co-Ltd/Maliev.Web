@@ -16,7 +16,8 @@ namespace Maliev.Web.Bff.Controllers;
 public sealed class AddressController(
     IConfiguration configuration,
     ICountryServiceClient countryClient,
-    IRegistryServiceClient registryClient) : ControllerBase
+    IRegistryServiceClient registryClient,
+    IHttpClientFactory httpClientFactory) : ControllerBase
 {
     private static readonly string[] FallbackCountryIso2Codes =
     [
@@ -40,6 +41,46 @@ public sealed class AddressController(
             DefaultZoom = section.GetValue("DefaultZoom", 12),
             IncludedRegionCodes = section.GetSection("IncludedRegionCodes").Get<string[]>() ?? []
         });
+    }
+
+    /// <summary>
+    /// Returns a static map image for a lat/lng pair via Google Static Maps API.
+    /// Falls back to an OpenStreetMap redirect when no Google key is configured.
+    /// </summary>
+    [HttpGet("static-map")]
+    [ResponseCache(Duration = 86400)]
+    [RequirePermission("customer.profile.read")]
+    public async Task<IActionResult> GetStaticMap(
+        [FromQuery] double lat,
+        [FromQuery] double lng,
+        [FromQuery] int width = 320,
+        [FromQuery] int height = 160,
+        CancellationToken cancellationToken = default)
+    {
+        var apiKey = configuration["GoogleMaps:ServerApiKey"]
+            ?? configuration["GoogleMaps:BrowserApiKey"];
+
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            var googleUrl = $"https://maps.googleapis.com/maps/api/staticmap" +
+                $"?center={lat},{lng}&zoom=16&size={width}x{height}&scale=2" +
+                $"&markers=color:red%7C{lat},{lng}&key={apiKey}";
+            try
+            {
+                var img = await httpClientFactory.CreateClient().GetByteArrayAsync(googleUrl, cancellationToken);
+                return File(img, "image/png");
+            }
+            catch
+            {
+                // Fall through to OSM redirect
+            }
+        }
+
+        // OpenStreetMap fallback — no API key required
+        var osmUrl = $"https://staticmap.openstreetmap.de/staticmap.php" +
+            $"?center={lat},{lng}&zoom=16&size={width}x{height}" +
+            $"&markers={lat},{lng},red-dot";
+        return Redirect(osmUrl);
     }
 
     /// <summary>Gets country options supported by the shared address record.</summary>

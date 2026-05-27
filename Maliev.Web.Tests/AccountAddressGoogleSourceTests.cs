@@ -6,17 +6,17 @@ namespace Maliev.Web.Tests;
 public sealed class AccountAddressGoogleSourceTests
 {
     /// <summary>
-    /// Verifies the account address page exposes the Google picker and structured address fields.
+    /// Verifies the account address page uses the unified address search component and exposes structured address fields.
     /// </summary>
     [Fact]
     public void AccountAddresses_UsesGooglePickerAndStructuredFields()
     {
         var page = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
-        var picker = ReadRepoFile("Maliev.Web.Client", "Components", "GoogleAddressPicker.razor");
+        var unified = ReadRepoFile("Maliev.Web.Client", "Components", "UnifiedAddressSearch.razor");
         var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-google-address-picker.js");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
 
-        Assert.Contains("GoogleAddressPicker", page, StringComparison.Ordinal);
+        Assert.Contains("UnifiedAddressSearch", page, StringComparison.Ordinal);
         Assert.Contains("Address No./Moo/Soi/Road", page, StringComparison.Ordinal);
         Assert.Contains("Place name", page, StringComparison.Ordinal);
         Assert.Contains("Mobile Number", page, StringComparison.Ordinal);
@@ -26,8 +26,8 @@ public sealed class AccountAddressGoogleSourceTests
         Assert.Contains("disabled=\"@ProvinceLocked\"", page, StringComparison.Ordinal);
         Assert.Contains("disabled=\"@PostalCodeLocked\"", page, StringComparison.Ordinal);
 
-        Assert.Contains("Search for your location", picker, StringComparison.Ordinal);
-        Assert.Contains("web/v1/address/google-config", picker, StringComparison.Ordinal);
+        Assert.Contains("Search for your location", unified, StringComparison.Ordinal);
+        Assert.Contains("web/v1/address/google-config", unified, StringComparison.Ordinal);
         Assert.Contains("PlaceAutocompleteElement", script, StringComparison.Ordinal);
         Assert.Contains("gmp-select", script, StringComparison.Ordinal);
         Assert.Contains("options.includedRegionCodes = config.includedRegionCodes", script, StringComparison.Ordinal);
@@ -130,20 +130,27 @@ public sealed class AccountAddressGoogleSourceTests
     }
 
     /// <summary>
-    /// Verifies the customer address form uses RegistryService Thai-location suggestions in addition to Google Maps.
+    /// Verifies the customer address form delegates Thai-location suggestions to UnifiedAddressSearch
+    /// and still applies registry selections to the form fields.
     /// </summary>
     [Fact]
     public void AccountAddresses_UsesRegistryServiceThaiLocationSuggestions()
     {
         var page = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+        var unified = ReadRepoFile("Maliev.Web.Client", "Components", "UnifiedAddressSearch.razor");
         var apiClient = ReadRepoFile("Maliev.Web.Client", "Services", "MalievApiClient.cs");
         var googleDtos = ReadRepoFile("Maliev.Web.Shared", "Account", "GoogleAddressDtos.cs");
         var css = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("Thai address registry", page, StringComparison.Ordinal);
-        Assert.Contains("SearchRegistryLocationsAsync", page, StringComparison.Ordinal);
+        // AccountAddresses wires up the callback and applies registry selections to the form
+        Assert.Contains("UnifiedAddressSearch", page, StringComparison.Ordinal);
+        Assert.Contains("RegistrySelectionChanged=\"ApplyRegistryLocation\"", page, StringComparison.Ordinal);
         Assert.Contains("ApplyRegistryLocation", page, StringComparison.Ordinal);
         Assert.Contains("AddressSource = \"RegistryThaiLocation\"", page, StringComparison.Ordinal);
+
+        // UnifiedAddressSearch owns the search UI and calls GetThaiAddressLocationsAsync
+        Assert.Contains("GetThaiAddressLocationsAsync", unified, StringComparison.Ordinal);
+        Assert.Contains("account-registry-suggestions", unified, StringComparison.Ordinal);
         Assert.Contains("GetThaiAddressLocationsAsync", apiClient, StringComparison.Ordinal);
         Assert.Contains("web/v1/address/thai-locations", apiClient, StringComparison.Ordinal);
         Assert.Contains("ThaiAddressRegistryLocationDto", googleDtos, StringComparison.Ordinal);

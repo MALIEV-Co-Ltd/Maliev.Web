@@ -98,6 +98,27 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await GetJsonAsync<List<CustomerAddressDto>>("web/v1/account/addresses", cancellationToken) ?? [];
     }
 
+    internal async Task<IReadOnlyList<CompanySearchResultDto>> SearchCompaniesAsync(string query, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+        {
+            return [];
+        }
+
+        try
+        {
+            return await GetJsonAsync<List<CompanySearchResultDto>>(
+                $"web/v1/account/company-search?q={Uri.EscapeDataString(query)}", cancellationToken) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    internal string BuildStaticMapUrl(decimal lat, decimal lng, int width = 320, int height = 160)
+        => $"web/v1/address/static-map?lat={lat}&lng={lng}&width={width}&height={height}";
+
     internal async Task<IReadOnlyList<AddressCountryOptionDto>> GetAddressCountriesAsync(CancellationToken cancellationToken = default)
     {
         return await GetJsonAsync<List<AddressCountryOptionDto>>("web/v1/address/countries", cancellationToken) ?? [];

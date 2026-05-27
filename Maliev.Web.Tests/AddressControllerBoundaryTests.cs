@@ -19,7 +19,7 @@ public sealed class AddressControllerBoundaryTests
     [Fact]
     public void GetGoogleConfig_NoConfiguredRegion_ReturnsUnrestrictedAutocomplete()
     {
-        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient(), new FakeRegistryServiceClient());
+        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeHttpClientFactory());
 
         var result = Assert.IsType<OkObjectResult>(controller.GetGoogleConfig().Result);
         var config = Assert.IsType<GoogleAddressConfigResponse>(result.Value);
@@ -45,7 +45,7 @@ public sealed class AddressControllerBoundaryTests
                     new { id = thailandId, iso2 = "TH", name = "Thailand" }
                 }
             }
-        }, new FakeRegistryServiceClient());
+        }, new FakeRegistryServiceClient(), new FakeHttpClientFactory());
 
         var action = await controller.GetCountryOptions(CancellationToken.None);
 
@@ -94,7 +94,7 @@ public sealed class AddressControllerBoundaryTests
                         }
                     }
                 }
-            });
+            }, new FakeHttpClientFactory());
 
         var action = await controller.SearchThaiLocationsAsync("pak", cancellationToken: CancellationToken.None);
 
@@ -134,5 +134,10 @@ public sealed class AddressControllerBoundaryTests
                 Content = JsonContent.Create(LocationsResponse ?? new { data = Array.Empty<object>() })
             });
         }
+    }
+
+    private sealed class FakeHttpClientFactory : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new();
     }
 }

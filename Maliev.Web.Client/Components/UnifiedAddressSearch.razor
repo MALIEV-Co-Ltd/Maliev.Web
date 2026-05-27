@@ -1,0 +1,291 @@
+@using Maliev.Web.Shared.Account
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject MalievApiClient Api
+
+<div class="unified-address-search">
+    <label class="form-full" for="@_inputId">
+        @Text("Address search", "ค้นหาที่อยู่")
+    </label>
+    <div class="unified-address-input-row">
+        @if (_googleReady)
+        {
+            <div id="@_autocompleteElementId"
+                 class="account-google-address-autocomplete"
+                 aria-label="@Text("Search for your location", "ค้นหาสถานที่ของคุณ")"></div>
+        }
+        else
+        {
+            <input id="@_inputId"
+                   value="@_query"
+                   @oninput="OnRegistryInput"
+                   autocomplete="off"
+                   placeholder="@Text("Search sub district, district, province, or postal code", "ค้นหาแขวง/ตำบล เขต/อำเภอ จังหวัด หรือรหัสไปรษณีย์")"
+                   aria-label="@Text("Address search", "ค้นหาที่อยู่")"
+                   aria-expanded="@(_registryResults.Count > 0)"
+                   aria-autocomplete="list" />
+        }
+        <button type="button" class="account-google-map-button" @onclick="OpenMapAsync" aria-label="@Text("Open map", "เปิดแผนที่")">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 21s7-6.1 7-12A7 7 0 1 0 5 9c0 5.9 7 12 7 12Zm0-9.2A2.8 2.8 0 1 1 12 6.2a2.8 2.8 0 0 1 0 5.6Z" />
+            </svg>
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_selectedSummary))
+    {
+        <p class="account-google-address-selected">@_selectedSummary</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(_statusMessage))
+    {
+        <p class="account-google-address-status">@_statusMessage</p>
+    }
+    @if (_registryLoading)
+    {
+        <p class="registry-hint">@Text("Searching…", "กำลังค้นหา…")</p>
+    }
+    else if (_registryResults.Count > 0)
+    {
+        <div class="account-registry-suggestions" role="listbox"
+             aria-label="@Text("Address suggestions", "รายการที่อยู่")">
+            @foreach (var loc in _registryResults)
+            {
+                <button type="button" class="account-registry-suggestion" role="option"
+                        @onclick="() => ApplyRegistryLocation(loc)">
+                    <span>@FormatPrimary(loc)</span>
+                    <small>@FormatSecondary(loc)</small>
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@if (_mapOpen)
+{
+    <div class="account-google-map-backdrop" role="dialog" aria-modal="true"
+         aria-label="@Text("Select address on map", "เลือกที่อยู่บนแผนที่")">
+        <div class="account-google-map-dialog">
+            <div class="account-google-map-title">
+                <strong>@Text("Select location", "เลือกตำแหน่ง")</strong>
+                <button type="button" @onclick="CloseMapAsync" aria-label="@Text("Close map", "ปิดแผนที่")">✕</button>
+            </div>
+            <div id="@_mapElementId" class="account-google-map-canvas"></div>
+            <div class="account-google-map-footer">
+                <span>@Text("Drag the marker or click the map to update the address.", "ลากหมุดหรือคลิกแผนที่เพื่ออัปเดตที่อยู่")</span>
+                <button type="button" class="button primary" @onclick="CloseMapAsync">@Text("Done", "เสร็จสิ้น")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private readonly string _autocompleteElementId = $"unified-address-autocomplete-{Guid.NewGuid():N}";
+    private readonly string _mapElementId = $"unified-address-map-{Guid.NewGuid():N}";
+    private readonly string _inputId = $"unified-address-input-{Guid.NewGuid():N}";
+
+    private DotNetObjectReference<UnifiedAddressSearch>? _dotNetRef;
+    private GoogleAddressConfigResponse? _config;
+    private bool _googleReady;
+    private bool _mapOpen;
+    private string? _selectedSummary;
+    private string? _statusMessage;
+    private string _query = string.Empty;
+    private IReadOnlyList<ThaiAddressRegistryLocationDto> _registryResults = [];
+    private bool _registryLoading;
+    private int _registrySearchVersion;
+
+    /// <summary>Gets or sets the current latitude used for map centering.</summary>
+    [Parameter] public decimal? Latitude { get; set; }
+
+    /// <summary>Gets or sets the current longitude used for map centering.</summary>
+    [Parameter] public decimal? Longitude { get; set; }
+
+    /// <summary>Gets or sets the formatted address to display after selection.</summary>
+    [Parameter] public string? FormattedAddress { get; set; }
+
+    /// <summary>Gets or sets the current culture (en / th).</summary>
+    [Parameter] public string Culture { get; set; } = "en";
+
+    /// <summary>Raised when the user selects an address via Google Places or map pin.</summary>
+    [Parameter] public EventCallback<GoogleAddressSelection> SelectionChanged { get; set; }
+
+    /// <summary>Raised when the user selects an address via the Thai registry fallback.</summary>
+    [Parameter] public EventCallback<ThaiAddressRegistryLocationDto> RegistrySelectionChanged { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _googleReady) return;
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        _config = await LoadConfigAsync();
+        _selectedSummary = FormattedAddress;
+
+        if (!string.IsNullOrWhiteSpace(_config.ApiKey))
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeSearch",
+                    _autocompleteElementId, _dotNetRef, _config);
+                _googleReady = true;
+                StateHasChanged();
+                return;
+            }
+            catch (JSException)
+            {
+                // Fall through to registry search
+            }
+        }
+
+        _statusMessage = Text(
+            "Live map search unavailable. Use the Thai address registry below.",
+            "ค้นหาแผนที่ไม่พร้อมใช้งาน ใช้การค้นหาจากทะเบียนแทน");
+        StateHasChanged();
+    }
+
+    private async Task OnRegistryInput(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? string.Empty;
+        var version = ++_registrySearchVersion;
+
+        if (_query.Length < 2)
+        {
+            _registryResults = [];
+            return;
+        }
+
+        _registryLoading = true;
+        try
+        {
+            var results = await Api.GetThaiAddressLocationsAsync(_query, 8);
+            if (version == _registrySearchVersion)
+                _registryResults = results.ToList();
+        }
+        catch
+        {
+            if (version == _registrySearchVersion)
+                _registryResults = [];
+        }
+        finally
+        {
+            if (version == _registrySearchVersion)
+                _registryLoading = false;
+        }
+    }
+
+    private void ApplyRegistryLocation(ThaiAddressRegistryLocationDto location)
+    {
+        _query = FormatPrimary(location);
+        _registryResults = [];
+        _selectedSummary = $"{FormatPrimary(location)}, {FormatSecondary(location)}";
+        _registrySearchVersion++;
+        _ = RegistrySelectionChanged.InvokeAsync(location);
+        StateHasChanged();
+    }
+
+    /// <summary>Receives Google address selections from JavaScript.</summary>
+    [JSInvokable]
+    public async Task NotifyGoogleAddressSelected(GoogleAddressSelection selection)
+    {
+        _selectedSummary = selection.FormattedAddress;
+        _statusMessage = null;
+        await SelectionChanged.InvokeAsync(selection);
+        StateHasChanged();
+    }
+
+    /// <summary>Receives Google picker status updates from JavaScript.</summary>
+    [JSInvokable]
+    public Task NotifyGoogleAddressPickerStatus(string status)
+    {
+        _statusMessage = string.Equals(status, "MapUnavailable", StringComparison.OrdinalIgnoreCase)
+            ? Text(
+                "Google Maps could not load. Use the Thai address registry.",
+                "ไม่สามารถโหลด Google Maps ได้ ใช้การค้นหาจากทะเบียนแทน")
+            : status;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task OpenMapAsync()
+    {
+        _config ??= await LoadConfigAsync();
+        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+        {
+            _statusMessage = Text("Google Maps key is not configured.", "ยังไม่ได้ตั้งค่า Google Maps");
+            return;
+        }
+
+        _mapOpen = true;
+        StateHasChanged();
+        await Task.Yield();
+        try
+        {
+            await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeMap",
+                _mapElementId, _dotNetRef, _config,
+                new { latitude = Latitude, longitude = Longitude });
+        }
+        catch (JSException)
+        {
+            _statusMessage = Text(
+                "Google Maps could not load in this browser.",
+                "ไม่สามารถโหลด Google Maps ได้ในเบราว์เซอร์นี้");
+        }
+    }
+
+    private async Task CloseMapAsync()
+    {
+        _mapOpen = false;
+        await TryDisposeJsResourceAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
+    }
+
+    private async Task<GoogleAddressConfigResponse> LoadConfigAsync()
+    {
+        try
+        {
+            return await Http.GetFromJsonAsync<GoogleAddressConfigResponse>("web/v1/address/google-config")
+                ?? new GoogleAddressConfigResponse();
+        }
+        catch
+        {
+            return new GoogleAddressConfigResponse();
+        }
+    }
+
+    private bool UseThaiLabels() =>
+        Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase);
+
+    private string FormatPrimary(ThaiAddressRegistryLocationDto loc) =>
+        UseThaiLabels()
+            ? $"{loc.SubDistrictTh}, {loc.DistrictTh}"
+            : $"{loc.SubDistrictEn}, {loc.DistrictEn}";
+
+    private string FormatSecondary(ThaiAddressRegistryLocationDto loc) =>
+        UseThaiLabels()
+            ? $"{loc.ProvinceTh} {loc.PostalCode}"
+            : $"{loc.ProvinceEn} {loc.PostalCode}";
+
+    private string Text(string en, string th) =>
+        Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await TryDisposeJsResourceAsync("malievGoogleAddressPicker.disposeSearch", _autocompleteElementId);
+        if (_mapOpen)
+            await TryDisposeJsResourceAsync("malievGoogleAddressPicker.disposeMap", _mapElementId);
+        _dotNetRef?.Dispose();
+    }
+
+    private async ValueTask TryDisposeJsResourceAsync(string identifier, string elementId)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync(identifier, elementId);
+        }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException ex) when (
+            ex.Message.Contains("JavaScript interop calls cannot be issued", StringComparison.OrdinalIgnoreCase)) { }
+    }
+}
