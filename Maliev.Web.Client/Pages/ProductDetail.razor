@@ -17,25 +17,37 @@ else
 {
     <section class="product-detail">
         <div class="product-detail-media">
-            @if (_selectedImage is not null)
-            {
-                <img src="@_selectedImage.Url" alt="@_selectedImage.Alt" />
-            }
-            @if (_product.Media.Count > 1)
-            {
-                <div class="media-strip">
+            <div class="media-strip">
+                @if (_product.Media.Count > 1)
+                {
                     @foreach (var media in _product.Media)
                     {
-                        <button type="button" class="@MediaButtonClass(media)" @onclick="() => _selectedImage = media">
+                        <button type="button" class="@MediaButtonClass(media)" @onclick="async () => await SelectImage(media)">
                             <img src="@media.Url" alt="" aria-hidden="true" />
                         </button>
                     }
-                </div>
-            }
+                }
+            </div>
+            <div class="product-detail-media-main">
+                @if (_fadingOutImage is not null)
+                {
+                    <img class="product-detail-img product-detail-img--out"
+                         src="@_fadingOutImage.Url"
+                         alt=""
+                         aria-hidden="true" />
+                }
+                @if (_displayedImage is not null)
+                {
+                    <img @key="@_displayedImage.Url"
+                         class="product-detail-img product-detail-img--in"
+                         src="@_displayedImage.Url"
+                         alt="@_displayedImage.Alt" />
+                }
+            </div>
         </div>
         <div class="product-detail-copy">
             <h1>@_product.Title.For(Preferences.Culture)</h1>
-            <p>@_product.Body.For(Preferences.Culture)</p>
+            <div class="product-description">@((MarkupString)_product.Body.For(Preferences.Culture))</div>
             <div class="product-price">@Price(_product)</div>
             @if (_product.Variants.Count > 0)
             {
@@ -72,7 +84,9 @@ else
     public string Handle { get; set; } = string.Empty;
 
     private ProductDetailDto? _product;
-    private ProductMediaDto? _selectedImage;
+    private ProductMediaDto? _displayedImage;
+    private ProductMediaDto? _fadingOutImage;
+    private bool _isTransitioning;
     private string _selectedVariantSku = string.Empty;
     private string? _loadError;
     private ProductVariantDto? SelectedVariant => _product?.Variants.FirstOrDefault(variant => variant.Sku == _selectedVariantSku) ?? _product?.Variants.FirstOrDefault();
@@ -86,11 +100,13 @@ else
     {
         await Preferences.InitializeAsync();
         await Cart.InitializeAsync();
+        _fadingOutImage = null;
+        _isTransitioning = false;
         try
         {
             _loadError = null;
             _product = await Api.GetProductAsync(Handle);
-            _selectedImage = _product?.Media.FirstOrDefault() ??
+            _displayedImage = _product?.Media.FirstOrDefault() ??
                 (!string.IsNullOrWhiteSpace(_product?.ImageUrl) ? new ProductMediaDto { Url = _product.ImageUrl, Alt = _product.Title.For(Preferences.Culture) } : null);
             _selectedVariantSku = _product?.Variants.FirstOrDefault(variant => variant.Available)?.Sku ??
                 _product?.Variants.FirstOrDefault()?.Sku ??
@@ -100,6 +116,19 @@ else
         {
             _loadError = ex.Message;
         }
+    }
+
+    private async Task SelectImage(ProductMediaDto media)
+    {
+        if (_isTransitioning || media.Url == _displayedImage?.Url) return;
+        _fadingOutImage = _displayedImage;
+        _displayedImage = media;
+        _isTransitioning = true;
+        StateHasChanged();
+        await Task.Delay(240);
+        _fadingOutImage = null;
+        _isTransitioning = false;
+        StateHasChanged();
     }
 
     private async Task AddToCart()
@@ -112,7 +141,7 @@ else
 
     private string MediaButtonClass(ProductMediaDto media)
     {
-        return media.Url == _selectedImage?.Url ? "media-thumb active" : "media-thumb";
+        return media.Url == _displayedImage?.Url ? "media-thumb active" : "media-thumb";
     }
 
     private string Price(ProductSummaryDto product)
