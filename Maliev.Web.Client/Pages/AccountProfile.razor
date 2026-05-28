@@ -119,7 +119,7 @@
                                 {
                                     <span class="company-search-hint">@Text("Searching…", "กำลังค้นหา…")</span>
                                 }
-                                @if (!_companySearching && _companyResults.Count == 0 && _companySearchQuery.Length >= 2 && !_companySearched)
+                                @if (!_companySearching && _companyResults.Count == 0 && _companySearchQuery.Length >= 2 && _companySearched)
                                 {
                                     <span class="company-search-hint">@Text("No matching companies found", "ไม่พบบริษัทที่ตรงกัน")</span>
                                 }
@@ -262,15 +262,83 @@
 
     private static readonly IReadOnlyList<TimezoneOption> TimezoneOptions =
     [
-        new("Asia/Bangkok", "Asia/Bangkok (GMT+7)"),
-        new("Asia/Singapore", "Asia/Singapore (GMT+8)"),
-        new("Asia/Hong_Kong", "Asia/Hong Kong (GMT+8)"),
-        new("Asia/Tokyo", "Asia/Tokyo (GMT+9)"),
-        new("Europe/London", "Europe/London (GMT+0/+1)"),
-        new("Europe/Berlin", "Europe/Berlin (GMT+1/+2)"),
+        new("UTC", "UTC (GMT+0)"),
+        // Africa
+        new("Africa/Cairo", "Africa/Cairo (GMT+2/+3)"),
+        new("Africa/Johannesburg", "Africa/Johannesburg (GMT+2)"),
+        new("Africa/Lagos", "Africa/Lagos (GMT+1)"),
+        new("Africa/Nairobi", "Africa/Nairobi (GMT+3)"),
+        // Americas
+        new("America/Anchorage", "America/Anchorage (GMT-9/-8)"),
+        new("America/Argentina/Buenos_Aires", "America/Buenos Aires (GMT-3)"),
+        new("America/Bogota", "America/Bogota (GMT-5)"),
+        new("America/Chicago", "America/Chicago (GMT-6/-5)"),
+        new("America/Denver", "America/Denver (GMT-7/-6)"),
+        new("America/Halifax", "America/Halifax (GMT-4/-3)"),
         new("America/Los_Angeles", "America/Los Angeles (GMT-8/-7)"),
+        new("America/Mexico_City", "America/Mexico City (GMT-6/-5)"),
         new("America/New_York", "America/New York (GMT-5/-4)"),
-        new("UTC", "UTC")
+        new("America/Phoenix", "America/Phoenix (GMT-7)"),
+        new("America/Santiago", "America/Santiago (GMT-4/-3)"),
+        new("America/Sao_Paulo", "America/São Paulo (GMT-3)"),
+        new("America/St_Johns", "America/St. John's (GMT-3:30/-2:30)"),
+        new("America/Toronto", "America/Toronto (GMT-5/-4)"),
+        new("America/Vancouver", "America/Vancouver (GMT-8/-7)"),
+        // Asia
+        new("Asia/Almaty", "Asia/Almaty (GMT+6)"),
+        new("Asia/Baghdad", "Asia/Baghdad (GMT+3)"),
+        new("Asia/Bangkok", "Asia/Bangkok (GMT+7)"),
+        new("Asia/Colombo", "Asia/Colombo (GMT+5:30)"),
+        new("Asia/Dhaka", "Asia/Dhaka (GMT+6)"),
+        new("Asia/Dubai", "Asia/Dubai (GMT+4)"),
+        new("Asia/Hong_Kong", "Asia/Hong Kong (GMT+8)"),
+        new("Asia/Jakarta", "Asia/Jakarta (GMT+7)"),
+        new("Asia/Karachi", "Asia/Karachi (GMT+5)"),
+        new("Asia/Kathmandu", "Asia/Kathmandu (GMT+5:45)"),
+        new("Asia/Kolkata", "Asia/Kolkata (GMT+5:30)"),
+        new("Asia/Kuala_Lumpur", "Asia/Kuala Lumpur (GMT+8)"),
+        new("Asia/Manila", "Asia/Manila (GMT+8)"),
+        new("Asia/Muscat", "Asia/Muscat (GMT+4)"),
+        new("Asia/Riyadh", "Asia/Riyadh (GMT+3)"),
+        new("Asia/Seoul", "Asia/Seoul (GMT+9)"),
+        new("Asia/Shanghai", "Asia/Shanghai (GMT+8)"),
+        new("Asia/Singapore", "Asia/Singapore (GMT+8)"),
+        new("Asia/Taipei", "Asia/Taipei (GMT+8)"),
+        new("Asia/Tehran", "Asia/Tehran (GMT+3:30/+4:30)"),
+        new("Asia/Tokyo", "Asia/Tokyo (GMT+9)"),
+        new("Asia/Yangon", "Asia/Yangon (GMT+6:30)"),
+        // Atlantic
+        new("Atlantic/Reykjavik", "Atlantic/Reykjavik (GMT+0)"),
+        // Australia & Pacific
+        new("Australia/Adelaide", "Australia/Adelaide (GMT+9:30/+10:30)"),
+        new("Australia/Brisbane", "Australia/Brisbane (GMT+10)"),
+        new("Australia/Perth", "Australia/Perth (GMT+8)"),
+        new("Australia/Sydney", "Australia/Sydney (GMT+10/+11)"),
+        new("Pacific/Auckland", "Pacific/Auckland (GMT+12/+13)"),
+        new("Pacific/Honolulu", "Pacific/Honolulu (GMT-10)"),
+        new("Pacific/Port_Moresby", "Pacific/Port Moresby (GMT+10)"),
+        // Europe
+        new("Europe/Amsterdam", "Europe/Amsterdam (GMT+1/+2)"),
+        new("Europe/Athens", "Europe/Athens (GMT+2/+3)"),
+        new("Europe/Berlin", "Europe/Berlin (GMT+1/+2)"),
+        new("Europe/Brussels", "Europe/Brussels (GMT+1/+2)"),
+        new("Europe/Bucharest", "Europe/Bucharest (GMT+2/+3)"),
+        new("Europe/Budapest", "Europe/Budapest (GMT+1/+2)"),
+        new("Europe/Copenhagen", "Europe/Copenhagen (GMT+1/+2)"),
+        new("Europe/Dublin", "Europe/Dublin (GMT+0/+1)"),
+        new("Europe/Helsinki", "Europe/Helsinki (GMT+2/+3)"),
+        new("Europe/Istanbul", "Europe/Istanbul (GMT+3)"),
+        new("Europe/Lisbon", "Europe/Lisbon (GMT+0/+1)"),
+        new("Europe/London", "Europe/London (GMT+0/+1)"),
+        new("Europe/Madrid", "Europe/Madrid (GMT+1/+2)"),
+        new("Europe/Moscow", "Europe/Moscow (GMT+3)"),
+        new("Europe/Oslo", "Europe/Oslo (GMT+1/+2)"),
+        new("Europe/Paris", "Europe/Paris (GMT+1/+2)"),
+        new("Europe/Prague", "Europe/Prague (GMT+1/+2)"),
+        new("Europe/Rome", "Europe/Rome (GMT+1/+2)"),
+        new("Europe/Stockholm", "Europe/Stockholm (GMT+1/+2)"),
+        new("Europe/Warsaw", "Europe/Warsaw (GMT+1/+2)"),
+        new("Europe/Zurich", "Europe/Zurich (GMT+1/+2)"),
     ];
 
     protected override async Task OnInitializedAsync()
@@ -392,6 +460,7 @@
             {
                 _companyResults = results;
                 _companySearched = true;
+                StateHasChanged();
             }
         }
         catch (OperationCanceledException)
@@ -431,6 +500,7 @@
             {
                 _companyResults = results;
                 _companySearched = true;
+                StateHasChanged();
             }
         }
         catch

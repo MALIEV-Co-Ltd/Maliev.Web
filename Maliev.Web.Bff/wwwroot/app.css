@@ -4917,7 +4917,7 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 .form-grid select,
 .form-grid textarea,
 .auth-form input,
-.account-form input,
+.account-form input:not([type="radio"]):not([type="checkbox"]),
 .account-form select,
 .account-form textarea,
 .variant-select select,
@@ -5286,6 +5286,31 @@ html[data-theme="dark"] .auth-google-icon {
   position: relative;
 }
 
+.company-search-wrapper > input {
+  padding-right: 44px;
+}
+
+.company-search-trigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  transition: color 0.12s;
+}
+
+.company-search-trigger:hover {
+  color: var(--ink);
+}
+
 .company-search-hint {
   display: block;
   font-size: 0.8em;
@@ -5358,7 +5383,8 @@ html[data-theme="dark"] .auth-google-icon {
   font-size: .86rem;
 }
 
-.account-google-address-row {
+.account-google-address-row,
+.unified-address-input-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 46px;
   gap: 10px;

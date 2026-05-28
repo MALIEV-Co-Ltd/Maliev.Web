@@ -88,6 +88,7 @@
     private DotNetObjectReference<UnifiedAddressSearch>? _dotNetRef;
     private GoogleAddressConfigResponse? _config;
     private bool _googleReady;
+    private bool _needsGoogleInit;
     private bool _mapOpen;
     private string? _selectedSummary;
     private string? _statusMessage;
@@ -117,32 +118,48 @@
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _googleReady) return;
-
-        _dotNetRef = DotNetObjectReference.Create(this);
-        _config = await LoadConfigAsync();
-        _selectedSummary = FormattedAddress;
-
-        if (!string.IsNullOrWhiteSpace(_config.ApiKey))
+        if (firstRender)
         {
-            try
+            _dotNetRef = DotNetObjectReference.Create(this);
+            _config = await LoadConfigAsync();
+            _selectedSummary = FormattedAddress;
+
+            if (!string.IsNullOrWhiteSpace(_config.ApiKey))
             {
-                await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeSearch",
-                    _autocompleteElementId, _dotNetRef, _config);
+                // Phase 1: render the div container first so it exists in the DOM,
+                // then let the next render cycle call initializeSearch (phase 2).
                 _googleReady = true;
+                _needsGoogleInit = true;
                 StateHasChanged();
                 return;
             }
-            catch (JSException)
-            {
-                // Fall through to registry search
-            }
+
+            _statusMessage = Text(
+                "Live map search unavailable. Use the Thai address registry below.",
+                "ค้นหาแผนที่ไม่พร้อมใช้งาน ใช้การค้นหาจากทะเบียนแทน");
+            StateHasChanged();
+            return;
         }
 
-        _statusMessage = Text(
-            "Live map search unavailable. Use the Thai address registry below.",
-            "ค้นหาแผนที่ไม่พร้อมใช้งาน ใช้การค้นหาจากทะเบียนแทน");
-        StateHasChanged();
+        if (_needsGoogleInit)
+        {
+            // Phase 2: the autocomplete div is now in the DOM — attach Google Places.
+            _needsGoogleInit = false;
+            try
+            {
+                await JS.InvokeVoidAsync("malievGoogleAddressPicker.initializeSearch",
+                    _autocompleteElementId, _dotNetRef, _config!);
+            }
+            catch (JSException)
+            {
+                // Google Places unavailable — fall back to registry search.
+                _googleReady = false;
+                _statusMessage = Text(
+                    "Live map search unavailable. Use the Thai address registry below.",
+                    "ค้นหาแผนที่ไม่พร้อมใช้งาน ใช้การค้นหาจากทะเบียนแทน");
+                StateHasChanged();
+            }
+        }
     }
 
     private async Task OnRegistryInput(ChangeEventArgs e)
@@ -192,7 +209,43 @@
         _selectedSummary = selection.FormattedAddress;
         _statusMessage = null;
         await SelectionChanged.InvokeAsync(selection);
+
+        if (!string.IsNullOrWhiteSpace(selection.District) || !string.IsNullOrWhiteSpace(selection.City))
+        {
+            var query = selection.District ?? selection.City ?? string.Empty;
+            if (query.Length >= 2)
+            {
+                try
+                {
+                    var enrichmentResults = await Api.GetThaiAddressLocationsAsync(query, 3);
+                    var match = FindBestRegistryMatch(enrichmentResults, selection);
+                    if (match is not null)
+                    {
+                        await RegistrySelectionChanged.InvokeAsync(match);
+                        _selectedSummary = $"{selection.FormattedAddress} ({match.SubDistrictTh}, {match.DistrictTh})";
+                    }
+                }
+                catch
+                {
+                    // Registry enrichment is best-effort
+                }
+            }
+        }
+
         StateHasChanged();
+    }
+
+    private static ThaiAddressRegistryLocationDto? FindBestRegistryMatch(
+        IReadOnlyList<ThaiAddressRegistryLocationDto> candidates,
+        GoogleAddressSelection selection)
+    {
+        if (candidates.Count == 0) return null;
+        if (candidates.Count == 1) return candidates[0];
+        var provinceMatch = candidates.FirstOrDefault(c =>
+            !string.IsNullOrWhiteSpace(selection.StateProvince) &&
+            (c.ProvinceEn.Contains(selection.StateProvince, StringComparison.OrdinalIgnoreCase) ||
+             c.ProvinceTh.Contains(selection.StateProvince, StringComparison.OrdinalIgnoreCase)));
+        return provinceMatch ?? candidates[0];
     }
 
     /// <summary>Receives Google picker status updates from JavaScript.</summary>

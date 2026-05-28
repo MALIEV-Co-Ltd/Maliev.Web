@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Controllers;
+using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Account;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ public sealed class AddressControllerBoundaryTests
     [Fact]
     public void GetGoogleConfig_NoConfiguredRegion_ReturnsUnrestrictedAutocomplete()
     {
-        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeHttpClientFactory());
+        var controller = new AddressController(new ConfigurationBuilder().Build(), new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeHttpClientFactory(), new StaticMapService(new FakeHttpClientFactory()));
 
         var result = Assert.IsType<OkObjectResult>(controller.GetGoogleConfig().Result);
         var config = Assert.IsType<GoogleAddressConfigResponse>(result.Value);
@@ -45,7 +46,7 @@ public sealed class AddressControllerBoundaryTests
                     new { id = thailandId, iso2 = "TH", name = "Thailand" }
                 }
             }
-        }, new FakeRegistryServiceClient(), new FakeHttpClientFactory());
+        }, new FakeRegistryServiceClient(), new FakeHttpClientFactory(), new StaticMapService(new FakeHttpClientFactory()));
 
         var action = await controller.GetCountryOptions(CancellationToken.None);
 
@@ -94,7 +95,7 @@ public sealed class AddressControllerBoundaryTests
                         }
                     }
                 }
-            }, new FakeHttpClientFactory());
+            }, new FakeHttpClientFactory(), new StaticMapService(new FakeHttpClientFactory()));
 
         var action = await controller.SearchThaiLocationsAsync("pak", cancellationToken: CancellationToken.None);
 
