@@ -4,13 +4,13 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Maliev.Web.Bff.Clients;
-using Maliev.Web.Bff.Security;
-using Maliev.Web.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Maliev.Web.Bff.Security;
+using Maliev.Web.Shared.Security;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -84,7 +84,7 @@ public sealed class AuthController(
             google_user_id = googleUserId,
             email_verified = true,
             profile_image_url = profileImageUrl,
-            preferred_language = Request.Cookies["maliev.culture"] ?? "th",
+            preferred_language = GetLanguageCode(Request.Cookies["maliev.culture"]),
             timezone = "Asia/Bangkok"
         }, cancellationToken);
 
@@ -100,6 +100,7 @@ public sealed class AuthController(
             return RedirectWithError("/auth/sign-in", "Google sign-in returned an incomplete customer session.");
         }
 
+        session.User.EmailVerified = true;
         await SignInCustomerAsync(session.User);
         return LocalRedirect(NormalizeReturnUrl(returnUrl));
     }
@@ -156,6 +157,7 @@ public sealed class AuthController(
             return RedirectWithError("/auth/sign-in", "Sign-in returned an incomplete customer session.");
         }
 
+        session.User.EmailVerified = false;
         await SignInCustomerAsync(session.User);
         return LocalRedirect(NormalizeReturnUrl(form.ReturnUrl));
     }
@@ -175,7 +177,7 @@ public sealed class AuthController(
             lastName = form.LastName,
             password = form.Password,
             registrationMethod = "Email",
-            preferredLanguage = Request.Cookies["maliev.culture"] ?? "th",
+            preferredLanguage = GetLanguageCode(Request.Cookies["maliev.culture"]),
             timezone = "Asia/Bangkok"
         }, cancellationToken);
 
@@ -247,6 +249,101 @@ public sealed class AuthController(
         return Redirect("/");
     }
 
+    /// <summary>
+    /// Handles the email verification link callback from verification emails.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmailCallback([FromQuery] string token, CancellationToken ct)
+    {
+        var response = await authClient.VerifyEmailAsync(new { Token = token }, ct);
+
+        if (!response.IsSuccessStatusCode)
+            return RedirectWithError("/auth/sign-in", "Invalid or expired verification link");
+
+        if (User.Identity?.IsAuthenticated == true)
+            return Redirect("/auth/refresh-claims");
+
+        return Redirect("/auth/sign-in?status=Email verified successfully");
+    }
+
+    /// <summary>
+    /// Refreshes the cookie claims from AuthService after email verification or passkey auth.
+    /// </summary>
+    [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
+    [HttpGet("refresh-claims")]
+    public async Task<IActionResult> RefreshClaims(CancellationToken ct)
+    {
+        var principalIdClaim = User.FindFirst("principal_id")?.Value;
+        if (!Guid.TryParse(principalIdClaim, out var principalId))
+            return Redirect("/auth/sign-in");
+
+        var response = await authClient.GetCurrentPrincipalAsync(principalId, ct);
+        if (!response.IsSuccessStatusCode)
+            return Redirect("/");
+
+        var profile = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
+        var emailVerified = profile.GetProperty("emailVerified").GetBoolean();
+
+        var identity = (ClaimsIdentity)User.Identity!;
+        var existingClaim = identity.FindFirst("email_verified");
+        if (existingClaim is not null)
+            identity.TryRemoveClaim(existingClaim);
+        identity.AddClaim(new Claim("email_verified", emailVerified.ToString().ToLowerInvariant()));
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+        return Redirect("/account/profile");
+    }
+
+    /// <summary>
+    /// Resends the verification email for the current user.
+    /// </summary>
+    [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
+    [HttpPost("resend-verification")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResendVerificationEmail(CancellationToken ct)
+    {
+        var principalIdClaim = User.FindFirst("principal_id")?.Value;
+        if (!Guid.TryParse(principalIdClaim, out var principalId))
+            return Redirect("/auth/sign-in");
+
+        await authClient.ResendVerificationEmailAsync(new { PrincipalId = principalId }, ct);
+
+        return Redirect("/account/profile?status=Verification email resent");
+    }
+
+    /// <summary>
+    /// Handles passkey sign-in — receives principalId from PasskeyService auth result and creates a cookie session.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("passkey-sign-in")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PasskeySignIn([FromForm] PasskeySignInRequest request, CancellationToken ct)
+    {
+        var customerResponse = await customerClient.GetCustomerByPrincipalIdAsync(request.PrincipalId, ct);
+        if (!customerResponse.IsSuccessStatusCode)
+            return BadRequest(new { error = "Customer not found" });
+
+        var customer = await customerResponse.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
+
+        var user = new AuthUser
+        {
+            Sub = request.PrincipalId.ToString(),
+            PrincipalId = request.PrincipalId.ToString(),
+            Email = request.Email ?? (customer.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : null),
+            EmailVerified = true,
+            Name = customer.TryGetProperty("firstName", out var firstNameProp) ? firstNameProp.GetString() ?? string.Empty : string.Empty,
+            ProfileImageUrl = customer.TryGetProperty("profileImageUrl", out var pictureProp) ? pictureProp.GetString() : null
+        };
+        if (!string.IsNullOrWhiteSpace(request.ReturnUrl) && !request.ReturnUrl.Contains("/auth/sign-in", StringComparison.Ordinal))
+            user.ReturnUrl = request.ReturnUrl;
+
+        await SignInCustomerAsync(user);
+
+        return Ok(new { redirectUrl = user.ReturnUrl ?? "/account/profile" });
+    }
+
     private async Task SignInCustomerAsync(AuthUser user)
     {
         var principalId = user.PrincipalId ?? user.UserId;
@@ -281,6 +378,8 @@ public sealed class AuthController(
         {
             claims.Add(new Claim("permission", permission));
         }
+
+        claims.Add(new Claim("email_verified", user.EmailVerified.ToString().ToLowerInvariant()));
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
@@ -321,7 +420,15 @@ public sealed class AuthController(
             returnUrl.StartsWith("/", StringComparison.Ordinal) &&
             !returnUrl.StartsWith("//", StringComparison.Ordinal)
             ? returnUrl
-            : "/projects/new";
+            : "/quotes/new";
+    }
+
+    private static string GetLanguageCode(string? culture)
+    {
+        if (string.IsNullOrWhiteSpace(culture))
+            return "th";
+        var dash = culture.IndexOf('-', StringComparison.Ordinal);
+        return (dash > 0 ? culture[..dash] : culture).ToLowerInvariant();
     }
 
     private static string? GetExternalProfileImageUrl(ClaimsPrincipal principal)
@@ -379,6 +486,21 @@ public sealed class AuthController(
         public string Password { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Posted passkey sign-in form with principalId and optional return URL.
+    /// </summary>
+    public class PasskeySignInRequest
+    {
+        /// <summary>The authenticated principal id.</summary>
+        public Guid PrincipalId { get; set; }
+
+        /// <summary>The principal email.</summary>
+        public string? Email { get; set; }
+
+        /// <summary>Local return URL.</summary>
+        public string? ReturnUrl { get; set; }
+    }
+
     private sealed class AuthLoginResponse
     {
         [JsonPropertyName("user")]
@@ -404,5 +526,13 @@ public sealed class AuthController(
 
         [JsonPropertyName("profile_image_url")]
         public string? ProfileImageUrl { get; set; }
+
+        [JsonPropertyName("sub")]
+        public string? Sub { get; set; }
+
+        [JsonPropertyName("email_verified")]
+        public bool EmailVerified { get; set; }
+
+        public string? ReturnUrl { get; set; }
     }
 }

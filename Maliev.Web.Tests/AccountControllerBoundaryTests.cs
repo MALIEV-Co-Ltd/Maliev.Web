@@ -22,7 +22,7 @@ public sealed class AccountControllerBoundaryTests
     public async Task GetProfile_CustomerServiceTimeout_ReturnsSanitizedUnavailableProblem()
     {
         var customerId = Guid.Parse("39543cbf-f925-4b1c-a723-2402f4f60a5f");
-        var controller = new AccountController(new TimeoutCustomerServiceClient(), new FakeCountryServiceClient())
+        var controller = new AccountController(new TimeoutCustomerServiceClient(), new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -54,7 +54,7 @@ public sealed class AccountControllerBoundaryTests
     public async Task GetProfile_CustomerServiceNotFound_ReturnsUnauthorizedSessionProblem()
     {
         var customerId = Guid.Parse("39543cbf-f925-4b1c-a723-2402f4f60a5f");
-        var controller = new AccountController(new MissingCustomerServiceClient(), new FakeCountryServiceClient())
+        var controller = new AccountController(new MissingCustomerServiceClient(), new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -152,7 +152,7 @@ public sealed class AccountControllerBoundaryTests
 
     private static AccountController CreateController(Guid customerId, ICustomerServiceClient customerClient)
     {
-        return new AccountController(customerClient, new FakeCountryServiceClient())
+        return new AccountController(customerClient, new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -263,6 +263,9 @@ public sealed class AccountControllerBoundaryTests
 
         public Task<HttpResponseMessage> DeleteCustomerAddressAsync(Guid addressId, object request, CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
     private sealed class TimeoutCustomerServiceClient : ICustomerServiceClient
@@ -298,6 +301,9 @@ public sealed class AccountControllerBoundaryTests
 
         public Task<HttpResponseMessage> DeleteCustomerAddressAsync(Guid addressId, object request, CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
     private sealed class MissingCustomerServiceClient : ICustomerServiceClient
@@ -331,6 +337,9 @@ public sealed class AccountControllerBoundaryTests
 
         public Task<HttpResponseMessage> DeleteCustomerAddressAsync(Guid addressId, object request, CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
     private sealed class FakeCountryServiceClient : ICountryServiceClient
@@ -340,5 +349,11 @@ public sealed class AccountControllerBoundaryTests
 
         public Task<HttpResponseMessage> GetCountriesAsync(CancellationToken cancellationToken) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+    }
+
+    private sealed class FakeBusinessRegistryClient : IBusinessRegistryClient
+    {
+        public Task<IReadOnlyList<BusinessRegistryCompanyDto>> SearchAsync(string query, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<BusinessRegistryCompanyDto>>([]);
     }
 }

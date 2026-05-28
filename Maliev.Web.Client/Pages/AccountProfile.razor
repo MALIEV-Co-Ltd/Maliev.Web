@@ -1,7 +1,10 @@
 @page "/account/profile"
 @attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
 @inherits PreferenceAwareComponentBase
+@implements IDisposable
 @inject MalievApiClient Api
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>@Text("Profile", "โปรไฟล์") - MALIEV</PageTitle>
 
@@ -20,6 +23,18 @@
     </div>
 
     <div class="account-panel">
+        @if (!_emailVerified && !_verificationBannerDismissed)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mb-4" ShowCloseIcon="true" CloseIconClicked="DismissVerificationBanner">
+                <MudText>
+                    @Text("Please verify your email address. Check your inbox for the verification link.", "กรุณายืนยันที่อยู่อีเมลของคุณ ตรวจสอบกล่องจดหมายเพื่อค้นหาลิงก์ยืนยัน")
+                </MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="ResendVerificationEmail">
+                    @Text("Resend verification email", "ส่งอีเมลยืนยันอีกครั้ง")
+                </MudButton>
+            </MudAlert>
+        }
+
         @if (_loading)
         {
             <p class="load-message">@Text("Loading profile...", "กำลังโหลดโปรไฟล์...")</p>
@@ -35,7 +50,13 @@
                     </div>
                     @if (!string.IsNullOrWhiteSpace(_status))
                     {
-                        <div class="auth-status account-form-alert" role="status">@_status</div>
+                        <div class="auth-status account-form-alert" role="status">
+                            <span>@_status</span>
+                            @if (RelativeSavedAt is not null)
+                            {
+                                <small class="account-form-alert-time">@RelativeSavedAt</small>
+                            }
+                        </div>
                     }
                     @if (!string.IsNullOrWhiteSpace(_error))
                     {
@@ -80,7 +101,47 @@
                     <div class="account-profile-fields">
                         <label class="account-profile-field account-profile-field-wide">
                             @Text("Company name", "ชื่อบริษัท")
-                            <InputText maxlength="255" @bind-Value="_form.CompanyName" />
+                            <div class="company-search-wrapper">
+                                <input value="@_companySearchQuery"
+                                       @oninput="SearchCompaniesAsync"
+                                       maxlength="255"
+                                       autocomplete="off"
+                                       placeholder="@Text("Search Thai company registry…", "ค้นหาในทะเบียนบริษัทไทย…")"
+                                       aria-label="@Text("Company name", "ชื่อบริษัท")"
+                                       aria-autocomplete="list"
+                                       aria-expanded="@(_companyResults.Count > 0)" />
+                                <button type="button" class="company-search-trigger"
+                                        @onclick="ManualCompanySearchAsync"
+                                        aria-label="@Text("Search companies", "ค้นหาบริษัท")">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                </button>
+                                @if (_companySearching)
+                                {
+                                    <span class="company-search-hint">@Text("Searching…", "กำลังค้นหา…")</span>
+                                }
+                                @if (!_companySearching && _companyResults.Count == 0 && _companySearchQuery.Length >= 2 && !_companySearched)
+                                {
+                                    <span class="company-search-hint">@Text("No matching companies found", "ไม่พบบริษัทที่ตรงกัน")</span>
+                                }
+                                @if (_companyResults.Count > 0)
+                                {
+                                    <div class="company-search-results" role="listbox">
+                                        @foreach (var result in _companyResults)
+                                        {
+                                            <button type="button" class="company-search-result" role="option"
+                                                    @onclick="() => ApplyCompanyResult(result)">
+                                                <span>@result.NameTh</span>
+                                                @if (!string.IsNullOrWhiteSpace(result.NameEn))
+                                                {
+                                                    <small>@result.NameEn</small>
+                                                }
+                                                <small class="company-search-id">@result.JuristicId</small>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <InputText maxlength="255" @bind-Value="_form.CompanyName" style="display:none" aria-hidden="true" tabindex="-1" />
                         </label>
                         <label class="account-profile-field">
                             @Text("VAT / tax ID", "เลขประจำตัวผู้เสียภาษี")
@@ -99,14 +160,41 @@
                             @Text("Company phone", "โทรศัพท์บริษัท")
                             <InputText maxlength="20" @bind-Value="_form.CompanyContactPhone" />
                         </label>
+                        <div class="account-profile-field account-profile-field-wide">
+                            @Text("Branch type", "ประเภทสาขา")
+                            <div class="branch-type-group">
+                                <label class="branch-type-option">
+                                    <input type="radio" name="branchType" value="HQ"
+                                           checked="@(_form.CompanyBranchType != "BRANCH")"
+                                           @onchange="SelectBranchTypeHQ" />
+                                    <span>@Text("Head Office (สำนักงานใหญ่)", "สำนักงานใหญ่")</span>
+                                </label>
+                                <label class="branch-type-option">
+                                    <input type="radio" name="branchType" value="BRANCH"
+                                           checked="@(_form.CompanyBranchType == "BRANCH")"
+                                           @onchange="SelectBranchTypeBranch" />
+                                    <span>@Text("Branch (สาขา)", "สาขา")</span>
+                                </label>
+                            </div>
+                            @if (_form.CompanyBranchType == "BRANCH")
+                            {
+                                <label class="account-profile-field" style="margin-top:8px;">
+                                    @Text("Branch code", "รหัสสาขา")
+                                    <InputText maxlength="5" placeholder="00001"
+                                               @bind-Value="_form.CompanyBranchCode"
+                                               aria-label="@Text("5-digit branch code", "รหัสสาขา 5 หลัก")" />
+                                    <small class="auth-field-help">@Text("5-digit branch number, e.g. 00001", "รหัสสาขา 5 หลัก เช่น 00001")</small>
+                                </label>
+                            }
+                        </div>
                     </div>
                 </section>
                 <div class="account-profile-fields">
                     <div class="account-field account-profile-field">
                         @Text("Preferred language", "ภาษาที่ต้องการ")
                         <div class="language-dropdown">
-                            <button class="language-dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="@_languageDropdownOpen" @onclick="ToggleLanguageDropdown">
-                                <span class="language-option-code">@SelectedLanguage.Code</span>
+                            <button class="language-dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="@_languageDropdownOpen" aria-label="@Text("Preferred language", "ภาษาที่ต้องการ"): @SelectedLanguage.Label" @onclick="ToggleLanguageDropdown">
+                                <img class="language-flag-icon" src="@SelectedLanguage.FlagIcon" alt="@SelectedLanguage.Label" aria-hidden="true" />
                                 <span class="language-option-copy">
                                     <strong>@SelectedLanguage.Label</strong>
                                     <span>@Text(SelectedLanguage.DescriptionEn, SelectedLanguage.DescriptionTh)</span>
@@ -118,7 +206,7 @@
                                     @foreach (var option in LanguageOptions)
                                     {
                                         <button class="@LanguageOptionClass(option.Value)" type="button" role="option" aria-selected="@IsLanguageSelected(option.Value)" @onclick="() => SelectLanguage(option.Value)">
-                                            <span class="language-option-code">@option.Code</span>
+                                            <img class="language-flag-icon" src="@option.FlagIcon" alt="@option.Label" aria-hidden="true" />
                                             <span class="language-option-copy">
                                                 <strong>@option.Label</strong>
                                                 <span>@Text(option.DescriptionEn, option.DescriptionTh)</span>
@@ -151,13 +239,25 @@
     private bool _saving;
     private bool _emailChangeRequested;
     private bool _languageDropdownOpen;
+    private bool _emailVerified = true;
+    private bool _verificationBannerDismissed;
+    private bool _resending;
     private string? _status;
     private string? _error;
+    private DateTime? _savedAt;
+    private string _companySearchQuery = string.Empty;
+    private IReadOnlyList<CompanySearchResultDto> _companyResults = [];
+    private bool _companySearching;
+    private bool _companySearched;
+    private int _companySearchVersion;
+    private System.Threading.CancellationTokenSource? _companySearchCts;
+    private System.Threading.Timer? _relativeTimer;
+    private int _relativeTimerTick;
 
     private static readonly IReadOnlyList<LanguageOption> LanguageOptions =
     [
-        new("en", "EN", "English", "Use English for website labels and account messages.", "ใช้ภาษาอังกฤษสำหรับป้ายกำกับและข้อความบัญชี"),
-        new("th", "TH", "ไทย", "Use Thai for website labels and account messages.", "ใช้ภาษาไทยสำหรับป้ายกำกับและข้อความบัญชี")
+        new("en", "EN", "English", "Use English for website labels and account messages.", "ใช้ภาษาอังกฤษสำหรับป้ายกำกับและข้อความบัญชี", "/images/flags/us.svg"),
+        new("th", "TH", "ไทย", "Use Thai for website labels and account messages.", "ใช้ภาษาไทยสำหรับป้ายกำกับและข้อความบัญชี", "/images/flags/th.svg")
     ];
 
     private static readonly IReadOnlyList<TimezoneOption> TimezoneOptions =
@@ -176,6 +276,9 @@
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var emailVerifiedClaim = state.User.FindFirst("email_verified")?.Value;
+        _emailVerified = emailVerifiedClaim != "false";
         await LoadAsync();
     }
 
@@ -189,6 +292,7 @@
             _form.Email = profile.Email;
             _form.Mobile = profile.Mobile;
             _form.CompanyName = profile.CompanyName;
+            _companySearchQuery = profile.CompanyName ?? string.Empty;
             _form.CompanyVatNumber = profile.CompanyVatNumber;
             _form.CompanyRegistrationNumber = profile.CompanyRegistrationNumber;
             _form.CompanyContactEmail = profile.CompanyContactEmail;
@@ -227,10 +331,18 @@
             _form.CompanyVersion = profile.CompanyVersion;
             _emailChangeRequested = false;
             _status = Text("Profile saved.", "บันทึกโปรไฟล์แล้ว");
+            _savedAt = DateTime.UtcNow;
+            _relativeTimer?.Dispose();
+            _relativeTimerTick = 0;
+            _relativeTimer = new System.Threading.Timer(TickRelativeTimer, null,
+                TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
         }
         catch (Exception ex)
         {
             _error = ex.Message;
+            _savedAt = null;
+            _relativeTimer?.Dispose();
+            _relativeTimer = null;
         }
         finally
         {
@@ -238,16 +350,182 @@
         }
     }
 
+    private void SelectBranchTypeHQ(ChangeEventArgs _)
+    {
+        _form.CompanyBranchType = "HQ";
+        _form.CompanyBranchCode = null;
+    }
+
+    private void SelectBranchTypeBranch(ChangeEventArgs _)
+    {
+        _form.CompanyBranchType = "BRANCH";
+    }
+
+    private async Task SearchCompaniesAsync(ChangeEventArgs e)
+    {
+        var query = e.Value?.ToString() ?? string.Empty;
+        _companySearchQuery = query;
+        _companySearched = false;
+        var version = ++_companySearchVersion;
+
+        _companySearchCts?.Cancel();
+        _companySearchCts = new System.Threading.CancellationTokenSource();
+        var cts = _companySearchCts;
+
+        if (query.Length < 2)
+        {
+            _companyResults = [];
+            _companySearching = false;
+            return;
+        }
+
+        _companySearching = true;
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(300, cts.Token);
+            if (version != _companySearchVersion) return;
+
+            var results = await Api.SearchCompaniesAsync(query, cts.Token);
+            if (version == _companySearchVersion)
+            {
+                _companyResults = results;
+                _companySearched = true;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // debounced away
+        }
+        catch
+        {
+            _companyResults = [];
+        }
+        finally
+        {
+            if (version == _companySearchVersion)
+            {
+                _companySearching = false;
+            }
+        }
+    }
+
+    private async Task ManualCompanySearchAsync()
+    {
+        if (_companySearching || _companySearchQuery.Length < 2) return;
+        var version = ++_companySearchVersion;
+        _companySearched = false;
+
+        _companySearchCts?.Cancel();
+        _companySearchCts = new System.Threading.CancellationTokenSource();
+        var cts = _companySearchCts;
+
+        _companySearching = true;
+        StateHasChanged();
+
+        try
+        {
+            var results = await Api.SearchCompaniesAsync(_companySearchQuery, cts.Token);
+            if (version == _companySearchVersion)
+            {
+                _companyResults = results;
+                _companySearched = true;
+            }
+        }
+        catch
+        {
+            _companyResults = [];
+        }
+        finally
+        {
+            if (version == _companySearchVersion)
+            {
+                _companySearching = false;
+            }
+        }
+    }
+
+    private void ApplyCompanyResult(CompanySearchResultDto result)
+    {
+        _form.CompanyName = result.NameTh;
+        _form.CompanyVatNumber = result.JuristicId;
+        _form.CompanyRegistrationNumber = result.JuristicId;
+        _companySearchQuery = result.NameTh;
+        _companyResults = [];
+        _companySearching = false;
+    }
+
+    public override void Dispose()
+    {
+        _companySearchCts?.Cancel();
+        _companySearchCts?.Dispose();
+        _relativeTimer?.Dispose();
+        base.Dispose();
+    }
+
+    private string? RelativeSavedAt => _savedAt is null ? null : FormatRelative(_savedAt.Value);
+
+    private static string? FormatRelative(DateTime savedAt)
+    {
+        var elapsed = DateTime.UtcNow - savedAt;
+        if (elapsed.TotalSeconds < 30) return "a moment ago";
+        if (elapsed.TotalSeconds < 60) return "a minute ago";
+        if (elapsed.TotalMinutes < 2) return "a minute ago";
+        if (elapsed.TotalMinutes < 60) return $"{(int)elapsed.TotalMinutes} minutes ago";
+        if (elapsed.TotalHours < 2) return "an hour ago";
+        return $"{(int)elapsed.TotalHours} hours ago";
+    }
+
+    private void TickRelativeTimer(object? state)
+    {
+        _relativeTimerTick++;
+        InvokeAsync(StateHasChanged);
+        var elapsed = _savedAt.HasValue ? DateTime.UtcNow - _savedAt.Value : TimeSpan.Zero;
+        var nextTick = elapsed.TotalMinutes < 2 ? 10_000
+            : elapsed.TotalMinutes < 5 ? 30_000
+            : 60_000;
+        _relativeTimer?.Change(nextTick, Timeout.Infinite);
+    }
+
     private void PrepareEmailChange()
     {
         _emailChangeRequested = true;
         _status = null;
+        _savedAt = null;
+        _relativeTimer?.Dispose();
+        _relativeTimer = null;
     }
 
     private void HandleInvalidSubmit()
     {
         _status = null;
         _error = null;
+    }
+
+    private void DismissVerificationBanner(MudAlert _)
+    {
+        _verificationBannerDismissed = true;
+    }
+
+    private async Task ResendVerificationEmail()
+    {
+        if (_resending) return;
+        _resending = true;
+        try
+        {
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>());
+            await Http.PostAsync("/auth/resend-verification", content);
+            _status = Text("Verification email sent! Check your inbox.", "ส่งอีเมลยืนยันแล้ว! ตรวจสอบกล่องจดหมายของคุณ");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _resending = false;
+        }
     }
 
     private void ToggleLanguageDropdown()
@@ -300,7 +578,7 @@
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
 
-    private sealed record LanguageOption(string Value, string Code, string Label, string DescriptionEn, string DescriptionTh);
+    private sealed record LanguageOption(string Value, string Code, string Label, string DescriptionEn, string DescriptionTh, string FlagIcon);
 
     private sealed record TimezoneOption(string Value, string Label);
 }

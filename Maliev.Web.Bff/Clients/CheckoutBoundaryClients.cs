@@ -51,6 +51,9 @@ public interface ICustomerServiceClient
 
     /// <summary>Deletes a customer-owned address.</summary>
     Task<HttpResponseMessage> DeleteCustomerAddressAsync(Guid addressId, object request, CancellationToken cancellationToken);
+
+    /// <summary>Gets customer by principal id.</summary>
+    Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -69,6 +72,36 @@ public interface IAuthServiceClient
 
     /// <summary>Confirms a customer password reset.</summary>
     Task<HttpResponseMessage> ConfirmPasswordResetAsync(object request, CancellationToken cancellationToken);
+
+    /// <summary>Initiates email verification for the current principal.</summary>
+    Task<HttpResponseMessage> InitiateEmailVerificationAsync(object request, CancellationToken ct);
+
+    /// <summary>Verifies an email address using a verification token.</summary>
+    Task<HttpResponseMessage> VerifyEmailAsync(object request, CancellationToken ct);
+
+    /// <summary>Resends the verification email for the current principal.</summary>
+    Task<HttpResponseMessage> ResendVerificationEmailAsync(object request, CancellationToken ct);
+
+    /// <summary>Gets the current principal profile from the AuthService.</summary>
+    Task<HttpResponseMessage> GetCurrentPrincipalAsync(Guid principalId, CancellationToken ct);
+
+    /// <summary>Begins passkey registration, returning WebAuthn credential creation options.</summary>
+    Task<HttpResponseMessage> PasskeyRegisterBeginAsync(object request, CancellationToken ct);
+
+    /// <summary>Completes passkey registration with the created credential.</summary>
+    Task<HttpResponseMessage> PasskeyRegisterCompleteAsync(object request, CancellationToken ct);
+
+    /// <summary>Begins passkey authentication, returning WebAuthn credential request options.</summary>
+    Task<HttpResponseMessage> PasskeyAuthBeginAsync(object request, CancellationToken ct);
+
+    /// <summary>Completes passkey authentication with the assertion.</summary>
+    Task<HttpResponseMessage> PasskeyAuthCompleteAsync(object request, CancellationToken ct);
+
+    /// <summary>Lists passkey credentials for a principal.</summary>
+    Task<HttpResponseMessage> ListPasskeyCredentialsAsync(Guid principalId, CancellationToken ct);
+
+    /// <summary>Deletes a passkey credential.</summary>
+    Task<HttpResponseMessage> DeletePasskeyCredentialAsync(Guid credentialId, Guid principalId, CancellationToken ct);
 }
 
 /// <summary>
@@ -147,6 +180,9 @@ internal sealed class CustomerServiceClient(HttpClient httpClient) : ICustomerSe
         };
         return httpClient.SendAsync(message, cancellationToken);
     }
+
+    public Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken) =>
+        httpClient.GetAsync($"/customer/v1/customers/by-principal/{principalId}", cancellationToken);
 }
 
 internal sealed class AuthServiceClient(HttpClient httpClient) : IAuthServiceClient
@@ -162,6 +198,36 @@ internal sealed class AuthServiceClient(HttpClient httpClient) : IAuthServiceCli
 
     public Task<HttpResponseMessage> ConfirmPasswordResetAsync(object request, CancellationToken cancellationToken) =>
         httpClient.PostAsJsonAsync("/auth/v1/password-reset/confirm", request, cancellationToken);
+
+    public Task<HttpResponseMessage> InitiateEmailVerificationAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/initiate-email-verification", request, ct);
+
+    public Task<HttpResponseMessage> VerifyEmailAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/verify-email", request, ct);
+
+    public Task<HttpResponseMessage> ResendVerificationEmailAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/resend-verification-email", request, ct);
+
+    public Task<HttpResponseMessage> GetCurrentPrincipalAsync(Guid principalId, CancellationToken ct) =>
+        httpClient.GetAsync($"/auth/v1/me?principalId={principalId}", ct);
+
+    public Task<HttpResponseMessage> PasskeyRegisterBeginAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/passkey/register/begin", request, ct);
+
+    public Task<HttpResponseMessage> PasskeyRegisterCompleteAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/passkey/register/complete", request, ct);
+
+    public Task<HttpResponseMessage> PasskeyAuthBeginAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/passkey/auth/begin", request, ct);
+
+    public Task<HttpResponseMessage> PasskeyAuthCompleteAsync(object request, CancellationToken ct) =>
+        httpClient.PostAsJsonAsync("/auth/v1/passkey/auth/complete", request, ct);
+
+    public Task<HttpResponseMessage> ListPasskeyCredentialsAsync(Guid principalId, CancellationToken ct) =>
+        httpClient.GetAsync($"/auth/v1/passkey/credentials?principalId={principalId}", ct);
+
+    public Task<HttpResponseMessage> DeletePasskeyCredentialAsync(Guid credentialId, Guid principalId, CancellationToken ct) =>
+        httpClient.DeleteAsync($"/auth/v1/passkey/credentials/{credentialId}?principalId={principalId}", ct);
 }
 
 internal sealed class CountryServiceClient(HttpClient httpClient) : ICountryServiceClient
