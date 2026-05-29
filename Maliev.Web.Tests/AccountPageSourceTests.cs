@@ -59,7 +59,7 @@ public sealed class AccountPageSourceTests
         Assert.Contains("NdaStatusLabel", account);
         Assert.Contains("NdaCardCopy", account);
         Assert.Contains("QuoteEngineNdasHref", account);
-        Assert.Contains("/auth/quote-engine?returnUrl=/ndas", account);
+        Assert.Contains("/quote/start?returnUrl=/ndas", account);
         Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"Customer tier\", \"ระดับลูกค้า\")", account);
@@ -112,16 +112,17 @@ public sealed class AccountPageSourceTests
     /// Verifies Web routes QuoteEngine account links through a signed session handoff instead of sending customers as anonymous users.
     /// </summary>
     [Fact]
-    public void AccountNdaLinkUsesQuoteEngineSessionHandoff()
+    public void AccountNdaLinkGoesToQuoteEngineViaSharedCookieSSO()
     {
         var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
         var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
 
         Assert.Contains("QuoteEngineNdasHref", account, StringComparison.Ordinal);
-        Assert.Contains("/auth/quote-engine?returnUrl=/ndas", account, StringComparison.Ordinal);
-        Assert.Contains("[HttpGet(\"quote-engine\")]", authController, StringComparison.Ordinal);
-        Assert.Contains("CustomerSessionHandoffToken", authController, StringComparison.Ordinal);
-        Assert.Contains("/auth/web-handoff", authController, StringComparison.Ordinal);
+        // With shared-cookie SSO, the NDA link uses /quote/start which does a plain redirect.
+        Assert.Contains("/quote/start?returnUrl=/ndas", account, StringComparison.Ordinal);
+        Assert.Contains("[HttpGet(\"/quote/start\")]", authController, StringComparison.Ordinal);
+        Assert.DoesNotContain("CustomerSessionHandoffToken", authController, StringComparison.Ordinal);
+        Assert.DoesNotContain("/auth/web-handoff", authController, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -167,12 +168,14 @@ public sealed class AccountPageSourceTests
         Assert.Contains("class=\"button primary account-profile-save\"", profile);
         Assert.DoesNotContain("class=\"success-message\"", profile);
 
-        Assert.Contains("id=\"profile-email\"", profile);
-        Assert.Contains("required", profile);
-        Assert.Contains("autocomplete=\"email\"", profile);
-        Assert.Contains("@bind-Value:event=\"oninput\"", profile);
-        Assert.Contains("ValidationMessage For=\"@(() => _form.Email)\"", profile);
-        Assert.Contains("@Text(\"Need to change it?\", \"ต้องการเปลี่ยนใช่ไหม\")", profile);
+        Assert.Contains("class=\"email-row\"", profile);
+        Assert.Contains("_form.Email", profile);
+        Assert.Contains("_emailChangeState", profile);
+        Assert.Contains("StartEmailChange", profile);
+        Assert.Contains("SendVerificationAsync", profile);
+        Assert.Contains("CancelEmailChange", profile);
+        Assert.Contains("_newEmail", profile);
+        Assert.Contains("@Text(\"Verified\", \"ยืนยันแล้ว\")", profile);
         Assert.Contains("@Text(\"Change email\", \"เปลี่ยนอีเมล\")", profile);
 
         Assert.Contains("class=\"language-dropdown\"", profile);

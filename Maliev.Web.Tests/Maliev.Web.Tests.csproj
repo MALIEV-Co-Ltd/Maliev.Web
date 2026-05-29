@@ -16,6 +16,12 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- Pre-existing suppression — same advisory is suppressed in Maliev.Web.Bff.csproj;
+       the NuGetAuditSuppress does not propagate transitively to test projects. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rxmq-m78w-7wmc" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Maliev.Web.Bff\Maliev.Web.Bff.csproj" />
     <ProjectReference Include="..\Maliev.Web.Client\Maliev.Web.Client.csproj" />

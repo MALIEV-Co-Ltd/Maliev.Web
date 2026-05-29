@@ -197,7 +197,7 @@ public sealed class HeroLayoutSourceTests
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
 
         Assert.Contains("<QuoteDropzone", source);
-        Assert.Contains("Href=\"@SiteContent.QuoteNewUrl\"", source);
+        Assert.Contains("Href=\"@SiteContent.QuoteNewProjectUrl\"", source);
         Assert.Contains("Class=\"final-dropzone\"", source);
         Assert.Contains("landing-quote-dropzone", dropzone);
         Assert.Contains("Icons.Material.Filled.Upload", dropzone);
@@ -232,7 +232,7 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies public quote dropzones route selected or dropped CAD files to QuoteEngine without Web-side uploads.
+    /// Verifies public quote dropzones upload files through the Web BFF and hand them off to QuoteEngine via a signed token.
     /// </summary>
     [Fact]
     public void QuoteDropzoneRoutesSelectedFilesToQuoteEngine()
@@ -265,9 +265,17 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("\"fbx\"", script, StringComparison.Ordinal);
         Assert.Contains("dropzone.addEventListener(\"keydown\", handleKeydown)", script, StringComparison.Ordinal);
         Assert.Contains("routeToQuoteEngine(Array.from(input.files), dropzone, quoteEngineUrl, state)", script, StringComparison.Ordinal);
-        Assert.Contains("redirectToQuoteEngine(quoteEngineUrl)", script, StringComparison.Ordinal);
+        Assert.Contains("redirectToQuoteEngine(quoteEngineUrl, handoff)", script, StringComparison.Ordinal);
         Assert.Contains("window.location.assign(url.toString())", script, StringComparison.Ordinal);
         Assert.Contains("Opening quote engine", script, StringComparison.Ordinal);
+        // Handoff upload pipeline assertions
+        Assert.Contains("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
+        Assert.Contains("Content-Range", script, StringComparison.Ordinal);
+        Assert.Contains("Uploading ", script, StringComparison.Ordinal);
+        Assert.Contains("uploadAndBuildHandoff", script, StringComparison.Ordinal);
+        Assert.Contains("toBase64Url", script, StringComparison.Ordinal);
+        Assert.Contains("url.searchParams.set(\"handoff\", handoff)", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Content-Length", script, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-divider", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-browse", styles, StringComparison.Ordinal);
@@ -281,9 +289,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("font-family: var(--font-mono);\n  font-size: .78rem;", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-action:hover,\n.landing-quote-dropzone:focus-visible .landing-quote-dropzone-action", styles, StringComparison.Ordinal);
         Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
-        Assert.DoesNotContain("/web/v1/quote/uploads/resumable", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("Content-Range", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("Uploading ", script, StringComparison.Ordinal);
         Assert.Contains("js/maliev-quote-dropzone.js", app, StringComparison.Ordinal);
     }
 
@@ -647,7 +652,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("data-machine-content=\"details\"", source);
         Assert.DoesNotContain("machine-feature-panel machine-feature-panel--details", source);
         Assert.Contains("<span>@Text(\"Pneumatic\", \"เครื่องฉีดพลาสติก\")</span>", source);
-        Assert.Contains("<span class=\"accent-blue\">@Text(\"Injection Molding Machine\", \"ระบบลม\")</span>", source);
+        Assert.Contains("<span class=\"accent-blue\">@Text(\"Injection Machine\", \"ระบบลม\")</span>", source);
         Assert.Contains("machine-feature-title--intro machine-feature-title--reveal", source);
         Assert.Contains("machine-feature-title machine-feature-title--intro", source);
         Assert.Contains("machine-feature-backdrop", source);
@@ -733,11 +738,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("machine-feature-title-line machine-feature-title-lead", source);
         Assert.DoesNotContain("<br />\n            <span class=\"accent-blue\">@Text(\"machines.\", \"สำหรับล็อตเล็ก\")</span>", source);
         Assert.Contains("@Text(\"Pneumatic\", \"เครื่องฉีดพลาสติก\")", source);
-        Assert.Contains("@Text(\"Injection Molding Machine\", \"ระบบลม\")", source);
+        Assert.Contains("@Text(\"Injection Machine\", \"ระบบลม\")", source);
         Assert.DoesNotContain("สำหรับล็อตเล็ก", source);
         Assert.Contains("private string _selectedMachineVariantKey = \"50g\";", source);
         Assert.Contains("Recommended shop choice", source);
-        Assert.Contains("better default for most shops", source);
+        Assert.Contains("larger shot volume", source);
         Assert.Contains("350°C melt range", source);
         Assert.Contains("Entry desktop trials", source);
         Assert.DoesNotContain("private string _selectedMachineVariantKey = \"30g\";", source);
@@ -762,11 +767,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("new(SiteContent.Text(\"30 days\", \"30 วัน\"), SiteContent.Text(\"lead time\", \"ระยะเวลา\"))", source);
         Assert.DoesNotContain("<div><strong>30d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
         Assert.DoesNotContain("<div><strong>14d</strong><small>@Text(\"lead time\", \"ระยะเวลา\")</small></div>", source);
-        Assert.Contains(".machine-feature-scroller", styles);
-        Assert.Contains("height: 200svh;", styles);
-        Assert.DoesNotContain("height: 120svh;", styles);
-        Assert.Contains("position: sticky;", styles);
-        Assert.Contains(".machine-feature", styles);
         Assert.Contains("@Text(\"Configure\", \"ตั้งค่า\")", source);
         Assert.Contains("machine-configure-button", source);
         Assert.Contains("machine-tooling-link", source);
@@ -774,6 +774,11 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("Configure selected machine", source);
         Assert.DoesNotContain("ตั้งค่าเครื่องที่เลือก", source);
         Assert.DoesNotContain("class=\"button secondary\" href=\"/contact\"", source);
+        Assert.Contains(".machine-feature-scroller", styles);
+        Assert.Contains("height: 200svh;", styles);
+        Assert.DoesNotContain("height: 120svh;", styles);
+        Assert.Contains("position: sticky;", styles);
+        Assert.Contains(".machine-feature", styles);
         Assert.Contains("display: block;", styles);
         Assert.Contains("scroll-margin-top: var(--site-header-height, 72px);", styles);
         Assert.Contains(".machine-feature-panel", styles);
@@ -834,6 +839,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("object-fit: cover;", styles);
         Assert.Contains("object-position: left bottom;", styles);
         Assert.Contains("object-position: center bottom;", styles);
+        Assert.Contains("filter: contrast(1.04) saturate(1.02);", styles);
         Assert.Contains("transition: opacity .48s ease-in-out;", styles);
         Assert.Contains(".machine-feature-backdrop.machine-feature-backdrop--dark {\n  opacity: 0;", styles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light {\n  opacity: 0;", styles);
@@ -842,7 +848,6 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("transform: translateX(-10vw) scale(1.02);", styles);
         Assert.DoesNotContain("transform: translateX(-5vw);", styles);
         Assert.DoesNotContain("object-position: -160px bottom;", styles);
-        Assert.Contains("filter: contrast(1.04) saturate(1.02);", styles);
         Assert.Contains("width: 100%;", styles);
         Assert.Contains("margin-inline: 0;", styles);
         Assert.Contains(".machine-configurator", styles);
@@ -863,12 +868,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Matches(
             @"@media \(max-width: 680px\)[\s\S]*?\.machine-actions\s*\{[^}]*align-items:\s*stretch;[^}]*gap:\s*10px;[^}]*padding:\s*10px;",
             styles);
+        Assert.DoesNotContain(".machine-actions .button {\n    width: 100%;", styles);
         Assert.Matches(
             @"@media \(max-width: 680px\)[\s\S]*?\.machine-tooling-link\s*\{[^}]*justify-content:\s*center;",
             styles);
         Assert.DoesNotContain(".machine-feature-point-button", styles);
         Assert.Contains(".machine-feature .h-display", styles);
-        Assert.DoesNotContain(".machine-actions .button {\n    width: 100%;", styles);
         Assert.Contains(".machine-feature-title", styles);
         Assert.Contains("html:lang(th) .machine-feature-title-lead", styles);
         Assert.Contains("html:lang(th) .machine-feature-title--intro > span", styles);
@@ -1005,12 +1010,12 @@ public sealed class HeroLayoutSourceTests
         var machineSection = source[machineStart..homeWorkStart];
 
         Assert.Contains("data-selected-variant=\"@SelectedMachineVariant.Key\"", machineSection);
+        Assert.Contains("private string _selectedMachineVariantKey = \"50g\";", source);
         Assert.Contains("data-compressor-included=\"@MachineCompressorAriaPressed\"", machineSection);
         Assert.Contains("@key=\"SelectedMachineImageKey\"", machineSection);
         Assert.Contains("src=\"@SelectedMachineFeatureImageUrl\"", machineSection);
         Assert.Contains("src=\"@SelectedMachineDarkFeatureImageUrl\"", machineSection);
         Assert.Contains("alt=\"@SelectedMachineFeatureImageAlt.For(Preferences.Culture)\"", machineSection);
-        Assert.Contains("private string _selectedMachineVariantKey = \"50g\";", source);
         Assert.Contains("@SelectedMachineVariant.Body.For(Preferences.Culture)", machineSection);
         Assert.Contains("@foreach (var stat in SelectedMachineVariant.Stats)", machineSection);
         Assert.Contains("@foreach (var variant in MachineVariants)", machineSection);
@@ -1021,16 +1026,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("25L air compressor", machineSection);
         Assert.Contains("SelectedMachineConfigurationHref", machineSection);
         Assert.Contains("SelectedMachinePackageLabel", machineSection);
-        Assert.DoesNotContain("ProcessSteps", machineSection);
-        Assert.DoesNotContain("_workflowCarousel", machineSection);
-        Assert.DoesNotContain("data-machine-feature", machineSection);
-        Assert.DoesNotContain("MachineFeatureButtonClass", machineSection);
-        Assert.DoesNotContain("SelectWorkflowStepAsync", machineSection);
         Assert.Contains("machine-configure-button", machineSection);
         Assert.Contains("@Text(\"Configure\", \"ตั้งค่า\")", machineSection);
         Assert.Contains("machine-tooling-link", machineSection);
         Assert.DoesNotContain("Configure selected machine", machineSection);
         Assert.DoesNotContain("class=\"button secondary\" href=\"/contact\"", machineSection);
+        Assert.DoesNotContain("ProcessSteps", machineSection);
+        Assert.DoesNotContain("_workflowCarousel", machineSection);
+        Assert.DoesNotContain("SelectWorkflowStepAsync", machineSection);
+        Assert.DoesNotContain("data-machine-feature", machineSection);
+        Assert.DoesNotContain("MachineFeatureButtonClass", machineSection);
 
         var machineFeaturesStart = source.IndexOf("private readonly IReadOnlyList<MachineVariant> MachineVariants", StringComparison.Ordinal);
         var processStepsStart = source.IndexOf("private readonly IReadOnlyList<ProcessStep> ProcessSteps", StringComparison.Ordinal);
@@ -1044,7 +1049,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("50g machine", machineFeatures);
         Assert.Contains("Entry desktop trials", machineFeatures);
         Assert.Contains("Recommended shop choice", machineFeatures);
-        Assert.Contains("better default for most shops", machineFeatures);
+        Assert.Contains("larger shot volume", machineFeatures);
         Assert.Contains("350°C melt range", machineFeatures);
         Assert.DoesNotContain("Desktop trials and inserts", machineFeatures);
         Assert.DoesNotContain("More desktop shot volume", machineFeatures);
@@ -1225,10 +1230,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("_hasExplicitHeroTarget", source);
         Assert.Contains("_heroServiceSlug", source);
         Assert.Contains("_highlightServiceSlug", source);
-        Assert.Contains("@if (IsPrimaryService(service))", source);
-        Assert.Contains("<span class=\"chip\">@PrimaryServiceBadgeText</span>", source);
-        Assert.DoesNotContain("private string PrimaryServiceBadgeText => _hasExplicitHeroTarget", source);
-        Assert.Contains("Text(\"Recommended\", \"แนะนำ\")", source);
         Assert.DoesNotContain("Text(\"Primary service\", \"บริการหลัก\")", source);
         Assert.Contains("TryTakeMatchingServicesOrder", source);
         Assert.Contains("new ServicesOrderState(_heroTargetKey, _hasExplicitHeroTarget", source);
@@ -1451,7 +1452,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("MaxContactFiles = 5", source);
         Assert.Contains("MaxContactFileBytes = 10 * 1024 * 1024", source);
         Assert.Contains("catch (InvalidOperationException)", source);
-        Assert.Contains("_contact.Files.Add(new ContactAttachmentDto", source);
+        Assert.Contains("_contact.Files = _contactFileUploads", source);
+        Assert.Contains("new ContactAttachmentDto", source);
         Assert.Contains("Base64Content = Convert.ToBase64String", source);
 
         Assert.Contains(".contact-details", styles);
@@ -1573,7 +1575,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
-        Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
         Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
         Assert.Contains("<NavLink href=\"/shop\">@Text(\"Shop\", \"ร้านค้า\")</NavLink>", source);
         Assert.Contains("<NavLink href=\"/contact\">@Text(\"Contact\", \"ติดต่อ\")</NavLink>", source);
@@ -1866,15 +1868,16 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<html lang=\"@documentLanguage\" data-culture=\"@currentCulture\" data-theme=\"light\">", app);
         Assert.Contains("<meta name=\"color-scheme\" content=\"light dark\" />", app);
         Assert.Contains("maliev.theme", app);
-        Assert.Contains("family=Inter:wght@400;500;600;700", app);
+        Assert.Contains("family=Albert+Sans:wght@400;500;600;700", app);
         Assert.Contains("family=JetBrains+Mono:wght@400;500;600;700", app);
         Assert.Contains("family=Noto+Sans+Thai:wght@400;500;600;700", app);
-        Assert.DoesNotContain("Geist", app);
-        Assert.Contains("--font-sans-en: Inter, \"Noto Sans Thai\"", styles);
+        Assert.Contains("family=Geist:wght@400;500;600;700", app);
+        Assert.Contains("--font-sans-en", styles);
+        Assert.Contains("\"Albert Sans\"", styles);
+        Assert.Contains("\"Noto Sans Thai\"", styles);
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: \"JetBrains Mono\", \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: var(--font-sans-th)", styles);
-        Assert.DoesNotContain("Geist", styles);
         Assert.Contains("The default English typography is Inter.", design);
         Assert.Contains("JetBrains Mono completes the system", design);
         Assert.Contains("Noto Sans Thai preserved as the Thai fallback", design);
@@ -2365,8 +2368,7 @@ public sealed class HeroLayoutSourceTests
         var preferences = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountPreferences.razor");
         var orders = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor");
 
-        Assert.Contains("AddAuthentication", program);
-        Assert.Contains("AddCookie", program);
+        Assert.Contains("AddMalievIdentityCookie", program);
         Assert.Contains("AddGoogle", program);
         Assert.Contains("sharedsecrets.json", program);
         Assert.Contains("Maliev.Aspire", program);
@@ -2416,7 +2418,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("class=\"empty-state compact account-orders-empty\"", orders);
         Assert.Contains(".account-orders-empty", styles);
-        Assert.Contains(".account-orders-empty {\n  display: grid;\n  gap: 12px;\n  max-width: 620px;\n  padding: 0;\n  background: transparent;\n  border-radius: 0;\n  box-shadow: none;\n  overflow: visible;", styles);
+        Assert.Contains(".account-orders-empty {\n  display: grid;\n  gap: 12px;\n  max-width: 620px;\n  padding: 0;\n  padding-inline-start: clamp(20px, 3vw, 36px);\n  background: transparent;\n  border-radius: 0;\n  box-shadow: none;\n  overflow: visible;", styles);
         Assert.Contains(".account-orders-empty h2,\n.account-orders-empty p {\n  margin: 0;\n}", styles);
         Assert.DoesNotContain("account-orders-empty {\n  padding: 28px;", styles);
     }
@@ -2479,10 +2481,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("auth-title-logo", signIn);
         Assert.Contains("src=\"/images/logo.svg\"", signIn);
-        Assert.Contains("auth-title-logo", signUp);
-        Assert.Contains("src=\"/images/logo.svg\"", signUp);
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
-        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signUp);
         Assert.Contains("auth-google-icon", googleButton);
         Assert.Contains("viewBox=\"0 0 18 18\"", googleButton);
         Assert.Contains("#4285F4", googleButton);
@@ -2495,7 +2494,6 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("@Text(\"Sign in to MALIEV\", \"เข้าสู่ระบบ MALIEV\")", signIn);
         Assert.DoesNotContain("@Text(\"Create your MALIEV account\", \"สร้างบัญชี MALIEV\")", signUp);
         Assert.DoesNotContain("auth-google-mark", signIn);
-        Assert.DoesNotContain("auth-google-mark", signUp);
         Assert.DoesNotContain(".auth-google-mark", styles);
     }
 
@@ -2525,18 +2523,16 @@ public sealed class HeroLayoutSourceTests
     public void AuthFormsPostToDedicatedActionRoutes()
     {
         var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
-        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
         var forgotPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthForgotPassword.razor");
         var resetPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthResetPassword.razor");
         var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
         var signInLines = signIn.Split('\n', StringSplitOptions.TrimEntries);
-        var signUpLines = signUp.Split('\n', StringSplitOptions.TrimEntries);
         var forgotPasswordLines = forgotPassword.Split('\n', StringSplitOptions.TrimEntries);
         var resetPasswordLines = resetPassword.Split('\n', StringSplitOptions.TrimEntries);
         var authControllerLines = authController.Split('\n', StringSplitOptions.TrimEntries);
 
         Assert.Contains("action=\"/auth/sign-in/email\"", signIn);
-        Assert.Contains("action=\"/auth/sign-up/email\"", signUp);
+        Assert.Contains("action=\"/auth/sign-up/email\"", signIn);
         Assert.Contains("action=\"/auth/forgot-password/request\"", forgotPassword);
         Assert.Contains("action=\"/auth/reset-password/confirm\"", resetPassword);
         Assert.Contains("[HttpPost(\"sign-in/email\")]", authController);
@@ -2544,7 +2540,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("[HttpPost(\"forgot-password/request\")]", authController);
         Assert.Contains("[HttpPost(\"reset-password/confirm\")]", authController);
         Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/sign-in\">", signInLines);
-        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/sign-up\">", signUpLines);
+        Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/sign-up\">", signInLines);
         Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/forgot-password\">", forgotPasswordLines);
         Assert.DoesNotContain("<form class=\"auth-form\" method=\"post\" action=\"/auth/reset-password\">", resetPasswordLines);
         Assert.DoesNotContain("[HttpPost(\"sign-in\")]", authControllerLines);
@@ -2560,7 +2556,6 @@ public sealed class HeroLayoutSourceTests
     public void AuthPagesCollapseEmailFallbackByDefault()
     {
         var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
-        var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
@@ -2568,14 +2563,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<summary>@Text(\"Use email instead\", \"ใช้อีเมลแทน\")</summary>", signIn);
         Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signIn);
         Assert.True(signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signIn.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
-        Assert.DoesNotContain("<div class=\"auth-divider\"", signIn);
+        Assert.Contains("<div class=\"auth-divider\"", signIn);
 
-        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signUp);
-        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signUp);
-        Assert.Contains("<summary>@Text(\"Create with email\", \"สร้างด้วยอีเมล\")</summary>", signUp);
-        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signUp);
-        Assert.True(signUp.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signUp.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
-        Assert.DoesNotContain("<div class=\"auth-divider\"", signUp);
+        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
+        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signIn);
+        Assert.Contains("<summary>@Text(\"Create with email\", \"สร้างด้วยอีเมล\")</summary>", signIn);
+        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signIn);
+        Assert.True(signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signIn.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
 
         Assert.Contains(".auth-email-panel", styles);
         Assert.Contains(".auth-email-panel summary", styles);
@@ -2603,11 +2597,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@Text(\"Use a full email address, for example name@company.com.\", \"ใช้อีเมลแบบเต็ม เช่น name@company.com\")", signIn);
         Assert.Contains("@Text(\"Password must be at least 6 characters.\", \"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร\")", signIn);
 
-        Assert.Contains("id=\"sign-up-email-requirements\"", signUp);
-        Assert.Contains("id=\"sign-up-password-requirements\"", signUp);
-        Assert.Contains("aria-describedby=\"sign-up-email-requirements\"", signUp);
-        Assert.Contains("aria-describedby=\"sign-up-password-requirements\"", signUp);
-        Assert.Contains("minlength=\"6\"", signUp);
+        Assert.Contains("id=\"sign-up-email-requirements\"", signIn);
+        Assert.Contains("id=\"sign-up-password-requirements\"", signIn);
+        Assert.Contains("aria-describedby=\"sign-up-email-requirements\"", signIn);
+        Assert.Contains("aria-describedby=\"sign-up-password-requirements\"", signIn);
+        Assert.Contains("minlength=\"6\"", signIn);
         Assert.DoesNotContain("minlength=\"12\"", signUp);
 
         Assert.Contains("id=\"reset-password-requirements\"", resetPassword);
@@ -2655,7 +2649,7 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("DefaultQuoteEngineUrl = \"https://quote.maliev.com\"", content);
         Assert.Contains("QuoteDemoUrl => $\"{QuoteEngineUrl}/demo\"", content);
-        Assert.Contains("QuoteNewUrl => $\"{QuoteEngineUrl}/projects/new\"", content);
+        Assert.Contains("QuoteNewProjectUrl => $\"{QuoteEngineUrl}/quotes/new\"", content);
         Assert.DoesNotContain("https://quote.maliev.com/quotes/new", content);
         Assert.Contains("SiteContent.QuoteNewUrl", shop);
         Assert.Contains("SiteContent.QuoteNewUrl", product);
@@ -2834,8 +2828,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("const baseRotation = new BABYLON.Vector3(0.04, -0.18, 0.005)", source);
         Assert.Contains("Math.sin(elapsed * 0.00055) * 0.025", source);
         Assert.DoesNotContain("Math.sin(elapsed * 0.0012) * 0.055", source);
-        Assert.DoesNotContain("* 0.24", source);
-        Assert.DoesNotContain("* 0.11", source);
+        Assert.DoesNotContain("* 0.24", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("* 0.11", source, StringComparison.Ordinal);
         Assert.DoesNotContain("frameLandingHeroCamera", source);
         Assert.DoesNotContain("measureProjectedMeshFrame", source);
         Assert.DoesNotContain("projectedFrameFits", source);

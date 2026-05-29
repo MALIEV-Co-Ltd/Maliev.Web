@@ -153,7 +153,7 @@
     private string ResetPasswordHref => string.IsNullOrWhiteSpace(_profile?.Email)
         ? "/auth/forgot-password"
         : $"/auth/forgot-password?email={Uri.EscapeDataString(_profile.Email)}";
-    private string QuoteEngineNdasHref => "/auth/quote-engine?returnUrl=/ndas";
+    private string QuoteEngineNdasHref => "/quote/start?returnUrl=/ndas";
     private string AvatarInitials
     {
         get

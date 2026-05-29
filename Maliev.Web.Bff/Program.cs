@@ -31,25 +31,7 @@ builder.Services.AddLocalization();
 builder.Services.AddMudServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
-var authentication = builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = "MalievExternal";
-    })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-    {
-        options.Cookie.Name = "__Host-Maliev.Web";
-        options.LoginPath = "/auth/sign-in";
-        options.LogoutPath = "/auth/sign-out";
-        options.AccessDeniedPath = "/auth/sign-in";
-        options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
-    })
-    .AddCookie("MalievExternal", options =>
-    {
-        options.Cookie.Name = "__Host-Maliev.Web.External";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-    });
+var authentication = builder.AddMalievIdentityCookie();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -57,7 +39,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
 {
     authentication.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
     {
-        options.SignInScheme = "MalievExternal";
+        options.SignInScheme = IdentityCookieExtensions.ExternalSchemeName;
         options.ClientId = googleClientId;
         options.ClientSecret = googleClientSecret;
         options.CallbackPath = "/auth/google/signin";
@@ -146,8 +128,8 @@ builder.Services.AddScoped<ICheckoutDraftService, CheckoutDraftService>();
 builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
-builder.Services.AddScoped<CustomerSessionHandoffToken>();
 builder.Services.AddScoped<BlogEbookPdfService>();
+builder.Services.AddScoped<StaticMapService>();
 
 var app = builder.Build();
 

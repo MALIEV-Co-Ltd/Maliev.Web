@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Maliev.Web.Bff.Security;
 using Maliev.Web.Shared.Security;
 
 namespace Maliev.Web.Bff.Controllers;
@@ -22,7 +21,6 @@ public sealed class AuthController(
     IAuthServiceClient authClient,
     ICustomerServiceClient customerClient,
     IConfiguration configuration,
-    CustomerSessionHandoffToken sessionHandoffToken,
     ILogger<AuthController> logger) : Controller
 {
     private const string ExternalScheme = "MalievExternal";
@@ -106,29 +104,16 @@ public sealed class AuthController(
     }
 
     /// <summary>
-    /// Creates a short-lived customer session handoff and redirects to the QuoteEngine.
+    /// Sends the user to the QuoteEngine. The shared identity cookie means no explicit
+    /// handoff token is needed — the session is already valid on quote.maliev.com.
     /// </summary>
-    [HttpGet("quote-engine")]
-    [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]
-    public IActionResult QuoteEngine([FromQuery] string? returnUrl = null)
+    [HttpGet("/quote/start")]
+    [AllowAnonymous]
+    public IActionResult QuoteStart([FromQuery] string? returnUrl = null)
     {
-        if (!Guid.TryParse(User.FindFirstValue("customer_id"), out var customerId))
-        {
-            return RedirectWithError("/auth/sign-in", "Sign in again before opening the quote portal.");
-        }
-
-        var now = DateTimeOffset.UtcNow;
-        var token = sessionHandoffToken.Create(new CustomerSessionHandoffPayload(
-            customerId,
-            User.FindFirstValue("principal_id") ?? User.FindFirstValue(ClaimTypes.NameIdentifier),
-            User.FindFirstValue(ClaimTypes.Email),
-            User.FindFirstValue(ClaimTypes.Name),
-            now,
-            now.AddMinutes(2)));
-        var quoteEngineUrl = ResolveQuoteEngineUrl();
+        var quoteEngineUrl = ResolveQuoteEngineUrl().TrimEnd('/');
         var quoteReturnUrl = NormalizeQuoteEngineReturnUrl(returnUrl);
-        var redirect = $"{quoteEngineUrl}/auth/web-handoff?token={Uri.EscapeDataString(token)}&returnUrl={Uri.EscapeDataString(quoteReturnUrl)}";
-        return Redirect(redirect);
+        return Redirect($"{quoteEngineUrl}{quoteReturnUrl}");
     }
 
     /// <summary>
@@ -284,12 +269,36 @@ public sealed class AuthController(
 
         var profile = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
         var emailVerified = profile.GetProperty("emailVerified").GetBoolean();
+        var authEmail = profile.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : null;
 
         var identity = (ClaimsIdentity)User.Identity!;
-        var existingClaim = identity.FindFirst("email_verified");
-        if (existingClaim is not null)
-            identity.TryRemoveClaim(existingClaim);
+
+        var existingVerifiedClaim = identity.FindFirst("email_verified");
+        if (existingVerifiedClaim is not null)
+            identity.TryRemoveClaim(existingVerifiedClaim);
         identity.AddClaim(new Claim("email_verified", emailVerified.ToString().ToLowerInvariant()));
+
+        var currentEmail = identity.FindFirst(ClaimTypes.Email)?.Value;
+        if (!string.IsNullOrWhiteSpace(authEmail) && !string.Equals(currentEmail, authEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            var existingEmailClaim = identity.FindFirst(ClaimTypes.Email);
+            if (existingEmailClaim is not null)
+                identity.TryRemoveClaim(existingEmailClaim);
+            identity.AddClaim(new Claim(ClaimTypes.Email, authEmail));
+
+            var customerIdClaim = identity.FindFirst("customer_id")?.Value;
+            if (Guid.TryParse(customerIdClaim, out var customerId))
+            {
+                try
+                {
+                    using var _ = await customerClient.UpdateCustomerAsync(customerId, new { email = authEmail }, ct);
+                }
+                catch
+                {
+                    // CustomerService sync is best-effort; profile page will re-sync on load
+                }
+            }
+        }
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
@@ -399,9 +408,25 @@ public sealed class AuthController(
 
     private string NormalizeReturnUrl(string? returnUrl)
     {
-        return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? returnUrl
-            : "/account";
+        if (string.IsNullOrWhiteSpace(returnUrl))
+            return "/account";
+        if (Url.IsLocalUrl(returnUrl))
+            return returnUrl;
+        // Allow cross-app return to the QuoteEngine so the user lands back after sign-in.
+        if (IsTrustedCrossAppReturnUrl(returnUrl))
+            return returnUrl;
+        return "/account";
+    }
+
+    private bool IsTrustedCrossAppReturnUrl(string returnUrl)
+    {
+        if (!Uri.TryCreate(returnUrl, UriKind.Absolute, out var uri))
+            return false;
+        if (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)
+            return false;
+        var quoteEngineUrl = ResolveQuoteEngineUrl();
+        return Uri.TryCreate(quoteEngineUrl, UriKind.Absolute, out var quoteUri)
+            && uri.Host.Equals(quoteUri.Host, StringComparison.OrdinalIgnoreCase);
     }
 
     private string ResolveQuoteEngineUrl()
