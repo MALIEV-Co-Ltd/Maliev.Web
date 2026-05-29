@@ -10,6 +10,10 @@ using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
+using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
@@ -32,6 +36,20 @@ builder.Services.AddMudServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 var authentication = builder.AddMalievIdentityCookie();
+// Persist Data Protection keys to Redis so Web and QuoteEngine share the same key ring.
+// Both BFFs must use the same application name (set by AddMalievIdentityCookie) and this
+// Redis key to decrypt each other's __Secure-Maliev.Identity cookies.
+builder.Services.AddSingleton<IPostConfigureOptions<KeyManagementOptions>>(sp =>
+    new PostConfigureOptions<KeyManagementOptions>(Microsoft.Extensions.Options.Options.DefaultName, opts =>
+    {
+        var mux = sp.GetService<IConnectionMultiplexer>();
+        if (mux is not null)
+        {
+            opts.XmlRepository = new RedisXmlRepository(
+                () => mux.GetDatabase(),
+                IdentityCookieExtensions.DataProtectionRedisKey);
+        }
+    }));
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
