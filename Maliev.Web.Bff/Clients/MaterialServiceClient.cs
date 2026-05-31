@@ -8,6 +8,12 @@ internal interface IMaterialServiceClient
     Task<IReadOnlyList<MaterialProcessCatalogResponse>> GetProcessesAsync(CancellationToken cancellationToken);
 
     Task<IReadOnlyList<MaterialCatalogResponse>> GetMaterialsAsync(string processCode, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<SurfaceFinishCatalogResponse>> GetFinishesAsync(string processCode, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<SurfaceFinishCatalogResponse>> GetMaterialFinishesAsync(Guid materialId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<ProcessConfigOptionCatalogResponse>> GetConfigOptionsAsync(string processCode, CancellationToken cancellationToken);
 }
 
 internal sealed class MaterialServiceClient(HttpClient httpClient, ILogger<MaterialServiceClient> logger) : IMaterialServiceClient
@@ -20,6 +26,21 @@ internal sealed class MaterialServiceClient(HttpClient httpClient, ILogger<Mater
     public async Task<IReadOnlyList<MaterialCatalogResponse>> GetMaterialsAsync(string processCode, CancellationToken cancellationToken)
     {
         return await GetAsync<List<MaterialCatalogResponse>>($"/material/v1/manufacturing/processes/{Uri.EscapeDataString(processCode)}/materials", $"materials for {processCode}", cancellationToken) ?? [];
+    }
+
+    public async Task<IReadOnlyList<SurfaceFinishCatalogResponse>> GetFinishesAsync(string processCode, CancellationToken cancellationToken)
+    {
+        return await GetAsync<List<SurfaceFinishCatalogResponse>>($"/material/v1/manufacturing/processes/{Uri.EscapeDataString(processCode)}/finishes", $"surface finishes for {processCode}", cancellationToken) ?? [];
+    }
+
+    public async Task<IReadOnlyList<SurfaceFinishCatalogResponse>> GetMaterialFinishesAsync(Guid materialId, CancellationToken cancellationToken)
+    {
+        return await GetAsync<List<SurfaceFinishCatalogResponse>>($"/material/v1/manufacturing/materials/{materialId}/finishes", $"surface finishes for material {materialId}", cancellationToken) ?? [];
+    }
+
+    public async Task<IReadOnlyList<ProcessConfigOptionCatalogResponse>> GetConfigOptionsAsync(string processCode, CancellationToken cancellationToken)
+    {
+        return await GetAsync<List<ProcessConfigOptionCatalogResponse>>($"/material/v1/manufacturing/processes/{Uri.EscapeDataString(processCode)}/config-options", $"configuration options for {processCode}", cancellationToken) ?? [];
     }
 
     private async Task<T?> GetAsync<T>(string path, string resourceName, CancellationToken cancellationToken)
@@ -66,4 +87,44 @@ internal sealed class MaterialCatalogResponse
     public string Name { get; set; } = string.Empty;
 
     public string? Description { get; set; }
+}
+
+internal sealed class SurfaceFinishCatalogResponse
+{
+    public Guid Id { get; set; }
+
+    public string Code { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public decimal? RaValueUm { get; set; }
+
+    public decimal AdditionalCostPercent { get; set; }
+
+    public string? Description { get; set; }
+
+    public int SortOrder { get; set; }
+}
+
+internal sealed class ProcessConfigOptionCatalogResponse
+{
+    public Guid Id { get; set; }
+
+    public string ConfigKey { get; set; } = string.Empty;
+
+    public string Label { get; set; } = string.Empty;
+
+    public string ConfigType { get; set; } = string.Empty;
+
+    public string? DefaultValue { get; set; }
+
+    public string? OptionsJson { get; set; }
+
+    public string? Unit { get; set; }
+
+    public string? HelpText { get; set; }
+
+    public bool IsRequired { get; set; }
+
+    public int SortOrder { get; set; }
 }

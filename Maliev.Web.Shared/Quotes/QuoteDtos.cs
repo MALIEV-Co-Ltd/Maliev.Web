@@ -42,6 +42,78 @@ public sealed class MaterialOptionDto
 }
 
 /// <summary>
+/// Customer-visible surface finish option.
+/// </summary>
+public sealed class SurfaceFinishOptionDto
+{
+    /// <summary>Gets or sets the downstream surface finish identifier.</summary>
+    public Guid? Id { get; set; }
+
+    /// <summary>Gets or sets the surface finish code.</summary>
+    public string Code { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the process code this surface finish belongs to.</summary>
+    public string ProcessCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localized surface finish name.</summary>
+    public LocalizedText Name { get; set; } = new();
+
+    /// <summary>Gets or sets the localized surface finish summary.</summary>
+    public LocalizedText Summary { get; set; } = new();
+
+    /// <summary>Gets or sets the surface roughness Ra value in micrometers when applicable.</summary>
+    public decimal? RaValueUm { get; set; }
+
+    /// <summary>Gets or sets the additional cost percentage.</summary>
+    public decimal AdditionalCostPercent { get; set; }
+
+    /// <summary>Gets or sets the display order.</summary>
+    public int SortOrder { get; set; }
+
+    /// <summary>Gets or sets the material identifiers this finish is compatible with.</summary>
+    public List<Guid> CompatibleMaterialIds { get; set; } = [];
+}
+
+/// <summary>
+/// Customer-visible process configuration option.
+/// </summary>
+public sealed class ProcessConfigOptionDto
+{
+    /// <summary>Gets or sets the downstream option identifier.</summary>
+    public Guid? Id { get; set; }
+
+    /// <summary>Gets or sets the process code this option belongs to.</summary>
+    public string ProcessCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the machine-readable configuration key.</summary>
+    public string ConfigKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localized option label.</summary>
+    public LocalizedText Label { get; set; } = new();
+
+    /// <summary>Gets or sets the control type, such as dropdown, toggle, number, or text.</summary>
+    public string ConfigType { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the default value represented as a string.</summary>
+    public string? DefaultValue { get; set; }
+
+    /// <summary>Gets or sets the JSON-encoded dropdown options.</summary>
+    public string? OptionsJson { get; set; }
+
+    /// <summary>Gets or sets the display unit suffix.</summary>
+    public string? Unit { get; set; }
+
+    /// <summary>Gets or sets the localized helper text.</summary>
+    public LocalizedText HelpText { get; set; } = new();
+
+    /// <summary>Gets or sets whether the option is required.</summary>
+    public bool IsRequired { get; set; }
+
+    /// <summary>Gets or sets the display order.</summary>
+    public int SortOrder { get; set; }
+}
+
+/// <summary>
 /// Reference data needed to configure a quote.
 /// </summary>
 public sealed class QuoteReferenceDataDto
@@ -51,6 +123,12 @@ public sealed class QuoteReferenceDataDto
 
     /// <summary>Gets or sets material options.</summary>
     public List<MaterialOptionDto> Materials { get; set; } = [];
+
+    /// <summary>Gets or sets surface finish options.</summary>
+    public List<SurfaceFinishOptionDto> SurfaceFinishes { get; set; } = [];
+
+    /// <summary>Gets or sets process configuration options.</summary>
+    public List<ProcessConfigOptionDto> ProcessOptions { get; set; } = [];
 
     /// <summary>Gets or sets supported lead-time codes.</summary>
     public List<string> LeadTimeCodes { get; set; } = [];
@@ -102,6 +180,15 @@ public sealed class QuotePartDraftDto
 
     /// <summary>Gets or sets the selected material code.</summary>
     public string MaterialCode { get; set; } = "PLA";
+
+    /// <summary>Gets or sets the downstream surface finish identifier.</summary>
+    public Guid? SurfaceFinishId { get; set; }
+
+    /// <summary>Gets or sets the selected surface finish code.</summary>
+    public string SurfaceFinishCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets selected process-specific option values keyed by MaterialService config key.</summary>
+    public Dictionary<string, string> ProcessOptionValues { get; set; } = [];
 
     /// <summary>Gets or sets the requested quantity.</summary>
     public int Quantity { get; set; } = 1;

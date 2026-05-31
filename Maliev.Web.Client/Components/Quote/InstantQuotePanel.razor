@@ -1,3 +1,4 @@
+@using System.Text.Json
 @inject MalievApiClient Api
 @inherits PreferenceAwareComponentBase
 
@@ -39,17 +40,105 @@
             @foreach (var part in _parts)
             {
                 <article class="quote-part">
-                    <div>
-                        <strong>@part.File.Name</strong>
-                        <span>@FormatBytes(part.File.SizeBytes) · @(string.IsNullOrWhiteSpace(part.UploadId) ? "uploading" : "uploaded")</span>
+                    <div class="quote-part-header">
+                        <div>
+                            <strong>@part.File.Name</strong>
+                            <span>@FormatBytes(part.File.SizeBytes) · @(string.IsNullOrWhiteSpace(part.UploadId) ? "uploading" : "uploaded")</span>
+                        </div>
+                        <input type="number" min="1" max="999" @bind="part.Quantity" aria-label="Quantity" />
                     </div>
-                    <select @bind="part.MaterialCode" aria-label="Material">
-                        @foreach (var material in _reference.Materials.Where(m => m.ProcessCode == part.ProcessCode))
-                        {
-                            <option value="@material.Code">@material.Name.For(Preferences.Culture)</option>
-                        }
-                    </select>
-                    <input type="number" min="1" max="999" @bind="part.Quantity" aria-label="Quantity" />
+
+                    <div class="quote-config-section">
+                        <span class="quote-config-label">Material</span>
+                        <div class="quote-option-grid" role="radiogroup" aria-label="Material">
+                            @foreach (var material in GetMaterials(part))
+                            {
+                                <button type="button"
+                                        class="@OptionCardClass(IsMaterialSelected(part, material))"
+                                        aria-pressed="@IsMaterialSelected(part, material)"
+                                        @onclick="() => SelectMaterial(part, material)">
+                                    <span class="quote-option-media">
+                                        <img class="quote-option-image" src="@GetMaterialImageUrl(material)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
+                                        <span class="quote-option-fallback" hidden aria-hidden="true">
+                                            <MudIcon Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
+                                        </span>
+                                    </span>
+                                    <span class="quote-option-name">@material.Name.For(Preferences.Culture)</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    @if (GetSurfaceFinishes(part).Any())
+                    {
+                        <div class="quote-config-section">
+                            <span class="quote-config-label">Surface finish</span>
+                            <div class="quote-option-grid" role="radiogroup" aria-label="Surface finish">
+                                @foreach (var finish in GetSurfaceFinishes(part))
+                                {
+                                    <button type="button"
+                                            class="@OptionCardClass(IsSurfaceFinishSelected(part, finish))"
+                                            aria-pressed="@IsSurfaceFinishSelected(part, finish)"
+                                            @onclick="() => SelectSurfaceFinish(part, finish)">
+                                        <span class="quote-option-media">
+                                            <img class="quote-option-image" src="@GetSurfaceFinishImageUrl(finish)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
+                                            <span class="quote-option-fallback" hidden aria-hidden="true">
+                                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
+                                            </span>
+                                        </span>
+                                        <span class="quote-option-name">@finish.Name.For(Preferences.Culture)</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @foreach (var option in GetVisualProcessOptions(part))
+                    {
+                        <div class="quote-config-section">
+                            <span class="quote-config-label">@option.Label.For(Preferences.Culture)</span>
+                            <div class="quote-option-grid" role="radiogroup" aria-label="@option.Label.For(Preferences.Culture)">
+                                @if (IsToggleOption(option))
+                                {
+                                    @foreach (var enabled in ToggleChoices)
+                                    {
+                                        var value = enabled ? "true" : "false";
+                                        <button type="button"
+                                                class="@OptionCardClass(IsConfigOptionSelected(part, option, value))"
+                                                aria-pressed="@IsConfigOptionSelected(part, option, value)"
+                                                @onclick="() => SelectConfigOption(part, option, value)">
+                                            <span class="quote-option-media">
+                                                <img class="quote-option-image" src="@GetConfigOptionImageUrl(option, value)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
+                                                <span class="quote-option-fallback" hidden aria-hidden="true">
+                                                    <MudIcon Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
+                                                </span>
+                                            </span>
+                                            <span class="quote-option-name">@FormatOptionValue(option, value)</span>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    @foreach (var value in GetOptionChoices(option))
+                                    {
+                                        <button type="button"
+                                                class="@OptionCardClass(IsConfigOptionSelected(part, option, value))"
+                                                aria-pressed="@IsConfigOptionSelected(part, option, value)"
+                                                @onclick="() => SelectConfigOption(part, option, value)">
+                                            <span class="quote-option-media">
+                                                <img class="quote-option-image" src="@GetConfigOptionImageUrl(option, value)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
+                                                <span class="quote-option-fallback" hidden aria-hidden="true">
+                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
+                                                </span>
+                                            </span>
+                                            <span class="quote-option-name">@FormatOptionValue(option, value)</span>
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
                     <label class="ack">
                         <input type="checkbox" @bind="part.DfmAcknowledged" />
                         DFM checked
@@ -97,6 +186,11 @@
 </section>
 
 @code {
+    private const string MaterialImageRoot = "/images/materials/";
+    private const string ImageErrorFallback = "this.hidden=true;this.nextElementSibling.hidden=false;";
+    private const string DeburrEdgesConfigKey = "deburr_edges";
+    private static readonly bool[] ToggleChoices = [true, false];
+
     private readonly List<QuotePartDraftDto> _parts = [];
     private QuoteReferenceDataDto _reference = new();
     private QuoteEstimateResponse? _estimate;
@@ -128,7 +222,7 @@
         foreach (var part in _parts)
         {
             part.ProcessCode = code;
-            part.MaterialCode = _reference.Materials.FirstOrDefault(m => m.ProcessCode == code)?.Code ?? part.MaterialCode;
+            ApplyDefaults(part);
         }
     }
 
@@ -137,8 +231,6 @@
         _statusMessage = null;
         foreach (var file in args.GetMultipleFiles(20))
         {
-            var material = _reference.Materials.FirstOrDefault(m => m.ProcessCode == _selectedProcess);
-            var process = _reference.Processes.FirstOrDefault(p => p.Code == _selectedProcess);
             var part = new QuotePartDraftDto
             {
                 File = new QuoteFileDraftDto
@@ -147,11 +239,9 @@
                     SizeBytes = file.Size,
                     ContentType = file.ContentType
                 },
-                ProcessCode = _selectedProcess,
-                ManufacturingProcessId = process?.Id,
-                MaterialCode = material?.Code ?? string.Empty,
-                MaterialId = material?.Id
+                ProcessCode = _selectedProcess
             };
+            ApplyDefaults(part);
             _parts.Add(part);
 
             try
@@ -200,9 +290,293 @@
         }
     }
 
+    private void ApplyDefaults(QuotePartDraftDto part)
+    {
+        var process = _reference.Processes.FirstOrDefault(p => p.Code.Equals(part.ProcessCode, StringComparison.OrdinalIgnoreCase));
+        part.ManufacturingProcessId = process?.Id;
+
+        var material = GetMaterials(part).FirstOrDefault(m =>
+            m.Code.Equals(part.MaterialCode, StringComparison.OrdinalIgnoreCase) ||
+            m.Id == part.MaterialId) ?? GetMaterials(part).FirstOrDefault();
+        if (material is not null)
+        {
+            SelectMaterial(part, material);
+        }
+        else
+        {
+            EnsureProcessOptions(part);
+        }
+    }
+
+    private IEnumerable<MaterialOptionDto> GetMaterials(QuotePartDraftDto part)
+    {
+        return _reference.Materials.Where(material => material.ProcessCode.Equals(part.ProcessCode, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<SurfaceFinishOptionDto> GetSurfaceFinishes(QuotePartDraftDto part)
+    {
+        var finishes = _reference.SurfaceFinishes
+            .Where(finish => finish.ProcessCode.Equals(part.ProcessCode, StringComparison.OrdinalIgnoreCase));
+
+        return part.MaterialId.HasValue
+            ? finishes.Where(finish => finish.CompatibleMaterialIds.Count == 0 || finish.CompatibleMaterialIds.Contains(part.MaterialId.Value))
+            : finishes;
+    }
+
+    private IEnumerable<ProcessConfigOptionDto> GetVisualProcessOptions(QuotePartDraftDto part)
+    {
+        return _reference.ProcessOptions
+            .Where(option => option.ProcessCode.Equals(part.ProcessCode, StringComparison.OrdinalIgnoreCase))
+            .Where(IsVisualOption)
+            .OrderBy(option => option.SortOrder);
+    }
+
+    private void SelectMaterial(QuotePartDraftDto part, MaterialOptionDto material)
+    {
+        part.MaterialId = material.Id;
+        part.MaterialCode = material.Code;
+        EnsureSurfaceFinish(part);
+        EnsureProcessOptions(part);
+    }
+
+    private void SelectSurfaceFinish(QuotePartDraftDto part, SurfaceFinishOptionDto finish)
+    {
+        part.SurfaceFinishId = finish.Id;
+        part.SurfaceFinishCode = finish.Code;
+    }
+
+    private void SelectConfigOption(QuotePartDraftDto part, ProcessConfigOptionDto option, string value)
+    {
+        part.ProcessOptionValues[option.ConfigKey] = value;
+    }
+
+    private void EnsureSurfaceFinish(QuotePartDraftDto part)
+    {
+        var finishes = GetSurfaceFinishes(part).ToList();
+        if (finishes.Count == 0)
+        {
+            part.SurfaceFinishId = null;
+            part.SurfaceFinishCode = string.Empty;
+            return;
+        }
+
+        var selected = finishes.FirstOrDefault(finish =>
+            finish.Code.Equals(part.SurfaceFinishCode, StringComparison.OrdinalIgnoreCase) ||
+            finish.Id == part.SurfaceFinishId) ?? finishes[0];
+        SelectSurfaceFinish(part, selected);
+    }
+
+    private void EnsureProcessOptions(QuotePartDraftDto part)
+    {
+        var currentOptions = _reference.ProcessOptions
+            .Where(option => option.ProcessCode.Equals(part.ProcessCode, StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(option => option.ConfigKey, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var key in part.ProcessOptionValues.Keys.Where(key => !currentOptions.ContainsKey(key)).ToList())
+        {
+            part.ProcessOptionValues.Remove(key);
+        }
+
+        foreach (var option in currentOptions.Values)
+        {
+            if (!part.ProcessOptionValues.TryGetValue(option.ConfigKey, out var selectedValue) || string.IsNullOrWhiteSpace(selectedValue))
+            {
+                var defaultValue = ResolveDefaultValue(option);
+                if (!string.IsNullOrWhiteSpace(defaultValue))
+                {
+                    part.ProcessOptionValues[option.ConfigKey] = defaultValue;
+                }
+            }
+        }
+    }
+
+    private static string ResolveDefaultValue(ProcessConfigOptionDto option)
+    {
+        if (!string.IsNullOrWhiteSpace(option.DefaultValue))
+        {
+            return option.DefaultValue;
+        }
+
+        return IsToggleOption(option) ? "false" : GetOptionChoices(option).FirstOrDefault() ?? string.Empty;
+    }
+
+    private static bool IsMaterialSelected(QuotePartDraftDto part, MaterialOptionDto material)
+    {
+        return material.Code.Equals(part.MaterialCode, StringComparison.OrdinalIgnoreCase) || material.Id == part.MaterialId;
+    }
+
+    private static bool IsSurfaceFinishSelected(QuotePartDraftDto part, SurfaceFinishOptionDto finish)
+    {
+        return finish.Code.Equals(part.SurfaceFinishCode, StringComparison.OrdinalIgnoreCase) || finish.Id == part.SurfaceFinishId;
+    }
+
+    private static bool IsConfigOptionSelected(QuotePartDraftDto part, ProcessConfigOptionDto option, string value)
+    {
+        return part.ProcessOptionValues.TryGetValue(option.ConfigKey, out var selected) &&
+            selected.Equals(value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsVisualOption(ProcessConfigOptionDto option)
+    {
+        return (IsDropdownOption(option) && IsVisualDropdown(option)) ||
+            (IsToggleOption(option) &&
+                (option.ConfigKey.Equals(DeburrEdgesConfigKey, StringComparison.OrdinalIgnoreCase) ||
+                    option.ConfigKey.Contains("deburr", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static bool IsVisualDropdown(ProcessConfigOptionDto option)
+    {
+        return option.ConfigKey.Contains("color", StringComparison.OrdinalIgnoreCase) ||
+            option.ConfigKey.Contains("finish", StringComparison.OrdinalIgnoreCase) ||
+            option.ConfigKey.Contains("post_processing", StringComparison.OrdinalIgnoreCase) ||
+            option.ConfigKey.Contains("surface_finish", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsDropdownOption(ProcessConfigOptionDto option)
+    {
+        return option.ConfigType.Equals("dropdown", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsToggleOption(ProcessConfigOptionDto option)
+    {
+        return option.ConfigType.Equals("toggle", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyList<string> GetOptionChoices(ProcessConfigOptionDto option)
+    {
+        if (string.IsNullOrWhiteSpace(option.OptionsJson))
+        {
+            return [];
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(option.OptionsJson) ?? [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
+    private static string OptionCardClass(bool selected)
+    {
+        return selected ? "quote-option-card active" : "quote-option-card";
+    }
+
     private string ProcessButtonClass(string code)
     {
         return code == _selectedProcess ? "quote-tab active" : "quote-tab";
+    }
+
+    private static string GetMaterialImageUrl(MaterialOptionDto material)
+    {
+        var code = NormalizeCode(material.Code);
+        var fileName = code switch
+        {
+            "AL6061" or "AL7075" or "AL5052" or "ALSI10MG" => "aluminum-material-image.png",
+            "SS304" or "SS316L" or "SS304_SHEET" or "SS316L_BJ" or "174PH" => "stainless-steel-material-image.png",
+            "MILD_STEEL" => "steel-material-image.png",
+            "BRASS_C360" or "BRASS_SHEET" or "BRONZE_BJ" => "brass-material-image.png",
+            "COPPER_C110" or "COPPER_SHEET" or "TI6AL4V" or "TI6AL4V_DMLS" or "IN718" => "raw-metal-material-image.png",
+            "PEEK" => "peek-natural-material-image.png",
+            "DELRIN" => "white-pom-material-image.png",
+            "ABS" or "ASA" or "CF_PETG" or "ABS_IM" or "PCABS_IM" or "VEROBLACK" => "abs-black-material-image.png",
+            "PLA" or "PC" or "PP_IM" or "PA66_IM" or "TPE_IM" or "TPU95A" or "TANGOPLUS" => "natural-plastic-material-image.png",
+            "PETG" => "clear-petg-material-image.png",
+            "PA12" or "PA12_SLS" or "PA11_SLS" or "PA12GF_SLS" or "PA12_MJF" or "PA12GB_MJF" => "pa12-natural-material-image.png",
+            "STD_RESIN" or "FLEX_RESIN" or "CAST_RESIN" or "VEROWHITE" => "clear-plastic-material-image.png",
+            "TOUGH_RESIN" => "tough-resin-material-image.png",
+            "HT_RESIN" => "high-temp-resin-material-image.png",
+            _ => "raw-metal-material-image.png"
+        };
+
+        return MaterialImageRoot + fileName;
+    }
+
+    private static string GetSurfaceFinishImageUrl(SurfaceFinishOptionDto finish)
+    {
+        var fileName = NormalizeCode(finish.Code) switch
+        {
+            "AS_MACHINED" => "finish-machined-material-image.png",
+            "BEAD_BLASTED" => "finish-bead-blast-material-image.png",
+            "ANODIZE_CLEAR" => "finish-anodized-clear-material-image.png",
+            "ANODIZE_BLACK" or "ANODIZE_HARD" => "finish-anodized-black-material-image.png",
+            "POWDER_COAT" or "POWDER_COAT_SM" => "finish-powder-material-image.png",
+            "AS_PRINTED" => "finish-as-printed-material-image.png",
+            "SANDED" => "finish-sanded-material-image.png",
+            "PAINTED" or "DYE" => "finish-painted-material-image.png",
+            "DEBURR" => "deburr-edges-material-image.png",
+            "AS_MOLDED" => "finish-natural-material-image.png",
+            _ => "finish-raw-material-image.png"
+        };
+
+        return MaterialImageRoot + fileName;
+    }
+
+    private static string GetConfigOptionImageUrl(ProcessConfigOptionDto option, string value)
+    {
+        if (option.ConfigKey.Contains("deburr", StringComparison.OrdinalIgnoreCase))
+        {
+            return MaterialImageRoot + (value.Equals("true", StringComparison.OrdinalIgnoreCase)
+                ? "deburr-edges-material-image.png"
+                : "no-deburr-material-image.png");
+        }
+
+        if (option.ConfigKey.Contains("anodize_color", StringComparison.OrdinalIgnoreCase))
+        {
+            return MaterialImageRoot + (NormalizeCode(value) switch
+            {
+                "BLACK" => "finish-anodized-black-material-image.png",
+                "RED" => "finish-anodized-red-material-image.png",
+                "BLUE" => "finish-anodized-blue-material-image.png",
+                "GOLD" => "finish-anodized-gold-material-image.png",
+                _ => "finish-anodized-clear-material-image.png"
+            });
+        }
+
+        if (option.ConfigKey.Contains("color", StringComparison.OrdinalIgnoreCase))
+        {
+            return MaterialImageRoot + (NormalizeCode(value) switch
+            {
+                "WHITE" => "white-pom-material-image.png",
+                "BLACK" => "black-pom-material-image.png",
+                "RED" => "red-plastic-material-image.png",
+                "BLUE" => "blue-plastic-material-image.png",
+                "GREEN" => "green-plastic-material-image.png",
+                "YELLOW" or "ORANGE" or "GOLD" => "yellow-plastic-material-image.png",
+                "GREY" or "GRAY" or "NATURAL_GREY" => "gray-plastic-material-image.png",
+                "CLEAR" => "clear-plastic-material-image.png",
+                "CUSTOM" or "CUSTOM_DYE" => "finish-painted-material-image.png",
+                _ => "natural-plastic-material-image.png"
+            });
+        }
+
+        return MaterialImageRoot + (NormalizeCode(value) switch
+        {
+            "AS_PRINTED" => "finish-as-printed-material-image.png",
+            "TUMBLED" or "SANDED" => "finish-sanded-material-image.png",
+            "DYED" or "PAINTED" => "finish-painted-material-image.png",
+            "MATTE" => "finish-raw-material-image.png",
+            "GLOSSY" => "finish-machined-material-image.png",
+            _ => "finish-natural-material-image.png"
+        });
+    }
+
+    private static string FormatOptionValue(ProcessConfigOptionDto option, string value)
+    {
+        if (IsToggleOption(option))
+        {
+            return value.Equals("true", StringComparison.OrdinalIgnoreCase) ? "Yes" : "No";
+        }
+
+        var label = value.Replace('_', ' ').ToLowerInvariant();
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(label);
+    }
+
+    private static string NormalizeCode(string value)
+    {
+        return value.Trim().ToUpperInvariant();
     }
 
     private static string FormatBytes(long bytes)
