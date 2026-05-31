@@ -149,26 +149,14 @@
   display: grid;
   place-items: center;
   aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: #ffffff;
+  background: var(--paper-2);
   border: 1px solid var(--rule-soft);
   border-radius: calc(var(--radius) - 2px);
-}
-
-.quote-option-image {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-.quote-option-fallback {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
   color: var(--muted);
-  background: var(--paper-2);
+}
+
+.quote-option-icon {
+  color: currentColor;
 }
 
 .quote-option-name {

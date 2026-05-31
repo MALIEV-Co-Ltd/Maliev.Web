@@ -58,10 +58,7 @@
                                         aria-pressed="@IsMaterialSelected(part, material)"
                                         @onclick="() => SelectMaterial(part, material)">
                                     <span class="quote-option-media">
-                                        <img class="quote-option-image" src="@GetMaterialImageUrl(material)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
-                                        <span class="quote-option-fallback" hidden aria-hidden="true">
-                                            <MudIcon Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
-                                        </span>
+                                        <MudIcon Class="quote-option-icon" Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
                                     </span>
                                     <span class="quote-option-name">@material.Name.For(Preferences.Culture)</span>
                                 </button>
@@ -81,10 +78,7 @@
                                             aria-pressed="@IsSurfaceFinishSelected(part, finish)"
                                             @onclick="() => SelectSurfaceFinish(part, finish)">
                                         <span class="quote-option-media">
-                                            <img class="quote-option-image" src="@GetSurfaceFinishImageUrl(finish)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
-                                            <span class="quote-option-fallback" hidden aria-hidden="true">
-                                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
-                                            </span>
+                                            <MudIcon Class="quote-option-icon" Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
                                         </span>
                                         <span class="quote-option-name">@finish.Name.For(Preferences.Culture)</span>
                                     </button>
@@ -108,10 +102,7 @@
                                                 aria-pressed="@IsConfigOptionSelected(part, option, value)"
                                                 @onclick="() => SelectConfigOption(part, option, value)">
                                             <span class="quote-option-media">
-                                                <img class="quote-option-image" src="@GetConfigOptionImageUrl(option, value)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
-                                                <span class="quote-option-fallback" hidden aria-hidden="true">
-                                                    <MudIcon Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
-                                                </span>
+                                                <MudIcon Class="quote-option-icon" Icon="@Icons.Material.Filled.BuildCircle" Size="Size.Medium" />
                                             </span>
                                             <span class="quote-option-name">@FormatOptionValue(option, value)</span>
                                         </button>
@@ -126,10 +117,7 @@
                                                 aria-pressed="@IsConfigOptionSelected(part, option, value)"
                                                 @onclick="() => SelectConfigOption(part, option, value)">
                                             <span class="quote-option-media">
-                                                <img class="quote-option-image" src="@GetConfigOptionImageUrl(option, value)" alt="" loading="lazy" onerror="@ImageErrorFallback" />
-                                                <span class="quote-option-fallback" hidden aria-hidden="true">
-                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
-                                                </span>
+                                                <MudIcon Class="quote-option-icon" Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
                                             </span>
                                             <span class="quote-option-name">@FormatOptionValue(option, value)</span>
                                         </button>
@@ -186,8 +174,6 @@
 </section>
 
 @code {
-    private const string MaterialImageRoot = "/images/materials/";
-    private const string ImageErrorFallback = "this.hidden=true;this.nextElementSibling.hidden=false;";
     private const string DeburrEdgesConfigKey = "deburr_edges";
     private static readonly bool[] ToggleChoices = [true, false];
 
@@ -467,100 +453,6 @@
     private string ProcessButtonClass(string code)
     {
         return code == _selectedProcess ? "quote-tab active" : "quote-tab";
-    }
-
-    private static string GetMaterialImageUrl(MaterialOptionDto material)
-    {
-        var code = NormalizeCode(material.Code);
-        var fileName = code switch
-        {
-            "AL6061" or "AL7075" or "AL5052" or "ALSI10MG" => "aluminum-material-image.png",
-            "SS304" or "SS316L" or "SS304_SHEET" or "SS316L_BJ" or "174PH" => "stainless-steel-material-image.png",
-            "MILD_STEEL" => "steel-material-image.png",
-            "BRASS_C360" or "BRASS_SHEET" or "BRONZE_BJ" => "brass-material-image.png",
-            "COPPER_C110" or "COPPER_SHEET" or "TI6AL4V" or "TI6AL4V_DMLS" or "IN718" => "raw-metal-material-image.png",
-            "PEEK" => "peek-natural-material-image.png",
-            "DELRIN" => "white-pom-material-image.png",
-            "ABS" or "ASA" or "CF_PETG" or "ABS_IM" or "PCABS_IM" or "VEROBLACK" => "abs-black-material-image.png",
-            "PLA" or "PC" or "PP_IM" or "PA66_IM" or "TPE_IM" or "TPU95A" or "TANGOPLUS" => "natural-plastic-material-image.png",
-            "PETG" => "clear-petg-material-image.png",
-            "PA12" or "PA12_SLS" or "PA11_SLS" or "PA12GF_SLS" or "PA12_MJF" or "PA12GB_MJF" => "pa12-natural-material-image.png",
-            "STD_RESIN" or "FLEX_RESIN" or "CAST_RESIN" or "VEROWHITE" => "clear-plastic-material-image.png",
-            "TOUGH_RESIN" => "tough-resin-material-image.png",
-            "HT_RESIN" => "high-temp-resin-material-image.png",
-            _ => "raw-metal-material-image.png"
-        };
-
-        return MaterialImageRoot + fileName;
-    }
-
-    private static string GetSurfaceFinishImageUrl(SurfaceFinishOptionDto finish)
-    {
-        var fileName = NormalizeCode(finish.Code) switch
-        {
-            "AS_MACHINED" => "finish-machined-material-image.png",
-            "BEAD_BLASTED" => "finish-bead-blast-material-image.png",
-            "ANODIZE_CLEAR" => "finish-anodized-clear-material-image.png",
-            "ANODIZE_BLACK" or "ANODIZE_HARD" => "finish-anodized-black-material-image.png",
-            "POWDER_COAT" or "POWDER_COAT_SM" => "finish-powder-material-image.png",
-            "AS_PRINTED" => "finish-as-printed-material-image.png",
-            "SANDED" => "finish-sanded-material-image.png",
-            "PAINTED" or "DYE" => "finish-painted-material-image.png",
-            "DEBURR" => "deburr-edges-material-image.png",
-            "AS_MOLDED" => "finish-natural-material-image.png",
-            _ => "finish-raw-material-image.png"
-        };
-
-        return MaterialImageRoot + fileName;
-    }
-
-    private static string GetConfigOptionImageUrl(ProcessConfigOptionDto option, string value)
-    {
-        if (option.ConfigKey.Contains("deburr", StringComparison.OrdinalIgnoreCase))
-        {
-            return MaterialImageRoot + (value.Equals("true", StringComparison.OrdinalIgnoreCase)
-                ? "deburr-edges-material-image.png"
-                : "no-deburr-material-image.png");
-        }
-
-        if (option.ConfigKey.Contains("anodize_color", StringComparison.OrdinalIgnoreCase))
-        {
-            return MaterialImageRoot + (NormalizeCode(value) switch
-            {
-                "BLACK" => "finish-anodized-black-material-image.png",
-                "RED" => "finish-anodized-red-material-image.png",
-                "BLUE" => "finish-anodized-blue-material-image.png",
-                "GOLD" => "finish-anodized-gold-material-image.png",
-                _ => "finish-anodized-clear-material-image.png"
-            });
-        }
-
-        if (option.ConfigKey.Contains("color", StringComparison.OrdinalIgnoreCase))
-        {
-            return MaterialImageRoot + (NormalizeCode(value) switch
-            {
-                "WHITE" => "white-pom-material-image.png",
-                "BLACK" => "black-pom-material-image.png",
-                "RED" => "red-plastic-material-image.png",
-                "BLUE" => "blue-plastic-material-image.png",
-                "GREEN" => "green-plastic-material-image.png",
-                "YELLOW" or "ORANGE" or "GOLD" => "yellow-plastic-material-image.png",
-                "GREY" or "GRAY" or "NATURAL_GREY" => "gray-plastic-material-image.png",
-                "CLEAR" => "clear-plastic-material-image.png",
-                "CUSTOM" or "CUSTOM_DYE" => "finish-painted-material-image.png",
-                _ => "natural-plastic-material-image.png"
-            });
-        }
-
-        return MaterialImageRoot + (NormalizeCode(value) switch
-        {
-            "AS_PRINTED" => "finish-as-printed-material-image.png",
-            "TUMBLED" or "SANDED" => "finish-sanded-material-image.png",
-            "DYED" or "PAINTED" => "finish-painted-material-image.png",
-            "MATTE" => "finish-raw-material-image.png",
-            "GLOSSY" => "finish-machined-material-image.png",
-            _ => "finish-natural-material-image.png"
-        });
     }
 
     private static string FormatOptionValue(ProcessConfigOptionDto option, string value)
