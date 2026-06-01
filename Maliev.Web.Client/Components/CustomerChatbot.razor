@@ -168,6 +168,7 @@
     private static readonly TimeSpan SignInPollInterval = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan AssistantWaitingDelay = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan AssistantRequestTimeout = TimeSpan.FromSeconds(45);
+    private static readonly TimeSpan PopoutVisibleDuration = TimeSpan.FromSeconds(30);
     private const double ContextHintShowProbability = 0.30;
     private static readonly TimeSpan ContextHintDwellDelay = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan BehaviorHintDwellDelay = TimeSpan.FromSeconds(5);
@@ -1811,7 +1812,7 @@
 
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(6), cts.Token);
+            await Task.Delay(PopoutVisibleDuration, cts.Token);
         }
         catch (OperationCanceledException)
         {

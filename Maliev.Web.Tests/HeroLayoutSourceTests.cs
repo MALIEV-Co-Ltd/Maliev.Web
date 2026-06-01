@@ -1907,6 +1907,19 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies assistive chatbot popouts remain visible long enough to read before self-dismissal.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotPopoutSelfDismissesAfterThirtySeconds()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+
+        Assert.Contains("PopoutVisibleDuration = TimeSpan.FromSeconds(30);", component);
+        Assert.Contains("await Task.Delay(PopoutVisibleDuration, cts.Token);", component);
+        Assert.DoesNotContain("Task.Delay(TimeSpan.FromSeconds(6)", component);
+    }
+
+    /// <summary>
     /// Verifies the customer chatbot uses first-party behavior signals to choose assistive popouts and assistant context.
     /// </summary>
     [Fact]
