@@ -7348,6 +7348,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 .customer-chatbot {
+  --customer-chatbot-inactive-opacity: .62;
   position: fixed;
   right: clamp(18px, 2.6vw, 36px);
   bottom: max(24px, env(safe-area-inset-bottom));
@@ -7364,6 +7365,17 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot-toggle,
 .customer-chatbot-popout {
   pointer-events: auto;
+}
+
+.customer-chatbot-panel,
+.customer-chatbot-popout {
+  opacity: var(--customer-chatbot-inactive-opacity);
+  transition: opacity .28s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;
+}
+
+.customer-chatbot-panel:is(:hover, :focus-within),
+.customer-chatbot-popout:is(:hover, :focus-visible, :focus-within) {
+  opacity: 1;
 }
 
 .customer-chatbot-popout {

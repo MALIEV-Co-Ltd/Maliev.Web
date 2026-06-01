@@ -1847,6 +1847,20 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the expanded customer chatbot softens when inactive and returns to full opacity for mouse and keyboard use.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotPanelFadesUntilHoveredOrFocused()
+    {
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("--customer-chatbot-inactive-opacity: .62;", styles);
+        Assert.Contains(".customer-chatbot-panel,\n.customer-chatbot-popout {\n  opacity: var(--customer-chatbot-inactive-opacity);", styles);
+        Assert.Contains("transition: opacity .28s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;", styles);
+        Assert.Contains(".customer-chatbot-panel:is(:hover, :focus-within),\n.customer-chatbot-popout:is(:hover, :focus-visible, :focus-within) {\n  opacity: 1;", styles);
+    }
+
+    /// <summary>
     /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
     /// </summary>
     [Fact]
