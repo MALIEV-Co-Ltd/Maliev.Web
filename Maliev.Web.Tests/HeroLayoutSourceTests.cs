@@ -2498,6 +2498,26 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the auth brand panel uses real manufacturing imagery instead of generated line-art assets.
+    /// </summary>
+    [Fact]
+    public void AuthBrandPanelUsesPhotoBasedManufacturingTreatment()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("auth-brand-panel", signIn);
+        Assert.Contains("auth-brand-features", signIn);
+        Assert.DoesNotContain("auth-blueprint", signIn);
+        Assert.DoesNotContain("<svg class=\"auth-blueprint", signIn);
+
+        Assert.Contains("url(\"/images/blog/design-for-manufacturing.jpg\")", styles);
+        Assert.Contains("center / cover no-repeat", styles);
+        Assert.Contains("backdrop-filter: blur(10px);", styles);
+        Assert.DoesNotContain(".auth-blueprint-card", styles);
+    }
+
+    /// <summary>
     /// Verifies the Google OAuth button keeps the official light button treatment on dark pages.
     /// </summary>
     [Fact]
