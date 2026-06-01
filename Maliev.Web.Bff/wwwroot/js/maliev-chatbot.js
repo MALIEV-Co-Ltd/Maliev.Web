@@ -317,6 +317,8 @@ const malievChatbotBehavior = (() => {
   };
 })();
 
+const isElement = value => value && value.nodeType === 1;
+
 window.malievChatbot = {
   getJson: async function (path) {
     if (!path || typeof path !== 'string' || !path.startsWith('/')) {
@@ -524,7 +526,10 @@ window.malievChatbot = {
   },
 
   initComposerKeys: function (textarea, sendButton) {
-    if (!textarea || !sendButton) {
+    if (!isElement(textarea) || !isElement(sendButton)
+      || typeof textarea.addEventListener !== 'function'
+      || typeof textarea.removeEventListener !== 'function'
+      || typeof sendButton.click !== 'function') {
       return;
     }
 
@@ -546,7 +551,7 @@ window.malievChatbot = {
   },
 
   fitComposer: function (textarea) {
-    if (!textarea) {
+    if (!isElement(textarea) || typeof textarea.style !== 'object') {
       return;
     }
 

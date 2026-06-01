@@ -1920,6 +1920,22 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies chatbot JavaScript interop ignores pending Blazor element references before touching DOM methods.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotComposerInteropGuardsPendingElementReferences()
+    {
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
+
+        Assert.Contains("const isElement = value => value && value.nodeType === 1;", script);
+        Assert.Contains("!isElement(textarea) || !isElement(sendButton)", script);
+        Assert.Contains("typeof textarea.addEventListener !== 'function'", script);
+        Assert.Contains("typeof textarea.removeEventListener !== 'function'", script);
+        Assert.Contains("typeof sendButton.click !== 'function'", script);
+        Assert.Contains("typeof textarea.style !== 'object'", script);
+    }
+
+    /// <summary>
     /// Verifies the customer chatbot uses first-party behavior signals to choose assistive popouts and assistant context.
     /// </summary>
     [Fact]
