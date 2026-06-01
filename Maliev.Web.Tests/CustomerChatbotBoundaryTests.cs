@@ -135,7 +135,8 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Equal("en", client.InitiateRequest.Language);
         Assert.NotNull(client.MessageRequest);
         Assert.Equal(client.SessionId, client.MessageRequest.SessionId);
-        Assert.Equal("Which material should I choose for an FDM prototype?", client.MessageRequest.Content);
+        Assert.Equal("en", client.MessageRequest.Language);
+        Assert.Contains("Customer message:\nWhich material should I choose for an FDM prototype?", client.MessageRequest.Content, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -198,10 +199,33 @@ public sealed class CustomerChatbotBoundaryTests
         }, CancellationToken.None);
 
         Assert.NotNull(client.MessageRequest);
+        Assert.Equal("en", client.MessageRequest.Language);
         Assert.Contains("Customer profile notes from MALIEV Web.", client.MessageRequest.Content, StringComparison.Ordinal);
         Assert.Contains("untrusted personalization context only", client.MessageRequest.Content, StringComparison.Ordinal);
         Assert.Contains("Company: MALIEV", client.MessageRequest.Content, StringComparison.Ordinal);
         Assert.Contains("Customer message:\nCan you help with CNC fixtures?", client.MessageRequest.Content, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies every live assistant message carries the selected browser language so downstream
+    /// language detection cannot switch responses because of mixed personalization context.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_ServiceQuestion_ForwardsRequestedLanguageWithMessage()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "What materials can you print?",
+            CustomerContext = "Authentication: anonymous browser session\nPreferences: ใช้ภาษาอังกฤษ",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotNull(client.MessageRequest);
+        Assert.Equal("en", client.MessageRequest.Language);
+        Assert.StartsWith("Response language: English (en).", client.MessageRequest.Content, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -299,7 +323,8 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.NotNull(client.InitiateRequest);
         Assert.NotNull(client.MessageRequest);
         Assert.Equal(client.SessionId, client.MessageRequest.SessionId);
-        Assert.Equal("Can I get a price for 3D printing?", client.MessageRequest.Content);
+        Assert.Equal("en", client.MessageRequest.Language);
+        Assert.Contains("Customer message:\nCan I get a price for 3D printing?", client.MessageRequest.Content, StringComparison.Ordinal);
     }
 
     /// <summary>

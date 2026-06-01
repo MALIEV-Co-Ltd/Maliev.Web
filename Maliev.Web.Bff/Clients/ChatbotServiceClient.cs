@@ -147,6 +147,8 @@ internal sealed class ChatbotSendMessageRequest
     public Guid SessionId { get; set; }
 
     public string Content { get; set; } = string.Empty;
+
+    public string? Language { get; set; }
 }
 
 internal sealed class ChatbotSessionResponse
