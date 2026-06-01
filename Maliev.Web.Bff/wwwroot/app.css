@@ -7349,6 +7349,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
 .customer-chatbot {
   --customer-chatbot-inactive-opacity: .62;
+  --customer-chatbot-context-inactive-opacity: .9;
+  --customer-chatbot-inactive-delay: 12s;
   position: fixed;
   right: clamp(18px, 2.6vw, 36px);
   bottom: max(24px, env(safe-area-inset-bottom));
@@ -7369,13 +7371,26 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
 .customer-chatbot-panel,
 .customer-chatbot-popout {
-  opacity: var(--customer-chatbot-inactive-opacity);
-  transition: opacity .28s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;
+  opacity: 1;
+  animation: customer-chatbot-idle-fade .48s ease-in-out var(--customer-chatbot-inactive-delay) both;
+  transition: opacity .32s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;
+  will-change: opacity;
 }
 
 .customer-chatbot-panel:is(:hover, :focus-within),
 .customer-chatbot-popout:is(:hover, :focus-visible, :focus-within) {
   opacity: 1;
+  animation: none;
+}
+
+@keyframes customer-chatbot-idle-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--customer-chatbot-inactive-opacity);
+  }
 }
 
 .customer-chatbot-popout {
@@ -7393,10 +7408,20 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 }
 
 .customer-chatbot-popout[data-chatbot-popout-kind="context"] {
-  opacity: .9;
+  animation-name: customer-chatbot-context-idle-fade;
   background: color-mix(in srgb, var(--paper) 90%, var(--blue-soft));
   border-color: color-mix(in srgb, var(--blue) 48%, var(--rule));
   box-shadow: rgba(10, 114, 239, .24) 0 22px 48px -26px, var(--shadow-border);
+}
+
+@keyframes customer-chatbot-context-idle-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: var(--customer-chatbot-context-inactive-opacity);
+  }
 }
 
 .customer-chatbot-popout[data-chatbot-popout-kind="context"]:is(:hover, :focus-visible, :focus-within) {

@@ -1847,7 +1847,7 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the expanded customer chatbot softens when inactive and returns to full opacity for mouse and keyboard use.
+    /// Verifies the expanded customer chatbot waits before softening, then returns to full opacity for mouse and keyboard use.
     /// </summary>
     [Fact]
     public void CustomerChatbotPanelFadesUntilHoveredOrFocused()
@@ -1855,9 +1855,14 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("--customer-chatbot-inactive-opacity: .62;", styles);
-        Assert.Contains(".customer-chatbot-panel,\n.customer-chatbot-popout {\n  opacity: var(--customer-chatbot-inactive-opacity);", styles);
-        Assert.Contains("transition: opacity .28s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;", styles);
+        Assert.Contains("--customer-chatbot-inactive-delay: 12s;", styles);
+        Assert.Contains(".customer-chatbot-panel,\n.customer-chatbot-popout {\n  opacity: 1;", styles);
+        Assert.Contains("animation: customer-chatbot-idle-fade .48s ease-in-out var(--customer-chatbot-inactive-delay) both;", styles);
+        Assert.Contains("transition: opacity .32s ease-in-out, box-shadow .22s ease-in-out, border-color .22s ease-in-out;", styles);
         Assert.Contains(".customer-chatbot-panel:is(:hover, :focus-within),\n.customer-chatbot-popout:is(:hover, :focus-visible, :focus-within) {\n  opacity: 1;", styles);
+        Assert.Contains("animation: none;", styles);
+        Assert.Contains("@keyframes customer-chatbot-idle-fade", styles);
+        Assert.Contains("to {\n    opacity: var(--customer-chatbot-inactive-opacity);", styles);
     }
 
     /// <summary>
