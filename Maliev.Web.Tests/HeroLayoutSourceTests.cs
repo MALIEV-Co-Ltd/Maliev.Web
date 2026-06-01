@@ -1926,6 +1926,30 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies behavior-driven assistant prompts remain localized for English and Thai page sessions.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotBehaviorHintsAreLocalizedForEnglishAndThai()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
+
+        Assert.Contains("hint.Popup.For(Preferences.Culture)", component);
+        Assert.Contains("hint.OpeningMessage.For(Preferences.Culture)", component);
+        Assert.Contains("Language = Preferences.Culture.StartsWith(\"th\", StringComparison.OrdinalIgnoreCase) ? \"th\" : \"en\"", component);
+        Assert.Contains("Localized(\"Have a CAD file ready? I can help choose process, material, and quote route.\", \"มีไฟล์ CAD พร้อมไหมคะ", component);
+        Assert.Contains("Localized(\"Choosing a manufacturing route? I can help compare process, risk, and quote readiness.\", \"กำลังเลือกเส้นทางผลิตอยู่ไหมคะ", component);
+        Assert.Contains("Localized(\"Looking at shop items? I can help compare stock, fit, and custom alternatives.\", \"กำลังดูสินค้าในร้านอยู่ไหมคะ", component);
+        Assert.Contains("Localized(\"Need the right MALIEV contact path? I can route sales, support, or RFQ details.\", \"ต้องการติดต่อช่องทางไหนของ MALIEV คะ", component);
+
+        Assert.Contains("target.closest?.('[data-chatbot-intent]')", script);
+        Assert.Contains("kind: 'service_comparison_intent'", script);
+        Assert.Contains("kind: 'material_comparison_intent'", script);
+        Assert.Contains("kind: 'shop_purchase_intent'", script);
+        Assert.Contains("kind: 'contact_support_intent'", script);
+    }
+
+    /// <summary>
     /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
     /// </summary>
     [Fact]
