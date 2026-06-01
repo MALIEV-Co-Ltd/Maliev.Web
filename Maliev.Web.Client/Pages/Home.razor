@@ -189,8 +189,12 @@
                 }
             </div>
             <div class="machine-configurator" aria-label="@Text("Machine configurator", "ตัวเลือกเครื่อง")">
-                <div class="machine-configurator-group">
-                    <span class="machine-configurator-label">@Text("Machine size", "ขนาดเครื่อง")</span>
+                <div class="machine-configurator-group machine-configurator-group--variant">
+                    <div class="machine-configurator-heading">
+                        <span class="machine-configurator-step" aria-hidden="true">1</span>
+                        <span class="machine-configurator-label">@Text("Choose machine size", "เลือกขนาดเครื่อง")</span>
+                        <span class="machine-configurator-hint">@Text("Select one", "เลือก 1 รุ่น")</span>
+                    </div>
                     <div class="machine-variant-options" role="radiogroup" aria-label="@Text("Select machine size", "เลือกขนาดเครื่อง")">
                         @foreach (var variant in MachineVariants)
                         {
@@ -204,21 +208,35 @@
                                     <strong>@variant.Title.For(Preferences.Culture)</strong>
                                     <small>@variant.Subtitle.For(Preferences.Culture)</small>
                                 </span>
-                                <span class="machine-variant-option-check" aria-hidden="true"></span>
+                                <span class="machine-option-control" aria-hidden="true">
+                                    <span class="machine-variant-option-check"></span>
+                                    <span class="machine-option-action">@MachineVariantStateLabel(variant)</span>
+                                </span>
                             </button>
                         }
                     </div>
                 </div>
-                <button class="@MachineCompressorOptionClass"
-                        type="button"
-                        aria-pressed="@MachineCompressorAriaPressed"
-                        @onclick="ToggleMachineCompressor">
-                    <span class="machine-addon-copy">
-                        <strong>@Text("25L air compressor", "ปั๊มลม 25L")</strong>
-                        <small>@Text("Optional add-on for shops without stable air supply.", "ตัวเลือกเสริมสำหรับพื้นที่ที่ยังไม่มีลมที่เสถียร")</small>
-                    </span>
-                    <span class="machine-addon-state">@MachineCompressorStateLabel</span>
-                </button>
+                <div class="machine-configurator-group machine-configurator-group--addon">
+                    <div class="machine-configurator-heading">
+                        <span class="machine-configurator-step" aria-hidden="true">2</span>
+                        <span class="machine-configurator-label">@Text("Add air supply", "เพิ่มชุดลม")</span>
+                        <span class="machine-configurator-hint">@Text("Optional", "ตัวเลือกเสริม")</span>
+                    </div>
+                    <button class="@MachineCompressorOptionClass"
+                            type="button"
+                            aria-pressed="@MachineCompressorAriaPressed"
+                            aria-label="@MachineCompressorAriaLabel"
+                            @onclick="ToggleMachineCompressor">
+                        <span class="machine-addon-toggle" aria-hidden="true">
+                            <span class="machine-addon-toggle-knob"></span>
+                        </span>
+                        <span class="machine-addon-copy">
+                            <strong>@Text("25L air compressor", "ปั๊มลม 25L")</strong>
+                            <small>@Text("Optional add-on for shops without stable air supply.", "ตัวเลือกเสริมสำหรับพื้นที่ที่ยังไม่มีลมที่เสถียร")</small>
+                        </span>
+                        <span class="machine-addon-state">@MachineCompressorStateLabel</span>
+                    </button>
+                </div>
                 <div class="machine-config-summary" aria-live="polite">
                     <span>@Text("Configured package", "แพ็กเกจที่เลือก")</span>
                     <strong>@SelectedMachinePackageLabel</strong>
@@ -487,7 +505,11 @@
 
     private string MachineCompressorOptionClass => _includeAirCompressor ? "machine-addon-option is-selected" : "machine-addon-option";
 
-    private string MachineCompressorStateLabel => _includeAirCompressor ? Text("Added", "เพิ่มแล้ว") : Text("Optional", "เลือกเพิ่ม");
+    private string MachineCompressorStateLabel => _includeAirCompressor ? Text("Added", "เพิ่มแล้ว") : Text("Add", "เพิ่ม");
+
+    private string MachineCompressorAriaLabel => _includeAirCompressor
+        ? Text("Remove 25L air compressor from configuration", "ถอดปั๊มลม 25L ออกจากชุดที่เลือก")
+        : Text("Add 25L air compressor to configuration", "เพิ่มปั๊มลม 25L ในชุดที่เลือก");
 
     private string SelectedMachinePackageLabel
     {
@@ -540,6 +562,11 @@
     private string MachineVariantAriaChecked(MachineVariant variant)
     {
         return IsSelectedMachineVariant(variant) ? "true" : "false";
+    }
+
+    private string MachineVariantStateLabel(MachineVariant variant)
+    {
+        return IsSelectedMachineVariant(variant) ? Text("Selected", "เลือกอยู่") : Text("Select", "เลือก");
     }
 
     private string MachineVariantButtonClass(MachineVariant variant)
