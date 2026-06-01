@@ -7392,6 +7392,17 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   backdrop-filter: blur(14px);
 }
 
+.customer-chatbot-popout[data-chatbot-popout-kind="context"] {
+  opacity: .9;
+  background: color-mix(in srgb, var(--paper) 90%, var(--blue-soft));
+  border-color: color-mix(in srgb, var(--blue) 48%, var(--rule));
+  box-shadow: rgba(10, 114, 239, .24) 0 22px 48px -26px, var(--shadow-border);
+}
+
+.customer-chatbot-popout[data-chatbot-popout-kind="context"]:is(:hover, :focus-visible, :focus-within) {
+  opacity: 1;
+}
+
 .customer-chatbot-popout strong {
   font-size: .86rem;
   line-height: 1.2;

@@ -1861,6 +1861,31 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the customer chatbot can surface contextual page hints without invoking the assistant service.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotUsesAnalyticsReadyContextualHints()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("@inject NavigationManager Navigation", component);
+        Assert.Contains("Navigation.LocationChanged += OnLocationChanged;", component);
+        Assert.Contains("ContextHintShowProbability = 0.30;", component);
+        Assert.Contains("ContextHintDwellDelay = TimeSpan.FromSeconds(8);", component);
+        Assert.Contains("ResolveContextHint(Navigation.Uri)", component);
+        Assert.Contains("ShouldSurfaceContextHint(hint, Navigation.Uri)", component);
+        Assert.Contains("HashCode.Combine(uri.PathAndQuery, hint.AnalyticsKey)", component);
+        Assert.Contains("AddContextPart(parts, \"Page context\", _activeContextHint?.Context);", component);
+        Assert.Contains("AddDistinct(_memory.ServiceInterests, hint.ServiceInterest", component);
+        Assert.Contains("Are you looking at any specific FDM material?", component);
+        Assert.Contains("Any questions about the 3D scanning service you're looking at?", component);
+        Assert.Contains("data-chatbot-popout-kind=\"@_popoutKind\"", component);
+        Assert.Contains("hint.OpeningMessage", component);
+        Assert.Contains(".customer-chatbot-popout[data-chatbot-popout-kind=\"context\"]", styles);
+    }
+
+    /// <summary>
     /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
     /// </summary>
     [Fact]

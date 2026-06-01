@@ -10,6 +10,7 @@
 @inject PreferenceService Preferences
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <aside class="customer-chatbot" aria-label="@Text("Customer manufacturing assistant", "ผู้ช่วยงานผลิตสำหรับลูกค้า")">
     @if (_isOpen)
@@ -127,8 +128,12 @@
     }
     else if (_showPopout)
     {
-        <button type="button" class="customer-chatbot-popout" @onclick="OpenFromPopoutAsync">
-            <strong>@Text("MALIEV assistant", "ผู้ช่วย MALIEV")</strong>
+        <button type="button"
+                class="customer-chatbot-popout"
+                aria-label="@PopoutAriaLabel"
+                data-chatbot-popout-kind="@_popoutKind"
+                @onclick="OpenFromPopoutAsync">
+            <strong>@PopoutTitle</strong>
             <span>@_popoutMessage</span>
         </button>
     }
@@ -163,6 +168,9 @@
     private static readonly TimeSpan SignInPollInterval = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan AssistantWaitingDelay = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan AssistantRequestTimeout = TimeSpan.FromSeconds(45);
+    private const double ContextHintShowProbability = 0.30;
+    private static readonly TimeSpan ContextHintDwellDelay = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan ContextHintCooldown = TimeSpan.FromSeconds(45);
     private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
     private static readonly Regex DangerousHtmlBlockPattern = new(
         @"<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>",
@@ -198,6 +206,72 @@
         "order", "orders", "order status", "track order", "receipt", "invoice", "tax invoice", "payment",
         "quote", "quotes", "quotation", "คำสั่งซื้อ", "ติดตามงาน", "ใบเสร็จ", "ใบกำกับภาษี", "ใบเสนอราคา", "การชำระเงิน"
     ];
+    private static readonly IReadOnlyList<CustomerChatbotContextHint> ContextHints =
+    [
+        new("services-overview", "/services", true,
+            Localized("Comparing processes? I can help narrow the route before you upload files.", "กำลังเทียบกระบวนการผลิตอยู่ไหมคะ น้องมะลิช่วยคัดเส้นทางก่อนอัปโหลดไฟล์ได้ค่ะ"),
+            Localized("You are viewing the MALIEV services overview. I can help compare 3D printing, CNC, scanning, design, casting, prototyping, and inspection routes before you upload files.", "ตอนนี้คุณกำลังดูภาพรวมบริการของ MALIEV ค่ะ น้องมะลิช่วยเทียบงานพิมพ์ 3 มิติ CNC สแกน ออกแบบ หล่อ ต้นแบบ และตรวจเทียบก่อนอัปโหลดไฟล์ได้ค่ะ"),
+            "Customer opened chat from the services overview while comparing manufacturing routes.",
+            "Manufacturing service comparison",
+            "context_hint_services_overview",
+            false),
+        new("3d-printing-materials", "/services/3d-printing", true,
+            Localized("Are you looking at any specific FDM material?", "กำลังมองหาวัสดุ FDM แบบไหนอยู่ไหมคะ"),
+            Localized("You are viewing the 3D printing service. I can help compare PLA, PETG, ABS, ASA, nylon, TPU, resin, SLS/MJF nylon, and trade-offs for heat, strength, finish, tolerance, or cost.", "ตอนนี้คุณกำลังดูบริการพิมพ์ 3 มิติค่ะ น้องมะลิช่วยเทียบ PLA, PETG, ABS, ASA, ไนลอน, TPU, เรซิน, SLS/MJF nylon และข้อแลกเปลี่ยนเรื่องความร้อน ความแข็งแรง ผิวงาน tolerance หรือราคาได้ค่ะ"),
+            "Customer opened chat from the 3D printing service page after seeing an FDM material prompt.",
+            "3D printing",
+            "context_hint_3d_printing_materials",
+            true),
+        new("cnc-machining-review", "/services/cnc-machining", true,
+            Localized("Need help deciding material, tolerance, or finish for CNC?", "ต้องการช่วยเลือกวัสดุ tolerance หรือผิวงาน CNC ไหมคะ"),
+            Localized("You are viewing the CNC machining service. I can help review material, tolerance, setup faces, finish notes, quantity, and whether a drawing is needed before quotation.", "ตอนนี้คุณกำลังดูบริการ CNC แมชชีนนิ่งค่ะ น้องมะลิช่วยดูวัสดุ tolerance ผิวตั้งงาน ผิวสำเร็จ จำนวน และควรมี Drawing ก่อนเสนอราคาหรือไม่ได้ค่ะ"),
+            "Customer opened chat from the CNC machining service page while reviewing material, tolerance, or finish requirements.",
+            "CNC machining",
+            "context_hint_cnc_machining_review",
+            true),
+        new("3d-scanning-service", "/services/3d-scanning", true,
+            Localized("Any questions about the 3D scanning service you're looking at?", "มีคำถามเกี่ยวกับบริการสแกน 3 มิติที่กำลังดูอยู่ไหมคะ"),
+            Localized("You are viewing the 3D scanning service. I can help decide whether you need scan-to-CAD, inspection reference data, deviation reporting, repair geometry, or replacement-part capture.", "ตอนนี้คุณกำลังดูบริการสแกน 3 มิติค่ะ น้องมะลิช่วยแยกได้ว่าควรใช้ scan-to-CAD ข้อมูลอ้างอิงตรวจสอบ รายงานความคลาดเคลื่อน geometry ซ่อม หรือการเก็บข้อมูลชิ้นส่วนทดแทนค่ะ"),
+            "Customer opened chat from the 3D scanning service page while reviewing scan, inspection, or reverse engineering options.",
+            "3D scanning",
+            "context_hint_3d_scanning_service",
+            true),
+        new("3d-design-dfm", "/services/3d-design", true,
+            Localized("Starting from sketches or broken samples? I can help shape the CAD brief.", "เริ่มจากสเก็ตช์หรือตัวอย่างแตกหักอยู่ไหมคะ น้องมะลิช่วยจัด brief งาน CAD ได้ค่ะ"),
+            Localized("You are viewing the 3D design service. I can help turn sketches, photos, rough dimensions, or broken samples into a CAD and DFM brief for manufacturing.", "ตอนนี้คุณกำลังดูบริการออกแบบ 3 มิติค่ะ น้องมะลิช่วยเปลี่ยนสเก็ตช์ รูปถ่าย ขนาดคร่าวๆ หรือตัวอย่างแตกหักเป็น brief CAD และ DFM สำหรับผลิตได้ค่ะ"),
+            "Customer opened chat from the 3D design service page while preparing a CAD or DFM design brief.",
+            "3D design and DFM",
+            "context_hint_3d_design_dfm",
+            true),
+        new("silicone-casting-batch", "/services/silicone-casting", true,
+            Localized("Checking whether casting fits your small batch?", "กำลังเช็กว่างานหล่อเหมาะกับล็อตเล็กของคุณไหมคะ"),
+            Localized("You are viewing silicone casting. I can help compare rapid molds, urethane or silicone-like materials, batch size, lead time, and when hard tooling starts to make more sense.", "ตอนนี้คุณกำลังดูงานหล่อซิลิโคนค่ะ น้องมะลิช่วยเทียบแม่พิมพ์เร็ว วัสดุยูรีเทนหรือคล้ายซิลิโคน จำนวน ระยะเวลา และจุดที่ควรเปลี่ยนไปใช้แม่พิมพ์จริงได้ค่ะ"),
+            "Customer opened chat from the silicone casting service page while reviewing small batch and rapid tooling fit.",
+            "Silicone or urethane casting",
+            "context_hint_silicone_casting_batch",
+            true),
+        new("rapid-prototyping-route", "/services/rapid-prototyping", true,
+            Localized("Need help choosing the fastest prototype route?", "อยากให้ช่วยเลือกเส้นทางทำต้นแบบที่เร็วที่สุดไหมคะ"),
+            Localized("You are viewing rapid prototyping. I can help choose between printing, CNC, scanning, design support, finishing, and test priorities so the first prototype answers the right question.", "ตอนนี้คุณกำลังดูงานสร้างต้นแบบรวดเร็วค่ะ น้องมะลิช่วยเลือกงานพิมพ์ CNC สแกน ออกแบบ ตกแต่ง และลำดับการทดสอบ เพื่อให้ต้นแบบแรกตอบคำถามที่ถูกต้องได้ค่ะ"),
+            "Customer opened chat from the rapid prototyping service page while comparing prototype route options.",
+            "Rapid prototyping",
+            "context_hint_rapid_prototyping_route",
+            true),
+        new("deviation-analysis-evidence", "/services/deviation-analysis", true,
+            Localized("Need evidence for fit, wear, or supplier comparison?", "ต้องการหลักฐานเรื่อง fit การสึก หรือเทียบ supplier ไหมคะ"),
+            Localized("You are viewing deviation analysis. I can help decide what evidence to capture: scan-to-CAD comparison, critical dimensions, wear areas, report images, or release/remake recommendations.", "ตอนนี้คุณกำลังดูบริการวิเคราะห์ความคลาดเคลื่อนค่ะ น้องมะลิช่วยเลือกหลักฐานที่ควรเก็บ เช่น scan-to-CAD มิติสำคัญ จุดสึก รูปรายงาน หรือคำแนะนำให้ปล่อยผ่านหรือผลิตใหม่ค่ะ"),
+            "Customer opened chat from the deviation analysis service page while reviewing inspection evidence needs.",
+            "3D scanning",
+            "context_hint_deviation_analysis_evidence",
+            true),
+        new("materials-comparison", "/materials", false,
+            Localized("Comparing materials? I can narrow options by heat, strength, finish, or cost.", "กำลังเทียบวัสดุอยู่ไหมคะ น้องมะลิช่วยคัดตามความร้อน ความแข็งแรง ผิวงาน หรือราคาได้ค่ะ"),
+            Localized("You are viewing material guidance. I can help narrow materials by operating temperature, strength, UV or chemical exposure, surface finish, flexibility, and budget.", "ตอนนี้คุณกำลังดูข้อมูลวัสดุค่ะ น้องมะลิช่วยคัดวัสดุตามอุณหภูมิใช้งาน ความแข็งแรง UV หรือสารเคมี ผิวงาน ความยืดหยุ่น และงบประมาณได้ค่ะ"),
+            "Customer opened chat from a materials page while comparing material trade-offs.",
+            "Material selection",
+            "context_hint_materials_comparison",
+            false)
+    ];
 
     private readonly List<CustomerChatMessage> _messages = [];
     private CustomerChatbotMemory _memory = new();
@@ -209,6 +283,7 @@
     private string _draft = string.Empty;
     private string _storageKey = $"{PersonalizationStoragePrefix}:guest";
     private string _popoutMessage = string.Empty;
+    private string _popoutKind = "notification";
     private bool _isOpen;
     private bool _isSending;
     private bool _isStartingSession;
@@ -226,6 +301,11 @@
     private CancellationTokenSource? _popoutCts;
     private CancellationTokenSource? _signInPollCts;
     private CancellationTokenSource? _pendingDelayCts;
+    private CancellationTokenSource? _contextHintCts;
+    private CustomerChatbotContextHint? _pendingContextHint;
+    private CustomerChatbotContextHint? _activeContextHint;
+    private string? _lastOpenedContextHintId;
+    private DateTimeOffset _lastContextHintShownAt = DateTimeOffset.MinValue;
 
     private bool CanInteract => !_isSending && _sessionId.HasValue;
     private bool CanSend => CanInteract && !string.IsNullOrWhiteSpace(_draft);
@@ -238,6 +318,12 @@
         : (_isWaitingLong
             ? Text("Still waiting for Mali's reply. I will time out and show an error if the service does not answer soon.", "ยังรอคำตอบจากน้องมะลิอยู่ค่ะ หากบริการไม่ตอบกลับ ระบบจะแจ้งข้อผิดพลาดให้ทราบ")
             : Text("Mali is checking your message", "น้องมะลิกำลังตรวจสอบข้อความของคุณ"));
+    private string PopoutTitle => _pendingContextHint is null
+        ? Text("MALIEV assistant", "ผู้ช่วย MALIEV")
+        : Text("Need help here?", "ให้ช่วยหน้านี้ไหมคะ");
+    private string PopoutAriaLabel => _pendingContextHint is null
+        ? Text("Open MALIEV assistant", "เปิดผู้ช่วย MALIEV")
+        : Text("Open MALIEV assistant with page context", "เปิดผู้ช่วย MALIEV พร้อมบริบทหน้านี้");
     private string UnreadBadgeText => _unreadCount > 9 ? "9+" : _unreadCount.ToString(CultureInfo.InvariantCulture);
     private string UnreadBadgeAriaLabel => Text($"{_unreadCount} unread assistant messages", $"{_unreadCount} ข้อความจากผู้ช่วยที่ยังไม่ได้อ่าน");
     private string LatestUnreadBadgeText => _latestUnreadCount > 9 ? "9+" : Math.Max(_latestUnreadCount, 1).ToString(CultureInfo.InvariantCulture);
@@ -248,6 +334,8 @@
         {
             await InitializePersonalizationAsync();
             await JS.InvokeVoidAsync("malievChatbot.initFooterAwareFloat");
+            Navigation.LocationChanged += OnLocationChanged;
+            ScheduleContextHintForCurrentRoute();
         }
 
         if (_composerResizePending && _isOpen)
@@ -306,19 +394,141 @@
             _latestUnreadCount = 0;
             QueueMessageScroll(false);
             CancelPopoutTimer();
+            CancelContextHintTimer();
             _unreadCount = 0;
             _memory.UnreadCount = 0;
             await PersistMemoryAsync();
             await EnsureChatSessionStartedAsync();
         }
+        else
+        {
+            ScheduleContextHintForCurrentRoute();
+        }
     }
 
     private async Task OpenFromPopoutAsync()
     {
+        var hint = _pendingContextHint;
         if (!_isOpen)
         {
             await ToggleOpenAsync();
         }
+
+        if (hint is not null)
+        {
+            await ApplyContextHintAsync(hint);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        _ = InvokeAsync(ScheduleContextHintForCurrentRoute);
+    }
+
+    private void ScheduleContextHintForCurrentRoute()
+    {
+        CancelContextHintTimer();
+        ClearContextPopout();
+
+        var hint = ResolveContextHint(Navigation.Uri);
+        if (hint is null || !ShouldSurfaceContextHint(hint, Navigation.Uri))
+        {
+            return;
+        }
+
+        var cts = new CancellationTokenSource();
+        _contextHintCts = cts;
+        _ = ShowContextHintAfterDwellAsync(hint, cts.Token);
+    }
+
+    private async Task ShowContextHintAfterDwellAsync(CustomerChatbotContextHint hint, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(ContextHintDwellDelay, cancellationToken);
+            await InvokeAsync(async () =>
+            {
+                if (cancellationToken.IsCancellationRequested || !ShouldSurfaceContextHint(hint, Navigation.Uri))
+                {
+                    return;
+                }
+
+                _lastContextHintShownAt = DateTimeOffset.UtcNow;
+                await ShowPopoutTemporarilyAsync(hint.Popup.For(Preferences.Culture), hint);
+            });
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private CustomerChatbotContextHint? ResolveContextHint(string absoluteUri)
+    {
+        var uri = Navigation.ToAbsoluteUri(absoluteUri);
+        var path = string.IsNullOrWhiteSpace(uri.AbsolutePath)
+            ? "/"
+            : uri.AbsolutePath.TrimEnd('/').ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            path = "/";
+        }
+
+        return ContextHints.FirstOrDefault(hint =>
+            hint.ExactPath
+                ? string.Equals(path, hint.Path, StringComparison.Ordinal)
+                : path.StartsWith(hint.Path, StringComparison.Ordinal));
+    }
+
+    private bool ShouldSurfaceContextHint(CustomerChatbotContextHint hint, string absoluteUri)
+    {
+        if (_isOpen || _isSending || _showPopout || !_storageReady)
+        {
+            return false;
+        }
+
+        if (DateTimeOffset.UtcNow - _lastContextHintShownAt < ContextHintCooldown)
+        {
+            return false;
+        }
+
+        if (hint.HighIntent)
+        {
+            return true;
+        }
+
+        var uri = Navigation.ToAbsoluteUri(absoluteUri);
+        var sample = (int)((uint)HashCode.Combine(uri.PathAndQuery, hint.AnalyticsKey) % 100);
+        return sample < (int)(ContextHintShowProbability * 100);
+    }
+
+    private async Task ApplyContextHintAsync(CustomerChatbotContextHint hint)
+    {
+        _activeContextHint = hint;
+        _pendingContextHint = null;
+        _popoutKind = "notification";
+        AddDistinct(_memory.ServiceInterests, hint.ServiceInterest, MaxStoredItems, 80);
+
+        if (!string.Equals(_lastOpenedContextHintId, hint.Id, StringComparison.Ordinal))
+        {
+            _lastOpenedContextHintId = hint.Id;
+            await AddAssistantMessageAsync("assistant", hint.OpeningMessage.For(Preferences.Culture));
+        }
+
+        await PersistMemoryAsync();
+    }
+
+    private void ClearContextPopout()
+    {
+        if (!string.Equals(_popoutKind, "context", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        CancelPopoutTimer();
+        _pendingContextHint = null;
+        _popoutKind = "notification";
+        _showPopout = false;
     }
 
     private async Task FitComposerAsync()
@@ -378,6 +588,7 @@
     private async Task ResetChatAsync()
     {
         CancelPopoutTimer();
+        CancelContextHintTimer();
         CancelSignInMonitor();
         _memory = new CustomerChatbotMemory();
         _sessionId = null;
@@ -386,6 +597,9 @@
         _latestUnreadCount = 0;
         _showJumpToLatest = false;
         _showPopout = false;
+        _pendingContextHint = null;
+        _activeContextHint = null;
+        _popoutKind = "notification";
         _isAwaitingSignIn = false;
         ResetDisplayedConversation();
         QueueMessageScroll(false);
@@ -1219,6 +1433,7 @@
         var parts = new List<string>();
         AddContextPart(parts, "Authentication", _identity.IsAuthenticated ? "signed-in customer session" : "anonymous browser session");
         AddContextPart(parts, "Assistant session", _sessionId?.ToString("D"));
+        AddContextPart(parts, "Page context", _activeContextHint?.Context);
         AddContextPart(parts, "Name", _memory.Name);
         AddContextPart(parts, "Email", _memory.Email);
         AddContextPart(parts, "Company", _memory.Company);
@@ -1391,7 +1606,7 @@
         }
     }
 
-    private async Task ShowPopoutTemporarilyAsync(string message)
+    private async Task ShowPopoutTemporarilyAsync(string message, CustomerChatbotContextHint? hint = null)
     {
         if (_isOpen || string.IsNullOrWhiteSpace(message))
         {
@@ -1401,6 +1616,8 @@
         CancelPopoutTimer();
         var cts = new CancellationTokenSource();
         _popoutCts = cts;
+        _pendingContextHint = hint;
+        _popoutKind = hint is null ? "notification" : "context";
         _popoutMessage = message;
         _showPopout = true;
         await InvokeAsync(StateHasChanged);
@@ -1417,6 +1634,12 @@
         if (!cts.IsCancellationRequested)
         {
             _showPopout = false;
+            if (ReferenceEquals(_pendingContextHint, hint))
+            {
+                _pendingContextHint = null;
+                _popoutKind = "notification";
+            }
+
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -1426,6 +1649,13 @@
         _popoutCts?.Cancel();
         _popoutCts?.Dispose();
         _popoutCts = null;
+    }
+
+    private void CancelContextHintTimer()
+    {
+        _contextHintCts?.Cancel();
+        _contextHintCts?.Dispose();
+        _contextHintCts = null;
     }
 
     private void CancelSignInMonitor()
@@ -1783,7 +2013,9 @@
 
     public void Dispose()
     {
+        Navigation.LocationChanged -= OnLocationChanged;
         CancelPopoutTimer();
+        CancelContextHintTimer();
         CancelSignInMonitor();
         CancelPendingDelay();
     }
@@ -1803,6 +2035,17 @@
         bool Primary);
 
     private sealed record CustomerChatbotIdentity(bool IsAuthenticated, string? UserKey, string? DisplayName, string? Email);
+
+    private sealed record CustomerChatbotContextHint(
+        string Id,
+        string Path,
+        bool ExactPath,
+        LocalizedText Popup,
+        LocalizedText OpeningMessage,
+        string Context,
+        string ServiceInterest,
+        string AnalyticsKey,
+        bool HighIntent);
 
     private sealed class BrowserJsonResponse
     {
