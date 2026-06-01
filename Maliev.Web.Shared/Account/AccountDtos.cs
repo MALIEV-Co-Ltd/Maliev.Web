@@ -227,57 +227,78 @@ public sealed class CustomerAddressDto
 public sealed class CustomerAddressUpsertRequest
 {
     /// <summary>Gets or sets the address type.</summary>
+    [Required(ErrorMessage = "Address type is required")]
+    [StringLength(50)]
     public string Type { get; set; } = "Shipping";
 
     /// <summary>Gets or sets whether this is the default address for its type.</summary>
     public bool IsDefault { get; set; }
 
     /// <summary>Gets or sets the user-facing place label.</summary>
+    [StringLength(50)]
     public string? PlaceLabel { get; set; }
 
     /// <summary>Gets or sets the custom place label when the label is Other.</summary>
+    [StringLength(100)]
     public string? PlaceLabelOther { get; set; }
 
     /// <summary>Gets or sets the first address line.</summary>
+    [Required(ErrorMessage = "Address line 1 is required")]
+    [StringLength(255)]
     public string AddressLine1 { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the second address line.</summary>
+    [StringLength(255)]
     public string? AddressLine2 { get; set; }
 
     /// <summary>Gets or sets the third address line.</summary>
+    [StringLength(255)]
     public string? AddressLine3 { get; set; }
 
     /// <summary>Gets or sets the district name.</summary>
+    [StringLength(100)]
     public string? District { get; set; }
 
     /// <summary>Gets or sets the city name.</summary>
+    [Required(ErrorMessage = "City is required")]
+    [StringLength(100)]
     public string City { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the state or province.</summary>
+    [Required(ErrorMessage = "State/Province is required")]
+    [StringLength(100)]
     public string StateProvince { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the postal code.</summary>
+    [Required(ErrorMessage = "Postal code is required")]
+    [StringLength(20)]
     public string PostalCode { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the country identifier.</summary>
     public Guid CountryId { get; set; }
 
     /// <summary>Gets or sets the delivery recipient name.</summary>
+    [StringLength(200)]
     public string? RecipientName { get; set; }
 
     /// <summary>Gets or sets the delivery recipient phone.</summary>
+    [StringLength(20)]
     public string? RecipientPhone { get; set; }
 
     /// <summary>Gets or sets the optional delivery note for the driver.</summary>
+    [StringLength(500)]
     public string? DriverNote { get; set; }
 
     /// <summary>Gets or sets the address source: Manual, GooglePlace, or GoogleMapPin.</summary>
+    [StringLength(50)]
     public string AddressSource { get; set; } = "Manual";
 
     /// <summary>Gets or sets the Google Places identifier.</summary>
+    [StringLength(255)]
     public string? GooglePlaceId { get; set; }
 
     /// <summary>Gets or sets the formatted Google address.</summary>
+    [StringLength(500)]
     public string? FormattedAddress { get; set; }
 
     /// <summary>Gets or sets the address latitude.</summary>

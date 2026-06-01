@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using Maliev.Web.Shared.Account;
 
 namespace Maliev.Web.Tests;
 
@@ -213,6 +215,34 @@ public sealed class AccountPageSourceTests
         Assert.Contains(".language-dropdown-trigger", styles);
         Assert.Contains(".language-dropdown-item", styles);
         Assert.Contains(".timezone-select", styles);
+    }
+
+    /// <summary>
+    /// Verifies the address form shows client-side validation for fields required by CustomerService before submit.
+    /// </summary>
+    [Fact]
+    public void AccountAddressesShowsValidationForRequiredAddressFieldsBeforeSubmit()
+    {
+        var addresses = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountAddresses.razor");
+
+        Assert.Contains("<DataAnnotationsValidator />", addresses);
+        Assert.Contains("novalidate", addresses);
+        Assert.Contains("OnInvalidSubmit=\"HandleInvalidSubmit\"", addresses);
+        Assert.Contains("ValidationMessage For=\"@(() => _form.AddressLine1)\"", addresses);
+        Assert.Contains("ValidationMessage For=\"@(() => _form.City)\"", addresses);
+        Assert.Contains("ValidationMessage For=\"@(() => _form.StateProvince)\"", addresses);
+        Assert.Contains("ValidationMessage For=\"@(() => _form.PostalCode)\"", addresses);
+
+        var request = new CustomerAddressUpsertRequest();
+        var results = new List<ValidationResult>();
+
+        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), results, validateAllProperties: true);
+
+        Assert.False(isValid);
+        Assert.Contains(results, result => result.MemberNames.Contains(nameof(CustomerAddressUpsertRequest.AddressLine1)));
+        Assert.Contains(results, result => result.MemberNames.Contains(nameof(CustomerAddressUpsertRequest.City)));
+        Assert.Contains(results, result => result.MemberNames.Contains(nameof(CustomerAddressUpsertRequest.StateProvince)));
+        Assert.Contains(results, result => result.MemberNames.Contains(nameof(CustomerAddressUpsertRequest.PostalCode)));
     }
 
     /// <summary>
