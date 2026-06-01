@@ -2,10 +2,12 @@ const malievChatbotBehavior = (() => {
   const storageKey = 'maliev.chatbot.behavior.v1';
   const maxEvents = 24;
   const maxSections = 8;
+  const maxActiveContexts = 6;
   const minInputLength = 2;
   let initialized = false;
   let observer = null;
   let currentSection = null;
+  let currentSectionPath = null;
   let currentSectionStartedAt = 0;
   let scrollFrame = 0;
   let inputTimer = 0;
@@ -26,12 +28,21 @@ const malievChatbotBehavior = (() => {
     return text.length > maxLength ? text.slice(0, maxLength).trim() : text;
   };
 
-  const createState = events => ({
+  const collectActiveContexts = () => {
+    const contexts = Array.from(document.querySelectorAll('[data-chatbot-active-context]'))
+      .map(element => clean(element.dataset?.chatbotActiveContext, 120))
+      .filter(Boolean);
+
+    return Array.from(new Set(contexts)).slice(0, maxActiveContexts);
+  };
+
+  const createState = () => ({
     path: pageKey(),
     pageStartedAt: now(),
     lastSeenAt: now(),
     maxScrollPercent: 0,
-    events: Array.isArray(events) ? events.slice(0, maxEvents) : [],
+    activeContexts: collectActiveContexts(),
+    events: [],
     sections: []
   });
 
@@ -45,11 +56,12 @@ const malievChatbotBehavior = (() => {
     }
 
     if (!state || state.path !== pageKey()) {
-      return createState(state && Array.isArray(state.events) ? state.events : []);
+      return createState();
     }
 
     state.events = Array.isArray(state.events) ? state.events.slice(0, maxEvents) : [];
     state.sections = Array.isArray(state.sections) ? state.sections.slice(0, maxSections) : [];
+    state.activeContexts = collectActiveContexts();
     state.maxScrollPercent = Number.isFinite(state.maxScrollPercent) ? state.maxScrollPercent : 0;
     return state;
   };
@@ -93,6 +105,13 @@ const malievChatbotBehavior = (() => {
       return;
     }
 
+    if (currentSectionPath !== pageKey()) {
+      currentSection = null;
+      currentSectionPath = null;
+      currentSectionStartedAt = 0;
+      return;
+    }
+
     const startedAt = currentSectionStartedAt;
     currentSectionStartedAt = now();
     addSectionDwell(currentSection, now() - startedAt);
@@ -106,6 +125,7 @@ const malievChatbotBehavior = (() => {
 
     finalizeCurrentSection();
     currentSection = cleaned;
+    currentSectionPath = pageKey();
     currentSectionStartedAt = now();
   };
 
@@ -308,6 +328,7 @@ const malievChatbotBehavior = (() => {
       finalizeCurrentSection();
       writeState(readState());
       currentSection = null;
+      currentSectionPath = null;
       currentSectionStartedAt = 0;
       bindSections();
       return snapshot();

@@ -496,7 +496,8 @@
 
     private CustomerChatbotContextHint? ResolveBehaviorHint(CustomerChatbotBehaviorSnapshot? behavior)
     {
-        if (behavior is null || behavior.PageDwellSeconds < 3 && behavior.Events.Count == 0)
+        if (behavior is null ||
+            behavior.PageDwellSeconds < 3 && behavior.Events.Count == 0 && behavior.ActiveContexts.Count == 0)
         {
             return null;
         }
@@ -524,7 +525,9 @@
                 "behavior_material_comparison");
         }
 
-        if (HasBehaviorIntent(behavior, "service_comparison_intent", "workflow_review_intent") || HasBehaviorSection(behavior, "route", "workflow", "manufacturing"))
+        if (HasBehaviorIntent(behavior, "service_comparison_intent", "workflow_review_intent") ||
+            HasBehaviorSection(behavior, "route", "workflow", "manufacturing") ||
+            HasBehaviorActiveContext(behavior, "service", "บริการผลิต"))
         {
             return CreateBehaviorHint(
                 "behavior-service-comparison",
@@ -1535,7 +1538,9 @@
         var parts = new List<string>();
         AddContextPart(parts, "Authentication", _identity.IsAuthenticated ? "signed-in customer session" : "anonymous browser session");
         AddContextPart(parts, "Assistant session", _sessionId?.ToString("D"));
-        AddContextPart(parts, "Page context", _activeContextHint?.Context);
+        AddContextPart(parts, "Page context", _activeContextHint is not null && IsContextHintCurrent(_activeContextHint)
+            ? _activeContextHint.Context
+            : null);
         AddContextPart(parts, "Recent page behavior", BuildBehaviorContext(_behaviorSnapshot));
         AddContextPart(parts, "Name", _memory.Name);
         AddContextPart(parts, "Email", _memory.Email);
@@ -1568,6 +1573,11 @@
             AddBehaviorPart(parts, "Scroll", $"{behavior.MaxScrollPercent}%");
         }
 
+        var activeContexts = behavior.ActiveContexts
+            .Where(item => !string.IsNullOrWhiteSpace(item))
+            .Take(MaxBehaviorContextSignals);
+        AddBehaviorPart(parts, "Current page location", JoinList(activeContexts));
+
         var sections = behavior.Sections
             .Where(section => !string.IsNullOrWhiteSpace(section.Label) && section.DwellSeconds > 0)
             .Take(MaxBehaviorContextSignals)
@@ -1575,7 +1585,7 @@
         AddBehaviorPart(parts, "Sections", JoinList(sections));
 
         var events = behavior.Events
-            .Where(item => !string.IsNullOrWhiteSpace(item.Label))
+            .Where(item => !string.IsNullOrWhiteSpace(item.Label) && IsCurrentBehaviorPath(behavior.Path, item.Path))
             .Take(MaxBehaviorContextSignals)
             .Select(item => string.IsNullOrWhiteSpace(item.Detail) ? $"{item.Kind}: {item.Label}" : $"{item.Kind}: {item.Label} ({item.Detail})");
         AddBehaviorPart(parts, "Signals", JoinList(events));
@@ -1594,13 +1604,43 @@
 
     private static bool HasBehaviorIntent(CustomerChatbotBehaviorSnapshot behavior, params string[] kinds)
     {
-        return behavior.Events.Any(item => kinds.Any(kind => string.Equals(item.Kind, kind, StringComparison.OrdinalIgnoreCase)));
+        return behavior.Events.Any(item =>
+            IsCurrentBehaviorPath(behavior.Path, item.Path) &&
+            kinds.Any(kind => string.Equals(item.Kind, kind, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static bool HasBehaviorSection(CustomerChatbotBehaviorSnapshot behavior, params string[] terms)
     {
         return behavior.Sections.Any(section =>
             terms.Any(term => section.Label?.Contains(term, StringComparison.OrdinalIgnoreCase) == true));
+    }
+
+    private static bool HasBehaviorActiveContext(CustomerChatbotBehaviorSnapshot behavior, params string[] terms)
+    {
+        return behavior.ActiveContexts.Any(context =>
+            terms.Any(term => context?.Contains(term, StringComparison.OrdinalIgnoreCase) == true));
+    }
+
+    private static bool IsCurrentBehaviorPath(string? snapshotPath, string? eventPath)
+    {
+        return string.IsNullOrWhiteSpace(eventPath) ||
+            string.Equals(snapshotPath, eventPath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsContextHintCurrent(CustomerChatbotContextHint hint)
+    {
+        var path = NormalizeContextPath(Navigation.ToAbsoluteUri(Navigation.Uri).AbsolutePath);
+        return hint.ExactPath
+            ? string.Equals(path, hint.Path, StringComparison.Ordinal)
+            : path.StartsWith(hint.Path, StringComparison.Ordinal);
+    }
+
+    private static string NormalizeContextPath(string? path)
+    {
+        var normalized = string.IsNullOrWhiteSpace(path)
+            ? "/"
+            : path.TrimEnd('/').ToLowerInvariant();
+        return string.IsNullOrWhiteSpace(normalized) ? "/" : normalized;
     }
 
     private void LearnFromCustomerMessage(string message)
@@ -2242,6 +2282,8 @@
         public int PageDwellSeconds { get; set; }
 
         public int MaxScrollPercent { get; set; }
+
+        public List<string> ActiveContexts { get; set; } = [];
 
         public List<CustomerChatbotBehaviorEvent> Events { get; set; } = [];
 

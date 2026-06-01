@@ -1897,7 +1897,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("ResolveContextHint(Navigation.Uri)", component);
         Assert.Contains("ShouldSurfaceContextHint(hint, Navigation.Uri)", component);
         Assert.Contains("HashCode.Combine(uri.PathAndQuery, hint.AnalyticsKey)", component);
-        Assert.Contains("AddContextPart(parts, \"Page context\", _activeContextHint?.Context);", component);
+        Assert.Contains("AddContextPart(parts, \"Page context\", _activeContextHint is not null && IsContextHintCurrent(_activeContextHint)", component);
         Assert.Contains("AddDistinct(_memory.ServiceInterests, hint.ServiceInterest", component);
         Assert.Contains("Are you looking at any specific FDM material?", component);
         Assert.Contains("Any questions about the 3D scanning service you're looking at?", component);
@@ -1992,6 +1992,30 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("kind: 'material_comparison_intent'", script);
         Assert.Contains("kind: 'shop_purchase_intent'", script);
         Assert.Contains("kind: 'contact_support_intent'", script);
+    }
+
+    /// <summary>
+    /// Verifies chatbot context is scoped to the visitor's current route and selected in-page service.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotSendsCurrentPageLocationContext()
+    {
+        var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
+
+        Assert.Contains("data-chatbot-active-context=\"@HomeServiceChatbotContext\"", home);
+        Assert.Contains("private string HomeServiceChatbotContext =>", home);
+        Assert.Contains("Current page location", component);
+        Assert.Contains("ActiveContexts", component);
+        Assert.Contains("HasBehaviorActiveContext", component);
+        Assert.Contains("IsCurrentBehaviorPath(behavior.Path, item.Path)", component);
+
+        Assert.Contains("activeContexts: collectActiveContexts()", script);
+        Assert.Contains("const collectActiveContexts = () =>", script);
+        Assert.Contains("let currentSectionPath = null;", script);
+        Assert.Contains("return createState();", script);
+        Assert.DoesNotContain("return createState(state && Array.isArray(state.events) ? state.events : []);", script);
     }
 
     /// <summary>
