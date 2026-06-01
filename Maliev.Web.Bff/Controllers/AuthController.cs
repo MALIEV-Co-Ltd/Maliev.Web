@@ -158,8 +158,8 @@ public sealed class AuthController(
         using var register = await customerClient.RegisterCustomerAsync(new
         {
             email = form.Email,
-            firstName = form.FirstName,
-            lastName = form.LastName,
+            firstName = ResolveSignUpFirstName(form),
+            lastName = ResolveSignUpLastName(form),
             password = form.Password,
             registrationMethod = "Email",
             preferredLanguage = GetLanguageCode(Request.Cookies["maliev.culture"]),
@@ -168,7 +168,7 @@ public sealed class AuthController(
 
         if (register.StatusCode == HttpStatusCode.Conflict || !register.IsSuccessStatusCode)
         {
-            return RedirectWithError("/auth/sign-up", "This email cannot be registered. It may already have a MALIEV account.");
+            return RedirectWithError($"/auth/sign-up?returnUrl={Uri.EscapeDataString(NormalizeReturnUrl(form.ReturnUrl))}", "This email cannot be registered. It may already have a MALIEV account.");
         }
 
         return await SignIn(new SignInForm
@@ -454,6 +454,32 @@ public sealed class AuthController(
             return "th";
         var dash = culture.IndexOf('-', StringComparison.Ordinal);
         return (dash > 0 ? culture[..dash] : culture).ToLowerInvariant();
+    }
+
+    private static string ResolveSignUpFirstName(SignUpForm form)
+    {
+        if (!string.IsNullOrWhiteSpace(form.FirstName))
+        {
+            return form.FirstName.Trim();
+        }
+
+        var localPart = form.Email.Split('@', 2)[0]
+            .Replace(".", " ", StringComparison.Ordinal)
+            .Replace("_", " ", StringComparison.Ordinal)
+            .Replace("-", " ", StringComparison.Ordinal)
+            .Trim();
+        var parts = localPart.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 0 ? parts[0] : "MALIEV";
+    }
+
+    private static string ResolveSignUpLastName(SignUpForm form)
+    {
+        if (!string.IsNullOrWhiteSpace(form.LastName))
+        {
+            return form.LastName.Trim();
+        }
+
+        return "Customer";
     }
 
     private static string? GetExternalProfileImageUrl(ClaimsPrincipal principal)

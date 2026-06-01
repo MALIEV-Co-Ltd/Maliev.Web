@@ -5691,6 +5691,66 @@ html[data-theme="dark"] .account-google-address-autocomplete {
   line-height: 1.45;
 }
 
+.auth-email-entry-form,
+.auth-credential-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-step-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-step-actions .button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.auth-requirement-list {
+  display: grid;
+  gap: 7px;
+  margin: -2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-requirement-item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
+.auth-requirement-item::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.auth-requirement-item.is-pending::before {
+  background: var(--paper-3);
+  box-shadow: var(--shadow-border);
+}
+
+.auth-requirement-item.is-met {
+  color: var(--ink);
+}
+
+.auth-requirement-item.is-met::before {
+  content: "\2713";
+  color: var(--line-on);
+  background: var(--line-green);
+}
 .field-validation-error {
   color: var(--red);
   font-size: .78rem;

@@ -2550,32 +2550,29 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies email auth remains available but is collapsed behind the preferred Google action by default.
+    /// Verifies email auth starts with only an email field while Google stays a primary action.
     /// </summary>
     [Fact]
-    public void AuthPagesCollapseEmailFallbackByDefault()
+    public void AuthPagesUseEmailFirstGooglePrimaryFlow()
     {
         var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
+        Assert.Contains("@Text(\"Sign in or sign up\", \"เข้าสู่ระบบหรือสมัครสมาชิก\")", signIn);
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
-        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signIn);
-        Assert.Contains("<summary>@Text(\"Use email instead\", \"ใช้อีเมลแทน\")</summary>", signIn);
-        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signIn);
-        Assert.True(signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signIn.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
-        Assert.Contains("<div class=\"auth-divider\"", signIn);
+        Assert.Contains("class=\"auth-email-entry-form", signIn);
+        Assert.Contains("id=\"auth-email-entry\"", signIn);
+        Assert.Contains("aria-describedby=\"auth-email-entry-requirements\"", signIn);
+        Assert.Contains("@onsubmit=\"ContinueWithEmail\"", signIn);
+        Assert.Contains("@Text(\"Continue\", \"ดำเนินการต่อ\")", signIn);
+        Assert.Contains("private bool ShowCredentialStep => _authStep == AuthStep.Credentials;", signIn);
+        Assert.DoesNotContain("<details class=\"auth-email-panel\"", signIn);
+        Assert.True(signIn.IndexOf("class=\"auth-email-entry-form", StringComparison.Ordinal) < signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal));
 
-        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
-        Assert.Contains("<details class=\"auth-email-panel\" open=\"@EmailPanelOpen\">", signIn);
-        Assert.Contains("<summary>@Text(\"Create with email\", \"สร้างด้วยอีเมล\")</summary>", signIn);
-        Assert.Contains("private bool EmailPanelOpen => !string.IsNullOrWhiteSpace(Error);", signIn);
-        Assert.True(signIn.IndexOf("<AuthGoogleButton", StringComparison.Ordinal) < signIn.IndexOf("<details class=\"auth-email-panel\"", StringComparison.Ordinal));
-
-        Assert.Contains(".auth-email-panel", styles);
-        Assert.Contains(".auth-email-panel summary", styles);
-        Assert.Contains(".auth-email-panel summary::after", styles);
-        Assert.Contains(".auth-email-panel[open] summary", styles);
-        Assert.Contains(".auth-email-panel .auth-form", styles);
+        Assert.Contains(".auth-email-entry-form", styles);
+        Assert.Contains(".auth-credential-form", styles);
+        Assert.Contains(".auth-step-actions", styles);
+        Assert.Contains(".auth-requirement-list", styles);
     }
 
     /// <summary>
@@ -2589,19 +2586,26 @@ public sealed class HeroLayoutSourceTests
         var resetPassword = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthResetPassword.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
+        Assert.Contains("id=\"auth-email-entry-requirements\"", signIn);
+        Assert.Contains("EmailRequirementClass", signIn);
         Assert.Contains("id=\"sign-in-email-requirements\"", signIn);
         Assert.Contains("id=\"sign-in-password-requirements\"", signIn);
         Assert.Contains("aria-describedby=\"sign-in-email-requirements\"", signIn);
         Assert.Contains("aria-describedby=\"sign-in-password-requirements\"", signIn);
         Assert.Contains("minlength=\"6\"", signIn);
         Assert.Contains("@Text(\"Use a full email address, for example name@company.com.\", \"ใช้อีเมลแบบเต็ม เช่น name@company.com\")", signIn);
-        Assert.Contains("@Text(\"Password must be at least 6 characters.\", \"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร\")", signIn);
+        Assert.Contains("@Text(\"Password has at least 6 characters.\", \"รหัสผ่านมีอย่างน้อย 6 ตัวอักษร\")", signIn);
+        Assert.Contains("PasswordRequirementClass", signIn);
 
         Assert.Contains("id=\"sign-up-email-requirements\"", signIn);
         Assert.Contains("id=\"sign-up-password-requirements\"", signIn);
         Assert.Contains("aria-describedby=\"sign-up-email-requirements\"", signIn);
         Assert.Contains("aria-describedby=\"sign-up-password-requirements\"", signIn);
         Assert.Contains("minlength=\"6\"", signIn);
+        Assert.Contains("@Text(\"Verify email address\", \"ยืนยันอีเมล\")", signIn);
+        Assert.Contains("@onclick=\"BackToEmailStep\"", signIn);
+        Assert.DoesNotContain("name=\"FirstName\"", signIn);
+        Assert.DoesNotContain("name=\"LastName\"", signIn);
         Assert.DoesNotContain("minlength=\"12\"", signUp);
 
         Assert.Contains("id=\"reset-password-requirements\"", resetPassword);
@@ -2610,6 +2614,8 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("minlength=\"12\"", resetPassword);
 
         Assert.Contains(".auth-field-help", styles);
+        Assert.Contains(".auth-requirement-item.is-met", styles);
+        Assert.Contains(".auth-requirement-item.is-pending", styles);
         Assert.Contains(".auth-form input:user-invalid", styles);
         Assert.Contains(".auth-form input:user-valid", styles);
     }
