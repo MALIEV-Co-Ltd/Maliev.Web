@@ -2468,10 +2468,10 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies customer auth pages use the MALIEV logo in the sign-in title and a Google-branded OAuth button.
+    /// Verifies customer auth pages keep form titles text-only while using a Google-branded OAuth button.
     /// </summary>
     [Fact]
-    public void AuthPagesUseLogoTitleAndGoogleBrandedButton()
+    public void AuthPagesUseTextOnlyTitleAndGoogleBrandedButton()
     {
         var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
         var signUp = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignUp.razor");
@@ -2479,8 +2479,8 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
 
-        Assert.Contains("auth-title-logo", signIn);
-        Assert.Contains("src=\"/images/logo.svg\"", signIn);
+        Assert.DoesNotContain("auth-title-logo", signIn);
+        Assert.DoesNotContain("<img class=\"auth-title-logo\"", signIn);
         Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
         Assert.Contains("auth-google-icon", googleButton);
         Assert.Contains("viewBox=\"0 0 18 18\"", googleButton);
