@@ -170,7 +170,9 @@
     private static readonly TimeSpan AssistantRequestTimeout = TimeSpan.FromSeconds(45);
     private const double ContextHintShowProbability = 0.30;
     private static readonly TimeSpan ContextHintDwellDelay = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan BehaviorHintDwellDelay = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan ContextHintCooldown = TimeSpan.FromSeconds(45);
+    private const int MaxBehaviorContextSignals = 6;
     private static readonly JsonSerializerOptions StorageJson = new(JsonSerializerDefaults.Web);
     private static readonly Regex DangerousHtmlBlockPattern = new(
         @"<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>",
@@ -304,6 +306,7 @@
     private CancellationTokenSource? _contextHintCts;
     private CustomerChatbotContextHint? _pendingContextHint;
     private CustomerChatbotContextHint? _activeContextHint;
+    private CustomerChatbotBehaviorSnapshot? _behaviorSnapshot;
     private string? _lastOpenedContextHintId;
     private DateTimeOffset _lastContextHintShownAt = DateTimeOffset.MinValue;
 
@@ -333,6 +336,7 @@
         if (firstRender)
         {
             await InitializePersonalizationAsync();
+            await InitializeBehaviorTrackerAsync();
             await JS.InvokeVoidAsync("malievChatbot.initFooterAwareFloat");
             Navigation.LocationChanged += OnLocationChanged;
             ScheduleContextHintForCurrentRoute();
@@ -409,6 +413,7 @@
     private async Task OpenFromPopoutAsync()
     {
         var hint = _pendingContextHint;
+        await RecordBehaviorEventAsync("assistant_popout_opened", hint?.Id ?? "manual-open", hint?.AnalyticsKey);
         if (!_isOpen)
         {
             await ToggleOpenAsync();
@@ -427,10 +432,17 @@
 
     private void ScheduleContextHintForCurrentRoute()
     {
+        _ = InvokeAsync(ScheduleContextHintForCurrentRouteAsync);
+    }
+
+    private async Task ScheduleContextHintForCurrentRouteAsync()
+    {
         CancelContextHintTimer();
         ClearContextPopout();
 
-        var hint = ResolveContextHint(Navigation.Uri);
+        _behaviorSnapshot = await ReadBehaviorSnapshotAsync("malievChatbot.refreshBehaviorTracker");
+        var behaviorHint = ResolveBehaviorHint(_behaviorSnapshot);
+        var hint = behaviorHint ?? ResolveContextHint(Navigation.Uri);
         if (hint is null || !ShouldSurfaceContextHint(hint, Navigation.Uri))
         {
             return;
@@ -438,16 +450,17 @@
 
         var cts = new CancellationTokenSource();
         _contextHintCts = cts;
-        _ = ShowContextHintAfterDwellAsync(hint, cts.Token);
+        _ = ShowContextHintAfterDwellAsync(hint, behaviorHint is null ? ContextHintDwellDelay : BehaviorHintDwellDelay, cts.Token);
     }
 
-    private async Task ShowContextHintAfterDwellAsync(CustomerChatbotContextHint hint, CancellationToken cancellationToken)
+    private async Task ShowContextHintAfterDwellAsync(CustomerChatbotContextHint hint, TimeSpan dwellDelay, CancellationToken cancellationToken)
     {
         try
         {
-            await Task.Delay(ContextHintDwellDelay, cancellationToken);
+            await Task.Delay(dwellDelay, cancellationToken);
             await InvokeAsync(async () =>
             {
+                _behaviorSnapshot = await ReadBehaviorSnapshotAsync();
                 if (cancellationToken.IsCancellationRequested || !ShouldSurfaceContextHint(hint, Navigation.Uri))
                 {
                     return;
@@ -478,6 +491,93 @@
             hint.ExactPath
                 ? string.Equals(path, hint.Path, StringComparison.Ordinal)
                 : path.StartsWith(hint.Path, StringComparison.Ordinal));
+    }
+
+    private CustomerChatbotContextHint? ResolveBehaviorHint(CustomerChatbotBehaviorSnapshot? behavior)
+    {
+        if (behavior is null || behavior.PageDwellSeconds < 3 && behavior.Events.Count == 0)
+        {
+            return null;
+        }
+
+        var behaviorContext = BuildBehaviorContext(behavior);
+        if (HasBehaviorIntent(behavior, "quote_upload_intent", "quote_route_interest", "quote_files_selected"))
+        {
+            return CreateBehaviorHint(
+                "behavior-quote-upload",
+                Localized("Have a CAD file ready? I can help choose process, material, and quote route.", "มีไฟล์ CAD พร้อมไหมคะ น้องมะลิช่วยเลือกกระบวนการ วัสดุ และเส้นทางขอราคาได้ค่ะ"),
+                Localized("I noticed quote upload intent on this page. I can help turn your file, material, quantity, finish, and deadline into a cleaner quote brief.", "น้องมะลิเห็นว่าคุณกำลังสนใจอัปโหลดไฟล์ขอราคาค่ะ ช่วยจัดไฟล์ วัสดุ จำนวน ผิวงาน และกำหนดเวลาให้เป็น brief ใบเสนอราคาที่ชัดขึ้นได้ค่ะ"),
+                $"Customer showed quote upload intent. {behaviorContext}",
+                "quote upload intent",
+                "behavior_quote_upload");
+        }
+
+        if (HasBehaviorIntent(behavior, "material_comparison_intent") || HasBehaviorSection(behavior, "material"))
+        {
+            return CreateBehaviorHint(
+                "behavior-material-comparison",
+                Localized("Comparing materials? I can narrow options by heat, strength, finish, or cost.", "กำลังเทียบวัสดุอยู่ไหมคะ น้องมะลิช่วยคัดตามความร้อน ความแข็งแรง ผิวงาน หรือราคาได้ค่ะ"),
+                Localized("I noticed material comparison intent. Tell me the operating temperature, load, exposure, finish target, and budget, and I will narrow the likely options.", "น้องมะลิเห็นว่าคุณกำลังเทียบวัสดุค่ะ บอกอุณหภูมิใช้งาน แรงรับ สภาพแวดล้อม ผิวงาน และงบประมาณ แล้วน้องช่วยคัดตัวเลือกได้ค่ะ"),
+                $"Customer showed material comparison intent. {behaviorContext}",
+                "material comparison intent",
+                "behavior_material_comparison");
+        }
+
+        if (HasBehaviorIntent(behavior, "service_comparison_intent", "workflow_review_intent") || HasBehaviorSection(behavior, "route", "workflow", "manufacturing"))
+        {
+            return CreateBehaviorHint(
+                "behavior-service-comparison",
+                Localized("Choosing a manufacturing route? I can help compare process, risk, and quote readiness.", "กำลังเลือกเส้นทางผลิตอยู่ไหมคะ น้องมะลิช่วยเทียบกระบวนการ ความเสี่ยง และความพร้อมขอราคาได้ค่ะ"),
+                Localized("I noticed service comparison intent. I can compare route, material, tolerance, finish, quantity, and risk before you upload files.", "น้องมะลิเห็นว่าคุณกำลังเทียบบริการค่ะ ช่วยเทียบเส้นทางผลิต วัสดุ tolerance ผิว จำนวน และความเสี่ยงก่อนอัปโหลดไฟล์ได้ค่ะ"),
+                $"Customer showed service comparison intent. {behaviorContext}",
+                "manufacturing route comparison",
+                "behavior_service_comparison");
+        }
+
+        if (HasBehaviorIntent(behavior, "shop_purchase_intent", "shop_search_intent"))
+        {
+            return CreateBehaviorHint(
+                "behavior-shop-selection",
+                Localized("Looking at shop items? I can help compare stock, fit, and custom alternatives.", "กำลังดูสินค้าในร้านอยู่ไหมคะ น้องมะลิช่วยเทียบสต็อก ความเหมาะสม และทางเลือกผลิตเฉพาะแบบได้ค่ะ"),
+                Localized("I noticed shop selection intent. I can help compare the product, stock status, fit, lead time, and whether a custom manufactured part is better.", "น้องมะลิเห็นว่าคุณกำลังเลือกสินค้าในร้านค่ะ ช่วยเทียบสินค้า สต็อก ความเหมาะสม ระยะเวลา และทางเลือกผลิตเฉพาะแบบได้ค่ะ"),
+                $"Customer showed shop selection intent. {behaviorContext}",
+                "shop product selection",
+                "behavior_shop_selection");
+        }
+
+        if (HasBehaviorIntent(behavior, "contact_support_intent"))
+        {
+            return CreateBehaviorHint(
+                "behavior-contact-support",
+                Localized("Need the right MALIEV contact path? I can route sales, support, or RFQ details.", "ต้องการติดต่อช่องทางไหนของ MALIEV คะ น้องมะลิช่วยแยกฝ่ายขาย ซัพพอร์ต หรือรายละเอียด RFQ ได้ค่ะ"),
+                Localized("I noticed contact support intent. I can help organize the project note, attachments, sales/support destination, and next step before you send it.", "น้องมะลิเห็นว่าคุณกำลังติดต่อทีมค่ะ ช่วยจัดโน้ตโปรเจกต์ ไฟล์แนบ ช่องทางฝ่ายขายหรือซัพพอร์ต และขั้นตอนต่อไปก่อนส่งได้ค่ะ"),
+                $"Customer showed contact support intent. {behaviorContext}",
+                "contact support intent",
+                "behavior_contact_support");
+        }
+
+        return null;
+    }
+
+    private CustomerChatbotContextHint CreateBehaviorHint(
+        string id,
+        LocalizedText popup,
+        LocalizedText openingMessage,
+        string context,
+        string serviceInterest,
+        string analyticsKey)
+    {
+        var path = Navigation.ToAbsoluteUri(Navigation.Uri).AbsolutePath.TrimEnd('/').ToLowerInvariant();
+        return new CustomerChatbotContextHint(
+            id,
+            string.IsNullOrWhiteSpace(path) ? "/" : path,
+            true,
+            popup,
+            openingMessage,
+            context,
+            serviceInterest,
+            analyticsKey,
+            true);
     }
 
     private bool ShouldSurfaceContextHint(CustomerChatbotContextHint hint, string absoluteUri)
@@ -685,6 +785,7 @@
         var trimmed = message.Trim();
         _messages.Add(new CustomerChatMessage("user", trimmed));
         LearnFromCustomerMessage(trimmed);
+        _behaviorSnapshot = await ReadBehaviorSnapshotAsync();
         BeginPendingState(isStartingSession: false);
         _showJumpToLatest = false;
         _latestUnreadCount = 0;
@@ -1434,6 +1535,7 @@
         AddContextPart(parts, "Authentication", _identity.IsAuthenticated ? "signed-in customer session" : "anonymous browser session");
         AddContextPart(parts, "Assistant session", _sessionId?.ToString("D"));
         AddContextPart(parts, "Page context", _activeContextHint?.Context);
+        AddContextPart(parts, "Recent page behavior", BuildBehaviorContext(_behaviorSnapshot));
         AddContextPart(parts, "Name", _memory.Name);
         AddContextPart(parts, "Email", _memory.Email);
         AddContextPart(parts, "Company", _memory.Company);
@@ -1444,6 +1546,60 @@
         return parts.Count == 0
             ? null
             : string.Join("\n", parts);
+    }
+
+    private static string? BuildBehaviorContext(CustomerChatbotBehaviorSnapshot? behavior)
+    {
+        if (behavior is null)
+        {
+            return null;
+        }
+
+        var parts = new List<string>();
+        AddBehaviorPart(parts, "Path", behavior.Path);
+        if (behavior.PageDwellSeconds > 0)
+        {
+            AddBehaviorPart(parts, "Dwell", $"{behavior.PageDwellSeconds}s");
+        }
+
+        if (behavior.MaxScrollPercent > 0)
+        {
+            AddBehaviorPart(parts, "Scroll", $"{behavior.MaxScrollPercent}%");
+        }
+
+        var sections = behavior.Sections
+            .Where(section => !string.IsNullOrWhiteSpace(section.Label) && section.DwellSeconds > 0)
+            .Take(MaxBehaviorContextSignals)
+            .Select(section => $"{section.Label} ({section.DwellSeconds}s)");
+        AddBehaviorPart(parts, "Sections", JoinList(sections));
+
+        var events = behavior.Events
+            .Where(item => !string.IsNullOrWhiteSpace(item.Label))
+            .Take(MaxBehaviorContextSignals)
+            .Select(item => string.IsNullOrWhiteSpace(item.Detail) ? $"{item.Kind}: {item.Label}" : $"{item.Kind}: {item.Label} ({item.Detail})");
+        AddBehaviorPart(parts, "Signals", JoinList(events));
+
+        return parts.Count == 0 ? null : string.Join("; ", parts);
+    }
+
+    private static void AddBehaviorPart(List<string> parts, string label, string? value)
+    {
+        var cleaned = CleanOneLine(value, 180);
+        if (!string.IsNullOrWhiteSpace(cleaned))
+        {
+            parts.Add($"{label}={cleaned}");
+        }
+    }
+
+    private static bool HasBehaviorIntent(CustomerChatbotBehaviorSnapshot behavior, params string[] kinds)
+    {
+        return behavior.Events.Any(item => kinds.Any(kind => string.Equals(item.Kind, kind, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static bool HasBehaviorSection(CustomerChatbotBehaviorSnapshot behavior, params string[] terms)
+    {
+        return behavior.Sections.Any(section =>
+            terms.Any(term => section.Label?.Contains(term, StringComparison.OrdinalIgnoreCase) == true));
     }
 
     private void LearnFromCustomerMessage(string message)
@@ -1600,6 +1756,37 @@
         try
         {
             await JS.InvokeVoidAsync("malievChatbot.clearSharedSession", SharedSessionStorageKey);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
+        {
+        }
+    }
+
+    private async Task InitializeBehaviorTrackerAsync()
+    {
+        _behaviorSnapshot = await ReadBehaviorSnapshotAsync("malievChatbot.initBehaviorTracker");
+    }
+
+    private async Task<CustomerChatbotBehaviorSnapshot?> ReadBehaviorSnapshotAsync(string method = "malievChatbot.readBehaviorSnapshot")
+    {
+        try
+        {
+            var raw = await JS.InvokeAsync<string?>(method);
+            return string.IsNullOrWhiteSpace(raw)
+                ? null
+                : JsonSerializer.Deserialize<CustomerChatbotBehaviorSnapshot>(raw, StorageJson);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException or JsonException)
+        {
+            return null;
+        }
+    }
+
+    private async Task RecordBehaviorEventAsync(string kind, string label, string? detail = null)
+    {
+        try
+        {
+            await JS.InvokeAsync<string?>("malievChatbot.recordBehaviorEvent", kind, label, detail);
         }
         catch (Exception ex) when (ex is InvalidOperationException or JSException or JSDisconnectedException)
         {
@@ -2046,6 +2233,41 @@
         string ServiceInterest,
         string AnalyticsKey,
         bool HighIntent);
+
+    private sealed class CustomerChatbotBehaviorSnapshot
+    {
+        public string? Path { get; set; }
+
+        public int PageDwellSeconds { get; set; }
+
+        public int MaxScrollPercent { get; set; }
+
+        public List<CustomerChatbotBehaviorEvent> Events { get; set; } = [];
+
+        public List<CustomerChatbotBehaviorSection> Sections { get; set; } = [];
+    }
+
+    private sealed class CustomerChatbotBehaviorEvent
+    {
+        public string? Kind { get; set; }
+
+        public string? Label { get; set; }
+
+        public string? Detail { get; set; }
+
+        public string? Path { get; set; }
+
+        public DateTimeOffset? OccurredAt { get; set; }
+    }
+
+    private sealed class CustomerChatbotBehaviorSection
+    {
+        public string? Label { get; set; }
+
+        public int DwellSeconds { get; set; }
+
+        public DateTimeOffset? LastSeenAt { get; set; }
+    }
 
     private sealed class BrowserJsonResponse
     {

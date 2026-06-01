@@ -1891,6 +1891,41 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the customer chatbot uses first-party behavior signals to choose assistive popouts and assistant context.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotTracksLocalBehaviorForAssistivePopouts()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-chatbot.js");
+
+        Assert.Contains("malievChatbot.initBehaviorTracker", component);
+        Assert.Contains("malievChatbot.refreshBehaviorTracker", component);
+        Assert.Contains("ReadBehaviorSnapshotAsync", component);
+        Assert.Contains("ResolveBehaviorHint", component);
+        Assert.Contains("BuildBehaviorContext", component);
+        Assert.Contains("Recent page behavior", component);
+        Assert.Contains("quote upload intent", component);
+        Assert.Contains("material comparison intent", component);
+        Assert.Contains("CustomerChatbotBehaviorSnapshot", component);
+        Assert.Contains("CustomerChatbotBehaviorEvent", component);
+        Assert.Contains("assistant_popout_opened", component);
+        Assert.Contains("recordBehaviorEvent", component);
+
+        Assert.Contains("initBehaviorTracker: function ()", script);
+        Assert.Contains("refreshBehaviorTracker: function ()", script);
+        Assert.Contains("readBehaviorSnapshot: function ()", script);
+        Assert.Contains("recordBehaviorEvent: function (kind, label, detail)", script);
+        Assert.Contains("maliev.chatbot.behavior.v1", script);
+        Assert.Contains("sessionStorage", script);
+        Assert.Contains("IntersectionObserver", script);
+        Assert.Contains("document.addEventListener('click'", script);
+        Assert.Contains("landing-quote-dropzone", script);
+        Assert.Contains("material-filter-row", script);
+        Assert.Contains("shop-search", script);
+    }
+
+    /// <summary>
     /// Verifies MudBlazor receives MALIEV design tokens instead of default styling.
     /// </summary>
     [Fact]

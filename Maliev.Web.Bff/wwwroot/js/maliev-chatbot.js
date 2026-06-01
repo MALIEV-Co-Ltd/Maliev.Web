@@ -1,3 +1,322 @@
+const malievChatbotBehavior = (() => {
+  const storageKey = 'maliev.chatbot.behavior.v1';
+  const maxEvents = 24;
+  const maxSections = 8;
+  const minInputLength = 2;
+  let initialized = false;
+  let observer = null;
+  let currentSection = null;
+  let currentSectionStartedAt = 0;
+  let scrollFrame = 0;
+  let inputTimer = 0;
+
+  const now = () => Date.now();
+  const pageKey = () => `${window.location.pathname || '/'}${window.location.search || ''}`;
+
+  const clean = (value, maxLength) => {
+    if (!value) {
+      return null;
+    }
+
+    const text = String(value).replace(/\s+/g, ' ').trim();
+    if (!text) {
+      return null;
+    }
+
+    return text.length > maxLength ? text.slice(0, maxLength).trim() : text;
+  };
+
+  const createState = events => ({
+    path: pageKey(),
+    pageStartedAt: now(),
+    lastSeenAt: now(),
+    maxScrollPercent: 0,
+    events: Array.isArray(events) ? events.slice(0, maxEvents) : [],
+    sections: []
+  });
+
+  const readState = () => {
+    let state = null;
+    try {
+      const stored = window.sessionStorage.getItem(storageKey);
+      state = stored ? JSON.parse(stored) : null;
+    } catch {
+      state = null;
+    }
+
+    if (!state || state.path !== pageKey()) {
+      return createState(state && Array.isArray(state.events) ? state.events : []);
+    }
+
+    state.events = Array.isArray(state.events) ? state.events.slice(0, maxEvents) : [];
+    state.sections = Array.isArray(state.sections) ? state.sections.slice(0, maxSections) : [];
+    state.maxScrollPercent = Number.isFinite(state.maxScrollPercent) ? state.maxScrollPercent : 0;
+    return state;
+  };
+
+  const writeState = state => {
+    state.lastSeenAt = now();
+    try {
+      window.sessionStorage.setItem(storageKey, JSON.stringify(state));
+    } catch {
+    }
+  };
+
+  const addSectionDwell = (label, dwellMs) => {
+    const cleaned = clean(label, 90);
+    if (!cleaned || dwellMs < 700) {
+      return;
+    }
+
+    const state = readState();
+    const dwellSeconds = Math.max(1, Math.round(dwellMs / 1000));
+    const existing = state.sections.find(section => section.label === cleaned);
+    if (existing) {
+      existing.dwellSeconds = Math.min(999, (existing.dwellSeconds || 0) + dwellSeconds);
+      existing.lastSeenAt = new Date().toISOString();
+    } else {
+      state.sections.unshift({
+        label: cleaned,
+        dwellSeconds,
+        lastSeenAt: new Date().toISOString()
+      });
+    }
+
+    state.sections = state.sections
+      .sort((left, right) => (right.dwellSeconds || 0) - (left.dwellSeconds || 0))
+      .slice(0, maxSections);
+    writeState(state);
+  };
+
+  const finalizeCurrentSection = () => {
+    if (!currentSection || !currentSectionStartedAt) {
+      return;
+    }
+
+    const startedAt = currentSectionStartedAt;
+    currentSectionStartedAt = now();
+    addSectionDwell(currentSection, now() - startedAt);
+  };
+
+  const activateSection = label => {
+    const cleaned = clean(label, 90);
+    if (!cleaned || cleaned === currentSection) {
+      return;
+    }
+
+    finalizeCurrentSection();
+    currentSection = cleaned;
+    currentSectionStartedAt = now();
+  };
+
+  const labelForElement = element => {
+    if (!element) {
+      return null;
+    }
+
+    const explicit = clean(element.dataset?.chatbotIntentLabel || element.dataset?.screenLabel || element.getAttribute?.('aria-label'), 90);
+    if (explicit) {
+      return explicit;
+    }
+
+    const labelledBy = element.getAttribute?.('aria-labelledby');
+    if (labelledBy) {
+      const labelElement = document.getElementById(labelledBy.split(/\s+/)[0]);
+      const label = clean(labelElement?.textContent, 90);
+      if (label) {
+        return label;
+      }
+    }
+
+    const heading = element.querySelector?.('h1, h2, h3, h4, strong, .card-meta, .material-filter-label, .quote-config-label');
+    return clean(heading?.textContent || element.textContent, 90);
+  };
+
+  const recordEvent = (kind, label, detail) => {
+    const cleanedKind = clean(kind, 64);
+    const cleanedLabel = clean(label, 120);
+    if (!cleanedKind || !cleanedLabel) {
+      return null;
+    }
+
+    const state = readState();
+    const event = {
+      kind: cleanedKind,
+      label: cleanedLabel,
+      detail: clean(detail, 180),
+      path: pageKey(),
+      occurredAt: new Date().toISOString()
+    };
+
+    state.events.unshift(event);
+    state.events = state.events.slice(0, maxEvents);
+    writeState(state);
+    return event;
+  };
+
+  const classifyClick = target => {
+    const explicit = target.closest?.('[data-chatbot-intent]');
+    if (explicit) {
+      return {
+        kind: explicit.dataset.chatbotIntent,
+        label: explicit.dataset.chatbotIntentLabel || labelForElement(explicit)
+      };
+    }
+
+    const quoteFormats = target.closest?.('.landing-quote-dropzone-format-button');
+    if (quoteFormats) {
+      return { kind: 'quote_format_check', label: 'Checked supported quote upload formats' };
+    }
+
+    const quoteDropzone = target.closest?.('.landing-quote-dropzone, .final-dropzone, .machine-configure-button');
+    if (quoteDropzone) {
+      return { kind: 'quote_upload_intent', label: labelForElement(quoteDropzone) || 'Opened quote upload route' };
+    }
+
+    const quoteLink = target.closest?.('a[href*="quote"], a[href*="quotes/new"], .service-page-hero .button.primary, .section-link[href*="quote"]');
+    if (quoteLink) {
+      return { kind: 'quote_route_interest', label: labelForElement(quoteLink) || 'Opened quote route' };
+    }
+
+    const serviceTab = target.closest?.('.home-services-tabs button, .home-services-cta, .service-card, .industry-sector-card');
+    if (serviceTab) {
+      return { kind: 'service_comparison_intent', label: labelForElement(serviceTab) || 'Compared service options' };
+    }
+
+    const workflowStep = target.closest?.('.process-grid button, [data-workflow-accent], [data-machine-variant], .machine-addon-copy');
+    if (workflowStep) {
+      return { kind: 'workflow_review_intent', label: labelForElement(workflowStep) || 'Reviewed manufacturing workflow' };
+    }
+
+    const materialControl = target.closest?.('.material-filter-row button, .material-mobile-card-heading button, .material-comparison-table button, .material-clear-selection');
+    if (materialControl) {
+      return { kind: 'material_comparison_intent', label: labelForElement(materialControl) || 'Compared materials' };
+    }
+
+    const shopControl = target.closest?.('.shop-collection-card, .product-card button, .shop-feature-action, .product-detail .button.primary');
+    if (shopControl) {
+      return { kind: 'shop_purchase_intent', label: labelForElement(shopControl) || 'Reviewed shop product' };
+    }
+
+    const contactControl = target.closest?.('.contact-submit-button, .contact-upload-panel, .contact-phone-reveal, .line-contact-link, .contact-map-actions button');
+    if (contactControl) {
+      return { kind: 'contact_support_intent', label: labelForElement(contactControl) || 'Reviewed contact options' };
+    }
+
+    return null;
+  };
+
+  const updateScrollDepth = () => {
+    scrollFrame = 0;
+    const state = readState();
+    const scrollable = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const percent = Math.round(Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100)));
+    if (percent > state.maxScrollPercent) {
+      state.maxScrollPercent = percent;
+      writeState(state);
+    }
+  };
+
+  const bindSections = () => {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+
+    if (typeof IntersectionObserver !== 'function') {
+      return;
+    }
+
+    const sections = Array.from(document.querySelectorAll('section, [data-screen-label]'))
+      .filter(section => !section.closest('.customer-chatbot'));
+    if (sections.length === 0) {
+      return;
+    }
+
+    observer = new IntersectionObserver(entries => {
+      const visible = entries
+        .filter(entry => entry.isIntersecting && entry.intersectionRatio >= 0.45)
+        .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+      if (visible) {
+        activateSection(labelForElement(visible.target));
+      }
+    }, { threshold: [0.45, 0.65, 0.85] });
+
+    sections.forEach(section => observer.observe(section));
+  };
+
+  const bind = () => {
+    if (initialized) {
+      return;
+    }
+
+    initialized = true;
+    document.addEventListener('click', event => {
+      const intent = classifyClick(event.target);
+      if (intent) {
+        recordEvent(intent.kind, intent.label);
+      }
+    }, true);
+
+    document.addEventListener('change', event => {
+      const input = event.target;
+      if (input?.matches?.('.landing-quote-dropzone-input') && input.files?.length) {
+        recordEvent('quote_files_selected', `${input.files.length} quote file${input.files.length === 1 ? '' : 's'} selected`);
+      }
+    }, true);
+
+    document.addEventListener('input', event => {
+      const input = event.target;
+      if (!input?.matches?.('.shop-search input') || (input.value || '').trim().length < minInputLength) {
+        return;
+      }
+
+      window.clearTimeout(inputTimer);
+      inputTimer = window.setTimeout(() => {
+        recordEvent('shop_search_intent', `Searched shop for "${clean(input.value, 60)}"`);
+      }, 600);
+    }, true);
+
+    window.addEventListener('scroll', () => {
+      if (scrollFrame) {
+        return;
+      }
+
+      scrollFrame = window.requestAnimationFrame(updateScrollDepth);
+    }, { passive: true });
+
+    window.addEventListener('beforeunload', finalizeCurrentSection);
+  };
+
+  const snapshot = () => {
+    finalizeCurrentSection();
+    updateScrollDepth();
+    const state = readState();
+    state.pageDwellSeconds = Math.max(0, Math.round((now() - (state.pageStartedAt || now())) / 1000));
+    writeState(state);
+    return state;
+  };
+
+  return {
+    init: () => {
+      bind();
+      bindSections();
+      writeState(readState());
+      return snapshot();
+    },
+    refresh: () => {
+      finalizeCurrentSection();
+      writeState(readState());
+      currentSection = null;
+      currentSectionStartedAt = 0;
+      bindSections();
+      return snapshot();
+    },
+    snapshot,
+    recordEvent
+  };
+})();
+
 window.malievChatbot = {
   getJson: async function (path) {
     if (!path || typeof path !== 'string' || !path.startsWith('/')) {
@@ -186,6 +505,22 @@ window.malievChatbot = {
       document.cookie = `maliev_customer_assistant_session=; Path=/; Max-Age=0; SameSite=Lax${secure}${domain}`;
     } catch {
     }
+  },
+
+  initBehaviorTracker: function () {
+    return JSON.stringify(malievChatbotBehavior.init());
+  },
+
+  refreshBehaviorTracker: function () {
+    return JSON.stringify(malievChatbotBehavior.refresh());
+  },
+
+  readBehaviorSnapshot: function () {
+    return JSON.stringify(malievChatbotBehavior.snapshot());
+  },
+
+  recordBehaviorEvent: function (kind, label, detail) {
+    return JSON.stringify(malievChatbotBehavior.recordEvent(kind, label, detail));
   },
 
   initComposerKeys: function (textarea, sendButton) {
