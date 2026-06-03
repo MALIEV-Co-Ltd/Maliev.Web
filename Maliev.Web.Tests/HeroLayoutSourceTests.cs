@@ -42,7 +42,7 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
         var modelReadme = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "models", "README.md");
 
-        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-01.glb")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "sample.glb")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-02.glb")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-printing-part-03.glb")));
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "models", "hero-3d-scanning-part-01.glb")));
@@ -51,7 +51,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("hero-cnc-machining-fixture-01.glb", modelReadme);
         Assert.Contains("hero-3d-scanning-part-01.glb", modelReadme);
         Assert.Contains("internal const string DefaultServiceSlug = \"3d-printing\";", catalog);
-        Assert.Contains("\"/models/hero-3d-printing-part-01.glb\"", catalog);
+        Assert.Contains("\"/models/sample.glb\"", catalog);
         Assert.Contains("\"/models/hero-3d-printing-part-02.glb\"", catalog);
         Assert.Contains("\"/models/hero-3d-printing-part-03.glb\"", catalog);
         Assert.Contains("\"/models/hero-3d-scanning-part-01.glb\"", catalog);

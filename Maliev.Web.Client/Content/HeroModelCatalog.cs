@@ -14,7 +14,7 @@ internal static class HeroModelCatalog
         new(
             "3d-printing-part-01",
             LegacyFixtureServiceSlug,
-            "/models/hero-3d-printing-part-01.glb",
+            "/models/sample.glb",
             SiteContent.Text("3D printed production fixture preview", "ตัวอย่างชิ้นงานฟิกซ์เจอร์จากงานพิมพ์ 3 มิติ"),
             true),
         new(
