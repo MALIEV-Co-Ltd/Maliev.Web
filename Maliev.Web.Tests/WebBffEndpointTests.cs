@@ -530,7 +530,8 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             Assert.NotEmpty(request.Sections);
             Assert.NotEmpty(request.Takeaways);
             Assert.NotNull(request.CoverImage);
-            Assert.NotEmpty(request.CoverImage.Bytes);
+            Assert.Equal("/images/blog/fdm-print-orientation.jpg", request.CoverImage.Url);
+            Assert.Equal("image/jpeg", request.CoverImage.ContentType);
             return Task.FromResult(PdfBytes);
         }
     }

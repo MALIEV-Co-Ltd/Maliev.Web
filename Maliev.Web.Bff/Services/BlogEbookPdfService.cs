@@ -48,25 +48,24 @@ public sealed class BlogEbookPdfService(IWebHostEnvironment environment, IPdfSer
 
     private async Task<BlogPracticalNotePdfImage?> MapImage(string url, string alt, string caption, CancellationToken cancellationToken)
     {
-        var imagePath = ResolveImagePath(url);
-        if (imagePath is null)
-        {
+        if (string.IsNullOrWhiteSpace(url))
             return null;
-        }
+
+        var imagePath = ResolveImagePath(url);
 
         return new BlogPracticalNotePdfImage
         {
             Url = url,
             Alt = alt,
             Caption = caption,
-            ContentType = ResolveContentType(imagePath),
-            Bytes = await File.ReadAllBytesAsync(imagePath, cancellationToken)
+            ContentType = imagePath is null ? ResolveContentType(url) : ResolveContentType(imagePath),
+            Bytes = imagePath is null ? [] : await File.ReadAllBytesAsync(imagePath, cancellationToken)
         };
     }
 
     private string? ResolveImagePath(string url)
     {
-        if (string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+        if (Uri.TryCreate(url, UriKind.Absolute, out _))
         {
             return null;
         }
