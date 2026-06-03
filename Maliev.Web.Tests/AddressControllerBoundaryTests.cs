@@ -135,6 +135,9 @@ public sealed class AddressControllerBoundaryTests
                 Content = JsonContent.Create(LocationsResponse ?? new { data = Array.Empty<object>() })
             });
         }
+
+        public Task<HttpResponseMessage> SearchCompaniesAsync(string query, int limit, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
     private sealed class FakeHttpClientFactory : IHttpClientFactory

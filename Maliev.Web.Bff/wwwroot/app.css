@@ -4913,13 +4913,13 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 
 .shop-collection-card {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   width: 100%;
 }
 
-.shop-collection-card:first-child {
-  grid-template-columns: minmax(0, 1fr);
+.shop-collection-card:has(.shop-collection-image) {
+  grid-template-columns: 58px minmax(0, 1fr);
 }
 
 .shop-collection-image {
@@ -4955,11 +4955,15 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 
 .shop-collection-summary {
   color: var(--muted);
-  display: -webkit-box;
+  display: none;
   font-size: .78rem;
   line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.shop-collection-card:hover .shop-collection-summary {
+  display: -webkit-box;
 }
 
 .shop-catalog-stage {
@@ -5490,7 +5494,9 @@ html[data-theme="dark"] .auth-google-icon {
 .company-search-result {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 3px;
   width: 100%;
   text-align: left;
   padding: 10px 14px;
@@ -5499,6 +5505,68 @@ html[data-theme="dark"] .auth-google-icon {
   cursor: pointer;
   font-size: 0.875rem;
   color: var(--ink);
+  line-height: 1.35;
+}
+
+button.company-search-result {
+  text-align: left;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.company-search-result-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.company-search-result-name {
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.company-search-result-status {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--maliev-radius-sm, 4px);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.55;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.company-status-active {
+  background: color-mix(in srgb, var(--green, #16a34a) 12%, transparent);
+  color: var(--green, #16a34a);
+}
+
+.company-status-defunct {
+  background: color-mix(in srgb, var(--red, #dc2626) 10%, transparent);
+  color: var(--red, #dc2626);
+}
+
+.company-search-result-fullname {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.company-search-result-type {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.company-search-result-objectives {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .company-search-result:hover,
@@ -5521,11 +5589,16 @@ html[data-theme="dark"] .auth-google-icon {
 }
 
 .branch-type-option {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+}
+
+.branch-type-option input[type="radio"] {
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .account-google-address-picker {
@@ -5831,6 +5904,7 @@ html[data-theme="dark"] .account-google-address-autocomplete {
 
 .auth-form label,
 .account-form label,
+.account-form .account-profile-field,
 .account-field,
 .form-full,
 .form-short {
@@ -5906,6 +5980,7 @@ html[data-theme="dark"] .account-google-address-autocomplete {
   color: var(--line-on);
   background: var(--line-green);
 }
+
 .field-validation-error {
   color: var(--red);
   font-size: .78rem;
@@ -5975,6 +6050,88 @@ html[data-theme="dark"] .account-google-address-autocomplete {
   min-height: 30px;
   padding: 6px 10px;
   font-size: .78rem;
+}
+
+.email-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  padding: 8px 0;
+}
+
+.email-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0;
+}
+
+.email-row .email-change-btn {
+  margin-left: auto;
+}
+
+.email-current {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.email-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.email-change-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.email-change-form input {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.email-change-form input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.email-change-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.email-change-pending {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.email-change-pending-message {
+  color: var(--muted);
+  font-size: .85rem;
+  line-height: 1.5;
 }
 
 .language-dropdown {

@@ -1,10 +1,26 @@
 @inject NavigationManager Navigation
 
-<p class="auth-redirect">@Text</p>
+<section class="auth-shell">
+    <span class="redirect-spinner" aria-label="Redirecting" role="status"></span>
+</section>
+
+<style>
+    .redirect-spinner {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid color-mix(in srgb, currentColor 20%, transparent);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: redirect-spin .7s linear infinite;
+    }
+
+    @@keyframes redirect-spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
 
 @code {
-    private string Text => "Redirecting to sign in...";
-
     protected override void OnInitialized()
     {
         var current = Navigation.ToBaseRelativePath(Navigation.Uri);

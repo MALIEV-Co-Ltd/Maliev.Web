@@ -117,12 +117,15 @@ public interface ICountryServiceClient
 }
 
 /// <summary>
-/// Downstream RegistryService client used by customer address entry.
+/// Downstream RegistryService client used by customer address entry and company search.
 /// </summary>
 public interface IRegistryServiceClient
 {
     /// <summary>Searches Thai administrative address locations.</summary>
     Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken);
+
+    /// <summary>Searches Thai companies by name or tax ID via Creden.co (primary) with BDEX fallback.</summary>
+    Task<HttpResponseMessage> SearchCompaniesAsync(string query, int limit, CancellationToken cancellationToken);
 }
 
 internal sealed class OrderServiceClient(HttpClient httpClient) : IOrderServiceClient
@@ -243,4 +246,7 @@ internal sealed class RegistryServiceClient(HttpClient httpClient) : IRegistrySe
 {
     public Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken) =>
         httpClient.GetAsync($"/registry/v1/thai/addresses/autocomplete?query={Uri.EscapeDataString(query)}&limit={limit}", cancellationToken);
+
+    public Task<HttpResponseMessage> SearchCompaniesAsync(string query, int limit, CancellationToken cancellationToken) =>
+        httpClient.GetAsync($"/registry/v1/thai/companies/search?query={Uri.EscapeDataString(query)}&limit={limit}", cancellationToken);
 }

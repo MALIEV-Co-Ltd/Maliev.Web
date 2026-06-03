@@ -57,7 +57,7 @@
                            Size="Size.Medium"
                            Class="nav-icon-button"
                            aria-label="@Text("Account", "บัญชี")" />
-            <a class="nav-quote-link" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+            <a class="nav-quote-link" href="/quote/start?returnUrl=%2Fquotes%2Fnew" @onclick="NavigateToQuoteStart" @onclick:preventDefault>@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             <button type="button"
                     class="mobile-menu-button"
                     aria-label="@Text("Open navigation", "เปิดเมนู")"
@@ -79,7 +79,7 @@
                 {
                     <NavLink class="mobile-nav-secondary" href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
                 }
-                <a class="mobile-nav-quote" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+                <a class="mobile-nav-quote" href="/quote/start?returnUrl=%2Fquotes%2Fnew" @onclick="NavigateToQuoteStart" @onclick:preventDefault>@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             </div>
         </nav>
     </header>
@@ -337,6 +337,9 @@
     {
         return _selectedCulture == culture ? "active" : string.Empty;
     }
+
+    private async Task NavigateToQuoteStart()
+        => await JS.InvokeVoidAsync("window.location.assign", "/quote/start?returnUrl=%2Fquotes%2Fnew");
 
     private void ToggleMobileNav()
     {

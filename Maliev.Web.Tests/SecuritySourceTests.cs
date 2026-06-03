@@ -35,6 +35,22 @@ public sealed class SecuritySourceTests
         Assert.True(ownershipCheck < forwardCall, $"{actionName} forwards address id before verifying ownership.");
     }
 
+    /// <summary>
+    /// Verifies the auth controller normalizes the culture cookie to a 2-letter language code
+    /// before passing it to downstream services whose PreferredLanguage column is varchar(2).
+    /// The raw cookie value is a full locale like "th-TH" or "en-US" which would exceed the column limit.
+    /// </summary>
+    [Fact]
+    public void AuthController_NormalizesCultureCookieToLanguageCodeBeforeSendingDownstream()
+    {
+        var source = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+
+        Assert.DoesNotContain("Cookies[\"maliev.culture\"] ?? \"th\"", source);
+        Assert.Contains("GetLanguageCode(Request.Cookies[\"maliev.culture\"])", source);
+        Assert.Contains("private static string GetLanguageCode(string? culture)", source);
+        Assert.Contains("culture.IndexOf('-'", source);
+    }
+
     private static string ReadRepoFile(params string[] pathSegments)
     {
         var root = FindRepoRoot();

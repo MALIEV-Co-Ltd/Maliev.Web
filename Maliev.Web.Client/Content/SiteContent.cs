@@ -22,7 +22,9 @@ internal static class SiteContent
 
     internal static string QuoteDemoUrl => $"{QuoteEngineUrl}/demo";
 
-    internal static string QuoteNewUrl => $"{QuoteEngineUrl}/projects/new";
+    internal static string QuoteNewUrl => QuoteEngineUrl;
+
+    internal static string QuoteNewProjectUrl => $"{QuoteEngineUrl}/quotes/new";
 
     internal static string QuoteProfileUrl => $"{QuoteEngineUrl}/profile";
 

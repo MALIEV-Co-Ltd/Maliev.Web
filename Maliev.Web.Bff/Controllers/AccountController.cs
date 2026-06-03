@@ -16,7 +16,7 @@ namespace Maliev.Web.Bff.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("web/v{version:apiVersion}/account")]
-public sealed class AccountController(ICustomerServiceClient customerClient, ICountryServiceClient countryClient) : ControllerBase
+public sealed class AccountController(ICustomerServiceClient customerClient, ICountryServiceClient countryClient, IRegistryServiceClient registryClient, IAuthServiceClient authClient) : ControllerBase
 {
     private const string AccountUnavailableDetail = "We could not load your account details right now. Please try again in a moment.";
 
@@ -122,7 +122,6 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         {
             firstName = request.FirstName,
             lastName = request.LastName,
-            email = request.Email,
             mobile = request.Mobile,
             companyId = companyMutation.CompanyId,
             preferredLanguage = NormalizeLanguage(request.PreferredLanguage),
@@ -140,6 +139,84 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             ? await ReadLinkedCompanyAsync(document.RootElement, cancellationToken)
             : null;
         return Ok(MapProfile(document.RootElement, customerId.Value, mutatedCompanyDocument?.RootElement ?? linkedCompanyDocument?.RootElement));
+    }
+
+    /// <summary>Initiates an email change by sending a verification token to the new address.</summary>
+    [HttpPost("email/change")]
+    [RequirePermission("customer.profile.write")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> ChangeEmail([FromBody] EmailChangeRequest request, CancellationToken cancellationToken)
+    {
+        var principalId = GetClaimGuid("principal_id", ClaimTypes.NameIdentifier);
+        if (!principalId.HasValue)
+        {
+            return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can update your email.", StatusCodes.Status401Unauthorized));
+        }
+
+        var currentEmail = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        if (string.Equals(currentEmail, request.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(AccountProblem("Same email", "This is already your current email address.", StatusCodes.Status400BadRequest));
+        }
+
+        HttpResponseMessage initResponse;
+        try
+        {
+            initResponse = await authClient.InitiateEmailVerificationAsync(new
+            {
+                email = request.Email,
+                principalId = principalId.Value
+            }, cancellationToken);
+        }
+        catch (Exception ex) when (IsDownstreamUnavailable(ex, cancellationToken))
+        {
+            return AccountUnavailableProblem();
+        }
+
+        using (initResponse)
+        {
+            if (initResponse.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                return Conflict(AccountProblem("Email unavailable", "This email address is already registered.", StatusCodes.Status409Conflict));
+            }
+
+            if (!initResponse.IsSuccessStatusCode)
+            {
+                return DownstreamProblem(initResponse, "We could not send the verification email right now. Please try again.");
+            }
+
+            return Ok();
+        }
+    }
+
+    /// <summary>Resends the verification email for a pending email change.</summary>
+    [HttpPost("email/resend-change")]
+    [RequirePermission("customer.profile.write")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> ResendEmailChange(CancellationToken cancellationToken)
+    {
+        var principalId = GetClaimGuid("principal_id", ClaimTypes.NameIdentifier);
+        if (!principalId.HasValue)
+        {
+            return Unauthorized(AccountProblem("Customer session missing", "Sign in again so MALIEV can resend your verification.", StatusCodes.Status401Unauthorized));
+        }
+
+        try
+        {
+            await authClient.ResendVerificationEmailAsync(new { PrincipalId = principalId.Value }, cancellationToken);
+        }
+        catch (Exception ex) when (IsDownstreamUnavailable(ex, cancellationToken))
+        {
+            return AccountUnavailableProblem();
+        }
+
+        return Ok();
     }
 
     /// <summary>Gets the signed-in customer address book from CustomerService.</summary>
@@ -341,6 +418,42 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
             ShopOrders = [],
             ManufacturingOrdersUrl = SiteContent.QuoteOrdersUrl
         });
+    }
+
+    /// <summary>Searches the Thai DBD business registry by company name.</summary>
+    [HttpGet("company-search")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchCompany([FromQuery] string? q, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+        {
+            return Ok(Array.Empty<object>());
+        }
+
+        using var response = await registryClient.SearchCompaniesAsync(q, 10, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            return Ok(Array.Empty<object>());
+        }
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
+        var registryResponse = JsonSerializer.Deserialize<RegistryCompanySearchResponse>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        if (registryResponse?.Data is not { Count: > 0 })
+        {
+            return Ok(Array.Empty<object>());
+        }
+
+        return Ok(registryResponse.Data.Select(r => new CompanySearchResultDto
+        {
+            JuristicId = r.TaxId,
+            NameTh = r.CompanyNameTh,
+            FullNameTh = r.FullNameTh,
+            NameEn = null,
+            Status = r.StatusNameTh,
+            JuristicType = r.CompanyTypeCode,
+            BusinessObjectives = r.BusinessObjectives
+        }));
     }
 
     private Guid? GetCurrentCustomerId()

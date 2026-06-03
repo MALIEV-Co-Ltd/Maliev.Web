@@ -503,7 +503,7 @@ else if (CurrentCaseStudy is { } caseStudyDetail)
                     <li>@outcome.For(Preferences.Culture)</li>
                 }
             </ul>
-            <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</a>
+            <a class="button primary" href="@SiteContent.QuoteNewProjectUrl">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</a>
         </aside>
     </section>
 }
@@ -553,7 +553,19 @@ else if (CurrentBlogPost is { } blogPost)
             <div class="detail-sidebar-actions" aria-label="@Text("Blog sidebar actions", "ปุ่มดำเนินการในแถบบทความ")">
                 <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
                 <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
-                <a class="button secondary blog-pdf-button" href="@BuildBlogPdfHref(blogPost)" download="@BuildBlogPdfFileName(blogPost)">@Text("Download PDF", "ดาวน์โหลด PDF")</a>
+                <button type="button" class="button secondary blog-pdf-button @(_pdfDownloading ? "is-loading" : "")"
+                        @onclick="() => DownloadPdfAsync(blogPost)" disabled="@_pdfDownloading"
+                        aria-label="@Text("Download PDF", "ดาวน์โหลด PDF")">
+                    @if (_pdfDownloading)
+                    {
+                        <span class="button-spinner" aria-hidden="true"></span>
+                        <span>@Text("Downloading…", "กำลังดาวน์โหลด…")</span>
+                    }
+                    else
+                    {
+                        @Text("Download PDF", "ดาวน์โหลด PDF")
+                    }
+                </button>
             </div>
         </aside>
     </section>
@@ -681,10 +693,60 @@ else if (Path == "contact")
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="form-grid">
-                <label>@Text("Full name", "ชื่อ-นามสกุล") <InputText @bind-Value="_contact.FullName" /></label>
-                <label>@Text("Email", "อีเมล") <InputText type="email" @bind-Value="_contact.Email" /></label>
-                <label>@Text("Phone", "โทรศัพท์") <InputText @bind-Value="_contact.PhoneNumber" /></label>
-                <label>@Text("Company", "บริษัท") <InputText @bind-Value="_contact.Company" /></label>
+                @if (ShowContactProfileCard)
+                {
+                    <div class="wide account-overview-card account-profile-card contact-identity-card">
+                        <div class="account-profile-header">
+                            @if (!string.IsNullOrWhiteSpace(_contactProfile?.ProfileImageUrl))
+                            {
+                                <img class="account-avatar account-avatar-image"
+                                     src="@_contactProfile.ProfileImageUrl"
+                                     alt=""
+                                     aria-hidden="true"
+                                     referrerpolicy="no-referrer" />
+                            }
+                            else
+                            {
+                                <div class="account-avatar" aria-hidden="true">@ContactAvatarInitials</div>
+                            }
+                            <div class="account-profile-identity">
+                                <span class="card-meta">@Text("Sending as", "ส่งในชื่อ")</span>
+                                <h3>@ContactDisplayName</h3>
+                                <p>@_contactProfile?.Email</p>
+                            </div>
+                        </div>
+                        <div class="account-profile-details">
+                            <div>
+                                <span>@Text("Company", "บริษัท")</span>
+                                <strong>@ContactCompanyLabel</strong>
+                            </div>
+                            <div>
+                                <span>@Text("Mobile", "โทรศัพท์มือถือ")</span>
+                                <strong>@ContactMobileLabel</strong>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="button secondary" @onclick="() => _useManualContactDetails = true">
+                                @Text("Use different contact details", "ใช้ข้อมูลติดต่ออื่น")
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <label>@Text("Full name", "ชื่อ-นามสกุล") <InputText @bind-Value="_contact.FullName" /></label>
+                    <label>@Text("Email", "อีเมล") <InputText type="email" @bind-Value="_contact.Email" /></label>
+                    <label>@Text("Phone", "โทรศัพท์") <InputText @bind-Value="_contact.PhoneNumber" /></label>
+                    <label>@Text("Company", "บริษัท") <InputText @bind-Value="_contact.Company" /></label>
+                    @if (_contactProfile is not null)
+                    {
+                        <div class="wide">
+                            <button type="button" class="button secondary" @onclick="() => _useManualContactDetails = false">
+                                @Text("Use my profile details", "ใช้ข้อมูลโปรไฟล์ของฉัน")
+                            </button>
+                        </div>
+                    }
+                }
                 <label class="wide">@Text("Subject", "หัวข้อ") <InputText @bind-Value="_contact.Subject" /></label>
                 <label class="wide">@Text("Message", "ข้อความ") <InputTextArea @bind-Value="_contact.Message" /></label>
             </div>
@@ -839,6 +901,7 @@ else
     private const string MalievMapUrl = "https://www.google.com/maps?q=MALIEV%20Co.%2C%20Ltd.%2036%2F1%20Moo%203%20Khlong%20Khoi%20Pak%20Kret%20Nonthaburi%2011120%20Thailand";
     private const string MalievMapEmbedUrl = MalievMapUrl + "&output=embed";
     private readonly List<ContactFileUploadState> _contactFileUploads = [];
+    private bool _pdfDownloading;
     private bool _submittingContact;
     private bool _showContactMapDialog;
     private bool _pendingMaterialComparisonScroll;
@@ -846,6 +909,9 @@ else
     private string? _contactStatusTitle;
     private string? _contactStatus;
     private ContactFormStatus _contactStatusKind = ContactFormStatus.None;
+    private CustomerAccountProfileDto? _contactProfile;
+    private bool _useManualContactDetails;
+    private bool _contactProfileLoadAttempted;
     private const string AllMaterialsFilter = "all";
     private readonly HashSet<string> _selectedMaterialNames = new(StringComparer.Ordinal);
     private string _materialProcessFilter = AllMaterialsFilter;
@@ -980,6 +1046,35 @@ else
     private string ContactSubmitLabel => _submittingContact
         ? Text("Sending...", "กำลังส่ง...")
         : Text("Send message", "ส่งข้อความ");
+
+    private bool ShowContactProfileCard => _contactProfile is not null && !_useManualContactDetails;
+
+    private string ContactAvatarInitials
+    {
+        get
+        {
+            var source = string.IsNullOrWhiteSpace(ContactDisplayName) ? "M" : ContactDisplayName;
+            var parts = source.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return (parts.Length >= 2
+                ? $"{parts[0][0]}{parts[1][0]}"
+                : parts.Length == 1 ? parts[0][0].ToString() : "M").ToUpperInvariant();
+        }
+    }
+
+    private string ContactDisplayName =>
+        string.IsNullOrWhiteSpace(_contactProfile?.DisplayName)
+            ? _contactProfile?.Email ?? string.Empty
+            : _contactProfile.DisplayName;
+
+    private string ContactCompanyLabel =>
+        string.IsNullOrWhiteSpace(_contactProfile?.CompanyName)
+            ? Text("Not added", "ยังไม่ได้เพิ่ม")
+            : _contactProfile.CompanyName;
+
+    private string ContactMobileLabel =>
+        string.IsNullOrWhiteSpace(_contactProfile?.Mobile)
+            ? Text("Not added", "ยังไม่ได้เพิ่ม")
+            : _contactProfile.Mobile;
 
     private string Body => Path switch
     {
@@ -1358,6 +1453,17 @@ else
         }
 
         return string.Empty;
+    }
+
+    private async Task DownloadPdfAsync(BlogPostContent post)
+    {
+        if (_pdfDownloading) return;
+        _pdfDownloading = true;
+        var href = BuildBlogPdfHref(post);
+        var filename = BuildBlogPdfFileName(post);
+        await JS.InvokeVoidAsync("malievBlog.downloadFile", href, filename);
+        await Task.Delay(2000);
+        _pdfDownloading = false;
     }
 
     private string BuildBlogPdfHref(BlogPostContent post)
@@ -1800,7 +1906,7 @@ else
     private string PrimaryHref => Path switch
     {
         var path when IsPolicyPage(path) => "/contact",
-        _ => SiteContent.QuoteNewUrl
+        _ => SiteContent.QuoteNewProjectUrl
     };
     private string SecondaryAction => Path switch
     {
@@ -1827,6 +1933,61 @@ else
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.Equals(Path, "contact", StringComparison.Ordinal) && !_contactProfileLoadAttempted)
+        {
+            _contactProfileLoadAttempted = true;
+            await LoadContactProfileAsync();
+        }
+    }
+
+    private async Task LoadContactProfileAsync()
+    {
+        try
+        {
+            var session = await Api.GetAccountSessionAsync();
+            if (!session.IsAuthenticated)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_contact.FullName))
+            {
+                _contact.FullName = session.DisplayName;
+            }
+
+            if (string.IsNullOrWhiteSpace(_contact.Email))
+            {
+                _contact.Email = session.Email;
+            }
+
+            try
+            {
+                _contactProfile = await Api.GetAccountProfileAsync();
+                _contact.FullName = string.IsNullOrWhiteSpace(_contactProfile.DisplayName)
+                    ? session.DisplayName
+                    : _contactProfile.DisplayName;
+                _contact.Email = _contactProfile.Email;
+                _contact.PhoneNumber = _contactProfile.Mobile ?? string.Empty;
+                _contact.Company = _contactProfile.CompanyName ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(_contact.FullName) || string.IsNullOrWhiteSpace(_contact.Email))
+                {
+                    _useManualContactDetails = true;
+                }
+            }
+            catch
+            {
+                _contactProfile = null;
+            }
+        }
+        catch
+        {
+            // Session call failed; leave form at defaults
+        }
     }
 
     private void OpenContactMapDialog()
@@ -1857,7 +2018,7 @@ else
                 {
                     FileName = file.FileName,
                     ContentType = file.ContentType,
-                    Base64Content = file.Base64Content
+                    Base64Content = Convert.ToBase64String(file.RawContent)
                 })
                 .ToList();
             SetContactFileStage(ContactFileUploadStage.Sending);
@@ -1944,7 +2105,7 @@ else
                 await InvokeAsync(StateHasChanged);
             }
 
-            fileUpload.MarkReady(Convert.ToBase64String(buffer.ToArray()));
+            fileUpload.MarkReady(buffer.ToArray());
         }
     }
 
@@ -2006,7 +2167,7 @@ else
 
         public long Size { get; } = size;
 
-        public string Base64Content { get; private set; } = string.Empty;
+        public byte[] RawContent { get; private set; } = [];
 
         public int Progress { get; private set; }
 
@@ -2048,9 +2209,9 @@ else
             Progress = Math.Clamp(progress, 0, 100);
         }
 
-        public void MarkReady(string base64Content)
+        public void MarkReady(byte[] rawContent)
         {
-            Base64Content = base64Content;
+            RawContent = rawContent;
             Progress = 100;
             Stage = ContactFileUploadStage.Ready;
         }

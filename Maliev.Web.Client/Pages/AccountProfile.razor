@@ -74,15 +74,54 @@
                     </label>
                     <label class="account-profile-field">
                         @Text("Email", "อีเมล")
-                        <InputText id="profile-email" type="email" autocomplete="email" required @bind-Value="_form.Email" @bind-Value:event="oninput" />
-                        <ValidationMessage For="@(() => _form.Email)" class="field-validation-error" />
-                        <span class="email-change-prompt">
-                            <span>@Text("Need to change it?", "ต้องการเปลี่ยนใช่ไหม")</span>
-                            <button class="button secondary" type="button" @onclick="PrepareEmailChange">@Text("Change email", "เปลี่ยนอีเมล")</button>
-                        </span>
-                        @if (_emailChangeRequested)
+                        <div class="email-row">
+                            <span class="email-current">@_form.Email</span>
+                            @if (_emailVerified)
+                            {
+                                <span class="email-verified-badge">@Text("Verified", "ยืนยันแล้ว")</span>
+                            }
+                            @if (string.IsNullOrEmpty(_emailChangeState))
+                            {
+                                <button class="button secondary email-change-btn" type="button"
+                                        @onclick="StartEmailChange">@Text("Change email", "เปลี่ยนอีเมล")</button>
+                            }
+                        </div>
+                        @if (_emailChangeState == "editing")
                         {
-                            <span class="auth-field-help">@Text("Edit the email above, then save your profile. This updates the email we use for future account communication.", "แก้ไขอีเมลด้านบนแล้วบันทึกโปรไฟล์ ระบบจะใช้อีเมลนี้สำหรับการติดต่อบัญชีในอนาคต")</span>
+                            <div class="email-change-form">
+                                <InputText id="profile-new-email" type="email" autocomplete="email"
+                                           @bind-Value="_newEmail" @bind-Value:event="oninput"
+                                           placeholder="@Text("New email address", "ที่อยู่อีเมลใหม่")" />
+                                <div class="email-change-actions">
+                                    <button class="button primary" type="button"
+                                            disabled="@_sendingVerification"
+                                            @onclick="SendVerificationAsync">@Text("Send verification", "ส่งการยืนยัน")</button>
+                                    <button class="button secondary" type="button"
+                                            @onclick="CancelEmailChange">@Text("Cancel", "ยกเลิก")</button>
+                                </div>
+                            </div>
+                        }
+                        else if (_emailChangeState == "pending")
+                        {
+                            <div class="email-change-pending">
+                                <span class="email-change-pending-message">
+                                    @Text("Verification sent to", "ส่งการยืนยันไปที่") <strong>@_pendingEmail</strong>
+                                    &mdash; @Text("check your inbox", "ตรวจสอบกล่องจดหมายของคุณ")
+                                </span>
+                                <div class="email-change-actions">
+                                    <button class="button secondary" type="button"
+                                            disabled="@_sendingVerification"
+                                            @onclick="ResendVerificationAsync">@Text("Resend verification", "ส่งอีกครั้ง")</button>
+                                    <button class="button secondary" type="button"
+                                            @onclick="StartEmailChange">@Text("Change to different email", "เปลี่ยนเป็นอีเมลอื่น")</button>
+                                    <button class="button secondary" type="button"
+                                            @onclick="CancelEmailChange">@Text("Cancel", "ยกเลิก")</button>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(_emailChangeError))
+                        {
+                            <span class="field-validation-error">@_emailChangeError</span>
                         }
                     </label>
                     <label class="account-profile-field">
@@ -130,10 +169,24 @@
                                         {
                                             <button type="button" class="company-search-result" role="option"
                                                     @onclick="() => ApplyCompanyResult(result)">
-                                                <span>@result.NameTh</span>
-                                                @if (!string.IsNullOrWhiteSpace(result.NameEn))
+                                                <div class="company-search-result-header">
+                                                    <span class="company-search-result-name">@result.NameTh</span>
+                                                    @if (!string.IsNullOrWhiteSpace(result.Status))
+                                                    {
+                                                        <span class="company-search-result-status @(result.Status.Contains("เลิก") || result.Status.Contains("สิ้น") ? "company-status-defunct" : "company-status-active")">@result.Status</span>
+                                                    }
+                                                </div>
+                                                @if (!string.IsNullOrWhiteSpace(result.FullNameTh) && result.FullNameTh != result.NameTh)
                                                 {
-                                                    <small>@result.NameEn</small>
+                                                    <small class="company-search-result-fullname">@result.FullNameTh</small>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(result.JuristicType) && result.JuristicType != "0")
+                                                {
+                                                    <small class="company-search-result-type">@result.JuristicType</small>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(result.BusinessObjectives))
+                                                {
+                                                    <small class="company-search-result-objectives">@result.BusinessObjectives</small>
                                                 }
                                                 <small class="company-search-id">@result.JuristicId</small>
                                             </button>
@@ -237,7 +290,6 @@
     private readonly CustomerAccountProfileUpdateRequest _form = new();
     private bool _loading = true;
     private bool _saving;
-    private bool _emailChangeRequested;
     private bool _languageDropdownOpen;
     private bool _emailVerified = true;
     private bool _verificationBannerDismissed;
@@ -253,6 +305,11 @@
     private System.Threading.CancellationTokenSource? _companySearchCts;
     private System.Threading.Timer? _relativeTimer;
     private int _relativeTimerTick;
+    private string? _emailChangeState;
+    private string _newEmail = string.Empty;
+    private string _pendingEmail = string.Empty;
+    private bool _sendingVerification;
+    private string? _emailChangeError;
 
     private static readonly IReadOnlyList<LanguageOption> LanguageOptions =
     [
@@ -397,7 +454,6 @@
             _form.CompanyContactEmail = profile.CompanyContactEmail;
             _form.CompanyContactPhone = profile.CompanyContactPhone;
             _form.CompanyVersion = profile.CompanyVersion;
-            _emailChangeRequested = false;
             _status = Text("Profile saved.", "บันทึกโปรไฟล์แล้ว");
             _savedAt = DateTime.UtcNow;
             _relativeTimer?.Dispose();
@@ -433,6 +489,7 @@
     {
         var query = e.Value?.ToString() ?? string.Empty;
         _companySearchQuery = query;
+        _form.CompanyName = string.IsNullOrWhiteSpace(query) ? null : query;
         _companySearched = false;
         var version = ++_companySearchVersion;
 
@@ -558,13 +615,77 @@
         _relativeTimer?.Change(nextTick, Timeout.Infinite);
     }
 
-    private void PrepareEmailChange()
+    private void StartEmailChange()
     {
-        _emailChangeRequested = true;
-        _status = null;
-        _savedAt = null;
-        _relativeTimer?.Dispose();
-        _relativeTimer = null;
+        _emailChangeState = "editing";
+        _newEmail = string.Empty;
+        _pendingEmail = string.Empty;
+        _emailChangeError = null;
+    }
+
+    private async Task SendVerificationAsync()
+    {
+        if (_sendingVerification) return;
+        _emailChangeError = null;
+
+        if (string.IsNullOrWhiteSpace(_newEmail))
+        {
+            _emailChangeError = Text("Please enter an email address.", "กรุณากรอกที่อยู่อีเมล");
+            return;
+        }
+
+        _sendingVerification = true;
+        try
+        {
+            await Api.InitiateEmailChangeAsync(_newEmail.Trim());
+            _pendingEmail = _newEmail.Trim();
+            _emailChangeState = "pending";
+        }
+        catch (MalievApiException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            _emailChangeError = ex.Message;
+        }
+        catch (MalievApiException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            _emailChangeError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _emailChangeError = ex.Message;
+        }
+        finally
+        {
+            _sendingVerification = false;
+        }
+    }
+
+    private async Task ResendVerificationAsync()
+    {
+        if (_sendingVerification) return;
+        _emailChangeError = null;
+
+        _sendingVerification = true;
+        try
+        {
+            await Api.ResendEmailChangeAsync();
+            _status = Text("Verification email resent!", "ส่งอีเมลยืนยันอีกครั้งแล้ว!");
+        }
+        catch (Exception ex)
+        {
+            _emailChangeError = ex.Message;
+        }
+        finally
+        {
+            _sendingVerification = false;
+        }
+    }
+
+    private void CancelEmailChange()
+    {
+        _emailChangeState = null;
+        _newEmail = string.Empty;
+        _pendingEmail = string.Empty;
+        _emailChangeError = null;
     }
 
     private void HandleInvalidSubmit()

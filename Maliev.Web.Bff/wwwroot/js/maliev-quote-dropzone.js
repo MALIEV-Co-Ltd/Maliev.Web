@@ -143,7 +143,7 @@ window.malievQuoteDropzone = (() => {
     formatDismissals.delete(shellId);
   }
 
-  function routeToQuoteEngine(files, dropzone, quoteEngineUrl, state) {
+  async function routeToQuoteEngine(files, dropzone, quoteEngineUrl, state) {
     const uploadable = files.filter(file => isAccepted(file.name));
     if (!uploadable.length) {
       showError(dropzone, "Use STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, or GLB files.");
@@ -152,11 +152,100 @@ window.malievQuoteDropzone = (() => {
 
     state.isNavigating = true;
     setNavigating(dropzone, true);
-    redirectToQuoteEngine(quoteEngineUrl);
+
+    let handoff;
+    try {
+      handoff = await uploadAndBuildHandoff(uploadable, dropzone);
+    } catch (err) {
+      state.isNavigating = false;
+      setNavigating(dropzone, false);
+      showError(dropzone, err?.message || "Upload failed. Please try again.");
+      return;
+    }
+
+    redirectToQuoteEngine(quoteEngineUrl, handoff);
   }
 
-  function redirectToQuoteEngine(quoteEngineUrl) {
+  async function uploadAndBuildHandoff(files, dropzone) {
+    const quoteSessionId = crypto.randomUUID();
+    const uploadedFiles = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadingLabel(dropzone, i + 1, files.length, file.name);
+
+      // Initiate resumable upload
+      const initRes = await fetch("/web/v1/quote/uploads/resumable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type || "application/octet-stream",
+          fileSize: file.size,
+          quoteSessionId
+        })
+      });
+      if (!initRes.ok) {
+        const detail = await initRes.text().catch(() => "");
+        throw new Error(`Failed to initiate upload for "${file.name}".${detail ? " " + detail : ""}`);
+      }
+      const session = await initRes.json();
+
+      // Stream file bytes to proxy
+      const lastByte = file.size - 1;
+      const putRes = await fetch(session.proxyUploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type || "application/octet-stream",
+          "Content-Range": `bytes 0-${lastByte}/${file.size}`
+        },
+        body: file
+      });
+      if (!putRes.ok) {
+        throw new Error(`Failed to upload "${file.name}".`);
+      }
+
+      // Complete the upload
+      const completeRes = await fetch(`/web/v1/quote/uploads/resumable/${session.uploadId}/complete`, {
+        method: "POST"
+      });
+      if (!completeRes.ok) {
+        throw new Error(`Failed to complete upload for "${file.name}".`);
+      }
+      const completed = await completeRes.json();
+
+      uploadedFiles.push({
+        uploadId: completed.uploadId ?? session.uploadId,
+        fileId: completed.fileId ?? null,
+        fileName: file.name,
+        storagePath: completed.storagePath ?? session.storagePath,
+        contentType: file.type || "application/octet-stream",
+        fileSizeBytes: file.size,
+        status: completed.status ?? "Completed"
+      });
+    }
+
+    const handoffJson = JSON.stringify({ quoteSessionId, files: uploadedFiles });
+    return toBase64Url(handoffJson);
+  }
+
+  function toBase64Url(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  }
+
+  function setUploadingLabel(dropzone, current, total, fileName) {
+    const labelNode = dropzone.querySelector("[data-quote-dropzone-label]");
+    if (labelNode) {
+      labelNode.textContent = `Uploading ${current} of ${total}…`;
+    }
+  }
+
+  function redirectToQuoteEngine(quoteEngineUrl, handoff) {
     const url = new URL(quoteEngineUrl, window.location.href);
+    if (handoff) url.searchParams.set("handoff", handoff);
     window.location.assign(url.toString());
   }
 

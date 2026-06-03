@@ -12,6 +12,7 @@ internal sealed class CommerceCatalogService(
     ILogger<CommerceCatalogService> logger) : ICommerceCatalogService
 {
     private const string IntranetCollectionMediaPrefix = "api/v1/commerce/collections/media/";
+    private const string IntranetProductMediaPrefix = "api/v1/commerce/products/media/";
 
     public async Task<IReadOnlyList<ProductCollectionDto>> GetCollectionsAsync(CancellationToken cancellationToken)
     {
@@ -74,6 +75,11 @@ internal sealed class CommerceCatalogService(
             .Where(product => IsPublished(product.Status))
             .Select(product => MapSummary(product, collectionSlug))
             .ToList();
+    }
+
+    public async Task<string?> GetProductMediaRedirectUrlAsync(string uploadId, CancellationToken cancellationToken)
+    {
+        return await uploadServiceClient.GetSignedUrlAsync(uploadId, cancellationToken);
     }
 
     public async Task<ProductDetailDto?> GetProductAsync(string handle, CancellationToken cancellationToken)
@@ -146,7 +152,7 @@ internal sealed class CommerceCatalogService(
             PriceThb = product.Currency.Equals("THB", StringComparison.OrdinalIgnoreCase) ? product.StartingPrice : 0,
             PriceStartsAt = false,
             LeadTimeDays = 0,
-            ImageUrl = product.ThumbnailUrl ?? string.Empty,
+            ImageUrl = BuildProductMediaUrl(product.ThumbnailUrl),
             IsPublished = IsPublished(product.Status),
             AvailableQuantity = null,
             InventoryStatus = product.StartingPrice > 0 ? "Available" : "Made to order"
@@ -167,7 +173,7 @@ internal sealed class CommerceCatalogService(
             .OrderBy(item => item.SortOrder)
             .Select(item => new ProductMediaDto
             {
-                Url = item.Url,
+                Url = BuildProductMediaUrl(item.Url),
                 Alt = item.AltText ?? product.Title
             })
             .ToList();
@@ -225,6 +231,39 @@ internal sealed class CommerceCatalogService(
         return TryExtractCollectionMediaUploadId(imageUrl, out _)
             ? $"/web/v1/catalog/collections/{Uri.EscapeDataString(collection.Handle)}/image"
             : imageUrl;
+    }
+
+    private static string BuildProductMediaUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return string.Empty;
+        }
+
+        var imageUrl = url.Trim();
+        return TryExtractProductMediaUploadId(imageUrl, out var uploadId)
+            ? $"/web/v1/catalog/products/media/{Uri.EscapeDataString(uploadId)}"
+            : imageUrl;
+    }
+
+    private static bool TryExtractProductMediaUploadId(string url, out string uploadId)
+    {
+        var normalized = url.Trim().TrimStart('/');
+        if (!normalized.StartsWith(IntranetProductMediaPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            uploadId = string.Empty;
+            return false;
+        }
+
+        var rawUploadId = normalized[IntranetProductMediaPrefix.Length..]
+            .Split(['?', '#'], StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault();
+
+        uploadId = string.IsNullOrWhiteSpace(rawUploadId)
+            ? string.Empty
+            : Uri.UnescapeDataString(rawUploadId);
+
+        return !string.IsNullOrWhiteSpace(uploadId);
     }
 
     private static bool TryExtractCollectionMediaUploadId(string imageUrl, out string uploadId)

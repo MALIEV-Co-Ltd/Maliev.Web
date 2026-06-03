@@ -218,8 +218,21 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
             return true;
         }
 
-        return !string.IsNullOrWhiteSpace(configuration.GetConnectionString("ChatbotService"))
-            || !string.IsNullOrWhiteSpace(configuration["Services:ChatbotService:BaseUrl"]);
+        // Explicit connection string config
+        if (!string.IsNullOrWhiteSpace(configuration.GetConnectionString("ChatbotService")))
+            return true;
+
+        // Explicit base URL override
+        if (!string.IsNullOrWhiteSpace(configuration["Services:ChatbotService:BaseUrl"]))
+            return true;
+
+        // Aspire project-to-project service discovery (sets services__ChatbotService__<scheme>__0)
+        if (!string.IsNullOrWhiteSpace(configuration["services__ChatbotService__https__0"]))
+            return true;
+        if (!string.IsNullOrWhiteSpace(configuration["services__ChatbotService__http__0"]))
+            return true;
+
+        return false;
     }
 
     private Task<ChatbotSessionResponse> InitiateWebsiteSessionAsync(string language, CancellationToken cancellationToken)

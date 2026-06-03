@@ -4,6 +4,14 @@
     let loaderPromise;
     let googleMapsAuthFailed = false;
 
+    const themeObserver = new MutationObserver(() => {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        for (const { autocomplete } of searches.values()) {
+            autocomplete.style.colorScheme = isDark ? "dark" : "light";
+        }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
     function loadGoogleMaps(apiKey) {
         if (window.google?.maps?.importLibrary) {
             return Promise.resolve();
@@ -76,12 +84,19 @@
         const streetNumber = componentText(components, "street_number");
         const route = componentText(components, "route");
         const premise = firstComponentText(components, ["premise", "subpremise"]);
+        let addressLine1 = joinParts([premise, streetNumber, route]);
+        if (!addressLine1) {
+            const formatted = place?.formattedAddress || place?.formatted_address || "";
+            const match = formatted.match(/^(\d+[\d\/\-\s]*\d*)\s*/);
+            if (match) addressLine1 = match[1].trim();
+        }
 
         return {
             source,
             placeId: place?.id || place?.place_id || null,
+            displayName: place?.displayName || place?.name || null,
             formattedAddress: place?.formattedAddress || place?.formatted_address || null,
-            addressLine1: joinParts([premise, streetNumber, route]),
+            addressLine1: addressLine1,
             district: firstComponentText(components, ["sublocality_level_2", "sublocality_level_1", "locality"]),
             city: firstComponentText(components, ["administrative_area_level_2", "locality", "sublocality_level_1"]),
             stateProvince: componentText(components, "administrative_area_level_1"),
@@ -110,7 +125,7 @@
         const autocomplete = new PlaceAutocompleteElement(options);
         autocomplete.placeholder = "Search for your location";
         autocomplete.classList.add("maliev-google-place-autocomplete");
-        autocomplete.style.colorScheme = "light";
+        autocomplete.style.colorScheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
         autocomplete.style.display = "block";
         autocomplete.style.width = "100%";
         container.appendChild(autocomplete);

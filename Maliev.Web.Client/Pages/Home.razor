@@ -19,7 +19,7 @@
         </h1>
         <p>@_heroCopy.Body.For(Preferences.Culture)</p>
         <div class="landing-hero-actions">
-            <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
+            <QuoteDropzone Href="@SiteContent.QuoteNewProjectUrl"
                            Title="@QuoteDropzoneTitle"
                            Description="@QuoteDropzoneDescription"
                            ActionText="@QuoteDropzoneAction"
@@ -174,13 +174,13 @@
         <div class="machine-feature-copy machine-feature-intro-copy" data-machine-content="intro">
             <h2 id="imm-intro-title" class="h-display machine-feature-title machine-feature-title--intro machine-feature-title--reveal">
                 <span>@Text("Pneumatic", "เครื่องฉีดพลาสติก")</span>
-                <span class="accent-blue">@Text("Injection Molding Machine", "ระบบลม")</span>
+                <span class="accent-blue">@Text("Injection Machine", "ระบบลม")</span>
             </h2>
         </div>
         <div class="machine-feature-copy machine-feature-details-copy" data-machine-content="details" aria-labelledby="imm-title">
             <h2 id="imm-title" class="h-display machine-feature-title">
                 <span class="machine-feature-title-line machine-feature-title-lead">@Text("Pneumatic", "เครื่องฉีดพลาสติก")</span>
-                <span class="machine-feature-title-line accent-blue">@Text("Injection Molding Machine", "ระบบลม")</span>
+                <span class="machine-feature-title-line accent-blue">@Text("Injection Machine", "ระบบลม")</span>
             </h2>
             <p class="lede">@SelectedMachineVariant.Body.For(Preferences.Culture)</p>
             <div class="machine-stat-grid">
@@ -244,8 +244,8 @@
                 </div>
             </div>
             <div class="quote-actions machine-actions">
-                <a class="button primary machine-configure-button" href="@SelectedMachineConfigurationHref">@Text("Configure", "ตั้งค่า")</a>
                 <a class="machine-tooling-link" href="/contact">@Text("Plan tooling with us", "วางแผนทูลลิ่งกับเรา")</a>
+                <a class="button primary machine-configure-button" href="@SelectedMachineConfigurationHref">@Text("Configure", "ตั้งค่า")</a>
             </div>
         </div>
     </div>
@@ -311,7 +311,7 @@
         <h2 id="final-cta-title" class="h-display">@Text("Ready when you are.", "พร้อมเมื่อคุณพร้อม")</h2>
         <p class="lede">@Text("Configure tolerances, finishes, and quantities. See pricing update live. Ship to your door.", "ตั้งค่า tolerance ผิวงาน และจำนวน ดูราคาอัปเดตสด และจัดส่งถึงปลายทาง")</p>
     </div>
-    <QuoteDropzone Href="@SiteContent.QuoteNewUrl"
+    <QuoteDropzone Href="@SiteContent.QuoteNewProjectUrl"
                    Class="final-dropzone"
                    Title="@QuoteDropzoneTitle"
                    Description="@QuoteDropzoneDescription"
@@ -415,7 +415,7 @@
             "50g",
             SiteContent.Text("50g machine", "เครื่อง 50g"),
             SiteContent.Text("Recommended shop choice", "ตัวเลือกแนะนำสำหรับเวิร์กช็อป"),
-            SiteContent.Text("Choose the 50g pneumatic machine as the better default for most shops: more shot volume, a 350°C melt range, and enough capacity for larger inserts, recycled-resin trials, and small-batch tooling without stepping into factory-scale equipment.", "เลือกเครื่องระบบลมรุ่น 50g เป็นตัวเลือกหลักที่ดีกว่าสำหรับเวิร์กช็อปส่วนใหญ่ ได้ปริมาตรฉีดมากขึ้น ช่วงหลอมถึง 350°C และรองรับอินเสิร์ตที่ใหญ่ขึ้น ทดลองเม็ดรีไซเคิล และงานแม่พิมพ์ล็อตเล็กโดยยังไม่ต้องใช้เครื่องระดับโรงงาน"),
+            SiteContent.Text("Choose the 50g pneumatic machine for larger shot volume, a 350°C melt range, and capacity for bigger inserts, recycled-resin trials, and small-batch tooling.", "เลือกเครื่องระบบลมรุ่น 50g เป็นตัวเลือกหลักที่ดีกว่าสำหรับเวิร์กช็อปส่วนใหญ่ ได้ปริมาตรฉีดมากขึ้น ช่วงหลอมถึง 350°C และรองรับอินเสิร์ตที่ใหญ่ขึ้น ทดลองเม็ดรีไซเคิล และงานแม่พิมพ์ล็อตเล็กโดยยังไม่ต้องใช้เครื่องระดับโรงงาน"),
             "/images/products/pneumatic-injection-molding-machines.png",
             "/images/products/pneumatic-injection-molding-machines-dark.png",
             "/images/products/pneumatic-injection-molding-machines-compressor.png",

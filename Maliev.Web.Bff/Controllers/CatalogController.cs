@@ -49,6 +49,24 @@ public sealed class CatalogController(ICommerceCatalogService catalogService) : 
         }
     }
 
+    /// <summary>Redirects a product media upload reference to its current storage URL.</summary>
+    [HttpGet("products/media/{uploadId}")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetProductMedia(string uploadId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var imageUrl = await catalogService.GetProductMediaRedirectUrlAsync(uploadId, cancellationToken);
+            return string.IsNullOrWhiteSpace(imageUrl) ? NotFound() : Redirect(imageUrl);
+        }
+        catch (BackendUnavailableException ex)
+        {
+            return BackendUnavailable(ex);
+        }
+    }
+
     /// <summary>Gets product cards from the catalog source.</summary>
     [HttpGet("products")]
     [ProducesResponseType(typeof(IReadOnlyList<ProductSummaryDto>), StatusCodes.Status200OK)]

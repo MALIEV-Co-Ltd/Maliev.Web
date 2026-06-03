@@ -22,7 +22,7 @@ public sealed class AccountControllerBoundaryTests
     public async Task GetProfile_CustomerServiceTimeout_ReturnsSanitizedUnavailableProblem()
     {
         var customerId = Guid.Parse("39543cbf-f925-4b1c-a723-2402f4f60a5f");
-        var controller = new AccountController(new TimeoutCustomerServiceClient(), new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
+        var controller = new AccountController(new TimeoutCustomerServiceClient(), new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeAuthServiceClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -54,7 +54,7 @@ public sealed class AccountControllerBoundaryTests
     public async Task GetProfile_CustomerServiceNotFound_ReturnsUnauthorizedSessionProblem()
     {
         var customerId = Guid.Parse("39543cbf-f925-4b1c-a723-2402f4f60a5f");
-        var controller = new AccountController(new MissingCustomerServiceClient(), new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
+        var controller = new AccountController(new MissingCustomerServiceClient(), new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeAuthServiceClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -152,7 +152,7 @@ public sealed class AccountControllerBoundaryTests
 
     private static AccountController CreateController(Guid customerId, ICustomerServiceClient customerClient)
     {
-        return new AccountController(customerClient, new FakeCountryServiceClient(), new FakeBusinessRegistryClient())
+        return new AccountController(customerClient, new FakeCountryServiceClient(), new FakeRegistryServiceClient(), new FakeAuthServiceClient())
         {
             ControllerContext = new ControllerContext
             {
@@ -351,9 +351,57 @@ public sealed class AccountControllerBoundaryTests
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 
-    private sealed class FakeBusinessRegistryClient : IBusinessRegistryClient
+    private sealed class FakeRegistryServiceClient : IRegistryServiceClient
     {
-        public Task<IReadOnlyList<BusinessRegistryCompanyDto>> SearchAsync(string query, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<BusinessRegistryCompanyDto>>([]);
+        public Task<HttpResponseMessage> SearchThaiLocationsAsync(string query, int limit, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> SearchCompaniesAsync(string query, int limit, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+    }
+
+    private sealed class FakeAuthServiceClient : IAuthServiceClient
+    {
+        public Task<HttpResponseMessage> LoginAsync(object request, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> ExchangeCustomerGoogleAsync(object request, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> RequestPasswordResetAsync(object request, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> ConfirmPasswordResetAsync(object request, CancellationToken cancellationToken) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> InitiateEmailVerificationAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> VerifyEmailAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> ResendVerificationEmailAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> GetCurrentPrincipalAsync(Guid principalId, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> PasskeyRegisterBeginAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> PasskeyRegisterCompleteAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> PasskeyAuthBeginAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> PasskeyAuthCompleteAsync(object request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> ListPasskeyCredentialsAsync(Guid principalId, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+
+        public Task<HttpResponseMessage> DeletePasskeyCredentialAsync(Guid credentialId, Guid principalId, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 }

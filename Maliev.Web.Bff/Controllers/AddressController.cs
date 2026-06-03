@@ -1,6 +1,8 @@
+using System.Globalization;
 using Asp.Versioning;
 using Maliev.Aspire.ServiceDefaults.Authorization;
 using Maliev.Web.Bff.Clients;
+using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Account;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -17,7 +19,8 @@ public sealed class AddressController(
     IConfiguration configuration,
     ICountryServiceClient countryClient,
     IRegistryServiceClient registryClient,
-    IHttpClientFactory httpClientFactory) : ControllerBase
+    IHttpClientFactory httpClientFactory,
+    StaticMapService staticMapService) : ControllerBase
 {
     private static readonly string[] FallbackCountryIso2Codes =
     [
@@ -45,7 +48,7 @@ public sealed class AddressController(
 
     /// <summary>
     /// Returns a static map image for a lat/lng pair via Google Static Maps API.
-    /// Falls back to an OpenStreetMap redirect when no Google key is configured.
+    /// Falls back to OpenStreetMap tile-based rendering when no Google key is configured.
     /// </summary>
     [HttpGet("static-map")]
     [ResponseCache(Duration = 86400)]
@@ -62,9 +65,11 @@ public sealed class AddressController(
 
         if (!string.IsNullOrWhiteSpace(apiKey))
         {
-            var googleUrl = $"https://maps.googleapis.com/maps/api/staticmap" +
-                $"?center={lat},{lng}&zoom=16&size={width}x{height}&scale=2" +
-                $"&markers=color:red%7C{lat},{lng}&key={apiKey}";
+            var latStr = lat.ToString(CultureInfo.InvariantCulture);
+            var lngStr = lng.ToString(CultureInfo.InvariantCulture);
+            var googleUrl = "https://maps.googleapis.com/maps/api/staticmap" +
+                $"?center={latStr},{lngStr}&zoom=16&size={width}x{height}&scale=2" +
+                $"&markers=color:red%7C{latStr},{lngStr}&key={apiKey}";
             try
             {
                 var img = await httpClientFactory.CreateClient().GetByteArrayAsync(googleUrl, cancellationToken);
@@ -72,15 +77,20 @@ public sealed class AddressController(
             }
             catch
             {
-                // Fall through to OSM redirect
+                // Fall through to OSM tile rendering
             }
         }
 
-        // OpenStreetMap fallback — no API key required
-        var osmUrl = $"https://staticmap.openstreetmap.de/staticmap.php" +
-            $"?center={lat},{lng}&zoom=16&size={width}x{height}" +
-            $"&markers={lat},{lng},red-dot";
-        return Redirect(osmUrl);
+        try
+        {
+            var png = await staticMapService.RenderAsync(lat, lng, 16, width, height, cancellationToken);
+            return File(png, "image/png");
+        }
+        catch
+        {
+            var fallback = staticMapService.RenderFallback(width, height);
+            return File(fallback, "image/png");
+        }
     }
 
     /// <summary>Gets country options supported by the shared address record.</summary>

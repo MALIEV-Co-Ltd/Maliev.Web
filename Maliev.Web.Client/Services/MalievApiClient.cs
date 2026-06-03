@@ -98,6 +98,18 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await GetJsonAsync<List<CustomerAddressDto>>("web/v1/account/addresses", cancellationToken) ?? [];
     }
 
+    internal async Task InitiateEmailChangeAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/account/email/change", new { email }, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    internal async Task ResendEmailChangeAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync("web/v1/account/email/resend-change", null, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
     internal async Task<IReadOnlyList<CompanySearchResultDto>> SearchCompaniesAsync(string query, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(query) || query.Length < 2)

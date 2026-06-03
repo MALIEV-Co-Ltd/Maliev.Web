@@ -136,6 +136,14 @@ public sealed class CustomerAccountProfileUpdateRequest
     [StringLength(20)]
     public string? CompanyContactPhone { get; set; }
 
+    /// <summary>Gets or sets the company branch type: "HQ" for head office, "BRANCH" for a branch.</summary>
+    [StringLength(10)]
+    public string? CompanyBranchType { get; set; }
+
+    /// <summary>Gets or sets the 5-digit branch code when CompanyBranchType is "BRANCH".</summary>
+    [StringLength(5)]
+    public string? CompanyBranchCode { get; set; }
+
     /// <summary>Gets or sets the preferred language code.</summary>
     public string PreferredLanguage { get; set; } = "th";
 
@@ -202,6 +210,9 @@ public sealed class CustomerAddressDto
     /// <summary>Gets or sets the optional delivery note for the driver.</summary>
     public string? DriverNote { get; set; }
 
+    /// <summary>Gets or sets the Google Maps business or location display name.</summary>
+    public string? GooglePlaceName { get; set; }
+
     /// <summary>Gets or sets the address source: Manual, GooglePlace, or GoogleMapPin.</summary>
     public string AddressSource { get; set; } = "Manual";
 
@@ -217,7 +228,7 @@ public sealed class CustomerAddressDto
     /// <summary>Gets or sets the address longitude.</summary>
     public decimal? Longitude { get; set; }
 
-    /// <summary>Gets or sets the concurrency token from CustomerService.</summary>
+    /// <summary>Gets or sets the concurrency token from CustomerService for updates.</summary>
     public uint Version { get; set; }
 }
 
@@ -289,6 +300,9 @@ public sealed class CustomerAddressUpsertRequest
     [StringLength(500)]
     public string? DriverNote { get; set; }
 
+    /// <summary>Gets or sets the Google Maps business or location display name.</summary>
+    public string? GooglePlaceName { get; set; }
+
     /// <summary>Gets or sets the address source: Manual, GooglePlace, or GoogleMapPin.</summary>
     [StringLength(50)]
     public string AddressSource { get; set; } = "Manual";
@@ -354,4 +368,79 @@ public sealed class CustomerOrdersResponse
 
     /// <summary>Gets or sets the QuoteEngine project and manufacturing order URL.</summary>
     public string ManufacturingOrdersUrl { get; set; } = "https://quote.maliev.com/orders";
+}
+
+    /// <summary>
+    /// A company result returned by the Thai DBD registry search.
+    /// </summary>
+    public sealed class CompanySearchResultDto
+    {
+        /// <summary>Gets or sets the 13-digit juristic (registration/tax) ID.</summary>
+        public string JuristicId { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the company name in Thai.</summary>
+        public string NameTh { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the company name in English.</summary>
+        public string? NameEn { get; set; }
+
+        /// <summary>Gets or sets the full legal company name in Thai with prefix (e.g. บริษัท XXX จำกัด).</summary>
+        public string FullNameTh { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the juristic status.</summary>
+        public string Status { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the juristic type.</summary>
+        public string? JuristicType { get; set; }
+
+        /// <summary>Gets or sets the business objectives description.</summary>
+        public string BusinessObjectives { get; set; } = string.Empty;
+    }
+
+/// <summary>
+/// Response wrapper from the internal RegistryService company search API.
+/// </summary>
+public sealed class RegistryCompanySearchResponse
+{
+    /// <summary>Gets or sets a value indicating whether the request was successful.</summary>
+    public bool Success { get; set; }
+
+    /// <summary>Gets or sets the list of matching company profiles.</summary>
+    public List<RegistryCompanySearchItemDto>? Data { get; set; }
+
+    /// <summary>Gets or sets the response message.</summary>
+    public string? Message { get; set; }
+
+    /// <summary>Gets or sets the list of error descriptions.</summary>
+    public List<string>? Errors { get; set; }
+}
+
+/// <summary>
+/// A single company profile returned by the RegistryService company search.
+/// </summary>
+public sealed class RegistryCompanySearchItemDto
+{
+    /// <summary>Gets or sets the company status code.</summary>
+    public string StatusCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the company status description in Thai.</summary>
+    public string StatusNameTh { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the 13-digit tax identification number.</summary>
+    public string TaxId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the company name in Thai.</summary>
+    public string CompanyNameTh { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the business objectives description.</summary>
+    public string BusinessObjectives { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the company type code.</summary>
+    public string CompanyTypeCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the stock exchange symbol name.</summary>
+    public string? StockName { get; set; }
+
+    /// <summary>Gets or sets the full company name in Thai with prefix.</summary>
+    public string FullNameTh { get; set; } = string.Empty;
 }

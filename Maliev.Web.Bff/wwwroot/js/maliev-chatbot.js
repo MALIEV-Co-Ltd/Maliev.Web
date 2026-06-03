@@ -566,6 +566,7 @@ window.malievChatbot = {
       event.preventDefault();
       if (!sendButton.disabled) {
         sendButton.click();
+        textarea.focus();
       }
     };
     textarea.addEventListener('keydown', textarea.__malievChatbotKeydown);
@@ -593,6 +594,22 @@ window.malievChatbot = {
     const nextHeight = Math.min(textarea.scrollHeight + border, maxHeight);
     textarea.style.height = `${Math.max(minHeight, nextHeight)}px`;
     textarea.style.overflowY = textarea.scrollHeight + border > maxHeight ? 'auto' : 'hidden';
+  },
+
+  focusComposer: function (textarea) {
+    if (!textarea) {
+      return;
+    }
+    try {
+      textarea.focus();
+      if (typeof textarea.selectionStart === 'number') {
+        const len = (textarea.value || '').length;
+        textarea.selectionStart = len;
+        textarea.selectionEnd = len;
+      }
+    } catch {
+      // Ignore if element is gone during re-render
+    }
   },
 
   isNearBottom: function (container) {

@@ -521,6 +521,34 @@ public sealed class CustomerChatbotBoundaryTests
     }
 
     /// <summary>
+    /// Regression guard for the anonymous identity leak bug: anonymous CustomerContext must not contain
+    /// Name or Email fields. When those fields are absent (as BuildCustomerContext() now enforces for
+    /// unauthenticated visitors), silicone casting queries route through the BFF without any PII reaching
+    /// ChatbotService. A Thai-script name in anonymous context would cause the ChatbotService language
+    /// detector to switch the session to Thai and address the visitor by a stored name.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_AnonymousContextWithoutPii_RoutesMessageWithNoPiiForwarded()
+    {
+        var client = new CapturingChatbotServiceClient();
+        var service = new CustomerChatbotService(client);
+
+        await service.SendAsync(new CustomerChatbotRequest
+        {
+            Message = "tell me about silicone casting",
+            CustomerContext = "Authentication: anonymous browser session\nService interests: Silicone or urethane casting",
+            Language = "en"
+        }, CancellationToken.None);
+
+        Assert.NotNull(client.MessageRequest);
+        Assert.Equal("en", client.MessageRequest.Language);
+        Assert.Contains("Authentication: anonymous browser session", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.Contains("untrusted personalization context only", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Name:", client.MessageRequest.Content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Email:", client.MessageRequest.Content, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies transport failures are converted into the BFF's customer-safe backend unavailable boundary.
     /// </summary>
     [Fact]

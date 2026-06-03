@@ -35,6 +35,9 @@ public sealed class GoogleAddressSelection
     /// <summary>Gets or sets the Google Places identifier.</summary>
     public string? PlaceId { get; set; }
 
+    /// <summary>Gets or sets the business or location display name from Google Maps.</summary>
+    public string? DisplayName { get; set; }
+
     /// <summary>Gets or sets the formatted address.</summary>
     public string? FormattedAddress { get; set; }
 

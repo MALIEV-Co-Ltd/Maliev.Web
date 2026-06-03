@@ -397,6 +397,11 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             return Task.FromResult(product);
         }
 
+        public Task<string?> GetProductMediaRedirectUrlAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<string?>($"https://cdn.example.test/products/media/{uploadId}");
+        }
+
     }
 
     private sealed class FakeManufacturingCatalogService : IManufacturingCatalogService

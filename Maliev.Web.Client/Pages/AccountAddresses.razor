@@ -25,7 +25,20 @@
                 <div>
                     <h2>@Text("Customer address book", "สมุดที่อยู่ลูกค้า")</h2>
                 </div>
+                @if (!_showForm && !_editingAddressId.HasValue)
+                {
+                    <button type="button" class="button primary" @onclick="ShowAddForm">@Text("Add address", "เพิ่มที่อยู่")</button>
+                }
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(_status))
+            {
+                <p class="success-message">@_status</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="load-message">@_error</p>
+            }
 
             @if (_loading)
             {
@@ -43,6 +56,7 @@
                 <div class="address-grid">
                     @foreach (var address in _addresses)
                     {
+                        var mapUrl = MapUrl(address);
                         <article class="address-card">
                             <div class="address-card-header">
                                 <div class="address-card-badges">
@@ -69,12 +83,20 @@
                                          class="address-card-map-img" />
                                 </div>
                             }
+                            @if (!string.IsNullOrWhiteSpace(address.GooglePlaceName))
+                            {
+                                <p class="address-card-place">📍 @address.GooglePlaceName</p>
+                            }
                             <p class="address-card-lines">@AddressLines(address)</p>
                             @if (!string.IsNullOrWhiteSpace(address.RecipientPhone))
                             {
                                 <p class="address-card-phone">📞 @address.RecipientPhone</p>
                             }
                             <div class="address-actions">
+                                @if (!string.IsNullOrWhiteSpace(mapUrl))
+                                {
+                                    <a href="@mapUrl" target="_blank" rel="noopener noreferrer" class="button secondary">@Text("Map", "แผนที่")</a>
+                                }
                                 <button type="button" class="button secondary" @onclick="() => Edit(address)">@Text("Edit", "แก้ไข")</button>
                                 <button type="button" class="button secondary danger" @onclick="() => DeleteAsync(address)">@Text("Delete", "ลบ")</button>
                             </div>
@@ -84,142 +106,133 @@
             }
         </div>
 
-        <div class="account-panel">
-            <div class="section-heading compact-heading">
-                <div>
-                    <h2>@(_editingAddressId.HasValue ? Text("Update address", "อัปเดตที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</h2>
+        @if (_showForm || _editingAddressId.HasValue)
+        {
+            <div class="account-panel">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <h2>@(_editingAddressId.HasValue ? Text("Update address", "อัปเดตที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</h2>
+                    </div>
                 </div>
-            </div>
 
-            @if (!string.IsNullOrWhiteSpace(_status))
-            {
-                <p class="success-message">@_status</p>
-            }
-            @if (!string.IsNullOrWhiteSpace(_error))
-            {
-                <p class="load-message">@_error</p>
-            }
-
-            <EditForm Model="_form" OnValidSubmit="SaveAsync" OnInvalidSubmit="HandleInvalidSubmit" FormName="account-address-form" class="account-form" novalidate>
-                <DataAnnotationsValidator />
-                <UnifiedAddressSearch Latitude="@_form.Latitude"
-                                      Longitude="@_form.Longitude"
-                                      FormattedAddress="@_form.FormattedAddress"
-                                      Culture="@Preferences.Culture"
-                                      SelectionChanged="ApplyGoogleAddressSelection"
-                                      RegistrySelectionChanged="ApplyRegistryLocation" />
-                <div class="form-grid two">
-                    <label>
-                        @Text("Type", "ประเภท")
-                        <InputSelect @bind-Value="FormAddressType">
-                            <option value="Shipping">@Text("Shipping", "จัดส่ง")</option>
-                            <option value="Billing">@Text("Billing", "ออกบิล")</option>
-                        </InputSelect>
-                        <ValidationMessage For="@(() => _form.Type)" class="field-validation-error" />
-                    </label>
-                    <label class="checkbox-label address-default-checkbox">
-                        <InputCheckbox @bind-Value="_form.IsDefault" />
-                        <span>@Text("Default address", "ที่อยู่เริ่มต้น")</span>
-                    </label>
-                </div>
-                <div class="form-grid two">
-                    <label>
-                        @Text("Place name", "ชื่อสถานที่")
-                        <InputSelect @bind-Value="_form.PlaceLabel">
-                            <option value="Home">@Text("Home", "บ้าน")</option>
-                            <option value="Work">@Text("Work", "ที่ทำงาน")</option>
-                            <option value="Other">@Text("Other", "อื่นๆ")</option>
-                        </InputSelect>
-                        <ValidationMessage For="@(() => _form.PlaceLabel)" class="field-validation-error" />
-                    </label>
-                    @if (string.Equals(_form.PlaceLabel, "Other", StringComparison.OrdinalIgnoreCase))
-                    {
+                <EditForm Model="_form" OnValidSubmit="SaveAsync" OnInvalidSubmit="HandleInvalidSubmit" FormName="account-address-form" class="account-form" novalidate>
+                    <DataAnnotationsValidator />
+                    <UnifiedAddressSearch Latitude="@_form.Latitude"
+                                          Longitude="@_form.Longitude"
+                                          FormattedAddress="@_form.FormattedAddress"
+                                          Culture="@Preferences.Culture"
+                                          SelectionChanged="ApplyGoogleAddressSelection"
+                                          RegistrySelectionChanged="ApplyRegistryLocation" />
+                    <div class="form-grid two">
                         <label>
-                            @Text("Other place name", "ชื่อสถานที่อื่น")
-                            <InputText @bind-Value="_form.PlaceLabelOther" name="placeLabelOther" aria-label="@Text("Other place name", "ชื่อสถานที่อื่น")" />
-                            <ValidationMessage For="@(() => _form.PlaceLabelOther)" class="field-validation-error" />
+                            @Text("Type", "ประเภท")
+                            <InputSelect @bind-Value="FormAddressType">
+                                <option value="Shipping">@Text("Shipping", "จัดส่ง")</option>
+                                <option value="Billing">@Text("Billing", "ออกบิล")</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _form.Type)" class="field-validation-error" />
+                        </label>
+                        <label class="checkbox-label address-default-checkbox">
+                            <InputCheckbox @bind-Value="_form.IsDefault" />
+                            <span>@Text("Default address", "ที่อยู่เริ่มต้น")</span>
+                        </label>
+                    </div>
+                    <div class="form-grid two">
+                        <label>
+                            @Text("Place name", "ชื่อสถานที่")
+                            <InputSelect @bind-Value="_form.PlaceLabel">
+                                <option value="Home">@Text("Home", "บ้าน")</option>
+                                <option value="Work">@Text("Work", "ที่ทำงาน")</option>
+                                <option value="Other">@Text("Other", "อื่นๆ")</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _form.PlaceLabel)" class="field-validation-error" />
+                        </label>
+                        @if (string.Equals(_form.PlaceLabel, "Other", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <label>
+                                @Text("Other place name", "ชื่อสถานที่อื่น")
+                                <InputText @bind-Value="_form.PlaceLabelOther" name="placeLabelOther" aria-label="@Text("Other place name", "ชื่อสถานที่อื่น")" />
+                                <ValidationMessage For="@(() => _form.PlaceLabelOther)" class="field-validation-error" />
+                            </label>
+                        }
+                    </div>
+                    <div class="form-grid two">
+                        <label>
+                            @Text("Recipient Name", "ชื่อผู้รับ")
+                            <InputText @bind-Value="_form.RecipientName" name="recipientName" aria-label="@Text("Recipient Name", "ชื่อผู้รับ")" />
+                            <ValidationMessage For="@(() => _form.RecipientName)" class="field-validation-error" />
+                        </label>
+                        <label>
+                            @Text("Mobile Number", "เบอร์มือถือ")
+                            <InputText @bind-Value="_form.RecipientPhone" name="recipientPhone" aria-label="@Text("Mobile Number", "เบอร์มือถือ")" />
+                            <ValidationMessage For="@(() => _form.RecipientPhone)" class="field-validation-error" />
+                        </label>
+                    </div>
+                    <label class="form-full">
+                        @Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")
+                        <InputText @bind-Value="_form.AddressLine1" name="addressLine1" aria-label="@Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")" />
+                        <ValidationMessage For="@(() => _form.AddressLine1)" class="field-validation-error" />
+                    </label>
+                    <label class="form-full">
+                        @Text("Address line 2", "ที่อยู่บรรทัดที่ 2")
+                        <InputText @bind-Value="_form.AddressLine2" name="addressLine2" aria-label="@Text("Address line 2", "ที่อยู่บรรทัดที่ 2")" />
+                        <ValidationMessage For="@(() => _form.AddressLine2)" class="field-validation-error" />
+                    </label>
+                    <div class="form-grid three">
+                        <label>
+                            @Text("Sub District", "แขวง/ตำบล")
+                            <InputText @bind-Value="_form.District" name="district" aria-label="@Text("Sub District", "แขวง/ตำบล")" />
+                            <ValidationMessage For="@(() => _form.District)" class="field-validation-error" />
+                        </label>
+                        <label>
+                            @Text("District", "เขต/อำเภอ")
+                            <InputText @bind-Value="_form.City" name="city" aria-label="@Text("District", "เขต/อำเภอ")" />
+                            <ValidationMessage For="@(() => _form.City)" class="field-validation-error" />
+                        </label>
+                        <label>
+                            @Text("Province", "จังหวัด")
+                            <InputText @bind-Value="_form.StateProvince" name="stateProvince" disabled="@ProvinceLocked" aria-label="@Text("Province", "จังหวัด")" />
+                            <ValidationMessage For="@(() => _form.StateProvince)" class="field-validation-error" />
+                        </label>
+                    </div>
+                    <div class="form-grid two">
+                        <label>
+                            @Text("Country / region", "ประเทศ/ภูมิภาค")
+                            <InputSelect @bind-Value="_form.CountryId" name="countryId" aria-label="@Text("Country / region", "ประเทศ/ภูมิภาค")">
+                                @if (_countries.Count == 0)
+                                {
+                                    <option value="@Guid.Empty">@Text("Country list unavailable", "ไม่สามารถโหลดรายชื่อประเทศ")</option>
+                                }
+                                else
+                                {
+                                    @foreach (var country in _countries)
+                                    {
+                                        <option value="@country.Id">@country.Name (@country.Iso2)</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </label>
+                        <label>
+                            @Text("Postal code", "รหัสไปรษณีย์")
+                            <InputText @bind-Value="_form.PostalCode" name="postalCode" disabled="@PostalCodeLocked" aria-label="@Text("Postal code", "รหัสไปรษณีย์")" />
+                            <ValidationMessage For="@(() => _form.PostalCode)" class="field-validation-error" />
+                        </label>
+                    </div>
+                    @if (IsShippingAddress)
+                    {
+                        <label class="form-full">
+                            @Text("Note to driver", "หมายเหตุถึงคนขับ")
+                            <InputTextArea @bind-Value="_form.DriverNote" name="driverNote" aria-label="@Text("Note to driver", "หมายเหตุถึงคนขับ")" />
+                            <ValidationMessage For="@(() => _form.DriverNote)" class="field-validation-error" />
                         </label>
                     }
-                </div>
-                <div class="form-grid two">
-                    <label>
-                        @Text("Recipient Name", "ชื่อผู้รับ")
-                        <InputText @bind-Value="_form.RecipientName" name="recipientName" aria-label="@Text("Recipient Name", "ชื่อผู้รับ")" />
-                        <ValidationMessage For="@(() => _form.RecipientName)" class="field-validation-error" />
-                    </label>
-                    <label>
-                        @Text("Mobile Number", "เบอร์มือถือ")
-                        <InputText @bind-Value="_form.RecipientPhone" name="recipientPhone" aria-label="@Text("Mobile Number", "เบอร์มือถือ")" />
-                        <ValidationMessage For="@(() => _form.RecipientPhone)" class="field-validation-error" />
-                    </label>
-                </div>
-                <label class="form-full">
-                    @Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")
-                    <InputText @bind-Value="_form.AddressLine1" name="addressLine1" aria-label="@Text("Address No./Moo/Soi/Road", "บ้านเลขที่/หมู่/ซอย/ถนน")" />
-                    <ValidationMessage For="@(() => _form.AddressLine1)" class="field-validation-error" />
-                </label>
-                <label class="form-full">
-                    @Text("Address line 2", "ที่อยู่บรรทัดที่ 2")
-                    <InputText @bind-Value="_form.AddressLine2" name="addressLine2" aria-label="@Text("Address line 2", "ที่อยู่บรรทัดที่ 2")" />
-                    <ValidationMessage For="@(() => _form.AddressLine2)" class="field-validation-error" />
-                </label>
-                <div class="form-grid three">
-                    <label>
-                        @Text("Sub District", "แขวง/ตำบล")
-                        <InputText @bind-Value="_form.District" name="district" aria-label="@Text("Sub District", "แขวง/ตำบล")" />
-                        <ValidationMessage For="@(() => _form.District)" class="field-validation-error" />
-                    </label>
-                    <label>
-                        @Text("District", "เขต/อำเภอ")
-                        <InputText @bind-Value="_form.City" name="city" aria-label="@Text("District", "เขต/อำเภอ")" />
-                        <ValidationMessage For="@(() => _form.City)" class="field-validation-error" />
-                    </label>
-                    <label>
-                        @Text("Province", "จังหวัด")
-                        <InputText @bind-Value="_form.StateProvince" name="stateProvince" disabled="@ProvinceLocked" aria-label="@Text("Province", "จังหวัด")" />
-                        <ValidationMessage For="@(() => _form.StateProvince)" class="field-validation-error" />
-                    </label>
-                </div>
-                <div class="form-grid two">
-                    <label>
-                        @Text("Country / region", "ประเทศ/ภูมิภาค")
-                        <InputSelect @bind-Value="_form.CountryId" name="countryId" aria-label="@Text("Country / region", "ประเทศ/ภูมิภาค")">
-                            @if (_countries.Count == 0)
-                            {
-                                <option value="@Guid.Empty">@Text("Country list unavailable", "ไม่สามารถโหลดรายชื่อประเทศ")</option>
-                            }
-                            else
-                            {
-                                @foreach (var country in _countries)
-                                {
-                                    <option value="@country.Id">@country.Name (@country.Iso2)</option>
-                                }
-                            }
-                        </InputSelect>
-                    </label>
-                    <label>
-                        @Text("Postal code", "รหัสไปรษณีย์")
-                        <InputText @bind-Value="_form.PostalCode" name="postalCode" disabled="@PostalCodeLocked" aria-label="@Text("Postal code", "รหัสไปรษณีย์")" />
-                        <ValidationMessage For="@(() => _form.PostalCode)" class="field-validation-error" />
-                    </label>
-                </div>
-                @if (IsShippingAddress)
-                {
-                    <label class="form-full">
-                        @Text("Note to driver", "หมายเหตุถึงคนขับ")
-                        <InputTextArea @bind-Value="_form.DriverNote" name="driverNote" aria-label="@Text("Note to driver", "หมายเหตุถึงคนขับ")" />
-                        <ValidationMessage For="@(() => _form.DriverNote)" class="field-validation-error" />
-                    </label>
-                }
-                <div class="account-form-actions">
-                    <button class="button primary" type="submit" disabled="@_saving">@(_editingAddressId.HasValue ? Text("Save address", "บันทึกที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</button>
-                    @if (_editingAddressId.HasValue)
-                    {
-                        <button class="button secondary" type="button" @onclick="ResetForm">@Text("Cancel edit", "ยกเลิกแก้ไข")</button>
-                    }
-                </div>
-            </EditForm>
-        </div>
+                    <div class="account-form-actions">
+                        <button class="button primary" type="submit" disabled="@_saving">@(_editingAddressId.HasValue ? Text("Save address", "บันทึกที่อยู่") : Text("Add address", "เพิ่มที่อยู่"))</button>
+                        <button class="button secondary" type="button" @onclick="ResetForm">@Text("Cancel", "ยกเลิก")</button>
+                    </div>
+                </EditForm>
+            </div>
+        }
     </div>
 </section>
 
@@ -231,6 +244,7 @@
     private Guid? _editingAddressId;
     private bool _loading = true;
     private bool _saving;
+    private bool _showForm;
     private string? _status;
     private string? _error;
     private bool IsGoogleAddress => string.Equals(_form.AddressSource, "GooglePlace", StringComparison.OrdinalIgnoreCase)
@@ -250,6 +264,10 @@
             if (!IsShippingAddress)
             {
                 _form.DriverNote = null;
+            }
+            if (!_editingAddressId.HasValue)
+            {
+                _form.IsDefault = !_addresses.Any(a => a.IsDefault && string.Equals(a.Type, _form.Type, StringComparison.OrdinalIgnoreCase));
             }
         }
     }
@@ -361,8 +379,15 @@
         }
     }
 
+    private void ShowAddForm()
+    {
+        ResetForm();
+        _showForm = true;
+    }
+
     private void Edit(CustomerAddressDto address)
     {
+        _showForm = true;
         _editingAddressId = address.Id;
         _form.Type = address.Type;
         _form.IsDefault = address.IsDefault;
@@ -381,6 +406,7 @@
         _form.DriverNote = address.DriverNote;
         _form.AddressSource = string.IsNullOrWhiteSpace(address.AddressSource) ? "Manual" : address.AddressSource;
         _form.GooglePlaceId = address.GooglePlaceId;
+        _form.GooglePlaceName = address.GooglePlaceName;
         _form.FormattedAddress = address.FormattedAddress;
         _form.Latitude = address.Latitude;
         _form.Longitude = address.Longitude;
@@ -390,8 +416,9 @@
     private void ResetForm()
     {
         _editingAddressId = null;
+        _showForm = false;
         _form.Type = "Shipping";
-        _form.IsDefault = false;
+        _form.IsDefault = !_addresses.Any(a => a.IsDefault && string.Equals(a.Type, _form.Type, StringComparison.OrdinalIgnoreCase));
         _form.PlaceLabel = "Home";
         _form.PlaceLabelOther = null;
         _form.AddressLine1 = string.Empty;
@@ -407,6 +434,7 @@
         _form.DriverNote = null;
         _form.AddressSource = "Manual";
         _form.GooglePlaceId = null;
+        _form.GooglePlaceName = null;
         _form.FormattedAddress = null;
         _form.Latitude = null;
         _form.Longitude = null;
@@ -431,6 +459,7 @@
 
         _form.AddressSource = string.IsNullOrWhiteSpace(selection.Source) ? "GooglePlace" : selection.Source;
         _form.GooglePlaceId = selection.PlaceId;
+        _form.GooglePlaceName = selection.DisplayName;
         _form.FormattedAddress = selection.FormattedAddress;
         _form.Latitude = selection.Latitude;
         _form.Longitude = selection.Longitude;
@@ -476,6 +505,17 @@
         }.Where(part => !string.IsNullOrWhiteSpace(part)));
     }
 
+    private string MapUrl(CustomerAddressDto address)
+    {
+        if (address.Latitude.HasValue && address.Longitude.HasValue)
+            return $"https://www.openstreetmap.org/?mlat={address.Latitude.Value}&mlon={address.Longitude.Value}&zoom=16";
+
+        var query = AddressLines(address);
+        return string.IsNullOrWhiteSpace(query)
+            ? string.Empty
+            : $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(query)}";
+    }
+
     private string? CountryName(Guid countryId)
     {
         return _countries.FirstOrDefault(country => country.Id == countryId)?.Name;
@@ -497,7 +537,7 @@
 
     private static bool ContainsThai(string? value)
     {
-        return value?.Any(character => character is >= '\u0E00' and <= '\u0E7F') == true;
+        return value?.Any(character => character is >= '฀' and <= '๿') == true;
     }
 
     private string Text(string en, string th)

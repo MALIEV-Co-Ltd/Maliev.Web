@@ -835,6 +835,26 @@
             }
 
             await PersistMemoryAsync();
+            if (_isOpen)
+            {
+                await FocusComposerAsync();
+            }
+        }
+    }
+
+    private async Task FocusComposerAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("malievChatbot.focusComposer", _draftInput);
+        }
+        catch (InvalidOperationException)
+        {
+            // Textarea can disappear while the chat panel is closing.
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore browser disconnects during shutdown or preview reloads.
         }
     }
 
@@ -1253,7 +1273,7 @@
         {
             ChatActionViewServices => ResolveServicesHref(action.Data),
             ChatActionContact => "/contact",
-            ChatActionRequestQuote => SiteContent.QuoteNewUrl,
+            ChatActionRequestQuote => SiteContent.QuoteNewProjectUrl,
             _ => TryNormalizeExplicitHref(action.Data)
         };
     }
@@ -1542,12 +1562,21 @@
             ? _activeContextHint.Context
             : null);
         AddContextPart(parts, "Recent page behavior", BuildBehaviorContext(_behaviorSnapshot));
-        AddContextPart(parts, "Name", _memory.Name);
-        AddContextPart(parts, "Email", _memory.Email);
-        AddContextPart(parts, "Company", _memory.Company);
+
+        // PII is only forwarded for authenticated sessions. Anonymous memory may contain a
+        // Thai-script name captured from a prior guest session; injecting it into the composed
+        // message causes the ChatbotService language detector to switch the session to Thai and
+        // exposes a name the chatbot has no right to assume for an unauthenticated visitor.
+        if (_identity.IsAuthenticated)
+        {
+            AddContextPart(parts, "Name", _memory.Name);
+            AddContextPart(parts, "Email", _memory.Email);
+            AddContextPart(parts, "Company", _memory.Company);
+            AddContextPart(parts, "Known addresses", JoinList(_memory.Addresses.Take(3)));
+        }
+
         AddContextPart(parts, "Service interests", JoinList(_memory.ServiceInterests));
         AddContextPart(parts, "Preferences", JoinList(_memory.Preferences));
-        AddContextPart(parts, "Known addresses", JoinList(_memory.Addresses.Take(3)));
 
         return parts.Count == 0
             ? null
@@ -1849,6 +1878,7 @@
         _popoutMessage = message;
         _showPopout = true;
         await InvokeAsync(StateHasChanged);
+        await RecordBehaviorEventAsync("assistant_popout_shown", hint?.Id ?? "assistant-reply", message);
 
         try
         {
