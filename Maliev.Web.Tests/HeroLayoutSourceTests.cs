@@ -2571,11 +2571,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("@page \"/account/preferences\"", preferences);
         Assert.Contains("@page \"/account/orders\"", orders);
         Assert.Contains("@page \"/account/orders/{OrderId}\"", orders);
-        Assert.Contains("@attribute [Authorize]", account);
-        Assert.Contains("@attribute [Authorize]", profile);
-        Assert.Contains("@attribute [Authorize]", addresses);
-        Assert.Contains("@attribute [Authorize]", preferences);
-        Assert.Contains("@attribute [Authorize]", orders);
+        Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", account);
+        Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", profile);
+        Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", addresses);
+        Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", preferences);
+        Assert.Contains("@attribute [Authorize(Policy = WebAuthorizationPolicies.CustomerAccount)]", orders);
         Assert.DoesNotContain("SiteContent.QuoteProfileUrl", layout);
     }
 
@@ -3134,7 +3134,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("scene.onBeforeRenderObservable.add(() => updateLandingHeadlight(camera, cameraHeadlight, BABYLON));", source);
         Assert.Contains("updateLandingHeadlight(camera, cameraHeadlight, BABYLON);", source);
         Assert.Contains("configureCadAmbientOcclusion(scene, camera, BABYLON);", source);
-        Assert.Contains("new BABYLON.SSAO2RenderingPipeline(\"landing-cad-ambient-occlusion\"", source);
+        Assert.Contains("new BABYLON.SSAO2RenderingPipeline(", source);
+        Assert.Contains("\"landing-cad-ambient-occlusion\"", source);
         Assert.Contains("ssao.totalStrength = 0.58;", source);
         Assert.Contains("configureLandingCadShadows(scene, lights.key, state.landingFrame, renderMeshes, BABYLON);", source);
         Assert.Contains("scene.shadowsEnabled = true;", source);

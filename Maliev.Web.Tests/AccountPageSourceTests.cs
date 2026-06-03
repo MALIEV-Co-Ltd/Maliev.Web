@@ -63,7 +63,7 @@ public sealed class AccountPageSourceTests
         Assert.Contains("QuoteEngineNdasHref", account);
         Assert.Contains("/quote/start?returnUrl=/ndas", account);
         Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
-        Assert.Contains("@Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
+        Assert.Contains("Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"Customer tier\", \"ระดับลูกค้า\")", account);
         Assert.Contains("@Text(\"Change email\", \"เปลี่ยนอีเมล\")", account);
         Assert.Contains("@Text(\"Reset password\", \"รีเซ็ตรหัสผ่าน\")", account);

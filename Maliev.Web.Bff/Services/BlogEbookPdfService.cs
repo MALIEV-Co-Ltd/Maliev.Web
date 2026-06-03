@@ -73,7 +73,29 @@ public sealed class BlogEbookPdfService(IWebHostEnvironment environment, IPdfSer
 
         var pathOnly = url.Split('?', '#')[0].TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
         var imagePath = Path.Combine(_webRootPath, pathOnly);
-        return File.Exists(imagePath) ? imagePath : null;
+        if (File.Exists(imagePath))
+        {
+            return imagePath;
+        }
+
+        return ResolveContentRootImagePath(pathOnly);
+    }
+
+    private string? ResolveContentRootImagePath(string pathOnly)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "Maliev.Web.Bff", "wwwroot", pathOnly);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            directory = directory.Parent;
+        }
+
+        return null;
     }
 
     private static string ResolveContentType(string imagePath)
