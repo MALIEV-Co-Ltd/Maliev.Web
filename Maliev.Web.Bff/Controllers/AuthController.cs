@@ -100,7 +100,7 @@ public sealed class AuthController(
 
         session.User.EmailVerified = true;
         await SignInCustomerAsync(session.User);
-        return LocalRedirect(NormalizeReturnUrl(returnUrl));
+        return RedirectToReturnUrl(returnUrl);
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public sealed class AuthController(
 
         session.User.EmailVerified = false;
         await SignInCustomerAsync(session.User);
-        return LocalRedirect(NormalizeReturnUrl(form.ReturnUrl));
+        return RedirectToReturnUrl(form.ReturnUrl);
     }
 
     /// <summary>
@@ -416,6 +416,14 @@ public sealed class AuthController(
         if (IsTrustedCrossAppReturnUrl(returnUrl))
             return returnUrl;
         return "/account";
+    }
+
+    private IActionResult RedirectToReturnUrl(string? returnUrl)
+    {
+        var normalized = NormalizeReturnUrl(returnUrl);
+        return Url.IsLocalUrl(normalized)
+            ? LocalRedirect(normalized)
+            : Redirect(normalized);
     }
 
     private bool IsTrustedCrossAppReturnUrl(string returnUrl)

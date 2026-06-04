@@ -2755,6 +2755,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp", signIn);
         Assert.Contains("return returnUrl;", signIn);
         Assert.Contains("if (IsTrustedCrossAppReturnUrl(returnUrl))", authController);
+        Assert.Contains("private IActionResult RedirectToReturnUrl(string? returnUrl)", authController);
+        Assert.Contains("? LocalRedirect(normalized)", authController);
+        Assert.Contains(": Redirect(normalized);", authController);
         Assert.Contains("return false;", authController);
         Assert.Contains("return \"/account\";", authController);
     }
