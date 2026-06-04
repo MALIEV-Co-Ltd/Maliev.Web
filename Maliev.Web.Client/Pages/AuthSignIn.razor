@@ -165,9 +165,7 @@
 
     private static readonly EmailAddressAttribute EmailValidator = new();
 
-    private string SafeReturnUrl => string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith("/", StringComparison.Ordinal)
-        ? "/account"
-        : ReturnUrl;
+    private string SafeReturnUrl => NormalizeClientReturnUrl(ReturnUrl);
 
     private string GoogleHref => $"/auth/google?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
     private bool ShowEmailStep => _authStep == AuthStep.Email;
@@ -221,6 +219,29 @@
     }
 
     private string Text(string en, string th) => Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+
+    private static string NormalizeClientReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return "/account";
+        }
+
+        if (returnUrl.StartsWith("/", StringComparison.Ordinal)
+            && !returnUrl.StartsWith("//", StringComparison.Ordinal)
+            && !returnUrl.StartsWith("/\\", StringComparison.Ordinal))
+        {
+            return returnUrl;
+        }
+
+        if (Uri.TryCreate(returnUrl, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp))
+        {
+            return returnUrl;
+        }
+
+        return "/account";
+    }
 
     private enum AuthStep
     {

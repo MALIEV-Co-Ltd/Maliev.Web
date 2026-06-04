@@ -2742,6 +2742,24 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the browser auth page preserves QuoteEngine handoff URLs while the BFF keeps final return URL validation authoritative.
+    /// </summary>
+    [Fact]
+    public void AuthReturnUrlPreservesCrossAppQuoteEngineHandoffForBffValidation()
+    {
+        var signIn = ReadRepoFile("Maliev.Web.Client", "Pages", "AuthSignIn.razor");
+        var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
+
+        Assert.Contains("private string SafeReturnUrl => NormalizeClientReturnUrl(ReturnUrl);", signIn);
+        Assert.Contains("Uri.TryCreate(returnUrl, UriKind.Absolute, out var uri)", signIn);
+        Assert.Contains("uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp", signIn);
+        Assert.Contains("return returnUrl;", signIn);
+        Assert.Contains("if (IsTrustedCrossAppReturnUrl(returnUrl))", authController);
+        Assert.Contains("return false;", authController);
+        Assert.Contains("return \"/account\";", authController);
+    }
+
+    /// <summary>
     /// Verifies email auth starts with only an email field while Google stays a primary action.
     /// </summary>
     [Fact]
