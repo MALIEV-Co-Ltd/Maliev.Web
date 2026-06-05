@@ -27,7 +27,7 @@
                 </div>
                 @if (!_showForm && !_editingAddressId.HasValue)
                 {
-                    <button type="button" class="button primary" @onclick="ShowAddForm">@Text("Add address", "เพิ่มที่อยู่")</button>
+                    <a class="button primary" href="/account/addresses?mode=add">@Text("Add address", "เพิ่มที่อยู่")</a>
                 }
             </div>
 
@@ -237,6 +237,10 @@
 </section>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "mode")]
+    public string? Mode { get; set; }
+
     private readonly CustomerAddressUpsertRequest _form = new();
     private List<CustomerAddressDto> _addresses = [];
     private IReadOnlyList<AddressCountryOptionDto> _countries = [];
@@ -245,6 +249,7 @@
     private bool _loading = true;
     private bool _saving;
     private bool _showForm;
+    private bool _initialized;
     private string? _status;
     private string? _error;
     private bool IsGoogleAddress => string.Equals(_form.AddressSource, "GooglePlace", StringComparison.OrdinalIgnoreCase)
@@ -279,6 +284,26 @@
         await LoadCountriesAsync();
         ResetForm();
         await LoadAsync();
+        _initialized = true;
+        ApplyQueryMode();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_initialized)
+        {
+            ApplyQueryMode();
+        }
+    }
+
+    private void ApplyQueryMode()
+    {
+        if (string.Equals(Mode, "add", StringComparison.OrdinalIgnoreCase)
+            && !_showForm
+            && !_editingAddressId.HasValue)
+        {
+            ShowAddForm();
+        }
     }
 
     private async Task LoadProfileAsync()
