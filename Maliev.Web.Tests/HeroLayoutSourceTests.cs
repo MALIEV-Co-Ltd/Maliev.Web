@@ -1702,9 +1702,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Icons.Material.Filled.SupportAgent", component);
         Assert.Contains("customer-chatbot-profile", component);
         Assert.Contains("customer-chatbot-gemini-icon", component);
-        Assert.Contains("/images/gemini-icon.svg", component);
+        Assert.Contains("/images/chatbot-avatar.webp", component);
         Assert.DoesNotContain("Icons.Material.Filled.AutoAwesome", component);
-        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "gemini-icon.svg")));
+        Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "chatbot-avatar.webp")));
         Assert.Contains("customer-chatbot-title", component);
         Assert.Contains("customer-chatbot-header-actions", component);
         Assert.Contains("customer-chatbot-reset", component);

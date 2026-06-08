@@ -1,5 +1,5 @@
-const babylonCdn = "https://cdn.jsdelivr.net/npm/babylonjs@9.6.0/babylon.min.js";
-const babylonLoadersCdn = "https://cdn.jsdelivr.net/npm/babylonjs-loaders@9.6.0/babylonjs.loaders.min.js";
+const babylonCdn = "/lib/babylonjs/babylon.min.js";
+const babylonLoadersCdn = "/lib/babylonjs/babylonjs.loaders.min.js";
 const instances = new WeakMap();
 let babylonRuntime;
 let babylonLoadersRuntime;

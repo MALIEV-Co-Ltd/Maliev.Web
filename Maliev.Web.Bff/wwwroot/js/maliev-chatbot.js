@@ -698,5 +698,231 @@ window.malievChatbot = {
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
     schedule();
+  },
+
+  initAvatarVideo: function (toggleButton) {
+    if (!toggleButton) {
+      return;
+    }
+
+    const video = toggleButton.querySelector('.customer-chatbot-avatar-video');
+    if (!video) {
+      return;
+    }
+
+    let playTimeout = null;
+    let pauseTimeout = null;
+    let isPlaying = false;
+    let isExternalTrigger = false;
+
+    const randomDelay = (min, max) => Math.random() * (max - min) + min;
+
+    const schedulePlay = () => {
+      if (playTimeout) {
+        clearTimeout(playTimeout);
+      }
+      const delay = randomDelay(8000, 25000);
+      playTimeout = window.setTimeout(() => {
+        if (isExternalTrigger || (!isPlaying && !video.paused)) {
+          return;
+        }
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        isPlaying = true;
+        schedulePause();
+      }, delay);
+    };
+
+    const schedulePause = () => {
+      if (pauseTimeout) {
+        clearTimeout(pauseTimeout);
+      }
+      const delay = randomDelay(3000, 6000);
+      pauseTimeout = window.setTimeout(() => {
+        video.pause();
+        video.currentTime = 0;
+        isPlaying = false;
+        isExternalTrigger = false;
+        schedulePlay();
+      }, delay);
+    };
+
+    video.addEventListener('ended', () => {
+      video.pause();
+      video.currentTime = 0;
+      isPlaying = false;
+      isExternalTrigger = false;
+      schedulePlay();
+    });
+
+    video.addEventListener('pause', () => {
+      if (isPlaying && !isExternalTrigger) {
+        isPlaying = false;
+        schedulePlay();
+      }
+    });
+
+    window.setTimeout(schedulePlay, randomDelay(2000, 5000));
+
+    toggleButton._avatarVideoController = {
+      trigger: function () {
+        if (isPlaying) return;
+        if (playTimeout) clearTimeout(playTimeout);
+        if (pauseTimeout) clearTimeout(pauseTimeout);
+        isExternalTrigger = true;
+        isPlaying = true;
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        schedulePause();
+      },
+      cleanup: function () {
+        if (playTimeout) clearTimeout(playTimeout);
+        if (pauseTimeout) clearTimeout(pauseTimeout);
+        video.pause();
+        video.src = '';
+        video.load();
+      }
+    };
+
+    toggleButton._avatarVideoCleanup = function () {
+      toggleButton._avatarVideoController?.cleanup();
+    };
+  },
+
+  triggerAvatarVideo: function (toggleButton) {
+    toggleButton?._avatarVideoController?.trigger();
+  },
+
+  positionTooltip: function (tooltip, toggleButton) {
+    if (!tooltip || !toggleButton) return;
+
+    const toggleRect = toggleButton.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const gap = 10;
+
+    const spaceRight = viewportWidth - toggleRect.right;
+    const spaceLeft = toggleRect.left;
+
+    const willOverflowRight = toggleRect.left + tooltipRect.width / 2 > viewportWidth - gap;
+    const willOverflowLeft = toggleRect.right - tooltipRect.width / 2 < gap;
+
+    if (willOverflowRight) {
+      tooltip.style.left = 'auto';
+      tooltip.style.right = `${gap}px`;
+      tooltip.style.transform = 'translateX(0) translateY(8px)';
+    } else if (willOverflowLeft) {
+      tooltip.style.left = `${gap}px`;
+      tooltip.style.right = 'auto';
+      tooltip.style.transform = 'translateX(0) translateY(8px)';
+    } else {
+      tooltip.style.left = '50%';
+      tooltip.style.right = 'auto';
+      tooltip.style.transform = 'translateX(-50%) translateY(8px)';
+    }
+  },
+
+  initTooltipPosition: function (toggleButton) {
+    if (!toggleButton) return;
+
+    const tooltip = toggleButton.querySelector('.customer-chatbot-toggle-tooltip');
+    if (!tooltip) return;
+
+    const updatePosition = () => {
+      malievChatbot.positionTooltip(tooltip, toggleButton);
+    };
+
+    const observer = new ResizeObserver(updatePosition);
+    observer.observe(tooltip);
+
+    window.addEventListener('resize', updatePosition);
+    toggleButton.addEventListener('mouseenter', updatePosition);
+
+    tooltip._tooltipPositionCleanup = () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updatePosition);
+      toggleButton.removeEventListener('mouseenter', updatePosition);
+    };
+  },
+
+  initSpeakingVideo: function () {
+    const panel = document.querySelector('.customer-chatbot-panel');
+    if (!panel) return;
+
+    const video = panel.querySelector('.customer-chatbot-speaking-avatar');
+    if (!video) return;
+
+    video.removeAttribute('loop');
+
+    let speakingTimeout = null;
+    let isPlaying = false;
+    let lastMessageTime = 0;
+    const SPEAKING_GRACE_MS = 2000;
+
+    const checkShouldStop = () => {
+      const timeSinceLastMessage = Date.now() - lastMessageTime;
+      if (timeSinceLastMessage > SPEAKING_GRACE_MS && !isPlaying) {
+        panel.classList.remove('is-assistant-speaking');
+      }
+    };
+
+    const scheduleCheck = () => {
+      if (speakingTimeout) clearTimeout(speakingTimeout);
+      speakingTimeout = setTimeout(checkShouldStop, SPEAKING_GRACE_MS);
+    };
+
+    video.addEventListener('play', () => {
+      isPlaying = true;
+      panel.classList.add('is-assistant-speaking');
+    });
+
+    video.addEventListener('ended', () => {
+      isPlaying = false;
+      video.currentTime = 0;
+      video.pause();
+      scheduleCheck();
+    });
+
+    video.addEventListener('pause', () => {
+      if (isPlaying) {
+        isPlaying = false;
+        scheduleCheck();
+      }
+    });
+
+    panel._speakingVideoController = {
+      trigger: function () {
+        lastMessageTime = Date.now();
+        if (speakingTimeout) clearTimeout(speakingTimeout);
+
+        if (!isPlaying) {
+          video.currentTime = 0;
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.warn('Speaking video play failed:', err);
+              panel.classList.remove('is-assistant-speaking');
+            });
+          }
+        }
+      },
+      cleanup: function () {
+        if (speakingTimeout) clearTimeout(speakingTimeout);
+        video.pause();
+        video.currentTime = 0;
+        panel.classList.remove('is-assistant-speaking');
+      }
+    };
+  },
+
+  setSpeakingVideo: function (isSpeaking) {
+    const panel = document.querySelector('.customer-chatbot-panel');
+    if (!panel || !panel._speakingVideoController) return;
+
+    if (isSpeaking) {
+      panel._speakingVideoController.trigger();
+    } else {
+      panel._speakingVideoController.cleanup();
+    }
   }
 };
