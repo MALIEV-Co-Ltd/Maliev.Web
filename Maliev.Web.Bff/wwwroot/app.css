@@ -7637,8 +7637,9 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   --customer-chatbot-inactive-opacity: .62;
   --customer-chatbot-context-inactive-opacity: .9;
   --customer-chatbot-inactive-delay: 12s;
+  --customer-chatbot-edge-right: clamp(18px, 2.6vw, 36px);
   position: fixed;
-  right: clamp(18px, 2.6vw, 36px);
+  right: var(--customer-chatbot-edge-right);
   bottom: max(24px, env(safe-area-inset-bottom));
   z-index: 1200;
   display: grid;
@@ -8278,11 +8279,10 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot-toggle-tooltip {
   position: absolute;
   bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  width: min(280px, calc(100vw - 80px));
-  padding: 10px 14px;
-  text-align: left;
+  right: 0;
+  transform: translateY(8px);
+  max-width: calc(100vw - 2 * var(--customer-chatbot-edge-right) - 8px);
+  padding: 10px 20px;
   white-space: nowrap;
   color: var(--ink);
   background: color-mix(in srgb, var(--paper) 96%, transparent);
@@ -8303,7 +8303,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 .customer-chatbot-toggle:focus-visible .customer-chatbot-toggle-tooltip {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
   animation: none;
 }
 
@@ -10066,7 +10066,8 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   }
 
   .customer-chatbot {
-    right: 12px;
+    --customer-chatbot-edge-right: 12px;
+    right: var(--customer-chatbot-edge-right);
     bottom: max(16px, env(safe-area-inset-bottom));
   }
 

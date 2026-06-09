@@ -710,74 +710,26 @@ window.malievChatbot = {
       return;
     }
 
-    let playTimeout = null;
-    let pauseTimeout = null;
     let isPlaying = false;
-    let isExternalTrigger = false;
-
-    const randomDelay = (min, max) => Math.random() * (max - min) + min;
-
-    const schedulePlay = () => {
-      if (playTimeout) {
-        clearTimeout(playTimeout);
-      }
-      const delay = randomDelay(8000, 25000);
-      playTimeout = window.setTimeout(() => {
-        if (isExternalTrigger || (!isPlaying && !video.paused)) {
-          return;
-        }
-        video.currentTime = 0;
-        video.play().catch(() => {});
-        isPlaying = true;
-        schedulePause();
-      }, delay);
-    };
-
-    const schedulePause = () => {
-      if (pauseTimeout) {
-        clearTimeout(pauseTimeout);
-      }
-      const delay = randomDelay(3000, 6000);
-      pauseTimeout = window.setTimeout(() => {
-        video.pause();
-        video.currentTime = 0;
-        isPlaying = false;
-        isExternalTrigger = false;
-        schedulePlay();
-      }, delay);
-    };
 
     video.addEventListener('ended', () => {
-      video.pause();
-      video.currentTime = 0;
       isPlaying = false;
-      isExternalTrigger = false;
-      schedulePlay();
+      video.currentTime = 0;
+      video.pause();
     });
 
     video.addEventListener('pause', () => {
-      if (isPlaying && !isExternalTrigger) {
-        isPlaying = false;
-        schedulePlay();
-      }
+      isPlaying = false;
     });
-
-    window.setTimeout(schedulePlay, randomDelay(2000, 5000));
 
     toggleButton._avatarVideoController = {
       trigger: function () {
         if (isPlaying) return;
-        if (playTimeout) clearTimeout(playTimeout);
-        if (pauseTimeout) clearTimeout(pauseTimeout);
-        isExternalTrigger = true;
         isPlaying = true;
         video.currentTime = 0;
-        video.play().catch(() => {});
-        schedulePause();
+        video.play().catch(() => { isPlaying = false; });
       },
       cleanup: function () {
-        if (playTimeout) clearTimeout(playTimeout);
-        if (pauseTimeout) clearTimeout(pauseTimeout);
         video.pause();
         video.src = '';
         video.load();
@@ -794,31 +746,32 @@ window.malievChatbot = {
   },
 
   positionTooltip: function (tooltip, toggleButton) {
-    if (!tooltip || !toggleButton) return;
+    tooltip.style.removeProperty('right');
+    tooltip.style.removeProperty('left');
+    tooltip.style.removeProperty('max-width');
+    tooltip.style.removeProperty('white-space');
 
-    const toggleRect = toggleButton.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const gap = 10;
+    const MARGIN = 8;
+    const vw = window.innerWidth;
 
-    const spaceRight = viewportWidth - toggleRect.right;
-    const spaceLeft = toggleRect.left;
+    // Expand the box to show text on one line when CSS max-width is too tight
+    if (tooltip.scrollWidth > tooltip.clientWidth) {
+      tooltip.style.maxWidth = tooltip.scrollWidth + 'px';
+    }
 
-    const willOverflowRight = toggleRect.left + tooltipRect.width / 2 > viewportWidth - gap;
-    const willOverflowLeft = toggleRect.right - tooltipRect.width / 2 < gap;
+    // Clamp right edge into viewport
+    const rect = tooltip.getBoundingClientRect();
+    if (rect.right > vw - MARGIN) {
+      const overshoot = rect.right - (vw - MARGIN);
+      const baseRight = parseFloat(window.getComputedStyle(tooltip).right) || 0;
+      tooltip.style.right = (baseRight + overshoot) + 'px';
+    }
 
-    if (willOverflowRight) {
-      tooltip.style.left = 'auto';
-      tooltip.style.right = `${gap}px`;
-      tooltip.style.transform = 'translateX(0) translateY(8px)';
-    } else if (willOverflowLeft) {
-      tooltip.style.left = `${gap}px`;
-      tooltip.style.right = 'auto';
-      tooltip.style.transform = 'translateX(0) translateY(8px)';
-    } else {
-      tooltip.style.left = '50%';
-      tooltip.style.right = 'auto';
-      tooltip.style.transform = 'translateX(-50%) translateY(8px)';
+    // If still too wide for the viewport, fall back to wrapping
+    const clamped = tooltip.getBoundingClientRect();
+    if (clamped.left < MARGIN) {
+      tooltip.style.whiteSpace = 'normal';
+      tooltip.style.maxWidth = Math.max(80, vw - 2 * MARGIN) + 'px';
     }
   },
 

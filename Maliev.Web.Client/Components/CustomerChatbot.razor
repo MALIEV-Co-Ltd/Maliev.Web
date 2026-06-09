@@ -162,7 +162,7 @@
         {
             <span class="customer-chatbot-unread-badge" aria-label="@UnreadBadgeAriaLabel">@UnreadBadgeText</span>
         }
-        @if (!_isOpen)
+        @if (!_isOpen && !_showPopout)
         {
             <span class="customer-chatbot-toggle-tooltip" role="tooltip">
                 @Text("Ask me anything about manufacturing", "ถามเรื่องผลิตอะไรก็ได้ค่ะ")
@@ -415,12 +415,7 @@
         await ClearSharedSessionAsync();
         await PersistMemoryAsync();
 
-        Preferences.Changed += OnPreferencesChanged;
-        StateHasChanged();
-    }
-
-    private void OnPreferencesChanged()
-    {
+        Preferences.Changed += StateHasChanged;
         StateHasChanged();
     }
 
@@ -1977,13 +1972,12 @@
         _ = ShowLongWaitingStateAsync(operationId, cts.Token);
     }
 
-    private async void EndPendingState()
+    private void EndPendingState()
     {
         CancelPendingDelay();
         _isSending = false;
         _isStartingSession = false;
         _isWaitingLong = false;
-        await JS.InvokeVoidAsync("malievChatbot.setSpeakingVideo", false);
     }
 
     private async Task ShowLongWaitingStateAsync(long operationId, CancellationToken cancellationToken)
@@ -2315,7 +2309,7 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
-        Preferences.Changed -= OnPreferencesChanged;
+        Preferences.Changed -= StateHasChanged;
         CancelPopoutTimer();
         CancelContextHintTimer();
         CancelSignInMonitor();

@@ -1699,11 +1699,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Where(message => !IsGeneratedGreeting(message))", component);
         Assert.DoesNotContain("OnPreferencesChanged", component);
         Assert.DoesNotContain("Ask me about MALIEV materials, 3D printing, CNC, scanning, molding, quotes, orders, or delivery.", component);
-        Assert.Contains("Icons.Material.Filled.SupportAgent", component);
+        Assert.Contains("customer-chatbot-avatar-video", component);
+        Assert.Contains("/images/chatbot-avatar.webm", component);
         Assert.Contains("customer-chatbot-profile", component);
         Assert.Contains("customer-chatbot-gemini-icon", component);
         Assert.Contains("/images/chatbot-avatar.webp", component);
         Assert.DoesNotContain("Icons.Material.Filled.AutoAwesome", component);
+        Assert.DoesNotContain("Icons.Material.Filled.SupportAgent", component);
         Assert.True(File.Exists(Path.Combine(root, "Maliev.Web.Bff", "wwwroot", "images", "chatbot-avatar.webp")));
         Assert.Contains("customer-chatbot-title", component);
         Assert.Contains("customer-chatbot-header-actions", component);
@@ -1830,10 +1832,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-composer textarea {\n  height: 42px;", styles);
         Assert.Contains(".customer-chatbot-composer button {\n  width: 44px;\n  height: 42px;", styles);
         Assert.DoesNotContain("bottom: clamp(84px, 8vh, 108px);", styles);
-        Assert.Contains(".customer-chatbot-toggle {\n  width: 50px;\n  min-height: 50px;\n  padding: 0;\n  border-radius: 9999px;", styles);
-        Assert.Contains("opacity: .78;", styles);
-        Assert.Contains("transition: opacity .18s ease-in-out, box-shadow .18s ease-in-out, background-color .18s ease-in-out;", styles);
-        Assert.Contains(".customer-chatbot-toggle .mud-icon-root", styles);
+        Assert.Contains(".customer-chatbot-toggle {\n  width: 64px;\n  min-height: 64px;\n  padding: 0;\n  border-radius: 50%;", styles);
+        Assert.Contains("animation: customer-chatbot-fade-in", styles);
+        Assert.Contains("transition: opacity .18s ease-in-out, box-shadow .18s ease-in-out;", styles);
+        Assert.Contains(".customer-chatbot-toggle-avatar", styles);
+        Assert.Contains(".customer-chatbot-avatar-video", styles);
         Assert.Contains(".customer-chatbot-toggle {\n    width: 46px;\n    min-height: 46px;", styles);
         Assert.Contains("bottom: max(16px, env(safe-area-inset-bottom));", styles);
         Assert.Contains("initFooterAwareFloat: function ()", script);
@@ -2929,7 +2932,7 @@ public sealed class HeroLayoutSourceTests
     {
         var source = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "manufacturing-gizmo.js");
 
-        Assert.Contains("babylonjs@9.6.0", source);
+        Assert.Contains("/lib/babylonjs/babylon.min.js", source);
         Assert.Contains("IntersectionObserver", source);
         Assert.Contains("isCanvasNearViewport", source);
         Assert.Contains("requestAnimationFrame", source);
@@ -3004,7 +3007,7 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("1.24", catalog);
         Assert.DoesNotContain("ModelScale", component);
         Assert.DoesNotContain("data-model-scale", component);
-        Assert.Contains("babylonjs-loaders@9.6.0", source);
+        Assert.Contains("/lib/babylonjs/babylonjs.loaders.min.js", source);
         Assert.Contains("createLandingHeroScene", source);
         Assert.Contains("configureLandingHeroCamera", source);
         Assert.Contains("Math.PI / 1.95", source);
