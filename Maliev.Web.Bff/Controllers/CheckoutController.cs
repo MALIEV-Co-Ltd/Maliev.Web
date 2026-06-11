@@ -65,7 +65,7 @@ public sealed class CheckoutController(
         }
         catch (CheckoutRequiresSignInException)
         {
-            return LocalRedirect("/auth/sign-in?returnUrl=%2Fcart");
+            return LocalRedirect("/auth/sign-in?returnUrl=%2Fcheckout");
         }
         catch (BackendUnavailableException ex)
         {
