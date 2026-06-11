@@ -1,0 +1,174 @@
+@page "/checkout"
+@inherits PreferenceAwareComponentBase
+@inject CartState ShoppingCart
+@inject MalievApiClient Api
+
+<PageTitle>Checkout - MALIEV</PageTitle>
+
+<section class="page-hero compact">
+    <h1>@Text("Checkout", "ชำระเงิน")</h1>
+    <p>@Text("Confirm billing, shipping, company, and consent details before payment.", "ยืนยันข้อมูลออกบิล จัดส่ง บริษัท และความยินยอมก่อนชำระเงิน")</p>
+</section>
+
+<section class="section cart-layout checkout-layout">
+    @if (ShoppingCart.Items.Count == 0)
+    {
+        <div class="empty-state">
+            <h2>@Text("Your cart is empty", "ตะกร้ายังว่าง")</h2>
+            <p>@Text("Add products before continuing to checkout.", "เพิ่มสินค้าก่อนดำเนินการชำระเงิน")</p>
+            <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="_form" OnValidSubmit="StartCheckoutAsync" FormName="checkout-details-form" class="account-form checkout-form">
+            <DataAnnotationsValidator />
+
+            <section class="account-form-section">
+                <div class="account-form-section-head">
+                    <h2>@Text("Contact and company", "ข้อมูลติดต่อและบริษัท")</h2>
+                    <p>@Text("Use legal billing details for invoices and VAT records.", "ใช้ข้อมูลตามกฎหมายสำหรับใบกำกับภาษีและบันทึก VAT")</p>
+                </div>
+                <label>
+                    @Text("Phone", "โทรศัพท์")
+                    <input name="phone" autocomplete="tel" inputmode="tel" @bind="_form.Phone" required />
+                </label>
+                <label>
+                    @Text("Company", "บริษัท")
+                    <input name="companyName" autocomplete="organization" @bind="_form.CompanyName" />
+                </label>
+                <label>
+                    @Text("VAT / tax ID", "เลขประจำตัวผู้เสียภาษี")
+                    <input name="vatId" autocomplete="off" @bind="_form.VatId" />
+                </label>
+            </section>
+
+            <section class="account-form-section">
+                <div class="account-form-section-head">
+                    <h2>@Text("Billing address", "ที่อยู่ออกบิล")</h2>
+                    <p>@Text("Shown on invoices, receipts, and payment records.", "ใช้บนใบกำกับภาษี ใบเสร็จ และบันทึกการชำระเงิน")</p>
+                </div>
+                <label>
+                    @Text("Billing address", "ที่อยู่ออกบิล")
+                    <textarea name="billingAddress" autocomplete="billing street-address" rows="4" @bind="_form.BillingAddress" required></textarea>
+                </label>
+            </section>
+
+            <section class="account-form-section">
+                <div class="account-form-section-head">
+                    <h2>@Text("Shipping address", "ที่อยู่จัดส่ง")</h2>
+                    <p>@Text("Used for delivery planning, freight quote, and packing documents.", "ใช้สำหรับวางแผนจัดส่ง ค่าขนส่ง และเอกสารแพ็กสินค้า")</p>
+                </div>
+                <label>
+                    @Text("Shipping address", "ที่อยู่จัดส่ง")
+                    <textarea name="shippingAddress" autocomplete="shipping street-address" rows="4" @bind="_form.ShippingAddress" required></textarea>
+                </label>
+            </section>
+
+            <label class="checkout-consent">
+                <input name="termsAccepted" type="checkbox" @bind="_form.TermsAccepted" required />
+                <span>@Text("I accept MALIEV terms and consent to order, payment, delivery, and customer notifications.", "ฉันยอมรับข้อกำหนดของ MALIEV และยินยอมสำหรับคำสั่งซื้อ การชำระเงิน การจัดส่ง และการแจ้งเตือนลูกค้า")</span>
+            </label>
+
+            <div class="account-form-actions">
+                <a class="button secondary" href="/cart">@Text("Back to cart", "กลับไปตะกร้า")</a>
+                <button type="submit" class="button primary" disabled="@_isSubmitting">@Text("Continue to payment", "ดำเนินการชำระเงิน")</button>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_statusMessage))
+            {
+                <p class="@(_isError ? "auth-error account-form-alert" : "auth-status account-form-alert")">@_statusMessage</p>
+            }
+        </EditForm>
+
+        <aside class="cart-panel cart-summary">
+            <h2>@Text("Order summary", "สรุปคำสั่งซื้อ")</h2>
+            <div class="quote-total">
+                @foreach (var item in ShoppingCart.Items)
+                {
+                    <div><span>@DisplayTitle(item)</span><strong>@LineTotal(item)</strong></div>
+                }
+                <div><span>@Text("Shipping", "ค่าจัดส่ง")</span><strong>@Text("Calculated after address review", "คำนวณหลังตรวจสอบที่อยู่")</strong></div>
+                <div class="grand-total"><span>@Text("Estimated total", "ยอดรวมโดยประมาณ")</span><strong>@FormatCurrency(Subtotal)</strong></div>
+            </div>
+        </aside>
+    }
+</section>
+
+@code {
+    private readonly CheckoutDetailsForm _form = new();
+    private bool _isSubmitting;
+    private bool _isError;
+    private string? _statusMessage;
+
+    private decimal Subtotal => ShoppingCart.Items.Sum(item => item.UnitPriceThb * Math.Max(1, item.Quantity));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ShoppingCart.InitializeAsync();
+        await Preferences.InitializeAsync();
+    }
+
+    private async Task StartCheckoutAsync()
+    {
+        if (!_form.TermsAccepted)
+        {
+            _isError = true;
+            _statusMessage = Text("Accept MALIEV terms before continuing.", "กรุณายอมรับข้อกำหนดของ MALIEV ก่อนดำเนินการต่อ");
+            return;
+        }
+
+        _isSubmitting = true;
+        _isError = false;
+        _statusMessage = null;
+
+        try
+        {
+            var checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest
+            {
+                Culture = Preferences.Culture,
+                Items = ShoppingCart.Items.ToList()
+            });
+
+            _statusMessage = Text(
+                $"Checkout draft {checkout.CheckoutId:N} is ready. Payment provider handoff will open next.",
+                $"แบบร่างชำระเงิน {checkout.CheckoutId:N} พร้อมแล้ว ระบบจะเปิดขั้นตอนชำระเงินต่อไป");
+        }
+        catch (MalievApiException ex)
+        {
+            _isError = true;
+            _statusMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private static string DisplayTitle(CartItemDto item) =>
+        string.IsNullOrWhiteSpace(item.Title) ? item.ProductHandle : item.Title;
+
+    private static string LineTotal(CartItemDto item) =>
+        FormatCurrency(item.UnitPriceThb * Math.Max(1, item.Quantity));
+
+    private static string FormatCurrency(decimal amount) =>
+        string.Create(CultureInfo.GetCultureInfo("th-TH"), $"฿{amount:N2}");
+
+    private string Text(string en, string th) =>
+        Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+
+    private sealed class CheckoutDetailsForm
+    {
+        public string Phone { get; set; } = string.Empty;
+
+        public string CompanyName { get; set; } = string.Empty;
+
+        public string VatId { get; set; } = string.Empty;
+
+        public string BillingAddress { get; set; } = string.Empty;
+
+        public string ShippingAddress { get; set; } = string.Empty;
+
+        public bool TermsAccepted { get; set; }
+    }
+}

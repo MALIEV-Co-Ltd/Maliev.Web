@@ -2527,6 +2527,27 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies authenticated cart checkout returns to a real checkout surface with required customer data fields.
+    /// </summary>
+    [Fact]
+    public void CheckoutPageCollectsCustomerCheckoutDetailsAfterSignIn()
+    {
+        var checkout = ReadRepoFile("Maliev.Web.Client", "Pages", "Checkout.razor");
+        var checkoutController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "CheckoutController.cs");
+
+        Assert.Contains("@page \"/checkout\"", checkout, StringComparison.Ordinal);
+        Assert.Contains("CreateCheckoutDraftAsync", checkout, StringComparison.Ordinal);
+        Assert.Contains("Billing address", checkout, StringComparison.Ordinal);
+        Assert.Contains("Shipping address", checkout, StringComparison.Ordinal);
+        Assert.Contains("Phone", checkout, StringComparison.Ordinal);
+        Assert.Contains("Company", checkout, StringComparison.Ordinal);
+        Assert.Contains("VAT / tax ID", checkout, StringComparison.Ordinal);
+        Assert.Contains("I accept MALIEV terms", checkout, StringComparison.Ordinal);
+        Assert.Contains("name=\"termsAccepted\"", checkout, StringComparison.Ordinal);
+        Assert.Contains("returnUrl=%2Fcheckout", checkoutController, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies the public account area uses local authenticated routes backed by the Web BFF.
     /// </summary>
     [Fact]
