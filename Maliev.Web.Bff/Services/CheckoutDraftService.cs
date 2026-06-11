@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Shared.Commerce;
 
@@ -9,6 +10,8 @@ internal sealed class CheckoutDraftService(
     ICommerceServiceClient commerceClient,
     ICustomerServiceClient customerClient) : ICheckoutDraftService
 {
+    private static readonly JsonSerializerOptions CheckoutSnapshotJsonOptions = new(JsonSerializerDefaults.Web);
+
     public async Task<CheckoutDraftResponse> CreateDraftAsync(CheckoutDraftRequest request, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
         var customerId = ResolveCustomerId(user);
@@ -39,8 +42,11 @@ internal sealed class CheckoutDraftService(
                 cart = await ReadCommerceResponseAsync<CommerceCartResponse>(lineResponse, "CommerceService", $"adding storefront cart line {item.ProductHandle}", cancellationToken);
             }
 
+            var shippingAddressJson = BuildShippingAddressJson(request);
+            var billingAddressJson = BuildBillingAddressJson(request);
+
             using var checkoutResponse = await commerceClient.CreateCheckoutSessionAsync(
-                new CommerceCreateCheckoutSessionRequest(cart.Id, customerId.Value, ShippingAddressJson: null, BillingAddressJson: null),
+                new CommerceCreateCheckoutSessionRequest(cart.Id, customerId.Value, shippingAddressJson, billingAddressJson),
                 cancellationToken);
             var checkout = await ReadCommerceResponseAsync<CommerceCheckoutSessionResponse>(checkoutResponse, "CommerceService", "creating storefront checkout session", cancellationToken);
 
@@ -69,6 +75,44 @@ internal sealed class CheckoutDraftService(
             user.FindFirstValue(ClaimTypes.NameIdentifier);
 
         return Guid.TryParse(value, out var customerId) ? customerId : null;
+    }
+
+    private static string? BuildShippingAddressJson(CheckoutDraftRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.ShippingAddress) &&
+            string.IsNullOrWhiteSpace(request.Phone) &&
+            string.IsNullOrWhiteSpace(request.CompanyName))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Serialize(new CheckoutShippingAddressSnapshot
+        {
+            Address = request.ShippingAddress.Trim(),
+            Phone = request.Phone.Trim(),
+            CompanyName = request.CompanyName.Trim()
+        }, CheckoutSnapshotJsonOptions);
+    }
+
+    private static string? BuildBillingAddressJson(CheckoutDraftRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.BillingAddress) &&
+            string.IsNullOrWhiteSpace(request.Phone) &&
+            string.IsNullOrWhiteSpace(request.CompanyName) &&
+            string.IsNullOrWhiteSpace(request.VatId) &&
+            !request.TermsAccepted)
+        {
+            return null;
+        }
+
+        return JsonSerializer.Serialize(new CheckoutBillingAddressSnapshot
+        {
+            Address = request.BillingAddress.Trim(),
+            Phone = request.Phone.Trim(),
+            CompanyName = request.CompanyName.Trim(),
+            VatId = request.VatId.Trim(),
+            TermsAccepted = request.TermsAccepted
+        }, CheckoutSnapshotJsonOptions);
     }
 
     private async Task<CommerceProductVariantResponse> ResolveProductVariantAsync(CartItemDto item, CancellationToken cancellationToken)
@@ -129,6 +173,28 @@ internal sealed record CommerceCreateCartRequest(Guid CustomerId, string Currenc
 internal sealed record CommerceUpsertCartLineRequest(Guid ProductVariantId, int Quantity);
 
 internal sealed record CommerceCreateCheckoutSessionRequest(Guid CartId, Guid CustomerId, string? ShippingAddressJson, string? BillingAddressJson);
+
+internal sealed record CheckoutShippingAddressSnapshot
+{
+    public required string Address { get; init; }
+
+    public required string Phone { get; init; }
+
+    public required string CompanyName { get; init; }
+}
+
+internal sealed record CheckoutBillingAddressSnapshot
+{
+    public required string Address { get; init; }
+
+    public required string Phone { get; init; }
+
+    public required string CompanyName { get; init; }
+
+    public required string VatId { get; init; }
+
+    public required bool TermsAccepted { get; init; }
+}
 
 internal sealed record CommerceCartResponse(
     Guid Id,

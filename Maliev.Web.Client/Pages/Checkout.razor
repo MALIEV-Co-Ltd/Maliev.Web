@@ -127,6 +127,12 @@
             var checkout = await Api.CreateCheckoutDraftAsync(new CheckoutDraftRequest
             {
                 Culture = Preferences.Culture,
+                Phone = _form.Phone,
+                CompanyName = _form.CompanyName,
+                VatId = _form.VatId,
+                BillingAddress = _form.BillingAddress,
+                ShippingAddress = _form.ShippingAddress,
+                TermsAccepted = _form.TermsAccepted,
                 Items = ShoppingCart.Items.ToList()
             });
 

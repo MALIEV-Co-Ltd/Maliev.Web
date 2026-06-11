@@ -37,6 +37,24 @@ public sealed class CheckoutDraftRequest
 
     /// <summary>Gets or sets the cart lines.</summary>
     public List<CartItemDto> Items { get; set; } = [];
+
+    /// <summary>Gets or sets the customer phone number for checkout contact and delivery.</summary>
+    public string Phone { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the legal company name for billing.</summary>
+    public string CompanyName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the VAT or tax identifier for invoice records.</summary>
+    public string VatId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the billing address entered at checkout.</summary>
+    public string BillingAddress { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the shipping address entered at checkout.</summary>
+    public string ShippingAddress { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets whether the customer accepted MALIEV terms before checkout.</summary>
+    public bool TermsAccepted { get; set; }
 }
 
 /// <summary>
