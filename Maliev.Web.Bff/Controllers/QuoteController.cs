@@ -63,9 +63,41 @@ public sealed class QuoteController(
     /// <summary>Initiates a resumable upload session in UploadService.</summary>
     [HttpPost("uploads/resumable")]
     [ProducesResponseType(typeof(WebUploadInitiationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> InitiateUpload([FromBody] WebUploadInitiationRequest request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.FileName) ||
+            !WebQuoteUploadConstraints.IsSupportedFileName(request.FileName))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Unsupported upload format",
+                Detail = $"Use one of these CAD formats: {WebQuoteUploadConstraints.SupportedExtensionLabel}.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        if (request.FileSize <= 0 || request.FileSize > WebQuoteUploadConstraints.MaxFileSizeBytes)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Upload is too large",
+                Detail = $"Quote uploads must be between 1 byte and {WebQuoteUploadConstraints.MaxFileSizeMegabytes} MB.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        if (request.QuoteSessionId == Guid.Empty)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Quote session is required",
+                Detail = "Create a quote session before uploading files.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
         try
         {
             return Ok(await uploadService.InitiateAsync(request, cancellationToken));

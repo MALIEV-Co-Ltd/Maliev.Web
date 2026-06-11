@@ -37,6 +37,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 services.RemoveAll<ICommerceCatalogService>();
                 services.RemoveAll<IManufacturingCatalogService>();
                 services.RemoveAll<IWebQuoteService>();
+                services.RemoveAll<IQuoteUploadService>();
                 services.RemoveAll<ICheckoutDraftService>();
                 services.RemoveAll<IContactMessageService>();
                 services.RemoveAll<ICustomerChatbotService>();
@@ -44,6 +45,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 services.AddSingleton<ICommerceCatalogService, FakeCommerceCatalogService>();
                 services.AddSingleton<IManufacturingCatalogService, FakeManufacturingCatalogService>();
                 services.AddSingleton<IWebQuoteService, FakeWebQuoteService>();
+                services.AddSingleton<IQuoteUploadService, FakeQuoteUploadService>();
                 services.AddSingleton<ICheckoutDraftService, FakeCheckoutDraftService>();
                 services.AddSingleton<IContactMessageService, FakeContactMessageService>();
                 services.AddSingleton<ICustomerChatbotService, FakeCustomerChatbotService>();
@@ -153,6 +155,50 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.NotNull(estimate);
         Assert.Equal("test-pricing", estimate.PricingSource);
         Assert.Equal(150m, estimate.BulkDiscountTotal);
+    }
+
+    /// <summary>
+    /// Verifies public quote upload initiation rejects file extensions outside the website upload contract.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadInitiation_UnsupportedExtension_ReturnsBadRequest()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/resumable", new WebUploadInitiationRequest
+        {
+            FileName = "malicious.exe",
+            ContentType = "application/octet-stream",
+            FileSize = 1024,
+            QuoteSessionId = Guid.NewGuid()
+        });
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Unsupported upload format", problem.Title);
+    }
+
+    /// <summary>
+    /// Verifies public quote upload initiation rejects files above the customer upload limit before UploadService allocation.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadInitiation_FileTooLarge_ReturnsBadRequest()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/resumable", new WebUploadInitiationRequest
+        {
+            FileName = "large.step",
+            ContentType = "application/octet-stream",
+            FileSize = 201L * 1024 * 1024,
+            QuoteSessionId = Guid.NewGuid()
+        });
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Upload is too large", problem.Title);
     }
 
     /// <summary>
@@ -457,6 +503,45 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 BulkDiscountTotal = 150m,
                 Total = 850m,
                 PricingSource = "test-pricing"
+            });
+        }
+    }
+
+    private sealed class FakeQuoteUploadService : IQuoteUploadService
+    {
+        public Task<WebUploadInitiationResponse> InitiateAsync(WebUploadInitiationRequest request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new WebUploadInitiationResponse
+            {
+                UploadId = "web-upload-1",
+                ProxyUploadUrl = "/web/v1/quote/uploads/resumable/web-upload-1",
+                StoragePath = $"quotes/temp/{request.QuoteSessionId:N}/{request.FileSize}/{request.FileName}"
+            });
+        }
+
+        public Task<WebUploadCompleteResponse> CompleteAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new WebUploadCompleteResponse
+            {
+                UploadId = uploadId,
+                FileName = "part.step",
+                StoragePath = $"quotes/temp/session/part.step",
+                Status = "Completed"
+            });
+        }
+
+        public Task<HttpResponseMessage> ResumeAsync(string uploadId, Stream content, string? contentType, long? contentLength, string contentRange, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        }
+
+        public Task<WebAnalysisStatusResponse> GetAnalysisStatusAsync(string uploadId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new WebAnalysisStatusResponse
+            {
+                UploadId = uploadId,
+                Status = "Uploaded",
+                Message = "File upload is complete."
             });
         }
     }
