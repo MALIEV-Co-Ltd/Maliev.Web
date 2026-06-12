@@ -231,6 +231,49 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies Web signs completed quote uploads before handing storage paths to QuoteEngine.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadHandoffToken_ReturnsSignedTokenForAllFiles()
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/handoff-token", new WebUploadHandoffTokenRequest
+        {
+            QuoteSessionId = quoteSessionId,
+            Files =
+            [
+                new WebUploadHandoffFileDto
+                {
+                    UploadId = "upload-a",
+                    FileName = "bracket.step",
+                    StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/bracket.step",
+                    ContentType = "application/step",
+                    FileSizeBytes = 420_000,
+                    Status = "Completed"
+                },
+                new WebUploadHandoffFileDto
+                {
+                    UploadId = "upload-b",
+                    FileName = "cover.stl",
+                    StoragePath = $"quotes/temp/{quoteSessionId:N}/120000/cover.stl",
+                    ContentType = "model/stl",
+                    FileSizeBytes = 120_000,
+                    Status = "Completed"
+                }
+            ]
+        });
+        var handoff = await response.Content.ReadFromJsonAsync<WebUploadHandoffTokenResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(handoff);
+        Assert.Contains('.', handoff.HandoffToken);
+        Assert.DoesNotContain("bracket.step", handoff.HandoffToken, StringComparison.Ordinal);
+        Assert.DoesNotContain("cover.stl", handoff.HandoffToken, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies customer website contact messages are routed through the contact boundary.
     /// </summary>
     [Fact]

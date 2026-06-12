@@ -84,6 +84,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddTransient<InternalBrowserCookieForwardingHandler>();
+builder.Services.AddScoped<QuoteUploadHandoffToken>();
 
 builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
 {

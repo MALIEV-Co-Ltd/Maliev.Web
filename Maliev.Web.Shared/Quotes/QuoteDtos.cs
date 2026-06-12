@@ -330,6 +330,54 @@ public sealed class WebUploadCompleteResponse
 }
 
 /// <summary>
+/// Request to sign completed Web uploads for QuoteEngine handoff.
+/// </summary>
+public sealed class WebUploadHandoffTokenRequest
+{
+    /// <summary>Gets or sets the anonymous quote session id.</summary>
+    public Guid QuoteSessionId { get; set; }
+
+    /// <summary>Gets or sets the completed files to hand off.</summary>
+    public List<WebUploadHandoffFileDto> Files { get; set; } = [];
+}
+
+/// <summary>
+/// Completed Web upload metadata included in a signed QuoteEngine handoff.
+/// </summary>
+public sealed class WebUploadHandoffFileDto
+{
+    /// <summary>Gets or sets the UploadService upload id.</summary>
+    public string UploadId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the UploadService file id when available.</summary>
+    public Guid? FileId { get; set; }
+
+    /// <summary>Gets or sets the browser file name.</summary>
+    public string FileName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the UploadService storage path.</summary>
+    public string StoragePath { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the browser content type.</summary>
+    public string ContentType { get; set; } = "application/octet-stream";
+
+    /// <summary>Gets or sets the browser file size.</summary>
+    public long FileSizeBytes { get; set; }
+
+    /// <summary>Gets or sets the UploadService status.</summary>
+    public string Status { get; set; } = "Completed";
+}
+
+/// <summary>
+/// Signed token that QuoteEngine can verify before importing Web uploads.
+/// </summary>
+public sealed class WebUploadHandoffTokenResponse
+{
+    /// <summary>Gets or sets the signed handoff token.</summary>
+    public string HandoffToken { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// Upload analysis status returned to the quote page watchdog.
 /// </summary>
 public sealed class WebAnalysisStatusResponse

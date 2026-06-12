@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +17,8 @@ namespace Maliev.Web.Bff.Controllers;
 public sealed class QuoteController(
     IManufacturingCatalogService manufacturingCatalog,
     IWebQuoteService quoteService,
-    IQuoteUploadService uploadService) : ControllerBase
+    IQuoteUploadService uploadService,
+    QuoteUploadHandoffToken handoffToken) : ControllerBase
 {
     /// <summary>Gets manufacturing and pricing reference data from downstream services.</summary>
     [HttpGet("reference-data")]
@@ -164,6 +166,24 @@ public sealed class QuoteController(
         }
     }
 
+    /// <summary>Signs completed Web uploads for QuoteEngine handoff.</summary>
+    [HttpPost("uploads/handoff-token")]
+    [ProducesResponseType(typeof(WebUploadHandoffTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult CreateHandoffToken([FromBody] WebUploadHandoffTokenRequest request)
+    {
+        var validationError = ValidateHandoffTokenRequest(request);
+        if (validationError is not null)
+        {
+            return BadRequest(validationError);
+        }
+
+        return Ok(new WebUploadHandoffTokenResponse
+        {
+            HandoffToken = handoffToken.Create(request)
+        });
+    }
+
     /// <summary>Gets upload analysis status for quote polling.</summary>
     [HttpGet("uploads/{uploadId}/analysis-status")]
     [ProducesResponseType(typeof(WebAnalysisStatusResponse), StatusCodes.Status200OK)]
@@ -179,6 +199,46 @@ public sealed class QuoteController(
             return BackendUnavailable(ex);
         }
     }
+
+    private static ProblemDetails? ValidateHandoffTokenRequest(WebUploadHandoffTokenRequest request)
+    {
+        if (request.QuoteSessionId == Guid.Empty)
+        {
+            return HandoffProblem("Quote session is required", "Create a quote session before handing files to QuoteEngine.");
+        }
+
+        if (request.Files.Count == 0)
+        {
+            return HandoffProblem("Uploaded files are required", "Upload at least one CAD file before continuing to QuoteEngine.");
+        }
+
+        var expectedPrefix = $"quotes/temp/{request.QuoteSessionId:N}/";
+        foreach (var file in request.Files)
+        {
+            if (string.IsNullOrWhiteSpace(file.UploadId) ||
+                string.IsNullOrWhiteSpace(file.FileName) ||
+                !WebQuoteUploadConstraints.IsSupportedFileName(file.FileName) ||
+                file.FileSizeBytes <= 0 ||
+                file.FileSizeBytes > WebQuoteUploadConstraints.MaxFileSizeBytes ||
+                string.IsNullOrWhiteSpace(file.StoragePath) ||
+                !file.StoragePath.Replace('\\', '/').StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return HandoffProblem(
+                    "Invalid uploaded file handoff",
+                    "One or more uploaded files could not be verified for QuoteEngine handoff.");
+            }
+        }
+
+        return null;
+    }
+
+    private static ProblemDetails HandoffProblem(string title, string detail)
+        => new()
+        {
+            Title = title,
+            Detail = detail,
+            Status = StatusCodes.Status400BadRequest
+        };
 
     private static void CopyContentHeaders(HttpResponseMessage downstream, HttpResponse response)
     {

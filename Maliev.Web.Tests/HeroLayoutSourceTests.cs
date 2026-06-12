@@ -273,7 +273,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Content-Range", script, StringComparison.Ordinal);
         Assert.Contains("Uploading ", script, StringComparison.Ordinal);
         Assert.Contains("uploadAndBuildHandoff", script, StringComparison.Ordinal);
-        Assert.Contains("toBase64Url", script, StringComparison.Ordinal);
+        Assert.Contains("/web/v1/quote/uploads/handoff-token", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("toBase64Url", script, StringComparison.Ordinal);
         Assert.Contains("url.searchParams.set(\"handoff\", handoff)", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Content-Length", script, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);

@@ -225,15 +225,21 @@ window.malievQuoteDropzone = (() => {
       });
     }
 
-    const handoffJson = JSON.stringify({ quoteSessionId, files: uploadedFiles });
-    return toBase64Url(handoffJson);
-  }
+    const tokenRes = await fetch("/web/v1/quote/uploads/handoff-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quoteSessionId, files: uploadedFiles })
+    });
+    if (!tokenRes.ok) {
+      throw new Error("Failed to prepare uploaded files for QuoteEngine.");
+    }
 
-  function toBase64Url(str) {
-    const bytes = new TextEncoder().encode(str);
-    let binary = "";
-    for (const byte of bytes) binary += String.fromCharCode(byte);
-    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const handoff = await tokenRes.json();
+    if (!handoff?.handoffToken) {
+      throw new Error("QuoteEngine handoff token was not returned.");
+    }
+
+    return handoff.handoffToken;
   }
 
   function setUploadingLabel(dropzone, current, total, fileName) {
