@@ -220,6 +220,7 @@ public sealed class QuoteController(
                 !WebQuoteUploadConstraints.IsSupportedFileName(file.FileName) ||
                 file.FileSizeBytes <= 0 ||
                 file.FileSizeBytes > WebQuoteUploadConstraints.MaxFileSizeBytes ||
+                !file.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) ||
                 string.IsNullOrWhiteSpace(file.StoragePath) ||
                 !file.StoragePath.Replace('\\', '/').StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
             {

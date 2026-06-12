@@ -274,6 +274,35 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies Web does not sign handoffs for files that have not completed upload.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadHandoffToken_IncompleteUpload_ReturnsBadRequest()
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/handoff-token", new WebUploadHandoffTokenRequest
+        {
+            QuoteSessionId = quoteSessionId,
+            Files =
+            [
+                new WebUploadHandoffFileDto
+                {
+                    UploadId = "upload-a",
+                    FileName = "bracket.step",
+                    StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/bracket.step",
+                    ContentType = "application/step",
+                    FileSizeBytes = 420_000,
+                    Status = "Processing"
+                }
+            ]
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    /// <summary>
     /// Verifies customer website contact messages are routed through the contact boundary.
     /// </summary>
     [Fact]
