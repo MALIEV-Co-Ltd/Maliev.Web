@@ -22,7 +22,26 @@ public static class WebQuoteUploadConstraints
         "igs",
         "iges",
         "gltf",
-        "glb"
+        "glb",
+        "ply",
+        "off",
+        "amf",
+        "wrl",
+        "x3d",
+        "x_t",
+        "x_b",
+        "sat",
+        "sab",
+        "sldprt",
+        "sldasm",
+        "prt",
+        "asm",
+        "catpart",
+        "catproduct",
+        "jt",
+        "3dxml",
+        "3dm",
+        "brep"
     ];
 
     private static readonly HashSet<string> SupportedExtensionLookup = new(SupportedExtensions, StringComparer.OrdinalIgnoreCase);

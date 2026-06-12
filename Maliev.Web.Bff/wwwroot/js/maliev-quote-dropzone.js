@@ -1,7 +1,7 @@
 window.malievQuoteDropzone = (() => {
   const registrations = new Map();
   const formatDismissals = new Map();
-  const acceptedExtensions = new Set(["stl", "step", "stp", "3mf", "obj", "igs", "iges", "gltf", "glb"]);
+  const acceptedExtensions = new Set(["stl", "step", "stp", "3mf", "obj", "igs", "iges", "gltf", "glb", "ply", "off", "amf", "wrl", "x3d", "x_t", "x_b", "sat", "sab", "sldprt", "sldasm", "prt", "asm", "catpart", "catproduct", "jt", "3dxml", "3dm", "brep"]);
 
   function register(dropzoneId, inputId, quoteEngineUrl) {
     const dropzone = document.getElementById(dropzoneId);

@@ -62,7 +62,7 @@
     private readonly string InputId = $"quote-dropzone-input-{Guid.NewGuid():N}";
     private readonly string FormatsShellId = $"quote-dropzone-format-shell-{Guid.NewGuid():N}";
     private readonly string FormatsPanelId = $"quote-dropzone-formats-{Guid.NewGuid():N}";
-    private static readonly string[] SupportedFormats = [".STL", ".STEP", ".STP", ".3MF", ".OBJ", ".IGS", ".IGES", ".GLTF", ".GLB"];
+    private static readonly string[] SupportedFormats = [".STL", ".STEP", ".STP", ".3MF", ".OBJ", ".IGS", ".IGES", ".GLTF", ".GLB", ".PLY", ".OFF", ".AMF", ".WRL", ".X3D", ".X_T", ".X_B", ".SAT", ".SAB", ".SLDPRT", ".SLDASM", ".PRT", ".ASM", ".CATPART", ".CATPRODUCT", ".JT", ".3DXML", ".3DM", ".BREP"];
     private static readonly string SupportedFormatsAccept = string.Join(",", SupportedFormats.Select(format => format.ToLowerInvariant()));
     private DotNetObjectReference<QuoteDropzone>? _objectReference;
     private bool _isFormatsOpen;

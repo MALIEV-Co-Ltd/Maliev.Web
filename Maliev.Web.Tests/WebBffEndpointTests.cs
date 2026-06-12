@@ -180,6 +180,35 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies public quote upload initiation accepts the same CAD extensions accepted by QuoteEngine handoff.
+    /// </summary>
+    [Theory]
+    [InlineData("bracket.x_t")]
+    [InlineData("housing.sldprt")]
+    [InlineData("fixture.catpart")]
+    [InlineData("mesh.ply")]
+    public async Task POST_QuoteUploadInitiation_QuoteEngineCadExtension_ReturnsUploadSession(string fileName)
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/resumable", new WebUploadInitiationRequest
+        {
+            FileName = fileName,
+            ContentType = "application/octet-stream",
+            FileSize = 1024,
+            QuoteSessionId = quoteSessionId
+        });
+        var session = await response.Content.ReadFromJsonAsync<WebUploadInitiationResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(session);
+        Assert.Equal("web-upload-1", session.UploadId);
+        Assert.Contains(fileName, session.StoragePath, StringComparison.Ordinal);
+        Assert.Contains(quoteSessionId.ToString("N"), session.StoragePath, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies public quote upload initiation rejects files above the customer upload limit before UploadService allocation.
     /// </summary>
     [Fact]

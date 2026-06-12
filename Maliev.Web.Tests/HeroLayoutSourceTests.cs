@@ -247,7 +247,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("FormatsButtonText", dropzone, StringComparison.Ordinal);
         Assert.Contains("FormatsExpanded => _isFormatsOpen ? \"true\" : \"false\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("SupportedFormats", dropzone, StringComparison.Ordinal);
-        Assert.Contains("\".STL\", \".STEP\", \".STP\", \".3MF\", \".OBJ\", \".IGS\", \".IGES\", \".GLTF\", \".GLB\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("\".STL\", \".STEP\", \".STP\", \".3MF\", \".OBJ\", \".IGS\", \".IGES\", \".GLTF\", \".GLB\", \".PLY\", \".OFF\", \".AMF\", \".WRL\", \".X3D\", \".X_T\", \".X_B\", \".SAT\", \".SAB\", \".SLDPRT\", \".SLDASM\", \".PRT\", \".ASM\", \".CATPART\", \".CATPRODUCT\", \".JT\", \".3DXML\", \".3DM\", \".BREP\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("accept=\"@SupportedFormatsAccept\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("DotNetObjectReference<QuoteDropzone>", dropzone, StringComparison.Ordinal);
         Assert.Contains("[JSInvokable]", dropzone, StringComparison.Ordinal);
@@ -260,7 +260,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("registerFormatDismissal(shellId, dotNetReference)", script, StringComparison.Ordinal);
         Assert.Contains("document.addEventListener(\"pointerdown\", closeIfOutside, true)", script, StringComparison.Ordinal);
         Assert.Contains("unregisterFormatDismissal(shellId)", script, StringComparison.Ordinal);
-        Assert.Contains("\"gltf\", \"glb\"", script, StringComparison.Ordinal);
+        Assert.Contains("\"gltf\", \"glb\", \"ply\", \"off\", \"amf\", \"wrl\", \"x3d\", \"x_t\", \"x_b\", \"sat\", \"sab\", \"sldprt\", \"sldasm\", \"prt\", \"asm\", \"catpart\", \"catproduct\", \"jt\", \"3dxml\", \"3dm\", \"brep\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("\"blend\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("\"fbx\"", script, StringComparison.Ordinal);
         Assert.Contains("dropzone.addEventListener(\"keydown\", handleKeydown)", script, StringComparison.Ordinal);
