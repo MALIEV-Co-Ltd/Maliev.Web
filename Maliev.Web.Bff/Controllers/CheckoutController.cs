@@ -21,6 +21,7 @@ public sealed class CheckoutController(
     [HttpPost("draft")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(CheckoutDraftResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateDraft([FromBody] CheckoutDraftRequest request, CancellationToken cancellationToken)
@@ -36,6 +37,15 @@ public sealed class CheckoutController(
                 Title = "Sign in required",
                 Detail = "Sign in to continue checkout and save this order to your account.",
                 Status = StatusCodes.Status401Unauthorized
+            });
+        }
+        catch (CheckoutValidationException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Checkout details required",
+                Detail = ex.Message,
+                Status = StatusCodes.Status400BadRequest
             });
         }
         catch (BackendUnavailableException ex)
@@ -55,7 +65,13 @@ public sealed class CheckoutController(
         var request = new CheckoutDraftRequest
         {
             Culture = string.IsNullOrWhiteSpace(form.Culture) ? "en-US" : form.Culture,
-            Items = items
+            Items = items,
+            Phone = form.Phone,
+            CompanyName = form.CompanyName,
+            VatId = form.VatId,
+            BillingAddress = form.BillingAddress,
+            ShippingAddress = form.ShippingAddress,
+            TermsAccepted = form.TermsAccepted
         };
 
         try
@@ -66,6 +82,10 @@ public sealed class CheckoutController(
         catch (CheckoutRequiresSignInException)
         {
             return LocalRedirect("/auth/sign-in?returnUrl=%2Fcheckout");
+        }
+        catch (CheckoutValidationException)
+        {
+            return LocalRedirect("/checkout?checkout=terms");
         }
         catch (BackendUnavailableException ex)
         {
@@ -126,5 +146,23 @@ public sealed class CheckoutController(
 
         /// <summary>Gets or sets the serialized cart item payload.</summary>
         public string ItemsJson { get; set; } = "[]";
+
+        /// <summary>Gets or sets the customer phone number.</summary>
+        public string Phone { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the billing company name.</summary>
+        public string CompanyName { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the VAT or tax identifier.</summary>
+        public string VatId { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the billing address.</summary>
+        public string BillingAddress { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the shipping address.</summary>
+        public string ShippingAddress { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets whether the customer accepted checkout terms.</summary>
+        public bool TermsAccepted { get; set; }
     }
 }

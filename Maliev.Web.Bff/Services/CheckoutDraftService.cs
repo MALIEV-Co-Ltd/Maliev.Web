@@ -20,6 +20,11 @@ internal sealed class CheckoutDraftService(
             throw new CheckoutRequiresSignInException();
         }
 
+        if (!request.TermsAccepted)
+        {
+            throw new CheckoutValidationException("Accept MALIEV checkout terms before continuing checkout.");
+        }
+
         try
         {
             using var customerResponse = await customerClient.GetCustomerAsync(customerId.Value, cancellationToken);

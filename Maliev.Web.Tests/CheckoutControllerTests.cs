@@ -36,6 +36,25 @@ public sealed class CheckoutControllerTests
         Assert.Equal("/auth/sign-in?returnUrl=%2Fcheckout", redirect.Url);
     }
 
+    /// <summary>
+    /// Verifies checkout validation failures return a customer-correctable 400 response.
+    /// </summary>
+    [Fact]
+    public async Task CreateDraft_InvalidCheckoutDetails_ReturnsBadRequestProblem()
+    {
+        var controller = new CheckoutController(
+            new InvalidCheckoutDraftService(),
+            new FakeHostEnvironment());
+
+        var result = await controller.CreateDraft(new CheckoutDraftRequest(), CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var problem = Assert.IsType<ProblemDetails>(badRequest.Value);
+        Assert.Equal(400, problem.Status);
+        Assert.Equal("Checkout details required", problem.Title);
+        Assert.Contains("terms", problem.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class SignInRequiredCheckoutDraftService : ICheckoutDraftService
     {
         public Task<CheckoutDraftResponse> CreateDraftAsync(
@@ -54,6 +73,18 @@ public sealed class CheckoutControllerTests
                 culture: null)!;
 
             return Task.FromException<CheckoutDraftResponse>(exception);
+        }
+    }
+
+    private sealed class InvalidCheckoutDraftService : ICheckoutDraftService
+    {
+        public Task<CheckoutDraftResponse> CreateDraftAsync(
+            CheckoutDraftRequest request,
+            ClaimsPrincipal user,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromException<CheckoutDraftResponse>(
+                new CheckoutValidationException("Accept MALIEV checkout terms before continuing checkout."));
         }
     }
 

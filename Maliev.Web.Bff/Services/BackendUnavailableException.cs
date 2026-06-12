@@ -27,6 +27,14 @@ internal sealed class CheckoutRequiresSignInException : Exception
     }
 }
 
+internal sealed class CheckoutValidationException : Exception
+{
+    internal CheckoutValidationException(string message)
+        : base(message)
+    {
+    }
+}
+
 internal sealed class ChatbotRateLimitException : Exception
 {
     internal ChatbotRateLimitException(string message)

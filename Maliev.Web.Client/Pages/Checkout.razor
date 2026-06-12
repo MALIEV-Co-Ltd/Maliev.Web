@@ -96,6 +96,9 @@
 </section>
 
 @code {
+    [SupplyParameterFromQuery(Name = "checkout")]
+    public string? CheckoutStatus { get; set; }
+
     private readonly CheckoutDetailsForm _form = new();
     private bool _isSubmitting;
     private bool _isError;
@@ -107,6 +110,12 @@
     {
         await ShoppingCart.InitializeAsync();
         await Preferences.InitializeAsync();
+
+        if (string.Equals(CheckoutStatus, "terms", StringComparison.OrdinalIgnoreCase))
+        {
+            _isError = true;
+            _statusMessage = Text("Accept MALIEV terms before continuing.", "กรุณายอมรับข้อกำหนดของ MALIEV ก่อนดำเนินการต่อ");
+        }
     }
 
     private async Task StartCheckoutAsync()
