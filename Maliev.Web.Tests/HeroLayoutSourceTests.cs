@@ -291,6 +291,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("problem?.detail || problem?.title || \"Failed to prepare uploaded files for QuoteEngine.\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("toBase64Url", script, StringComparison.Ordinal);
         Assert.Contains("url.searchParams.set(\"handoff\", handoff)", script, StringComparison.Ordinal);
+        // Display language must survive the Web → quote engine subdomain hop.
+        Assert.Contains("url.searchParams.set(\"culture\", culture)", script, StringComparison.Ordinal);
+        Assert.Contains("window.malievCulture.getCulture()", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Content-Length", script, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone.is-opening", styles, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone-divider", styles, StringComparison.Ordinal);

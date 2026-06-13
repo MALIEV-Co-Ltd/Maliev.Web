@@ -261,7 +261,22 @@ window.malievQuoteDropzone = (() => {
   function redirectToQuoteEngine(quoteEngineUrl, handoff) {
     const url = new URL(quoteEngineUrl, window.location.href);
     if (handoff) url.searchParams.set("handoff", handoff);
+    // Carry the chosen display language across the subdomain hop — the culture
+    // cookie/localStorage are host-scoped and don't reach the quote engine.
+    const culture = resolveCurrentCulture();
+    if (culture) url.searchParams.set("culture", culture);
     window.location.assign(url.toString());
+  }
+
+  function resolveCurrentCulture() {
+    try {
+      if (window.malievCulture && typeof window.malievCulture.getCulture === "function") {
+        return window.malievCulture.getCulture();
+      }
+      return window.localStorage.getItem("maliev.culture") || "en-US";
+    } catch {
+      return "en-US";
+    }
   }
 
   function isAccepted(fileName) {
