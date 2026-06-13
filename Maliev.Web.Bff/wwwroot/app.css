@@ -1235,6 +1235,74 @@ html:lang(th) .h1 {
   width: 100%;
 }
 
+.make-studio-cta {
+  display: grid;
+  gap: 18px;
+  width: min(100%, 640px);
+  padding: clamp(18px, 2.3vw, 26px);
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 10%, transparent), transparent 44%),
+    var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: rgba(52, 55, 65, .10) 0 22px 52px -32px, var(--shadow-border);
+}
+
+.make-studio-cta span {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  color: var(--blue-ink);
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.make-studio-cta strong {
+  display: block;
+  max-width: 24ch;
+  color: var(--ink);
+  font-size: 1.45rem;
+  font-weight: 650;
+  line-height: 1.08;
+}
+
+.make-studio-cta p {
+  max-width: 58ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .98rem;
+  line-height: 1.58;
+}
+
+.make-studio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.make-studio-actions .button {
+  min-height: 44px;
+}
+
+.make-studio-primary::after {
+  content: "→";
+  margin-left: .35em;
+}
+
+.make-studio-cta .make-studio-note {
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-size: .86rem;
+}
+
 .landing-quote-dropzone-shell {
   position: relative;
 }
@@ -4324,6 +4392,12 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
 }
 
 .final-dropzone {
+  align-self: center;
+  justify-self: stretch;
+  max-width: 560px;
+}
+
+.final-make-studio {
   align-self: center;
   justify-self: stretch;
   max-width: 560px;
@@ -8955,7 +9029,7 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     margin-inline: auto;
   }
 
-  .final-cta > .final-dropzone {
+  .final-cta > .final-make-studio {
     order: 1;
     justify-self: center;
     width: min(100%, 560px);

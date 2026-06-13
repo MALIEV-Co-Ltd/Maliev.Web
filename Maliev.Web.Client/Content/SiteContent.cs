@@ -30,6 +30,8 @@ internal static class SiteContent
 
     internal static string QuoteEngineUrl => ResolveQuoteEngineUrl();
 
+    internal static string MakeStudioUrl => QuoteEngineUrl;
+
     internal static string QuoteDemoUrl => $"{QuoteEngineUrl}/demo";
 
     internal static string QuoteNewUrl => QuoteEngineUrl;

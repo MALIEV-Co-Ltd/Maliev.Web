@@ -179,26 +179,39 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".service-file-chip", styles);
         Assert.Matches(@"\.service-file-chip\s*\{[^}]*background:\s*transparent;", styles);
         Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
-        Assert.Contains(".final-dropzone", styles);
+        Assert.Contains(".final-make-studio", styles);
         Assert.Contains(".final-cta {\n  grid-template-columns: minmax(0, 660px) minmax(320px, 540px);\n  align-items: center;\n  justify-content: center;\n  max-width: none;", styles);
         Assert.Matches(@"\.final-cta\s*\{[^}]*background:\s*var\(--paper-2\);", styles);
         Assert.DoesNotMatch(@"\.final-cta\s*\{[^}]*border-top:\s*1px solid var\(--rule\);", styles);
-        Assert.Matches(@"\.final-dropzone\s*\{[^}]*align-self:\s*center;", styles);
-        Assert.DoesNotMatch(@"\.final-dropzone\s*\{[^}]*align-self:\s*stretch;", styles);
+        Assert.Matches(@"\.final-make-studio\s*\{[^}]*align-self:\s*center;", styles);
+        Assert.DoesNotMatch(@"\.final-make-studio\s*\{[^}]*align-self:\s*stretch;", styles);
     }
 
     /// <summary>
-    /// Verifies the home hero routes quote entry through a MudBlazor dropzone CTA.
+    /// Verifies the home hero routes custom work into the chat-first Make Studio CTA.
     /// </summary>
     [Fact]
-    public void HomeHeroMergesStartQuoteIntoDropzone()
+    public void HomeHeroUsesMakeStudioCta()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("<QuoteDropzone", source);
-        Assert.Contains("Href=\"@SiteContent.QuoteNewProjectUrl\"", source);
-        Assert.Contains("Class=\"final-dropzone\"", source);
+        Assert.Contains("SiteContent.MakeStudioUrl", source);
+        Assert.Contains("Open Make Studio", source);
+        Assert.Contains("What do you want to make today?", source);
+        Assert.Contains("make-studio-cta", source);
+        Assert.Contains("make-studio-primary", source);
+        Assert.Contains("make-studio-note", source);
+        Assert.Contains("final-make-studio", source);
+        Assert.Contains("Make Studio", content);
+        Assert.Contains("MakeStudioUrl => QuoteEngineUrl", content);
+        Assert.Contains(".make-studio-cta", styles);
+        Assert.Contains(".make-studio-primary", styles);
+        Assert.Contains(".final-make-studio", styles);
+        Assert.DoesNotContain("<QuoteDropzone Href=\"@SiteContent.QuoteNewProjectUrl\"", source);
+        Assert.DoesNotContain("Class=\"final-dropzone\"", source);
         Assert.Contains("landing-quote-dropzone", dropzone);
         Assert.Contains("Icons.Material.Filled.Upload", dropzone);
         Assert.DoesNotContain("Icons.Material.Filled.CloudUpload", dropzone);
@@ -208,8 +221,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone-browse", dropzone);
         Assert.Contains("role=\"button\"", dropzone);
         Assert.Contains("tabindex=\"@DropzoneTabIndex\"", dropzone);
-        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", source);
-        Assert.Contains("DisabledText=\"@QuoteDropzoneDisabledText\"", source);
         Assert.Contains("landing-quote-dropzone-format-button", dropzone);
         Assert.Contains("landing-quote-dropzone-format-popover", dropzone);
         Assert.Contains("data-dropzone-interactive", dropzone);
@@ -219,10 +230,10 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("landing-quote-dropzone-or\">@OrText", dropzone);
         Assert.Contains("landing-quote-dropzone-icon", dropzone);
         Assert.Contains("landing-quote-dropzone-action", dropzone);
-        Assert.Contains("Drop 3D files for instant quote", source);
-        Assert.Contains("Browse files", source);
-        Assert.Contains("Configure material, finish and quantity after upload.", source);
-        Assert.Contains("Ready when you are.", source);
+        Assert.DoesNotContain("Drop 3D files for instant quote", source);
+        Assert.DoesNotContain("Browse files", source);
+        Assert.DoesNotContain("Configure material, finish and quantity after upload.", source);
+        Assert.DoesNotContain("Ready when you are.", source);
         Assert.DoesNotContain("Configure material, finish and quantity at quote.maliev.com.", source);
         Assert.DoesNotContain("Paste link", dropzone);
         Assert.DoesNotContain("StartIcon=", dropzone);
@@ -315,15 +326,16 @@ public sealed class HeroLayoutSourceTests
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("SiteContent.QuoteEntryDisabled", layout, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.MakeStudioUrl", layout, StringComparison.Ordinal);
         Assert.DoesNotContain("NavigateToQuoteStart", layout, StringComparison.Ordinal);
         Assert.DoesNotContain("href=\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", layout, StringComparison.Ordinal);
-        Assert.Contains("aria-disabled=\"true\"", layout, StringComparison.Ordinal);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", layout, StringComparison.Ordinal);
+        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-quote-disabled", layout, StringComparison.Ordinal);
 
-        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", home, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.MakeStudioUrl", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("Disabled=\"@SiteContent.QuoteEntryDisabled\"", home, StringComparison.Ordinal);
         Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage, StringComparison.Ordinal);
-        Assert.Contains("QuoteDropzoneDisabledText", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDropzoneDisabledText", home, StringComparison.Ordinal);
         Assert.Contains("QuoteDropzoneDisabledText", servicePage, StringComparison.Ordinal);
 
         Assert.DoesNotContain("http-equiv=\"refresh\"", quote, StringComparison.Ordinal);
@@ -456,14 +468,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("id=\"workflow-carousel\"", source);
         Assert.Contains("process-grid", source);
         Assert.Contains("bindWorkflowStepReveal", source);
-        Assert.Contains("Quote to part workflow", source);
+        Assert.Contains("Make Studio to made part workflow", source);
         Assert.DoesNotContain("process-step-kicker", source);
         Assert.DoesNotContain("How it works", source);
-        Assert.Contains("Quote to part, no friction", source);
-        Assert.Contains("Upload CAD once, configure online, let MALIEV make it", source);
-        Assert.Contains("Drop your file", source);
-        Assert.Contains("Configure online", source);
-        Assert.Contains("We make it", source);
+        Assert.Contains("Make Studio to made part", source);
+        Assert.Contains("Start with a chat, attach files, sketch requirements", source);
+        Assert.Contains("Start with chat", source);
+        Assert.Contains("Attach files and sketches", source);
+        Assert.Contains("Review artifacts", source);
         Assert.Contains("Inspect and ship", source);
         Assert.DoesNotContain("workflow-step-visual", source);
         Assert.Contains("workflow-step-number", source);
@@ -565,7 +577,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta\s*\{[^}]*justify-items:\s*center;[^}]*gap:\s*26px;[^}]*text-align:\s*center;", styles);
         Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta-copy\s*\{[^}]*order:\s*2;[^}]*display:\s*grid;[^}]*justify-items:\s*center;", styles);
         Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta-copy \.lede\s*\{[^}]*max-width:\s*58ch;", styles);
-        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta > \.final-dropzone\s*\{[^}]*order:\s*1;[^}]*justify-self:\s*center;[^}]*width:\s*min\(100%, 560px\);", styles);
+        Assert.Matches(@"@media \(max-width: 960px\)[\s\S]*?\.final-cta > \.final-make-studio\s*\{[^}]*order:\s*1;[^}]*justify-self:\s*center;[^}]*width:\s*min\(100%, 560px\);", styles);
         Assert.DoesNotContain("final-dropzone-arrow", source);
         Assert.DoesNotContain(".final-dropzone-arrow", styles);
         Assert.DoesNotContain(".final-dropzone-icon", styles);
@@ -1655,9 +1667,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
-        Assert.Contains("SiteContent.QuoteEntryDisabled", source);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
-        Assert.Contains("aria-disabled=\"true\"", source);
+        Assert.Contains("SiteContent.MakeStudioUrl", source);
+        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", source);
+        Assert.DoesNotContain("data-quote-disabled", source);
         Assert.DoesNotContain("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
         Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
         Assert.Contains("<NavLink href=\"/shop\">@Text(\"Shop\", \"ร้านค้า\")</NavLink>", source);

@@ -57,13 +57,7 @@
                            Size="Size.Medium"
                            Class="nav-icon-button"
                            aria-label="@Text("Account", "บัญชี")" />
-            <span class="nav-quote-link is-disabled"
-                  role="link"
-                  aria-disabled="true"
-                  data-quote-disabled="@SiteContent.QuoteEntryDisabled.ToString().ToLowerInvariant()"
-                  title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">
-                @Text("Get part price", "ดูราคาชิ้นงาน")
-            </span>
+            <a class="nav-quote-link" href="@SiteContent.MakeStudioUrl">@Text("Make Studio", "Make Studio")</a>
             <button type="button"
                     class="mobile-menu-button"
                     aria-label="@Text("Open navigation", "เปิดเมนู")"
@@ -85,13 +79,7 @@
                 {
                     <NavLink class="mobile-nav-secondary" href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
                 }
-                <span class="mobile-nav-quote is-disabled"
-                      role="link"
-                      aria-disabled="true"
-                      data-quote-disabled="@SiteContent.QuoteEntryDisabled.ToString().ToLowerInvariant()"
-                      title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">
-                    @Text("Get part price", "ดูราคาชิ้นงาน")
-                </span>
+                <a class="mobile-nav-quote" href="@SiteContent.MakeStudioUrl" @onclick="CloseMobileNav">@Text("Make Studio", "Make Studio")</a>
             </div>
         </nav>
     </header>

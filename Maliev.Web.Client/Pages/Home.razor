@@ -19,15 +19,18 @@
         </h1>
         <p>@_heroCopy.Body.For(Preferences.Culture)</p>
         <div class="landing-hero-actions">
-            <QuoteDropzone Href="@SiteContent.QuoteNewProjectUrl"
-                           Title="@QuoteDropzoneTitle"
-                           Description="@QuoteDropzoneDescription"
-                           ActionText="@QuoteDropzoneAction"
-                           Disabled="@SiteContent.QuoteEntryDisabled"
-                           DisabledText="@QuoteDropzoneDisabledText"
-                           FormatsButtonText="@QuoteDropzoneFormatsButtonText"
-                           FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
-                           AriaLabel="@QuoteDropzoneAction" />
+            <div class="make-studio-cta" aria-label="@Text("Make Studio start", "เริ่มต้น Make Studio")">
+                <div>
+                    <span>@Text("Make Studio", "Make Studio")</span>
+                    <strong>@Text("What do you want to make today?", "วันนี้ต้องการผลิตอะไร?")</strong>
+                    <p>@Text("Start with chat, attach CAD files or sketches, and let the studio build requirements, DFM notes, and quote artifacts as the project becomes clear.", "เริ่มจากการคุย แนบไฟล์ CAD หรือสเก็ตช์ แล้วให้สตูดิโอจัดโจทย์ หมายเหตุ DFM และไฟล์ใบเสนอราคาเมื่อโปรเจกต์ชัดขึ้น")</p>
+                </div>
+                <div class="make-studio-actions">
+                    <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Open Make Studio", "เปิด Make Studio")</a>
+                    <a class="button secondary make-studio-secondary" href="/contact">@Text("Talk to MALIEV", "คุยกับ MALIEV")</a>
+                </div>
+                <p class="make-studio-note">@Text("Chat-first quoting replaces the old price button: describe the part, upload when ready, and keep every artifact in one workspace.", "การขอราคาแบบแชทแทนปุ่มดูราคาแบบเดิม: อธิบายชิ้นงาน อัปโหลดเมื่อพร้อม และเก็บทุกไฟล์งานไว้ในพื้นที่เดียว")</p>
+            </div>
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
             @foreach (var metric in SiteContent.HeroMetrics)
@@ -136,10 +139,10 @@
          class="section process-section"
          aria-labelledby="process-title">
     <div class="section-lede process-lede">
-        <h2 id="process-title">@Text("Quote to part, no friction", "จากใบเสนอราคาสู่ชิ้นงานอย่างลื่นไหล")</h2>
-        <p>@Text("Upload CAD once, configure online, let MALIEV make it, and inspect or ship from the same workspace.", "อัปโหลด CAD ครั้งเดียว ตั้งค่างานออนไลน์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
+        <h2 id="process-title">@Text("Make Studio to made part", "จาก Make Studio สู่ชิ้นงานจริง")</h2>
+        <p>@Text("Start with a chat, attach files, sketch requirements, let MALIEV make it, and inspect or ship from the same workspace.", "เริ่มจากแชท แนบไฟล์ สเก็ตช์โจทย์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
     </div>
-    <div class="process-grid" aria-label="@Text("Quote to part workflow", "ขั้นตอนจากใบเสนอราคาสู่ชิ้นงาน")">
+    <div class="process-grid" aria-label="@Text("Make Studio to made part workflow", "ขั้นตอนจาก Make Studio สู่ชิ้นงาน")">
         @foreach (var step in ProcessSteps)
         {
             <button class="@WorkflowStepClass(step)"
@@ -310,19 +313,20 @@
 
 <section class="section final-cta" aria-labelledby="final-cta-title">
     <div class="final-cta-copy">
-        <h2 id="final-cta-title" class="h-display">@Text("Ready when you are.", "พร้อมเมื่อคุณพร้อม")</h2>
-        <p class="lede">@Text("Configure tolerances, finishes, and quantities. See pricing update live. Ship to your door.", "ตั้งค่า tolerance ผิวงาน และจำนวน ดูราคาอัปเดตสด และจัดส่งถึงปลายทาง")</p>
+        <h2 id="final-cta-title" class="h-display">@Text("Bring the idea to Make Studio.", "พาไอเดียเข้า Make Studio")</h2>
+        <p class="lede">@Text("Describe the part, attach files when you have them, and let the chat workspace turn intent into quote-ready artifacts.", "อธิบายชิ้นงาน แนบไฟล์เมื่อพร้อม แล้วให้พื้นที่แชทเปลี่ยนโจทย์เป็นไฟล์พร้อมเสนอราคา")</p>
     </div>
-    <QuoteDropzone Href="@SiteContent.QuoteNewProjectUrl"
-                   Class="final-dropzone"
-                   Title="@QuoteDropzoneTitle"
-                   Description="@QuoteDropzoneDescription"
-                   ActionText="@QuoteDropzoneAction"
-                   Disabled="@SiteContent.QuoteEntryDisabled"
-                   DisabledText="@QuoteDropzoneDisabledText"
-                   FormatsButtonText="@QuoteDropzoneFormatsButtonText"
-                   FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
-                   AriaLabel="@QuoteDropzoneAction" />
+    <div class="make-studio-cta final-make-studio" aria-label="@Text("Make Studio final action", "ปุ่มสุดท้าย Make Studio")">
+        <div>
+            <span>@Text("Chat-based quoting", "ขอราคาแบบแชท")</span>
+            <strong>@Text("Open the workspace and start with one sentence.", "เปิดพื้นที่ทำงานแล้วเริ่มด้วยหนึ่งประโยค")</strong>
+            <p>@Text("Make Studio keeps chat, uploads, sketches, DFM feedback, and quote artifacts together instead of sending you through a price form.", "Make Studio เก็บแชท ไฟล์อัปโหลด สเก็ตช์ ความเห็น DFM และไฟล์ใบเสนอราคาไว้ด้วยกัน แทนการพาคุณผ่านฟอร์มราคา")</p>
+        </div>
+        <div class="make-studio-actions">
+            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Open Make Studio", "เปิด Make Studio")</a>
+            <a class="button secondary make-studio-secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
+        </div>
+    </div>
 </section>
 
 @code {
@@ -439,18 +443,18 @@
         new(
             "01",
             "upload",
-            SiteContent.Text("Drop your file", "วางไฟล์ของคุณ"),
-            SiteContent.Text("STEP, STL, IGES, OBJ, and 3MF files move into one quote-ready workspace.", "ไฟล์ STEP, STL, IGES, OBJ และ 3MF เข้าสู่พื้นที่พร้อมเสนอราคาเดียวกัน")),
+            SiteContent.Text("Start with chat", "เริ่มจากแชท"),
+            SiteContent.Text("Tell Make Studio what you want to make before choosing a process or form.", "บอก Make Studio ว่าต้องการผลิตอะไร ก่อนเลือกกระบวนการหรือกรอกฟอร์ม")),
         new(
             "02",
             "dfm",
-            SiteContent.Text("Configure online", "ตั้งค่าออนไลน์"),
-            SiteContent.Text("Choose material, finish, quantity, tolerance, and delivery while pricing stays transparent.", "เลือกวัสดุ ผิวงาน จำนวน tolerance และการจัดส่ง พร้อมเห็นราคาชัดเจน")),
+            SiteContent.Text("Attach files and sketches", "แนบไฟล์และสเก็ตช์"),
+            SiteContent.Text("Add CAD, drawings, photos, or rough sketches when they help explain the part.", "เพิ่ม CAD, Drawing, รูปภาพ หรือสเก็ตช์คร่าว ๆ เมื่อช่วยอธิบายชิ้นงาน")),
         new(
             "03",
             "price",
-            SiteContent.Text("We make it", "เราผลิตให้"),
-            SiteContent.Text("In-house teams route the job across printing, CNC, scanning, casting, and molding.", "ทีมในโรงงานเดินงานผ่านการพิมพ์ CNC สแกน หล่อ และฉีดขึ้นรูป")),
+            SiteContent.Text("Review artifacts", "ตรวจไฟล์งาน"),
+            SiteContent.Text("DFM notes, assumptions, quantities, and quote artifacts build as the conversation becomes specific.", "หมายเหตุ DFM สมมติฐาน จำนวน และไฟล์ใบเสนอราคาจะค่อย ๆ ชัดขึ้นตามบทสนทนา")),
         new(
             "04",
             "order",
@@ -482,20 +486,6 @@
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
-
-    private string QuoteDropzoneTitle => Text("Drop 3D files for instant quote", "วางไฟล์ 3D เพื่อขอราคาทันที");
-
-    private string QuoteDropzoneDescription => Text(
-        "STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, GLB - up to 200 MB. Configure material, finish and quantity after upload.",
-        "รองรับ STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, GLB สูงสุด 200 MB ตั้งค่าวัสดุ ผิวงาน และจำนวนหลังอัปโหลด");
-
-    private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
-
-    private string QuoteDropzoneDisabledText => SiteContent.QuoteDisabledAction.For(Preferences.Culture);
-
-    private string QuoteDropzoneFormatsButtonText => Text("Supported formats", "ไฟล์ที่รองรับ");
-
-    private string QuoteDropzoneFormatsPanelLabel => Text("Supported QuoteEngine file formats", "รายการไฟล์ที่ QuoteEngine รองรับ");
 
     private ServicePageContent SelectedHomeService => _services.FirstOrDefault(
         service => string.Equals(service.Slug, _selectedHomeServiceSlug, StringComparison.OrdinalIgnoreCase))

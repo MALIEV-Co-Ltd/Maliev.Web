@@ -110,14 +110,15 @@ public sealed class LocalizationTests
         Assert.False(home.Contains("IStringLocalizer<SharedResources>", StringComparison.Ordinal));
         Assert.False(layout.Contains("L[\"", StringComparison.Ordinal));
         Assert.False(home.Contains("L[\"", StringComparison.Ordinal));
-        Assert.Contains("@Text(\"Get part price\", \"ดูราคาชิ้นงาน\")", layout);
-        Assert.Contains("ActionText=\"@QuoteDropzoneAction\"", home);
-        Assert.Contains("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
-        Assert.Contains("FormatsButtonText=\"@QuoteDropzoneFormatsButtonText\"", home);
-        Assert.Contains("FormatsPanelLabel=\"@QuoteDropzoneFormatsPanelLabel\"", home);
-        Assert.Contains("private string QuoteDropzoneFormatsButtonText => Text(\"Supported formats\", \"ไฟล์ที่รองรับ\")", home);
-        Assert.Contains("private string QuoteDropzoneFormatsPanelLabel => Text(\"Supported QuoteEngine file formats\", \"รายการไฟล์ที่ QuoteEngine รองรับ\")", home);
-        Assert.Contains("Configure material, finish and quantity after upload.", home);
+        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout);
+        Assert.Contains("SiteContent.MakeStudioUrl", layout);
+        Assert.DoesNotContain("data-quote-disabled", layout);
+        Assert.Contains("Text(\"Open Make Studio\", \"เปิด Make Studio\")", home);
+        Assert.Contains("Text(\"Talk to MALIEV\", \"คุยกับ MALIEV\")", home);
+        Assert.Contains("Text(\"What do you want to make today?\", \"วันนี้ต้องการผลิตอะไร?\")", home);
+        Assert.Contains("SiteContent.MakeStudioUrl", home);
+        Assert.DoesNotContain("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
+        Assert.DoesNotContain("Configure material, finish and quantity after upload.", home);
         Assert.DoesNotContain("quantity at quote.maliev.com", home);
     }
 
