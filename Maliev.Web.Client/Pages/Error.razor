@@ -5,5 +5,9 @@
 <section class="page-hero compact">
     <h1>Something went wrong</h1>
     <p>The customer website could not complete this request. Try reloading or returning to the quote workspace.</p>
-    <a class="button primary" href="@SiteContent.QuoteNewUrl">Open quote</a>
+    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@SiteContent.QuoteDisabledTitle.En">Open quote</button>
 </section>
+
+@code {
+    private const string QuoteDisabledButtonClass = "button primary is-disabled";
+}

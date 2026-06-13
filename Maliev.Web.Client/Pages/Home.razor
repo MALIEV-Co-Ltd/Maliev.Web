@@ -23,6 +23,8 @@
                            Title="@QuoteDropzoneTitle"
                            Description="@QuoteDropzoneDescription"
                            ActionText="@QuoteDropzoneAction"
+                           Disabled="@SiteContent.QuoteEntryDisabled"
+                           DisabledText="@QuoteDropzoneDisabledText"
                            FormatsButtonText="@QuoteDropzoneFormatsButtonText"
                            FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
                            AriaLabel="@QuoteDropzoneAction" />
@@ -316,6 +318,8 @@
                    Title="@QuoteDropzoneTitle"
                    Description="@QuoteDropzoneDescription"
                    ActionText="@QuoteDropzoneAction"
+                   Disabled="@SiteContent.QuoteEntryDisabled"
+                   DisabledText="@QuoteDropzoneDisabledText"
                    FormatsButtonText="@QuoteDropzoneFormatsButtonText"
                    FormatsPanelLabel="@QuoteDropzoneFormatsPanelLabel"
                    AriaLabel="@QuoteDropzoneAction" />
@@ -486,6 +490,8 @@
         "รองรับ STL, STEP, STP, 3MF, OBJ, IGS, IGES, GLTF, GLB สูงสุด 200 MB ตั้งค่าวัสดุ ผิวงาน และจำนวนหลังอัปโหลด");
 
     private string QuoteDropzoneAction => Text("Browse files", "เลือกไฟล์");
+
+    private string QuoteDropzoneDisabledText => SiteContent.QuoteDisabledAction.For(Preferences.Culture);
 
     private string QuoteDropzoneFormatsButtonText => Text("Supported formats", "ไฟล์ที่รองรับ");
 

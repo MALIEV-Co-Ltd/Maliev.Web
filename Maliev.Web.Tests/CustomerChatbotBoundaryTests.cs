@@ -57,7 +57,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Equal("assistant", response.Role);
         Assert.Equal("en", response.Language);
         Assert.Contains("not fully available", response.Content, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains(response.SuggestedActions, action => action.Action == "request_quote" && action.Data == "/quote");
+        Assert.DoesNotContain(response.SuggestedActions, action => action.Action == "request_quote");
         Assert.Contains(response.SuggestedActions, action => action.Action == "contact" && action.Data == "/contact");
     }
 
@@ -108,7 +108,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Equal(sessionId, response.SessionId);
         Assert.Equal("assistant", response.Role);
         Assert.Contains("live assistant", response.Content, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains(response.SuggestedActions, action => action.Action == "request_quote" && action.Data == "/quote");
+        Assert.DoesNotContain(response.SuggestedActions, action => action.Action == "request_quote");
         Assert.Contains(response.SuggestedActions, action => action.Action == "contact" && action.Data == "/contact");
     }
 

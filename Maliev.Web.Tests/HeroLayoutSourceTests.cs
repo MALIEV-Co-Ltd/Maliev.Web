@@ -207,7 +207,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("landing-quote-dropzone-divider", dropzone);
         Assert.Contains("landing-quote-dropzone-browse", dropzone);
         Assert.Contains("role=\"button\"", dropzone);
-        Assert.Contains("tabindex=\"0\"", dropzone);
+        Assert.Contains("tabindex=\"@DropzoneTabIndex\"", dropzone);
+        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", source);
+        Assert.Contains("DisabledText=\"@QuoteDropzoneDisabledText\"", source);
         Assert.Contains("landing-quote-dropzone-format-button", dropzone);
         Assert.Contains("landing-quote-dropzone-format-popover", dropzone);
         Assert.Contains("data-dropzone-interactive", dropzone);
@@ -293,6 +295,63 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone-action:hover,\n.landing-quote-dropzone:focus-visible .landing-quote-dropzone-action", styles, StringComparison.Ordinal);
         Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
         Assert.Contains("js/maliev-quote-dropzone.js", app, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies QuoteEngine entry points are visibly disabled while QuoteEngine is out of the MVP path.
+    /// </summary>
+    [Fact]
+    public void PublicQuoteEntryPointsAreDisabledForMvp()
+    {
+        var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
+        var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
+        var quote = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
+        var services = ReadRepoFile("Maliev.Web.Client", "Pages", "Services.razor");
+        var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+        var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
+        var error = ReadRepoFile("Maliev.Web.Client", "Pages", "Error.razor");
+        var product = ReadRepoFile("Maliev.Web.Client", "Pages", "ProductDetail.razor");
+        var staticPage = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.Contains("SiteContent.QuoteEntryDisabled", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("NavigateToQuoteStart", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", layout, StringComparison.Ordinal);
+        Assert.Contains("aria-disabled=\"true\"", layout, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", layout, StringComparison.Ordinal);
+
+        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", home, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage, StringComparison.Ordinal);
+        Assert.Contains("QuoteDropzoneDisabledText", home, StringComparison.Ordinal);
+        Assert.Contains("QuoteDropzoneDisabledText", servicePage, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("http-equiv=\"refresh\"", quote, StringComparison.Ordinal);
+        Assert.DoesNotContain("SiteContent.QuoteDemoUrl", quote, StringComparison.Ordinal);
+        Assert.DoesNotContain("SiteContent.QuoteNewProjectUrl", quote, StringComparison.Ordinal);
+        Assert.Contains("disabled", quote, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", quote, StringComparison.Ordinal);
+
+        Assert.Contains("QuoteDisabledButtonClass", services, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", servicePage, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", shop, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", error, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", product, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", staticPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", services, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", servicePage, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", shop, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", error, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", product, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", staticPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewProjectUrl\"", staticPage, StringComparison.Ordinal);
+
+        Assert.Contains("public bool Disabled { get; set; }", dropzone, StringComparison.Ordinal);
+        Assert.Contains("disabled=\"@Disabled\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("aria-disabled=\"@DisabledAria\"", dropzone, StringComparison.Ordinal);
+        Assert.Contains("if (Disabled)", dropzone, StringComparison.Ordinal);
+        Assert.Contains(".landing-quote-dropzone.is-disabled", styles, StringComparison.Ordinal);
+        Assert.Contains(".button.is-disabled", styles, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -1560,7 +1619,7 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the quote page sends custom manufacturing work to the dedicated quote engine.
+    /// Verifies the quote page keeps quote intake visibly disabled for the MVP.
     /// </summary>
     [Fact]
     public void QuotePageRoutesToDedicatedQuoteEngine()
@@ -1568,10 +1627,12 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
-        Assert.Contains("SiteContent.QuoteDemoUrl", source);
-        Assert.Contains("SiteContent.QuoteNewUrl", source);
-        Assert.Contains("http-equiv=\"refresh\"", source);
-        Assert.Contains("content=\"5; url=@SiteContent.QuoteNewUrl\"", source);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
+        Assert.Contains("QuoteDisabledButtonClass", source);
+        Assert.Contains("disabled", source);
+        Assert.DoesNotContain("SiteContent.QuoteDemoUrl", source);
+        Assert.DoesNotContain("SiteContent.QuoteNewUrl", source);
+        Assert.DoesNotContain("http-equiv=\"refresh\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("quote-engine-mock", source);
         Assert.DoesNotContain("quote-engine-dropzone", source);
@@ -1594,7 +1655,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
-        Assert.Contains("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
+        Assert.Contains("SiteContent.QuoteEntryDisabled", source);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
+        Assert.Contains("aria-disabled=\"true\"", source);
+        Assert.DoesNotContain("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
         Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
         Assert.Contains("<NavLink href=\"/shop\">@Text(\"Shop\", \"ร้านค้า\")</NavLink>", source);
         Assert.Contains("<NavLink href=\"/contact\">@Text(\"Contact\", \"ติดต่อ\")</NavLink>", source);
@@ -2144,7 +2208,7 @@ public sealed class HeroLayoutSourceTests
     /// Verifies all designed service slugs are implemented as real Blazor routes.
     /// </summary>
     [Fact]
-    public void ServicesUseRealRoutesAndQuoteEngineLinks()
+    public void ServicesUseRealRoutesAndDisabledQuoteActions()
     {
         var services = ReadRepoFile("Maliev.Web.Client", "Pages", "Services.razor");
         var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
@@ -2153,8 +2217,11 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("@page \"/services\"", services);
         Assert.Contains("@page \"/services/{Slug}\"", servicePage);
-        Assert.Contains("SiteContent.QuoteNewUrl", services);
-        Assert.Contains("SiteContent.QuoteNewUrl", servicePage);
+        Assert.Contains("QuoteDisabledButtonClass", services);
+        Assert.Contains("QuoteDisabledButtonClass", servicePage);
+        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", services);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", servicePage);
         Assert.Contains("services-hero-title", services);
         Assert.Contains("services-hero-logo", services);
         Assert.Contains("src=\"/images/logo.svg\"", services);
@@ -2235,7 +2302,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("IReadOnlyList<LocalizedText> Items", source);
         Assert.Contains("<li>@point.For(Preferences.Culture)</li>", source);
         Assert.Contains("SubmitContactMessageAsync", source);
-        Assert.Contains("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("QuoteDisabledButtonClass", source);
+        Assert.Contains("QuoteDisabledTitle", source);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("class=\"@ContactStatusClass\" role=\"@ContactStatusRole\"", source);
         Assert.Contains("@ContactStatusTitle", source);
         Assert.Contains("contact-file-progress", source);
@@ -2588,7 +2657,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("GetProfile", accountController);
         Assert.Contains("GetAddresses", accountController);
         Assert.Contains("GetOrders", accountController);
-        Assert.Contains("QuoteOrdersUrl", accountController);
+        Assert.Contains("ManufacturingOrdersUrl = \"/contact\"", accountController);
+        Assert.DoesNotContain("QuoteOrdersUrl", accountController);
         Assert.Contains("Href=\"/account\"", layout);
         Assert.Contains("<CascadingAuthenticationState>", routes);
         Assert.Contains("<AuthorizeRouteView", routes);
@@ -2886,7 +2956,7 @@ public sealed class HeroLayoutSourceTests
     /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
     /// </summary>
     [Fact]
-    public void CommerceQuoteCtasUseDedicatedQuoteEngine()
+    public void CommerceQuoteCtasAreDisabledForMvp()
     {
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
@@ -2896,10 +2966,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("DefaultQuoteEngineUrl = \"https://quote.maliev.com\"", content);
         Assert.Contains("QuoteDemoUrl => $\"{QuoteEngineUrl}/demo\"", content);
         Assert.Contains("QuoteNewProjectUrl => $\"{QuoteEngineUrl}/quotes/new\"", content);
+        Assert.Contains("QuoteEntryDisabled = true", content);
         Assert.DoesNotContain("https://quote.maliev.com/quotes/new", content);
-        Assert.Contains("SiteContent.QuoteNewUrl", shop);
-        Assert.Contains("SiteContent.QuoteNewUrl", product);
-        Assert.Contains("SiteContent.QuoteNewUrl", error);
+        Assert.Contains("QuoteDisabledButtonClass", shop);
+        Assert.Contains("QuoteDisabledButtonClass", product);
+        Assert.Contains("QuoteDisabledButtonClass", error);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", shop);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", product);
+        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", error);
         Assert.DoesNotContain("href=\"/quote\"", shop);
         Assert.DoesNotContain("href=\"/quote\"", product);
         Assert.DoesNotContain("href=\"/quote\"", error);

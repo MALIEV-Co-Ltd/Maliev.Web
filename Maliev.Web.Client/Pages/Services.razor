@@ -15,7 +15,7 @@
     </h1>
     <p>@Text("Choose the right process, or start with a CAD upload and let us review manufacturability before quotation.", "เลือกกระบวนการที่เหมาะสม หรือเริ่มจากอัปโหลด CAD แล้วให้เราตรวจความเหมาะสมก่อนเสนอราคา")</p>
     <div class="quote-actions">
-        <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+        <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Get part price", "ดูราคาชิ้นงาน")</button>
         <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
     </div>
 </section>
@@ -53,6 +53,10 @@
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
     }
+
+    private string QuoteDisabledButtonClass => "button primary is-disabled";
+
+    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     private static string ServiceCardClass(ServicePageContent service)
     {

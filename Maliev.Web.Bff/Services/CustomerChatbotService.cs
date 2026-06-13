@@ -491,8 +491,8 @@ Customer message:
         {
             SessionId = sessionId,
             Content = language == "th"
-                ? "ตอนนี้ระบบผู้ช่วยอัตโนมัติยังตอบรายละเอียดไม่ได้ครบถ้วนค่ะ ถ้าต้องการราคา ให้อัปโหลดไฟล์ที่ระบบราคา หรือส่งข้อความถึงทีมงานให้ช่วยตรวจได้เลยค่ะ"
-                : "The live assistant cannot generate a detailed answer right now. For pricing, upload your CAD file in Quote Engine, or contact the team and we will review it directly.",
+                ? "ตอนนี้ระบบผู้ช่วยอัตโนมัติยังตอบรายละเอียดไม่ได้ครบถ้วนค่ะ กรุณาส่งข้อความถึงทีมงานให้ช่วยตรวจข้อมูลโดยตรงได้เลยค่ะ"
+                : "The live assistant cannot generate a detailed answer right now. Contact the team and we will review your request directly.",
             Role = "assistant",
             Language = language,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -504,12 +504,6 @@ Customer message:
     {
         return
         [
-            new CustomerChatbotActionDto
-            {
-                Label = language == "th" ? "ขอราคาชิ้นงาน" : "Get part price",
-                Action = "request_quote",
-                Data = "/quote"
-            },
             new CustomerChatbotActionDto
             {
                 Label = language == "th" ? "ติดต่อทีมงาน" : "Contact MALIEV",

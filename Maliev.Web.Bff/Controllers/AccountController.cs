@@ -416,7 +416,7 @@ public sealed class AccountController(ICustomerServiceClient customerClient, ICo
         return Ok(new CustomerOrdersResponse
         {
             ShopOrders = [],
-            ManufacturingOrdersUrl = SiteContent.QuoteOrdersUrl
+            ManufacturingOrdersUrl = "/contact"
         });
     }
 

@@ -3,18 +3,17 @@
 
 <PageTitle>Custom manufacturing quote - MALIEV</PageTitle>
 <HeadContent>
-    <meta name="description" content="Start a MALIEV custom manufacturing quote at quote.maliev.com for CAD upload, DFM review, deterministic pricing, and order tracking." />
+    <meta name="description" content="MALIEV custom manufacturing online quote intake is temporarily unavailable while the MVP workflow is prepared." />
     <link rel="canonical" href="https://www.maliev.com/quote" />
-    <meta http-equiv="refresh" content="5; url=@SiteContent.QuoteNewUrl" />
 </HeadContent>
 
 <section class="hero-band quote-hero">
     <div class="hero-copy">
-        <h1>Custom quotes now run in the dedicated quote engine.</h1>
-        <p>@Text("Upload CAD files, configure parts, review manufacturability, request a formal quote, and track custom manufacturing orders at quote.maliev.com.", "อัปโหลดไฟล์ CAD ตั้งค่าชิ้นงาน ตรวจความเหมาะสมการผลิต ขอใบเสนอราคาอย่างเป็นทางการ และติดตามคำสั่งผลิตที่ quote.maliev.com")</p>
+        <h1>@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)</h1>
+        <p>@SiteContent.QuoteDisabledBody.For(Preferences.Culture)</p>
         <div class="quote-actions">
-            <a class="button primary" href="@SiteContent.QuoteDemoUrl">@Text("Try demo", "ทดลองดูตัวอย่าง")</a>
-            <a class="button secondary" href="@SiteContent.QuoteNewProjectUrl">@Text("Start project", "เริ่มโปรเจกต์")</a>
+            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">@Text("Try demo", "ทดลองดูตัวอย่าง")</button>
+            <button type="button" class="button secondary is-disabled" disabled title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">@Text("Start project", "เริ่มโปรเจกต์")</button>
             <a class="button secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>
@@ -24,6 +23,8 @@
 </section>
 
 @code {
+    private string QuoteDisabledButtonClass => "button primary is-disabled";
+
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;

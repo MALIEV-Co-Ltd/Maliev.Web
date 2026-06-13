@@ -8,7 +8,7 @@
 
 <section class="page-hero compact account-hero">
     <h1>@Text("Shop orders", "คำสั่งซื้อร้านค้า")</h1>
-    <p>@Text("Storefront orders are managed here. Manufacturing projects, quote configuration, DFM, and production tracking stay in the dedicated quote engine.", "คำสั่งซื้อร้านค้าอยู่ที่นี่ ส่วนโปรเจกต์งานผลิต การตั้งราคา DFM และติดตามการผลิตอยู่ในระบบราคาโดยเฉพาะ")</p>
+    <p>@Text("Storefront orders are managed here. Manufacturing project tracking is temporarily unavailable while the MVP workflow is prepared.", "คำสั่งซื้อร้านค้าอยู่ที่นี่ ส่วนการติดตามโปรเจกต์งานผลิตยังไม่พร้อมใช้งานชั่วคราวระหว่างเตรียมเวิร์กโฟลว์ MVP")</p>
 </section>
 
 <section class="section account-two-column">
@@ -38,7 +38,7 @@
             <div class="account-panel">
                 <div class="empty-state compact">
                     <h2>@Text("Order detail is not available yet", "ยังไม่มีรายละเอียดคำสั่งซื้อนี้")</h2>
-                    <p>@Text("This route is reserved for storefront order details. Manufacturing order details remain in the quote engine.", "เส้นทางนี้เตรียมไว้สำหรับรายละเอียดคำสั่งซื้อร้านค้า ส่วนรายละเอียดคำสั่งผลิตอยู่ในระบบราคา")</p>
+                    <p>@Text("This route is reserved for storefront order details. Manufacturing order details are temporarily unavailable.", "เส้นทางนี้เตรียมไว้สำหรับรายละเอียดคำสั่งซื้อร้านค้า ส่วนรายละเอียดคำสั่งผลิตยังไม่พร้อมใช้งานชั่วคราว")</p>
                     <a class="button secondary" href="/account/orders">@Text("Back to orders", "กลับไปคำสั่งซื้อ")</a>
                 </div>
             </div>
@@ -63,10 +63,10 @@
         {
             <div class="empty-state compact account-orders-empty">
                 <h2>@Text("No shop orders yet", "ยังไม่มีคำสั่งซื้อร้านค้า")</h2>
-                <p>@Text("Machine, product, and spare-part orders will appear here after storefront checkout is connected. Manufacturing projects are already separated into the quote engine.", "คำสั่งซื้อเครื่องจักร สินค้า และอะไหล่จะแสดงที่นี่หลังเชื่อมต่อ checkout ร้านค้า ส่วนโปรเจกต์งานผลิตแยกอยู่ในระบบราคาแล้ว")</p>
+                <p>@Text("Machine, product, and spare-part orders will appear here after storefront checkout is connected. Manufacturing project tracking is temporarily unavailable.", "คำสั่งซื้อเครื่องจักร สินค้า และอะไหล่จะแสดงที่นี่หลังเชื่อมต่อ checkout ร้านค้า ส่วนการติดตามโปรเจกต์งานผลิตยังไม่พร้อมใช้งานชั่วคราว")</p>
                 <div class="quote-actions">
                     <a class="button primary" href="/shop">@Text("Shop products", "เลือกซื้อสินค้า")</a>
-                    <a class="button secondary" href="@_orders?.ManufacturingOrdersUrl">@Text("Open manufacturing orders", "เปิดคำสั่งผลิต")</a>
+                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Open manufacturing orders", "เปิดคำสั่งผลิต")</button>
                 </div>
             </div>
         }
@@ -80,6 +80,8 @@
     private CustomerOrdersResponse? _orders;
     private bool _loading = true;
     private string? _error;
+    private string QuoteDisabledButtonClass => "button secondary is-disabled";
+    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     protected override async Task OnInitializedAsync()
     {

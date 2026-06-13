@@ -1259,7 +1259,7 @@
             actions.Add(CreateLinkAction(Text("Open orders", "เปิดคำสั่งซื้อ"), "/account/orders", Icons.Material.Filled.ReceiptLong, true));
         }
 
-        actions.Add(CreateLinkAction(Text("Quote Engine", "ระบบราคา"), SiteContent.QuoteOrdersUrl, Icons.Material.Filled.OpenInNew, true));
+        actions.Add(CreateLinkAction(Text("Contact MALIEV", "ติดต่อ MALIEV"), "/contact", Icons.Material.Filled.Mail, true));
         actions.Add(ContainsAnyTerm(normalizedMessage, ProfileIntentTerms)
             ? CreateLinkAction(Text("Addresses", "สมุดที่อยู่"), "/account/addresses", Icons.Material.Filled.LocationOn, false)
             : CreateLinkAction(Text("Profile", "โปรไฟล์"), "/account/profile", Icons.Material.Filled.Person, false));
@@ -1305,7 +1305,7 @@
         {
             ChatActionViewServices => ResolveServicesHref(action.Data),
             ChatActionContact => "/contact",
-            ChatActionRequestQuote => SiteContent.QuoteNewProjectUrl,
+            ChatActionRequestQuote => "/contact",
             _ => TryNormalizeExplicitHref(action.Data)
         };
     }

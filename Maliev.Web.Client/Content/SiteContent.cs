@@ -6,6 +6,16 @@ namespace Maliev.Web.Client.Content;
 internal static class SiteContent
 {
     private const string DefaultQuoteEngineUrl = "https://quote.maliev.com";
+    internal const bool QuoteEntryDisabled = true;
+    internal static readonly LocalizedText QuoteDisabledTitle = Text(
+        "Online quote intake is temporarily unavailable.",
+        "ระบบขอราคาชิ้นงานออนไลน์ยังไม่เปิดใช้งานชั่วคราว");
+    internal static readonly LocalizedText QuoteDisabledBody = Text(
+        "Please contact MALIEV while we prepare the MVP quote workflow.",
+        "กรุณาติดต่อ MALIEV ระหว่างที่เราเตรียมเวิร์กโฟลว์ราคา MVP");
+    internal static readonly LocalizedText QuoteDisabledAction = Text(
+        "Temporarily unavailable",
+        "ยังไม่เปิดใช้งาน");
     private static readonly IReadOnlyDictionary<string, string> BlogPdfCategoryTokens =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

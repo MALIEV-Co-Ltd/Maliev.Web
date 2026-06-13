@@ -366,8 +366,8 @@ public sealed class CustomerOrdersResponse
     /// <summary>Gets or sets shop orders from the commerce boundary.</summary>
     public List<CustomerOrderSummaryDto> ShopOrders { get; set; } = [];
 
-    /// <summary>Gets or sets the QuoteEngine project and manufacturing order URL.</summary>
-    public string ManufacturingOrdersUrl { get; set; } = "https://quote.maliev.com/orders";
+    /// <summary>Gets or sets the customer-facing support URL for manufacturing order help.</summary>
+    public string ManufacturingOrdersUrl { get; set; } = "/contact";
 }
 
     /// <summary>

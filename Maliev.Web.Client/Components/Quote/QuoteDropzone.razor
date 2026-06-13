@@ -6,12 +6,15 @@
            class="landing-quote-dropzone-input"
            type="file"
            multiple
-           accept="@SupportedFormatsAccept" />
+           accept="@SupportedFormatsAccept"
+           disabled="@Disabled" />
     <div id="@DropzoneId"
          role="button"
-         tabindex="0"
+         tabindex="@DropzoneTabIndex"
          class="@ButtonClass"
          aria-label="@AriaLabel"
+         aria-disabled="@DisabledAria"
+         data-disabled="@DisabledAria"
          data-idle-label="@ActionText"
          data-opening-label="@OpeningText">
         <span class="landing-quote-dropzone-inner">
@@ -50,7 +53,7 @@
                     }
                 </span>
                 <span class="landing-quote-dropzone-action">
-                    <span data-quote-dropzone-label>@ActionText</span>
+                    <span data-quote-dropzone-label>@DisplayActionText</span>
                 </span>
             </span>
         </span>
@@ -97,15 +100,32 @@
     [Parameter]
     public string OpeningText { get; set; } = "Opening quote engine";
 
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public string DisabledText { get; set; } = "Temporarily unavailable";
+
     private string WrapperClass => string.IsNullOrWhiteSpace(Class)
         ? "landing-quote-dropzone-shell"
         : $"landing-quote-dropzone-shell {Class}";
 
-    private string ButtonClass => string.IsNullOrWhiteSpace(Class)
-        ? "landing-quote-dropzone"
-        : $"landing-quote-dropzone {Class}";
+    private string ButtonClass
+    {
+        get
+        {
+            var classes = string.IsNullOrWhiteSpace(Class)
+                ? "landing-quote-dropzone"
+                : $"landing-quote-dropzone {Class}";
+
+            return Disabled ? $"{classes} is-disabled" : classes;
+        }
+    }
 
     private string FormatsExpanded => _isFormatsOpen ? "true" : "false";
+    private string DisabledAria => Disabled ? "true" : "false";
+    private string DropzoneTabIndex => Disabled ? "-1" : "0";
+    private string DisplayActionText => Disabled ? DisabledText : ActionText;
 
     private void ToggleFormats()
     {
@@ -128,6 +148,11 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
+        {
+            return;
+        }
+
+        if (Disabled)
         {
             return;
         }

@@ -60,8 +60,10 @@ public sealed class AccountPageSourceTests
         Assert.Contains("CustomerSegmentLabel", account);
         Assert.Contains("NdaStatusLabel", account);
         Assert.Contains("NdaCardCopy", account);
-        Assert.Contains("QuoteEngineNdasHref", account);
-        Assert.Contains("/quote/start?returnUrl=/ndas", account);
+        Assert.Contains("QuoteDisabledTitle", account);
+        Assert.Contains("account-action-card is-disabled", account);
+        Assert.DoesNotContain("QuoteEngineNdasHref", account);
+        Assert.DoesNotContain("/quote/start?returnUrl=/ndas", account);
         Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
         Assert.Contains("Text(\"View NDA agreement\", \"ดูข้อตกลง NDA\")", account);
         Assert.Contains("@Text(\"Customer tier\", \"ระดับลูกค้า\")", account);
@@ -82,7 +84,7 @@ public sealed class AccountPageSourceTests
         Assert.Contains("ProfileImageUrl = GetString(root, \"profileImageUrl\", \"profile_image_url\", \"ProfileImageUrl\")", controller);
         Assert.DoesNotContain("Status = GetString(root, \"status\", \"Status\")", controller);
 
-        Assert.Contains("QuoteNdasUrl => $\"{QuoteEngineUrl}/ndas\"", siteContent);
+        Assert.Contains("QuoteEntryDisabled = true", siteContent);
 
         Assert.Contains("[SupplyParameterFromQuery]\n    public string? Email", forgotPassword);
         Assert.Contains("value=\"@Email\"", forgotPassword);
@@ -111,17 +113,18 @@ public sealed class AccountPageSourceTests
     }
 
     /// <summary>
-    /// Verifies Web routes QuoteEngine account links through a signed session handoff instead of sending customers as anonymous users.
+    /// Verifies Web disables QuoteEngine account links while QuoteEngine is out of the MVP path.
     /// </summary>
     [Fact]
-    public void AccountNdaLinkGoesToQuoteEngineViaSharedCookieSSO()
+    public void AccountNdaLinkIsDisabledForMvp()
     {
         var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
         var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
 
-        Assert.Contains("QuoteEngineNdasHref", account, StringComparison.Ordinal);
-        // With shared-cookie SSO, the NDA link uses /quote/start which does a plain redirect.
-        Assert.Contains("/quote/start?returnUrl=/ndas", account, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledTitle", account, StringComparison.Ordinal);
+        Assert.Contains("aria-disabled=\"true\"", account, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteEngineNdasHref", account, StringComparison.Ordinal);
+        Assert.DoesNotContain("/quote/start?returnUrl=/ndas", account, StringComparison.Ordinal);
         Assert.Contains("[HttpGet(\"/quote/start\")]", authController, StringComparison.Ordinal);
         Assert.DoesNotContain("CustomerSessionHandoffToken", authController, StringComparison.Ordinal);
         Assert.DoesNotContain("/auth/web-handoff", authController, StringComparison.Ordinal);
@@ -255,6 +258,9 @@ public sealed class AccountPageSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("class=\"empty-state compact account-orders-empty\"", orders);
+        Assert.Contains("QuoteDisabledButtonClass", orders);
+        Assert.Contains("Open manufacturing orders", orders);
+        Assert.DoesNotContain("ManufacturingOrdersUrl", orders);
         Assert.Contains(".account-orders-empty", styles);
         Assert.Contains("padding-inline-start: clamp(20px, 3vw, 36px);", styles);
         Assert.Contains("@media (max-width: 960px)", styles);

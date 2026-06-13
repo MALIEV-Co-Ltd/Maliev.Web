@@ -499,14 +499,22 @@ main {
 }
 
 .button:disabled,
-.button[aria-disabled="true"] {
+.button[aria-disabled="true"],
+.button.is-disabled,
+.nav-quote-link.is-disabled,
+.mobile-nav-quote.is-disabled,
+.section-link.is-disabled,
+.inline-link.is-disabled {
   opacity: .62;
   cursor: not-allowed;
   pointer-events: none;
   transform: none;
 }
 
-.button.primary:disabled {
+.button.primary:disabled,
+.button.primary.is-disabled,
+.nav-quote-link.is-disabled,
+.mobile-nav-quote.is-disabled {
   background: color-mix(in srgb, var(--cta-bg) 72%, var(--paper-3));
 }
 
@@ -1270,6 +1278,20 @@ html:lang(th) .h1 {
 .landing-quote-dropzone.is-opening {
   cursor: progress;
   opacity: .78;
+}
+
+.landing-quote-dropzone.is-disabled {
+  cursor: not-allowed;
+  opacity: .68;
+  border-style: solid;
+  background: var(--paper-2);
+}
+
+.landing-quote-dropzone.is-disabled:hover,
+.landing-quote-dropzone.is-disabled:focus-visible,
+.landing-quote-dropzone.is-disabled.is-dragover {
+  border-color: color-mix(in srgb, var(--muted) 54%, transparent);
+  background: var(--paper-2);
 }
 
 .landing-quote-dropzone.has-error {

@@ -36,7 +36,14 @@
         @if (ShouldRenderPageHeroActions)
         {
             <div class="quote-actions">
-                <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+                @if (PrimaryActionDisabled)
+                {
+                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@PrimaryAction</button>
+                }
+                else
+                {
+                    <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
+                }
                 <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
                     @if (SecondaryActionUsesLogo)
                     {
@@ -503,7 +510,7 @@ else if (CurrentCaseStudy is { } caseStudyDetail)
                     <li>@outcome.For(Preferences.Culture)</li>
                 }
             </ul>
-            <a class="button primary" href="@SiteContent.QuoteNewProjectUrl">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</a>
+            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</button>
         </aside>
     </section>
 }
@@ -551,7 +558,7 @@ else if (CurrentBlogPost is { } blogPost)
                 }
             </ul>
             <div class="detail-sidebar-actions" aria-label="@Text("Blog sidebar actions", "ปุ่มดำเนินการในแถบบทความ")">
-                <a class="button primary" href="@SiteContent.QuoteNewUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
+                <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Get part price", "ดูราคาชิ้นงาน")</button>
                 <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
                 <button type="button" class="button secondary blog-pdf-button @(_pdfDownloading ? "is-loading" : "")"
                         @onclick="() => DownloadPdfAsync(blogPost)" disabled="@_pdfDownloading"
@@ -758,7 +765,7 @@ else if (Path == "contact")
                     <strong>@Text("This form is not the RFQ workspace.", "แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา")</strong>
                     <p>
                         @Text("Attach small support references here. For CAD upload, price checks, lead time, and production RFQ, use the", "แนบไฟล์อ้างอิงขนาดเล็กสำหรับงานสนับสนุนที่นี่ หากต้องอัปโหลด CAD เช็กราคา ระยะเวลา หรือขอใบเสนอราคางานผลิต ให้ใช้")
-                        <a href="@SiteContent.QuoteNewUrl">@Text("Quote Engine", "ระบบราคา")</a>.
+                        <span class="inline-link is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">@Text("Quote Engine", "ระบบราคา")</span>.
                     </p>
                 </div>
             </div>
@@ -1908,6 +1915,13 @@ else
         var path when IsPolicyPage(path) => "/contact",
         _ => SiteContent.QuoteNewProjectUrl
     };
+
+    private bool PrimaryActionDisabled => !IsPolicyPage(Path);
+
+    private string QuoteDisabledButtonClass => "button primary is-disabled";
+
+    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
+
     private string SecondaryAction => Path switch
     {
         "contact" => Text("Shop products", "เลือกซื้อสินค้า"),
