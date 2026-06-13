@@ -274,6 +274,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Uploading ", script, StringComparison.Ordinal);
         Assert.Contains("uploadAndBuildHandoff", script, StringComparison.Ordinal);
         Assert.Contains("/web/v1/quote/uploads/handoff-token", script, StringComparison.Ordinal);
+        Assert.Contains("readProblemDetail(tokenRes)", script, StringComparison.Ordinal);
+        Assert.Contains("problem?.detail || problem?.title || \"Failed to prepare uploaded files for QuoteEngine.\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("toBase64Url", script, StringComparison.Ordinal);
         Assert.Contains("url.searchParams.set(\"handoff\", handoff)", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Content-Length", script, StringComparison.Ordinal);

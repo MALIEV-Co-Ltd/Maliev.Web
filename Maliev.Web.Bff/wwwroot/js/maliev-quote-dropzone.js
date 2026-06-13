@@ -231,7 +231,8 @@ window.malievQuoteDropzone = (() => {
       body: JSON.stringify({ quoteSessionId, files: uploadedFiles })
     });
     if (!tokenRes.ok) {
-      throw new Error("Failed to prepare uploaded files for QuoteEngine.");
+      const problem = await readProblemDetail(tokenRes);
+      throw new Error(problem?.detail || problem?.title || "Failed to prepare uploaded files for QuoteEngine.");
     }
 
     const handoff = await tokenRes.json();
@@ -240,6 +241,14 @@ window.malievQuoteDropzone = (() => {
     }
 
     return handoff.handoffToken;
+  }
+
+  async function readProblemDetail(response) {
+    try {
+      return await response.json();
+    } catch {
+      return null;
+    }
   }
 
   function setUploadingLabel(dropzone, current, total, fileName) {
