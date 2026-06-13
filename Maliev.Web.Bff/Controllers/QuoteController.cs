@@ -178,9 +178,17 @@ public sealed class QuoteController(
             return BadRequest(validationError);
         }
 
+        var token = handoffToken.Create(request);
+        if (token.Length > WebQuoteUploadConstraints.MaxQuoteEngineHandoffTokenLength)
+        {
+            return BadRequest(HandoffProblem(
+                "Too many uploaded files",
+                "Upload fewer files at a time so QuoteEngine can import the handoff securely."));
+        }
+
         return Ok(new WebUploadHandoffTokenResponse
         {
-            HandoffToken = handoffToken.Create(request)
+            HandoffToken = token
         });
     }
 

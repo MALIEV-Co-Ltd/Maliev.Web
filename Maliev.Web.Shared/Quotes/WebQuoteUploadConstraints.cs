@@ -11,6 +11,9 @@ public static class WebQuoteUploadConstraints
     /// <summary>Maximum customer quote upload size in megabytes for user-facing problem details.</summary>
     public const int MaxFileSizeMegabytes = 200;
 
+    /// <summary>Maximum signed handoff token length accepted by QuoteEngine.</summary>
+    public const int MaxQuoteEngineHandoffTokenLength = 20_000;
+
     /// <summary>CAD file extensions accepted by the public website quote handoff.</summary>
     public static IReadOnlyList<string> SupportedExtensions { get; } =
     [

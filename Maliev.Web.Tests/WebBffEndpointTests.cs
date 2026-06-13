@@ -10,6 +10,7 @@ using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Localization;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -271,6 +272,43 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains('.', handoff.HandoffToken);
         Assert.DoesNotContain("bracket.step", handoff.HandoffToken, StringComparison.Ordinal);
         Assert.DoesNotContain("cover.stl", handoff.HandoffToken, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies Web refuses to create handoff tokens that exceed QuoteEngine's wire contract.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadHandoffToken_TooManyFilesForQuoteEngineToken_ReturnsBadRequest()
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+        var files = Enumerable.Range(1, 80)
+            .Select(index =>
+            {
+                var fileName = $"customer-uploaded-production-bracket-with-long-name-{index:D3}.step";
+                return new WebUploadHandoffFileDto
+                {
+                    UploadId = $"upload-{index:D3}-{Guid.NewGuid():N}",
+                    FileName = fileName,
+                    StoragePath = $"quotes/temp/{quoteSessionId:N}/{index:D3}/{fileName}",
+                    ContentType = "application/step",
+                    FileSizeBytes = 420_000,
+                    Status = "Completed"
+                };
+            })
+            .ToList();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/handoff-token", new WebUploadHandoffTokenRequest
+        {
+            QuoteSessionId = quoteSessionId,
+            Files = files
+        });
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Too many uploaded files", problem.Title);
+        Assert.Equal(StatusCodes.Status400BadRequest, problem.Status);
     }
 
     /// <summary>
