@@ -199,8 +199,16 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("SiteContent.MakeStudioUrl", source);
-        Assert.Contains("Open Make Studio", source);
-        Assert.Contains("What do you want to make today?", source);
+        Assert.Contains("Start in Make Studio", source);
+        Assert.Contains("Tell Make Studio what you want to build.", source);
+        Assert.Contains("Describe the part in plain language, then attach CAD, drawings, photos, or sketches when they help.", source);
+        Assert.Contains("make-studio-prompt", source);
+        Assert.Contains("make-studio-artifacts", source);
+        Assert.Contains("CAD", source);
+        Assert.Contains("Drawings", source);
+        Assert.Contains("Photos", source);
+        Assert.Contains("Sketches", source);
+        Assert.Contains("DFM notes", source);
         Assert.Contains("make-studio-cta", source);
         Assert.Contains("make-studio-primary", source);
         Assert.Contains("make-studio-note", source);
@@ -208,8 +216,15 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Make Studio", content);
         Assert.Contains("MakeStudioUrl => QuoteEngineUrl", content);
         Assert.Contains(".make-studio-cta", styles);
+        Assert.Contains(".make-studio-prompt", styles);
+        Assert.Contains(".make-studio-artifacts", styles);
+        Assert.Contains(".make-studio-prompt span {\n    white-space: normal;", styles);
+        Assert.Contains(".make-studio-artifacts li {\n    min-width: 0;", styles);
         Assert.Contains(".make-studio-primary", styles);
         Assert.Contains(".final-make-studio", styles);
+        Assert.DoesNotContain("What do you want to make today?", source);
+        Assert.DoesNotContain("Open Make Studio", source);
+        Assert.DoesNotContain("old price button", source);
         Assert.DoesNotContain("<QuoteDropzone Href=\"@SiteContent.QuoteNewProjectUrl\"", source);
         Assert.DoesNotContain("Class=\"final-dropzone\"", source);
         Assert.Contains("landing-quote-dropzone", dropzone);

@@ -22,14 +22,24 @@
             <div class="make-studio-cta" aria-label="@Text("Make Studio start", "เริ่มต้น Make Studio")">
                 <div>
                     <span>@Text("Make Studio", "Make Studio")</span>
-                    <strong>@Text("What do you want to make today?", "วันนี้ต้องการผลิตอะไร?")</strong>
-                    <p>@Text("Start with chat, attach CAD files or sketches, and let the studio build requirements, DFM notes, and quote artifacts as the project becomes clear.", "เริ่มจากการคุย แนบไฟล์ CAD หรือสเก็ตช์ แล้วให้สตูดิโอจัดโจทย์ หมายเหตุ DFM และไฟล์ใบเสนอราคาเมื่อโปรเจกต์ชัดขึ้น")</p>
+                    <strong>@Text("Tell Make Studio what you want to build.", "บอก Make Studio ว่าต้องการสร้างอะไร")</strong>
+                    <p>@Text("Describe the part in plain language, then attach CAD, drawings, photos, or sketches when they help.", "อธิบายชิ้นงานด้วยภาษาปกติ แล้วแนบ CAD, Drawing, รูปถ่าย หรือสเก็ตช์เมื่อช่วยให้เข้าใจงาน")</p>
+                    <div class="make-studio-prompt" aria-label="@Text("Example Make Studio prompt", "ตัวอย่างข้อความ Make Studio")">
+                        <span>@Text("I need five nylon brackets for a test rig by Friday...", "ต้องการขายึดไนลอน 5 ชิ้นสำหรับแท่นทดสอบภายในวันศุกร์...")</span>
+                    </div>
+                    <ul class="make-studio-artifacts" aria-label="@Text("Make Studio accepted inputs", "ข้อมูลที่ Make Studio รองรับ")">
+                        <li>CAD</li>
+                        <li>@Text("Drawings", "Drawing")</li>
+                        <li>@Text("Photos", "รูปถ่าย")</li>
+                        <li>@Text("Sketches", "สเก็ตช์")</li>
+                        <li>@Text("DFM notes", "หมายเหตุ DFM")</li>
+                    </ul>
                 </div>
                 <div class="make-studio-actions">
-                    <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Open Make Studio", "เปิด Make Studio")</a>
+                    <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
                     <a class="button secondary make-studio-secondary" href="/contact">@Text("Talk to MALIEV", "คุยกับ MALIEV")</a>
                 </div>
-                <p class="make-studio-note">@Text("Chat-first quoting replaces the old price button: describe the part, upload when ready, and keep every artifact in one workspace.", "การขอราคาแบบแชทแทนปุ่มดูราคาแบบเดิม: อธิบายชิ้นงาน อัปโหลดเมื่อพร้อม และเก็บทุกไฟล์งานไว้ในพื้นที่เดียว")</p>
+                <p class="make-studio-note">@Text("Make Studio keeps the conversation, uploads, assumptions, DFM review, and quote artifacts together from the first message.", "Make Studio เก็บบทสนทนา ไฟล์อัปโหลด สมมติฐาน การตรวจ DFM และไฟล์ใบเสนอราคาไว้ด้วยกันตั้งแต่ข้อความแรก")</p>
             </div>
         </div>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
@@ -322,8 +332,14 @@
             <strong>@Text("Open the workspace and start with one sentence.", "เปิดพื้นที่ทำงานแล้วเริ่มด้วยหนึ่งประโยค")</strong>
             <p>@Text("Make Studio keeps chat, uploads, sketches, DFM feedback, and quote artifacts together instead of sending you through a price form.", "Make Studio เก็บแชท ไฟล์อัปโหลด สเก็ตช์ ความเห็น DFM และไฟล์ใบเสนอราคาไว้ด้วยกัน แทนการพาคุณผ่านฟอร์มราคา")</p>
         </div>
+        <ul class="make-studio-artifacts" aria-label="@Text("Make Studio project evidence", "หลักฐานโปรเจกต์ใน Make Studio")">
+            <li>CAD</li>
+            <li>@Text("Drawings", "Drawing")</li>
+            <li>@Text("Photos", "รูปถ่าย")</li>
+            <li>@Text("Sketches", "สเก็ตช์")</li>
+        </ul>
         <div class="make-studio-actions">
-            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Open Make Studio", "เปิด Make Studio")</a>
+            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
             <a class="button secondary make-studio-secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>

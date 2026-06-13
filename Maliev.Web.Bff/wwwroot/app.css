@@ -1249,7 +1249,7 @@ html:lang(th) .h1 {
   box-shadow: rgba(52, 55, 65, .10) 0 22px 52px -32px, var(--shadow-border);
 }
 
-.make-studio-cta span {
+.make-studio-cta > div > span {
   display: inline-flex;
   width: fit-content;
   margin-bottom: 8px;
@@ -1280,6 +1280,56 @@ html:lang(th) .h1 {
   color: var(--muted);
   font-size: .98rem;
   line-height: 1.58;
+}
+
+.make-studio-prompt {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  margin-top: 16px;
+  padding: 0 14px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper-2) 88%, var(--blue) 12%);
+  border: 1px solid color-mix(in srgb, var(--blue) 28%, var(--rule));
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 44%, transparent);
+}
+
+.make-studio-prompt span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.make-studio-artifacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.make-studio-artifacts li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--ink-2);
+  background: color-mix(in srgb, var(--paper) 78%, var(--blue) 8%);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
 .make-studio-actions {
@@ -9505,6 +9555,31 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .landing-hero-actions {
     display: grid;
     margin-top: 18px;
+  }
+
+  .make-studio-cta {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .make-studio-prompt {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .make-studio-prompt span {
+    white-space: normal;
+  }
+
+  .make-studio-artifacts {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .make-studio-artifacts li {
+    min-width: 0;
+    padding: 0 8px;
+    font-size: .58rem;
   }
 
   .shop-masthead {
