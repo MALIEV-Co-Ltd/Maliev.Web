@@ -36,7 +36,7 @@
                     </ul>
                 </div>
                 <div class="make-studio-actions">
-                    <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
+                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start in Make Studio", "เริ่มใน Make Studio")</button>
                     <a class="button secondary make-studio-secondary" href="/contact">@Text("Talk to MALIEV", "คุยกับ MALIEV")</a>
                 </div>
                 <p class="make-studio-note">@Text("Make Studio keeps the conversation, uploads, assumptions, DFM review, and quote artifacts together from the first message.", "Make Studio เก็บบทสนทนา ไฟล์อัปโหลด สมมติฐาน การตรวจ DFM และไฟล์ใบเสนอราคาไว้ด้วยกันตั้งแต่ข้อความแรก")</p>
@@ -339,7 +339,7 @@
             <li>@Text("Sketches", "สเก็ตช์")</li>
         </ul>
         <div class="make-studio-actions">
-            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
+            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start in Make Studio", "เริ่มใน Make Studio")</button>
             <a class="button secondary make-studio-secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>
@@ -511,6 +511,10 @@
     private string HomeServiceChatbotContext => Text(
         $"Home services selected: {SelectedHomeService.Title.En}",
         $"บริการผลิตที่เลือก: {SelectedHomeService.Title.Th}");
+
+    private string QuoteDisabledButtonClass => "button primary make-studio-primary is-disabled";
+
+    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     private async Task SelectWorkflowStepAsync(ProcessStep step, ElementReference scrollTarget)
     {

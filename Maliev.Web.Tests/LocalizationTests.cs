@@ -111,12 +111,14 @@ public sealed class LocalizationTests
         Assert.False(layout.Contains("L[\"", StringComparison.Ordinal));
         Assert.False(home.Contains("L[\"", StringComparison.Ordinal));
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout);
-        Assert.Contains("SiteContent.MakeStudioUrl", layout);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", layout);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", layout);
         Assert.DoesNotContain("data-quote-disabled", layout);
-        Assert.Contains("Text(\"Open Make Studio\", \"เปิด Make Studio\")", home);
+        Assert.Contains("Text(\"Start in Make Studio\", \"เริ่มใน Make Studio\")", home);
         Assert.Contains("Text(\"Talk to MALIEV\", \"คุยกับ MALIEV\")", home);
-        Assert.Contains("Text(\"What do you want to make today?\", \"วันนี้ต้องการผลิตอะไร?\")", home);
-        Assert.Contains("SiteContent.MakeStudioUrl", home);
+        Assert.Contains("Text(\"Tell Make Studio what you want to build.", home);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", home);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", home);
         Assert.DoesNotContain("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
         Assert.DoesNotContain("Configure material, finish and quantity after upload.", home);
         Assert.DoesNotContain("quantity at quote.maliev.com", home);

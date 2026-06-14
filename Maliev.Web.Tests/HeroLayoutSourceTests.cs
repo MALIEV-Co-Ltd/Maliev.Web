@@ -198,7 +198,9 @@ public sealed class HeroLayoutSourceTests
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("SiteContent.MakeStudioUrl", source);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", source, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", source, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", source, StringComparison.Ordinal);
         Assert.Contains("Start in Make Studio", source);
         Assert.Contains("Tell Make Studio what you want to build.", source);
         Assert.Contains("Describe the part in plain language, then attach CAD, drawings, photos, or sketches when they help.", source);
@@ -344,13 +346,18 @@ public sealed class HeroLayoutSourceTests
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("SiteContent.MakeStudioUrl", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", layout, StringComparison.Ordinal);
         Assert.DoesNotContain("NavigateToQuoteStart", layout, StringComparison.Ordinal);
         Assert.DoesNotContain("href=\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", layout, StringComparison.Ordinal);
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledNavClass", layout, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledMobileNavClass", layout, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", layout, StringComparison.Ordinal);
         Assert.DoesNotContain("data-quote-disabled", layout, StringComparison.Ordinal);
 
-        Assert.Contains("SiteContent.MakeStudioUrl", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", home, StringComparison.Ordinal);
+        Assert.Contains("QuoteDisabledButtonClass", home, StringComparison.Ordinal);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", home, StringComparison.Ordinal);
         Assert.DoesNotContain("Disabled=\"@SiteContent.QuoteEntryDisabled\"", home, StringComparison.Ordinal);
         Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage, StringComparison.Ordinal);
         Assert.DoesNotContain("QuoteDropzoneDisabledText", home, StringComparison.Ordinal);
@@ -1685,8 +1692,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
-        Assert.Contains("SiteContent.MakeStudioUrl", source);
+        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", source);
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", source);
+        Assert.Contains("QuoteDisabledNavClass", source);
+        Assert.Contains("QuoteDisabledMobileNavClass", source);
+        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
         Assert.DoesNotContain("data-quote-disabled", source);
         Assert.DoesNotContain("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
         Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
@@ -1694,7 +1704,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<NavLink href=\"/contact\">@Text(\"Contact\", \"ติดต่อ\")</NavLink>", source);
         Assert.Contains("class=\"mobile-nav-primary\"", source);
         Assert.Contains("class=\"mobile-nav-actions\"", source);
-        Assert.Contains("class=\"mobile-nav-quote\"", source);
+        Assert.Contains("mobile-nav-quote is-disabled", source);
         Assert.DoesNotContain("<NavLink href=\"/materials\" @onclick=\"CloseMobileNav\">", source);
         Assert.DoesNotContain("<NavLink href=\"/case-studies\" @onclick=\"CloseMobileNav\">", source);
         Assert.DoesNotContain("<NavLink href=\"/blog\" @onclick=\"CloseMobileNav\">", source);
