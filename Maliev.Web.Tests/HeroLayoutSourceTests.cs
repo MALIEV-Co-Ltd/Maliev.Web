@@ -1560,7 +1560,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("contact-rfq-notice", source);
         Assert.Contains("This form is not the RFQ workspace.", source);
         Assert.Contains("แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา", source);
-        Assert.Contains("Quote Engine", source);
+        Assert.Contains("Make Studio", source);
+        Assert.DoesNotContain("Quote Engine", source);
         Assert.Contains("contact-upload-panel", source);
         Assert.Contains("<InputFile OnChange=\"HandleContactFilesAsync\"", source);
         Assert.Contains("accept=\".pdf,.png,.jpg,.jpeg,.webp,.txt,.zip,.stl,.step,.stp,.obj,.3mf\"", source);

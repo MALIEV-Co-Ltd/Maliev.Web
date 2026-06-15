@@ -131,9 +131,18 @@ public sealed class LocalizationTests
     public void ServiceQuoteDropzone_UsesPreferenceBackedFormatLabels()
     {
         var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
+        var staticPage = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var chatbot = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
 
         Assert.Contains("FormatsButtonText=\"@Text(\"Supported formats\", \"ไฟล์ที่รองรับ\")\"", servicePage);
-        Assert.Contains("FormatsPanelLabel=\"@Text(\"Supported QuoteEngine file formats\", \"รายการไฟล์ที่ QuoteEngine รองรับ\")\"", servicePage);
+        Assert.Contains("FormatsPanelLabel=\"@Text(\"Supported Make Studio file formats\", \"รายการไฟล์ที่ Make Studio รองรับ\")\"", servicePage);
+        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")</span>.", staticPage);
+        Assert.Contains("Use Make Studio for RFQ CAD packages.", staticPage);
+        Assert.Contains("Manufacturing quotes and production orders continue in Make Studio", chatbot);
+        Assert.DoesNotContain("Supported QuoteEngine file formats", servicePage);
+        Assert.DoesNotContain("Use Quote Engine for RFQ CAD packages", staticPage);
+        Assert.DoesNotContain("quote.maliev.com", staticPage);
+        Assert.DoesNotContain("continue in the Quote Engine", chatbot);
     }
 
     /// <summary>

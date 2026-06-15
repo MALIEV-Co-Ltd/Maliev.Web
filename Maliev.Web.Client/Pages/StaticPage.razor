@@ -765,7 +765,7 @@ else if (Path == "contact")
                     <strong>@Text("This form is not the RFQ workspace.", "แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา")</strong>
                     <p>
                         @Text("Attach small support references here. For CAD upload, price checks, lead time, and production RFQ, use the", "แนบไฟล์อ้างอิงขนาดเล็กสำหรับงานสนับสนุนที่นี่ หากต้องอัปโหลด CAD เช็กราคา ระยะเวลา หรือขอใบเสนอราคางานผลิต ให้ใช้")
-                        <span class="inline-link is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">@Text("Quote Engine", "ระบบราคา")</span>.
+                        <span class="inline-link is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">@Text("Make Studio", "Make Studio")</span>.
                     </p>
                 </div>
             </div>
@@ -779,7 +779,7 @@ else if (Path == "contact")
                 </span>
                 <span class="contact-upload-copy">
                     <strong>@Text("Attach support files", "แนบไฟล์ประกอบ")</strong>
-                    <small>@Text($"Up to {MaxContactFiles} files, {MaxContactFileMegabytes} MB each. Use Quote Engine for RFQ CAD packages.", $"สูงสุด {MaxContactFiles} ไฟล์ ไฟล์ละ {MaxContactFileMegabytes} MB หากเป็นชุดไฟล์ CAD เพื่อขอราคาให้ใช้ระบบราคา")</small>
+                    <small>@Text($"Up to {MaxContactFiles} files, {MaxContactFileMegabytes} MB each. Use Make Studio for RFQ CAD packages.", $"สูงสุด {MaxContactFiles} ไฟล์ ไฟล์ละ {MaxContactFileMegabytes} MB หากเป็นชุดไฟล์ CAD เพื่อขอราคาให้ใช้ Make Studio")</small>
                 </span>
             </label>
             @if (_contactFileUploads.Count > 0)
@@ -1097,7 +1097,7 @@ else
         "industries" => Text("We support factories, designers, product builders, educators, and maintenance teams.", "เราสนับสนุนโรงงาน นักออกแบบ ทีมพัฒนาสินค้า สถาบันการศึกษา และทีมซ่อมบำรุง"),
         "case-studies" => Text("Representative workflows for custom parts, fixtures, small-batch products, and machine support.", "ตัวอย่างเวิร์กโฟลว์สำหรับชิ้นงานเฉพาะ ฟิกซ์เจอร์ งานจำนวนน้อย และการสนับสนุนเครื่องจักร"),
         "blog" => Text("Practical notes for preparing manufacturable parts and ordering from MALIEV.", "บันทึกเชิงปฏิบัติสำหรับเตรียมชิ้นงานให้ผลิตได้และสั่งงานกับ MALIEV"),
-        "account/quotes" => Text("Saved custom manufacturing quotes now live in the dedicated quote engine.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ในระบบราคาโดยเฉพาะ"),
+        "account/quotes" => Text("Saved custom manufacturing quotes now live in Make Studio.", "ใบเสนอราคางานผลิตเฉพาะแบบอยู่ใน Make Studio"),
         var path when path.StartsWith("blog/", StringComparison.Ordinal) => CurrentBlogPost?.Summary.For(Preferences.Culture)
             ?? Text("Manufacturing guidance for customers preparing custom parts and product work.", "คำแนะนำงานผลิตสำหรับลูกค้าที่เตรียมชิ้นงานเฉพาะและงานสินค้า"),
         var path when path.StartsWith("case-studies/", StringComparison.Ordinal) => CurrentCaseStudy?.Summary.For(Preferences.Culture)
@@ -1131,8 +1131,8 @@ else
         ],
         "faq" =>
         [
-            Section("Where do custom quotes happen?", "งานเฉพาะแบบดูราคาที่ไหน", "Custom manufacturing quotes start at quote.maliev.com so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มที่ quote.maliev.com เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
-            Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่คำนวณราคาชิ้นงานได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from the quote engine.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจากระบบราคา"),
+            Section("Where do custom quotes happen?", "งานเฉพาะแบบดูราคาที่ไหน", "Custom manufacturing quotes start in Make Studio so uploads, DFM, pricing, and order tracking stay together.", "งานผลิตเฉพาะแบบเริ่มใน Make Studio เพื่อให้อัปโหลด ตรวจ DFM ราคา และติดตามงานอยู่ด้วยกัน"),
+            Section("Can I buy products without a quote?", "ซื้อสินค้าโดยไม่คำนวณราคาชิ้นงานได้ไหม", "Published shop items can be added to cart directly. Custom parts, tooling, and services should start from Make Studio.", "สินค้าที่เผยแพร่ในร้านค้าสามารถเพิ่มลงตะกร้าได้โดยตรง งานเฉพาะแบบ ทูลลิ่ง และบริการควรเริ่มจาก Make Studio"),
             Section("Can I request Thai or English documents?", "ขอเอกสารไทยหรืออังกฤษได้ไหม", "Yes. Keep your preferred language in the customer workspace and we will use it where available.", "ได้ ตั้งค่าภาษาที่ต้องการในพื้นที่ลูกค้า แล้วเราจะใช้ภาษานั้นเมื่อรองรับ")
         ],
         "shipping-returns" =>
@@ -1174,7 +1174,7 @@ else
                 "Scope and last update",
                 "ขอบเขตและวันที่ปรับปรุง",
                 "Updated May 12, 2026. This privacy policy explains how MALIEV Co., Ltd. collects, uses, discloses, stores, and protects personal data for website visitors, customers, quotation users, product buyers, and support contacts.",
-                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายความเป็นส่วนตัวนี้อธิบายวิธีที่บริษัท มาลีฟ จำกัด เก็บ ใช้ เปิดเผย จัดเก็บ และปกป้องข้อมูลส่วนบุคคลของผู้เยี่ยมชมเว็บไซต์ ลูกค้า ผู้ใช้ระบบราคา ผู้ซื้อสินค้า และผู้ติดต่อฝ่ายสนับสนุน",
+                "ปรับปรุงวันที่ 12 พฤษภาคม 2569 นโยบายความเป็นส่วนตัวนี้อธิบายวิธีที่บริษัท มาลีฟ จำกัด เก็บ ใช้ เปิดเผย จัดเก็บ และปกป้องข้อมูลส่วนบุคคลของผู้เยี่ยมชมเว็บไซต์ ลูกค้า ผู้ใช้ Make Studio ผู้ซื้อสินค้า และผู้ติดต่อฝ่ายสนับสนุน",
                 ("Controller contact: MALIEV Co., Ltd., 36/1 Moo 3, Khlong Khoi, Pak Kret, Nonthaburi 11120, Thailand.", "ผู้ควบคุมข้อมูล: บริษัท มาลีฟ จำกัด 36/1 หมู่ 3 ตำบลคลองข่อย อำเภอปากเกร็ด จังหวัดนนทบุรี 11120 ประเทศไทย"),
                 ("Email: info@maliev.com. Phone: +66 81 803 0404.", "อีเมล: info@maliev.com โทรศัพท์: +66 81 803 0404")),
             Section(
@@ -1360,13 +1360,13 @@ else
         ],
         "account/quotes" =>
         [
-            Section("Dedicated quote portal", "พอร์ทัลราคาชิ้นงานโดยเฉพาะ", "Custom manufacturing account features live at quote.maliev.com so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ที่ quote.maliev.com เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
+            Section("Dedicated Make Studio workspace", "พื้นที่ Make Studio โดยเฉพาะ", "Custom manufacturing account features live in Make Studio so files, quotes, orders, NDAs, and documents stay together.", "ฟีเจอร์บัญชีงานผลิตเฉพาะอยู่ใน Make Studio เพื่อให้ไฟล์ ใบเสนอราคา คำสั่งซื้อ NDA และเอกสารอยู่ด้วยกัน"),
             Section("Product shop", "ร้านค้าสินค้า", "Product shopping remains on www.maliev.com and keeps a separate cart flow.", "การซื้อสินค้ายังอยู่ที่ www.maliev.com และใช้ตะกร้าแยกต่างหาก")
         ],
         _ =>
         [
             Section("What we make", "สิ่งที่เราผลิต", "We support 3D printing, CNC machining, 3D scanning, CAD design, pneumatic injection molding machines, spare parts, fixtures, and printed products.", "เรารองรับงานพิมพ์ 3 มิติ CNC สแกน 3 มิติ ออกแบบ CAD เครื่องฉีดพลาสติกระบบลม อะไหล่ ฟิกซ์เจอร์ และสินค้าพิมพ์"),
-            Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use the dedicated quote engine when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ระบบราคาชิ้นงานเมื่องานเป็นแบบเฉพาะ")
+            Section("How we work", "วิธีการทำงาน", "Customers can buy published products directly or use Make Studio when the work is custom.", "ลูกค้าสามารถซื้อสินค้าที่เผยแพร่ได้โดยตรง หรือใช้ Make Studio เมื่องานเป็นแบบเฉพาะ")
         ]
     };
 
@@ -1905,7 +1905,7 @@ else
 
     private string PrimaryAction => Path switch
     {
-        var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open quote engine", "เปิดระบบราคา"),
+        var path when path.StartsWith("account/", StringComparison.Ordinal) => Text("Open Make Studio", "เปิด Make Studio"),
         var path when IsPolicyPage(path) => Text("Contact MALIEV", "ติดต่อ MALIEV"),
         _ => Text("Get part price", "ดูราคาชิ้นงาน")
     };
@@ -2080,7 +2080,7 @@ else
         {
             SetContactStatus(
                 Text("Too many files selected", "เลือกไฟล์มากเกินไป"),
-                Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through the Quote Engine.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่านระบบราคา"),
+                Text($"Select up to {MaxContactFiles} support files. Send larger RFQ packages through Make Studio.", $"เลือกไฟล์ประกอบได้สูงสุด {MaxContactFiles} ไฟล์ หากเป็นชุดไฟล์ขอราคาขนาดใหญ่ให้ส่งผ่าน Make Studio"),
                 ContactFormStatus.Error);
             return;
         }
@@ -2099,7 +2099,7 @@ else
                 fileUpload.MarkFailed();
                 SetContactStatus(
                     Text("File is too large", "ไฟล์ใหญ่เกินไป"),
-                    Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through the Quote Engine.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่านระบบราคา"),
+                    Text($"File {file.Name} is larger than {MaxContactFileMegabytes} MB. Please send large CAD packages through Make Studio.", $"ไฟล์ {file.Name} มีขนาดเกิน {MaxContactFileMegabytes} MB กรุณาส่งชุดไฟล์ CAD ขนาดใหญ่ผ่าน Make Studio"),
                     ContactFormStatus.Error);
                 _contact.Files.Clear();
                 return;

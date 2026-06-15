@@ -1061,8 +1061,8 @@
             await AddAssistantMessageAsync(
                 "assistant",
                 Text(
-                    $"Hi {displayName ?? "there"}, I can help with quote, order, receipt, and delivery questions tied to your signed-in customer account.\n\n{orderSummary}\n\nManufacturing quotes and production orders continue in the Quote Engine using the same customer identity.",
-                    $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} น้องมะลิช่วยเรื่องใบเสนอราคา คำสั่งซื้อ ใบเสร็จ และการจัดส่งที่ผูกกับบัญชีลูกค้าได้ค่ะ\n\n{orderSummary}\n\nงานใบเสนอราคาและคำสั่งผลิตจะต่อในระบบราคาโดยใช้ตัวตนลูกค้าเดียวกันค่ะ"),
+                    $"Hi {displayName ?? "there"}, I can help with quote, order, receipt, and delivery questions tied to your signed-in customer account.\n\n{orderSummary}\n\nManufacturing quotes and production orders continue in Make Studio using the same customer identity.",
+                    $"สวัสดีค่ะ {displayName ?? "คุณลูกค้า"} น้องมะลิช่วยเรื่องใบเสนอราคา คำสั่งซื้อ ใบเสร็จ และการจัดส่งที่ผูกกับบัญชีลูกค้าได้ค่ะ\n\n{orderSummary}\n\nงานใบเสนอราคาและคำสั่งผลิตจะต่อใน Make Studio โดยใช้ตัวตนลูกค้าเดียวกันค่ะ"),
                 actions);
             return;
         }
@@ -2147,23 +2147,23 @@
         if (orders is null)
         {
             return Text(
-                "Account order data is temporarily unavailable. You can still open the account area or Quote Engine.",
-                "ข้อมูลคำสั่งซื้อยังไม่พร้อมใช้งานชั่วคราว แต่ยังเปิดหน้าบัญชีหรือระบบราคาได้ค่ะ");
+                "Account order data is temporarily unavailable. You can still open the account area or Make Studio.",
+                "ข้อมูลคำสั่งซื้อยังไม่พร้อมใช้งานชั่วคราว แต่ยังเปิดหน้าบัญชีหรือ Make Studio ได้ค่ะ");
         }
 
         if (orders.ShopOrders.Count == 0)
         {
             return Text(
-                "I do not see storefront shop orders in this Web account yet. Manufacturing quotes, receipts, and production orders are available from the Quote Engine.",
-                "ยังไม่พบคำสั่งซื้อร้านค้าในบัญชี Web นี้ค่ะ ใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ในระบบราคาค่ะ");
+                "I do not see storefront shop orders in this Web account yet. Manufacturing quotes, receipts, and production orders are available from Make Studio.",
+                "ยังไม่พบคำสั่งซื้อร้านค้าในบัญชี Web นี้ค่ะ ใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ใน Make Studio ค่ะ");
         }
 
         var latest = orders.ShopOrders
             .OrderByDescending(order => order.CreatedAt)
             .First();
         return Text(
-            $"I found {orders.ShopOrders.Count} storefront order{(orders.ShopOrders.Count == 1 ? string.Empty : "s")}. Latest: **{latest.OrderNumber}** ({latest.Status}). Manufacturing quotes, receipts, and production orders stay in the Quote Engine.",
-            $"พบคำสั่งซื้อร้านค้า {orders.ShopOrders.Count} รายการค่ะ ล่าสุด: **{latest.OrderNumber}** ({latest.Status}) ส่วนใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ในระบบราคาค่ะ");
+            $"I found {orders.ShopOrders.Count} storefront order{(orders.ShopOrders.Count == 1 ? string.Empty : "s")}. Latest: **{latest.OrderNumber}** ({latest.Status}). Manufacturing quotes, receipts, and production orders stay in Make Studio.",
+            $"พบคำสั่งซื้อร้านค้า {orders.ShopOrders.Count} รายการค่ะ ล่าสุด: **{latest.OrderNumber}** ({latest.Status}) ส่วนใบเสนอราคา ใบเสร็จ และคำสั่งผลิตอยู่ใน Make Studio ค่ะ");
     }
 
     private static void AddMarkdownLine(List<string> lines, string label, string? value)
