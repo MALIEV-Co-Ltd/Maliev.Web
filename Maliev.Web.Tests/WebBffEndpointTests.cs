@@ -210,6 +210,35 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies public quote upload initiation accepts Make Studio supplemental context files accepted by QuoteEngine.
+    /// </summary>
+    [Theory]
+    [InlineData("requirements.pdf", "application/pdf")]
+    [InlineData("sketch.png", "image/png")]
+    [InlineData("photo.jpeg", "image/jpeg")]
+    [InlineData("drawing.dxf", "application/dxf")]
+    public async Task POST_QuoteUploadInitiation_SupplementalAttachment_ReturnsUploadSession(string fileName, string contentType)
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/resumable", new WebUploadInitiationRequest
+        {
+            FileName = fileName,
+            ContentType = contentType,
+            FileSize = 1024,
+            QuoteSessionId = quoteSessionId
+        });
+        var session = await response.Content.ReadFromJsonAsync<WebUploadInitiationResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(session);
+        Assert.Equal("web-upload-1", session.UploadId);
+        Assert.Contains(fileName, session.StoragePath, StringComparison.Ordinal);
+        Assert.Contains(quoteSessionId.ToString("N"), session.StoragePath, StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// Verifies public quote upload initiation rejects files above the customer upload limit before UploadService allocation.
     /// </summary>
     [Fact]
@@ -272,6 +301,39 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Contains('.', handoff.HandoffToken);
         Assert.DoesNotContain("bracket.step", handoff.HandoffToken, StringComparison.Ordinal);
         Assert.DoesNotContain("cover.stl", handoff.HandoffToken, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Verifies Web signs completed supplemental quote context before handing storage paths to QuoteEngine.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadHandoffToken_SupplementalAttachment_ReturnsSignedToken()
+    {
+        using var client = _factory.CreateClient();
+        var quoteSessionId = Guid.NewGuid();
+
+        var response = await client.PostAsJsonAsync("/web/v1/quote/uploads/handoff-token", new WebUploadHandoffTokenRequest
+        {
+            QuoteSessionId = quoteSessionId,
+            Files =
+            [
+                new WebUploadHandoffFileDto
+                {
+                    UploadId = "upload-pdf",
+                    FileName = "requirements.pdf",
+                    StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/requirements.pdf",
+                    ContentType = "application/pdf",
+                    FileSizeBytes = 420_000,
+                    Status = "Completed"
+                }
+            ]
+        });
+        var handoff = await response.Content.ReadFromJsonAsync<WebUploadHandoffTokenResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(handoff);
+        Assert.Contains('.', handoff.HandoffToken);
+        Assert.DoesNotContain("requirements.pdf", handoff.HandoffToken, StringComparison.Ordinal);
     }
 
     /// <summary>

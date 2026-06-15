@@ -14,8 +14,8 @@ public static class WebQuoteUploadConstraints
     /// <summary>Maximum signed handoff token length accepted by QuoteEngine.</summary>
     public const int MaxQuoteEngineHandoffTokenLength = 20_000;
 
-    /// <summary>CAD file extensions accepted by the public website quote handoff.</summary>
-    public static IReadOnlyList<string> SupportedExtensions { get; } =
+    /// <summary>CAD and 3D file extensions accepted by the public website quote handoff.</summary>
+    public static IReadOnlyList<string> SupportedCadExtensions { get; } =
     [
         "stl",
         "step",
@@ -47,12 +47,45 @@ public static class WebQuoteUploadConstraints
         "brep"
     ];
 
+    /// <summary>Drawing and office document extensions accepted as supplemental Make Studio context.</summary>
+    public static IReadOnlyList<string> SupplementalDocumentExtensions { get; } =
+    [
+        "pdf",
+        "dxf",
+        "dwg"
+    ];
+
+    /// <summary>Image extensions accepted as supplemental Make Studio context.</summary>
+    public static IReadOnlyList<string> SupplementalImageExtensions { get; } =
+    [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "heic"
+    ];
+
+    /// <summary>Archive extensions accepted for bundled quote attachments.</summary>
+    public static IReadOnlyList<string> SupplementalArchiveExtensions { get; } =
+    [
+        "zip"
+    ];
+
+    /// <summary>All file extensions accepted by the public website quote handoff.</summary>
+    public static IReadOnlyList<string> SupportedExtensions { get; } =
+        SupportedCadExtensions
+            .Concat(SupplementalDocumentExtensions)
+            .Concat(SupplementalImageExtensions)
+            .Concat(SupplementalArchiveExtensions)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
     private static readonly HashSet<string> SupportedExtensionLookup = new(SupportedExtensions, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Human-readable extension list for upload validation messages.</summary>
     public static string SupportedExtensionLabel => string.Join(", ", SupportedExtensions.Select(extension => extension.ToUpperInvariant()));
 
-    /// <summary>Determines whether the supplied file name has a supported CAD extension.</summary>
+    /// <summary>Determines whether the supplied file name has a supported Make Studio attachment extension.</summary>
     public static bool IsSupportedFileName(string fileName)
     {
         var extension = Path.GetExtension(fileName).TrimStart('.');

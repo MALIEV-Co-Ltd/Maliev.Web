@@ -75,7 +75,7 @@ public sealed class QuoteController(
             return BadRequest(new ProblemDetails
             {
                 Title = "Unsupported upload format",
-                Detail = $"Use one of these CAD formats: {WebQuoteUploadConstraints.SupportedExtensionLabel}.",
+                Detail = $"Use one of these Make Studio attachment formats: {WebQuoteUploadConstraints.SupportedExtensionLabel}.",
                 Status = StatusCodes.Status400BadRequest
             });
         }
@@ -217,7 +217,7 @@ public sealed class QuoteController(
 
         if (request.Files.Count == 0)
         {
-            return HandoffProblem("Uploaded files are required", "Upload at least one CAD file before continuing to QuoteEngine.");
+            return HandoffProblem("Uploaded files are required", "Upload at least one manufacturing file or supplemental attachment before continuing to Make Studio.");
         }
 
         var expectedPrefix = $"quotes/temp/{request.QuoteSessionId:N}/";
