@@ -53,6 +53,12 @@ public sealed class CheckoutDraftRequest
     /// <summary>Gets or sets the shipping address entered at checkout.</summary>
     public string ShippingAddress { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets structured shipping details entered at checkout.</summary>
+    public CheckoutShippingDetailsDto ShippingDetails { get; set; } = new();
+
+    /// <summary>Gets or sets the selected shipping rate snapshot.</summary>
+    public CheckoutShippingRateDto? SelectedShippingRate { get; set; }
+
     /// <summary>Gets or sets whether the customer accepted MALIEV terms before checkout.</summary>
     public bool TermsAccepted { get; set; }
 }
@@ -73,4 +79,106 @@ public sealed class CheckoutDraftResponse
 
     /// <summary>Gets or sets whether account sign-in is required before final checkout.</summary>
     public bool RequiresSignIn { get; set; } = true;
+}
+
+/// <summary>
+/// Structured shipping details collected during checkout.
+/// </summary>
+public sealed class CheckoutShippingDetailsDto
+{
+    /// <summary>Gets or sets recipient name.</summary>
+    public string RecipientName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets recipient phone.</summary>
+    public string Phone { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets street address.</summary>
+    public string Address { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets district or subdistrict.</summary>
+    public string District { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets state or amphoe.</summary>
+    public string State { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets province.</summary>
+    public string Province { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets postal code.</summary>
+    public string Postcode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets parcel weight in grams.</summary>
+    public decimal WeightGrams { get; set; } = 1000m;
+
+    /// <summary>Gets or sets parcel length in centimeters.</summary>
+    public decimal LengthCm { get; set; } = 20m;
+
+    /// <summary>Gets or sets parcel width in centimeters.</summary>
+    public decimal WidthCm { get; set; } = 15m;
+
+    /// <summary>Gets or sets parcel height in centimeters.</summary>
+    public decimal HeightCm { get; set; } = 10m;
+}
+
+/// <summary>
+/// Available courier option.
+/// </summary>
+public sealed class CheckoutShippingCourierDto
+{
+    /// <summary>Gets or sets courier code.</summary>
+    public string CourierCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets courier display name.</summary>
+    public string CourierName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets optional courier note.</summary>
+    public string? Note { get; set; }
+
+    /// <summary>Gets or sets shipping scope.</summary>
+    public string Scope { get; set; } = "domestic";
+}
+
+/// <summary>
+/// Selected or available shipping rate option.
+/// </summary>
+public sealed class CheckoutShippingRateDto
+{
+    /// <summary>Gets or sets courier code.</summary>
+    public string CourierCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets carrier product name.</summary>
+    public string ProductName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets total price.</summary>
+    public decimal TotalPrice { get; set; }
+
+    /// <summary>Gets or sets currency code.</summary>
+    public string CurrencyCode { get; set; } = "THB";
+
+    /// <summary>Gets or sets estimated delivery date.</summary>
+    public string? EstimatedDeliveryDate { get; set; }
+
+    /// <summary>Gets or sets service level.</summary>
+    public string? ServiceLevel { get; set; }
+}
+
+/// <summary>
+/// Request for live checkout shipping rates.
+/// </summary>
+public sealed class CheckoutShippingRateRequest
+{
+    /// <summary>Gets or sets destination and parcel details.</summary>
+    public CheckoutShippingDetailsDto ShippingDetails { get; set; } = new();
+
+    /// <summary>Gets or sets optional courier codes.</summary>
+    public List<string> CourierCodes { get; set; } = [];
+}
+
+/// <summary>
+/// Response containing live checkout shipping rates.
+/// </summary>
+public sealed class CheckoutShippingRateResponse
+{
+    /// <summary>Gets or sets available rates.</summary>
+    public List<CheckoutShippingRateDto> Rates { get; set; } = [];
 }

@@ -32,6 +32,28 @@ public sealed class CheckoutDraftServiceTests
             VatId = "0105566000000",
             BillingAddress = "Billing Tower, Bangkok",
             ShippingAddress = "Factory Dock 7, Chonburi",
+            ShippingDetails = new CheckoutShippingDetailsDto
+            {
+                RecipientName = "Somchai Receiver",
+                Phone = "+66 82 000 2222",
+                Address = "Factory Dock 7",
+                District = "Mueang",
+                State = "Mueang Chonburi",
+                Province = "Chonburi",
+                Postcode = "20000",
+                WeightGrams = 1250m,
+                LengthCm = 30m,
+                WidthCm = 20m,
+                HeightCm = 12m
+            },
+            SelectedShippingRate = new CheckoutShippingRateDto
+            {
+                CourierCode = "flash",
+                ProductName = "Flash Express",
+                TotalPrice = 82.25m,
+                CurrencyCode = "THB",
+                ServiceLevel = "standard"
+            },
             TermsAccepted = true,
             Items =
             [
@@ -56,6 +78,11 @@ public sealed class CheckoutDraftServiceTests
         Assert.Equal("Factory Dock 7, Chonburi", shipping.RootElement.GetProperty("address").GetString());
         Assert.Equal("+66 81 000 1111", shipping.RootElement.GetProperty("phone").GetString());
         Assert.Equal("MALIEV Customer Co., Ltd.", shipping.RootElement.GetProperty("companyName").GetString());
+        Assert.Equal("Somchai Receiver", shipping.RootElement.GetProperty("recipientName").GetString());
+        Assert.Equal("20000", shipping.RootElement.GetProperty("postcode").GetString());
+        Assert.Equal(1250m, shipping.RootElement.GetProperty("parcelWeightGrams").GetDecimal());
+        Assert.Equal("flash", shipping.RootElement.GetProperty("selectedRate").GetProperty("courierCode").GetString());
+        Assert.Equal(82.25m, shipping.RootElement.GetProperty("selectedRate").GetProperty("totalPrice").GetDecimal());
         Assert.Equal("0105566000000", billing.RootElement.GetProperty("vatId").GetString());
         Assert.True(billing.RootElement.GetProperty("termsAccepted").GetBoolean());
     }

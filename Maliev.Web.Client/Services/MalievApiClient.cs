@@ -76,6 +76,18 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<CheckoutDraftResponse>(cancellationToken) ?? new CheckoutDraftResponse();
     }
 
+    internal async Task<IReadOnlyList<CheckoutShippingCourierDto>> GetShippingCouriersAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetJsonAsync<List<CheckoutShippingCourierDto>>("web/v1/shipping/couriers", cancellationToken) ?? [];
+    }
+
+    internal async Task<CheckoutShippingRateResponse> GetShippingRatesAsync(CheckoutShippingRateRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("web/v1/shipping/rates", request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CheckoutShippingRateResponse>(cancellationToken) ?? new CheckoutShippingRateResponse();
+    }
+
     internal async Task<CustomerAccountSessionDto> GetAccountSessionAsync(CancellationToken cancellationToken = default)
     {
         return await GetJsonAsync<CustomerAccountSessionDto>("web/v1/account/session", cancellationToken) ?? new CustomerAccountSessionDto();

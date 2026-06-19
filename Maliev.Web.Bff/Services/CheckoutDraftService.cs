@@ -85,6 +85,8 @@ internal sealed class CheckoutDraftService(
     private static string? BuildShippingAddressJson(CheckoutDraftRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.ShippingAddress) &&
+            string.IsNullOrWhiteSpace(request.ShippingDetails.Address) &&
+            string.IsNullOrWhiteSpace(request.ShippingDetails.Postcode) &&
             string.IsNullOrWhiteSpace(request.Phone) &&
             string.IsNullOrWhiteSpace(request.CompanyName))
         {
@@ -93,9 +95,19 @@ internal sealed class CheckoutDraftService(
 
         return JsonSerializer.Serialize(new CheckoutShippingAddressSnapshot
         {
-            Address = request.ShippingAddress.Trim(),
+            Address = FirstNonEmpty(request.ShippingAddress, request.ShippingDetails.Address),
             Phone = request.Phone.Trim(),
-            CompanyName = request.CompanyName.Trim()
+            CompanyName = request.CompanyName.Trim(),
+            RecipientName = request.ShippingDetails.RecipientName.Trim(),
+            District = request.ShippingDetails.District.Trim(),
+            State = request.ShippingDetails.State.Trim(),
+            Province = request.ShippingDetails.Province.Trim(),
+            Postcode = request.ShippingDetails.Postcode.Trim(),
+            ParcelWeightGrams = request.ShippingDetails.WeightGrams,
+            ParcelLengthCm = request.ShippingDetails.LengthCm,
+            ParcelWidthCm = request.ShippingDetails.WidthCm,
+            ParcelHeightCm = request.ShippingDetails.HeightCm,
+            SelectedRate = request.SelectedShippingRate
         }, CheckoutSnapshotJsonOptions);
     }
 
@@ -171,6 +183,9 @@ internal sealed class CheckoutDraftService(
         var normalized = content.ReplaceLineEndings(" ");
         return $" Body: {normalized[..Math.Min(normalized.Length, 1_000)]}";
     }
+
+    private static string FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
 }
 
 internal sealed record CommerceCreateCartRequest(Guid CustomerId, string Currency);
@@ -186,6 +201,26 @@ internal sealed record CheckoutShippingAddressSnapshot
     public required string Phone { get; init; }
 
     public required string CompanyName { get; init; }
+
+    public required string RecipientName { get; init; }
+
+    public required string District { get; init; }
+
+    public required string State { get; init; }
+
+    public required string Province { get; init; }
+
+    public required string Postcode { get; init; }
+
+    public required decimal ParcelWeightGrams { get; init; }
+
+    public required decimal ParcelLengthCm { get; init; }
+
+    public required decimal ParcelWidthCm { get; init; }
+
+    public required decimal ParcelHeightCm { get; init; }
+
+    public CheckoutShippingRateDto? SelectedRate { get; init; }
 }
 
 internal sealed record CheckoutBillingAddressSnapshot

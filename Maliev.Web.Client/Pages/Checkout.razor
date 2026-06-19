@@ -59,10 +59,83 @@
                     <h2>@Text("Shipping address", "ที่อยู่จัดส่ง")</h2>
                     <p>@Text("Used for delivery planning, freight quote, and packing documents.", "ใช้สำหรับวางแผนจัดส่ง ค่าขนส่ง และเอกสารแพ็กสินค้า")</p>
                 </div>
-                <label>
-                    @Text("Shipping address", "ที่อยู่จัดส่ง")
-                    <textarea name="shippingAddress" autocomplete="shipping street-address" rows="4" @bind="_form.ShippingAddress" required></textarea>
-                </label>
+                <div class="checkout-shipping-grid">
+                    <label>
+                        @Text("Recipient name", "ชื่อผู้รับ")
+                        <input name="shippingRecipientName" autocomplete="shipping name" @bind="_form.ShippingDetails.RecipientName" />
+                    </label>
+                    <label>
+                        @Text("Recipient phone", "เบอร์ผู้รับ")
+                        <input name="shippingPhone" autocomplete="shipping tel" inputmode="tel" @bind="_form.ShippingDetails.Phone" required />
+                    </label>
+                    <label class="span-2">
+                        @Text("Address", "ที่อยู่")
+                        <input name="shippingAddress" autocomplete="shipping street-address" @bind="_form.ShippingDetails.Address" required />
+                    </label>
+                    <label>
+                        @Text("District", "ตำบล/แขวง")
+                        <input name="shippingDistrict" @bind="_form.ShippingDetails.District" required />
+                    </label>
+                    <label>
+                        @Text("State", "อำเภอ/เขต")
+                        <input name="shippingState" @bind="_form.ShippingDetails.State" required />
+                    </label>
+                    <label>
+                        @Text("Province", "จังหวัด")
+                        <input name="shippingProvince" autocomplete="shipping address-level1" @bind="_form.ShippingDetails.Province" required />
+                    </label>
+                    <label>
+                        @Text("Postal code", "รหัสไปรษณีย์")
+                        <input name="shippingPostcode" autocomplete="shipping postal-code" inputmode="numeric" @bind="_form.ShippingDetails.Postcode" required />
+                    </label>
+                    <label>
+                        @Text("Courier", "ขนส่ง")
+                        <select @bind="_selectedCourierCode">
+                            <option value="">@Text("Any available courier", "ขนส่งที่พร้อมให้บริการ")</option>
+                            @foreach (var courier in _couriers)
+                            {
+                                <option value="@courier.CourierCode">@CourierLabel(courier)</option>
+                            }
+                        </select>
+                    </label>
+                    <label>
+                        @Text("Weight (g)", "น้ำหนัก (กรัม)")
+                        <input type="number" min="1" step="1" @bind="_form.ShippingDetails.WeightGrams" @bind:event="oninput" required />
+                    </label>
+                    <label>
+                        @Text("Length (cm)", "ยาว (ซม.)")
+                        <input type="number" min="0.1" step="0.1" @bind="_form.ShippingDetails.LengthCm" @bind:event="oninput" required />
+                    </label>
+                    <label>
+                        @Text("Width (cm)", "กว้าง (ซม.)")
+                        <input type="number" min="0.1" step="0.1" @bind="_form.ShippingDetails.WidthCm" @bind:event="oninput" required />
+                    </label>
+                    <label>
+                        @Text("Height (cm)", "สูง (ซม.)")
+                        <input type="number" min="0.1" step="0.1" @bind="_form.ShippingDetails.HeightCm" @bind:event="oninput" required />
+                    </label>
+                </div>
+                <button type="button" class="button secondary checkout-rate-button" disabled="@_isFetchingRates" @onclick="FetchShippingRatesAsync">
+                    @(_isFetchingRates ? Text("Checking courier rates...", "กำลังตรวจสอบค่าขนส่ง...") : Text("Get courier rates", "ดูราคาขนส่ง"))
+                </button>
+                @if (_shippingRates.Count > 0)
+                {
+                    <div class="checkout-rate-list">
+                        @foreach (var rate in _shippingRates)
+                        {
+                            <button type="button"
+                                    class="checkout-rate-option @(ReferenceEquals(rate, _selectedShippingRate) ? "is-selected" : "")"
+                                    @onclick="@(() => SelectShippingRate(rate))">
+                                <span>@rate.ProductName</span>
+                                <strong>@FormatCurrency(rate.TotalPrice)</strong>
+                                @if (!string.IsNullOrWhiteSpace(rate.EstimatedDeliveryDate))
+                                {
+                                    <small>@Text("ETA", "ถึงประมาณ") @rate.EstimatedDeliveryDate</small>
+                                }
+                            </button>
+                        }
+                    </div>
+                }
             </section>
 
             <label class="checkout-consent">
@@ -88,8 +161,8 @@
                 {
                     <div><span>@DisplayTitle(item)</span><strong>@LineTotal(item)</strong></div>
                 }
-                <div><span>@Text("Shipping", "ค่าจัดส่ง")</span><strong>@Text("Calculated after address review", "คำนวณหลังตรวจสอบที่อยู่")</strong></div>
-                <div class="grand-total"><span>@Text("Estimated total", "ยอดรวมโดยประมาณ")</span><strong>@FormatCurrency(Subtotal)</strong></div>
+                <div><span>@Text("Shipping", "ค่าจัดส่ง")</span><strong>@ShippingSummaryText</strong></div>
+                <div class="grand-total"><span>@Text("Estimated total", "ยอดรวมโดยประมาณ")</span><strong>@FormatCurrency(EstimatedTotal)</strong></div>
             </div>
         </aside>
     }
@@ -101,15 +174,25 @@
 
     private readonly CheckoutDetailsForm _form = new();
     private bool _isSubmitting;
+    private bool _isFetchingRates;
     private bool _isError;
     private string? _statusMessage;
+    private IReadOnlyList<CheckoutShippingCourierDto> _couriers = [];
+    private List<CheckoutShippingRateDto> _shippingRates = [];
+    private CheckoutShippingRateDto? _selectedShippingRate;
+    private string? _selectedCourierCode;
 
     private decimal Subtotal => ShoppingCart.Items.Sum(item => item.UnitPriceThb * Math.Max(1, item.Quantity));
+    private decimal EstimatedTotal => Subtotal + (_selectedShippingRate?.TotalPrice ?? 0m);
+    private string ShippingSummaryText => _selectedShippingRate is null
+        ? Text("Choose a courier rate", "เลือกค่าขนส่ง")
+        : $"{_selectedShippingRate.ProductName} · {FormatCurrency(_selectedShippingRate.TotalPrice)}";
 
     protected override async Task OnInitializedAsync()
     {
         await ShoppingCart.InitializeAsync();
         await Preferences.InitializeAsync();
+        _couriers = await Api.GetShippingCouriersAsync();
 
         if (string.Equals(CheckoutStatus, "terms", StringComparison.OrdinalIgnoreCase))
         {
@@ -140,7 +223,9 @@
                 CompanyName = _form.CompanyName,
                 VatId = _form.VatId,
                 BillingAddress = _form.BillingAddress,
-                ShippingAddress = _form.ShippingAddress,
+                ShippingAddress = BuildShippingAddressText(),
+                ShippingDetails = _form.ShippingDetails,
+                SelectedShippingRate = _selectedShippingRate,
                 TermsAccepted = _form.TermsAccepted,
                 Items = ShoppingCart.Items.ToList()
             });
@@ -158,6 +243,93 @@
         {
             _isSubmitting = false;
         }
+    }
+
+    private async Task FetchShippingRatesAsync()
+    {
+        var validationError = ValidateShippingDetails();
+        if (validationError is not null)
+        {
+            _isError = true;
+            _statusMessage = validationError;
+            return;
+        }
+
+        _isFetchingRates = true;
+        _isError = false;
+        _statusMessage = null;
+        _shippingRates = [];
+        _selectedShippingRate = null;
+        try
+        {
+            var response = await Api.GetShippingRatesAsync(new CheckoutShippingRateRequest
+            {
+                ShippingDetails = _form.ShippingDetails,
+                CourierCodes = string.IsNullOrWhiteSpace(_selectedCourierCode) ? [] : [_selectedCourierCode]
+            });
+            _shippingRates = response.Rates;
+            if (_shippingRates.Count == 0)
+            {
+                _isError = true;
+                _statusMessage = Text("No courier rates are available for this address.", "ยังไม่มีราคาขนส่งสำหรับที่อยู่นี้");
+            }
+        }
+        catch (MalievApiException ex)
+        {
+            _isError = true;
+            _statusMessage = ex.Message;
+        }
+        finally
+        {
+            _isFetchingRates = false;
+        }
+    }
+
+    private string? ValidateShippingDetails()
+    {
+        var details = _form.ShippingDetails;
+        if (string.IsNullOrWhiteSpace(details.Phone) ||
+            string.IsNullOrWhiteSpace(details.Address) ||
+            string.IsNullOrWhiteSpace(details.District) ||
+            string.IsNullOrWhiteSpace(details.State) ||
+            string.IsNullOrWhiteSpace(details.Province) ||
+            string.IsNullOrWhiteSpace(details.Postcode))
+        {
+            return Text("Enter destination phone, address, district, state, province, and postal code before checking courier rates.", "กรอกเบอร์ ที่อยู่ ตำบล อำเภอ จังหวัด และรหัสไปรษณีย์ก่อนตรวจสอบค่าขนส่ง");
+        }
+
+        if (details.WeightGrams <= 0 || details.LengthCm <= 0 || details.WidthCm <= 0 || details.HeightCm <= 0)
+        {
+            return Text("Enter positive parcel weight and dimensions before checking courier rates.", "กรอกน้ำหนักและขนาดพัสดุให้มากกว่าศูนย์ก่อนตรวจสอบค่าขนส่ง");
+        }
+
+        return null;
+    }
+
+    private void SelectShippingRate(CheckoutShippingRateDto rate)
+    {
+        _selectedShippingRate = rate;
+        _isError = false;
+        _statusMessage = null;
+    }
+
+    private string BuildShippingAddressText()
+    {
+        var details = _form.ShippingDetails;
+        return string.Join(", ", new[]
+        {
+            details.Address,
+            details.District,
+            details.State,
+            details.Province,
+            details.Postcode
+        }.Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()));
+    }
+
+    private string CourierLabel(CheckoutShippingCourierDto courier)
+    {
+        var name = string.IsNullOrWhiteSpace(courier.CourierName) ? courier.CourierCode : courier.CourierName;
+        return string.IsNullOrWhiteSpace(courier.Note) ? name : $"{name} - {courier.Note}";
     }
 
     private static string DisplayTitle(CartItemDto item) =>
@@ -183,6 +355,8 @@
         public string BillingAddress { get; set; } = string.Empty;
 
         public string ShippingAddress { get; set; } = string.Empty;
+
+        public CheckoutShippingDetailsDto ShippingDetails { get; set; } = new();
 
         public bool TermsAccepted { get; set; }
     }

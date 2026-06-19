@@ -12,9 +12,19 @@ internal interface IPaymentServiceClient
     Task<HttpResponseMessage> CreatePaymentIntentAsync(object request, CancellationToken cancellationToken);
 }
 
-internal interface IDeliveryServiceClient
+/// <summary>
+/// Downstream DeliveryService client used by Web checkout shipping.
+/// </summary>
+public interface IDeliveryServiceClient
 {
-    Task<HttpResponseMessage> EstimateDeliveryAsync(object request, CancellationToken cancellationToken);
+    /// <summary>Gets available shipping couriers.</summary>
+    Task<HttpResponseMessage> GetShippingCouriersAsync(CancellationToken cancellationToken);
+
+    /// <summary>Gets live shipping rates.</summary>
+    Task<HttpResponseMessage> GetShippingRatesAsync(object request, CancellationToken cancellationToken);
+
+    /// <summary>Gets tracking status for a shipment.</summary>
+    Task<HttpResponseMessage> GetShippingTrackingAsync(string trackingCode, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -142,8 +152,14 @@ internal sealed class PaymentServiceClient(HttpClient httpClient) : IPaymentServ
 
 internal sealed class DeliveryServiceClient(HttpClient httpClient) : IDeliveryServiceClient
 {
-    public Task<HttpResponseMessage> EstimateDeliveryAsync(object request, CancellationToken cancellationToken) =>
-        httpClient.PostAsJsonAsync("/delivery/v1/shipments/estimate", request, cancellationToken);
+    public Task<HttpResponseMessage> GetShippingCouriersAsync(CancellationToken cancellationToken) =>
+        httpClient.GetAsync("/delivery/v1/shipping/couriers", cancellationToken);
+
+    public Task<HttpResponseMessage> GetShippingRatesAsync(object request, CancellationToken cancellationToken) =>
+        httpClient.PostAsJsonAsync("/delivery/v1/shipping/rates", request, cancellationToken);
+
+    public Task<HttpResponseMessage> GetShippingTrackingAsync(string trackingCode, CancellationToken cancellationToken) =>
+        httpClient.GetAsync($"/delivery/v1/shipping/tracking/{Uri.EscapeDataString(trackingCode)}", cancellationToken);
 }
 
 internal sealed class CustomerServiceClient(HttpClient httpClient) : ICustomerServiceClient
