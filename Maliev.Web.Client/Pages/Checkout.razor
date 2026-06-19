@@ -127,6 +127,10 @@
                                     class="checkout-rate-option @(ReferenceEquals(rate, _selectedShippingRate) ? "is-selected" : "")"
                                     @onclick="@(() => SelectShippingRate(rate))">
                                 <span>@rate.ProductName</span>
+                                @if (!string.IsNullOrWhiteSpace(rate.Provider))
+                                {
+                                    <small>@Text("Via", "ผ่าน") @rate.Provider</small>
+                                }
                                 <strong>@FormatCurrency(rate.TotalPrice)</strong>
                                 @if (!string.IsNullOrWhiteSpace(rate.EstimatedDeliveryDate))
                                 {
@@ -186,7 +190,7 @@
     private decimal EstimatedTotal => Subtotal + (_selectedShippingRate?.TotalPrice ?? 0m);
     private string ShippingSummaryText => _selectedShippingRate is null
         ? Text("Choose a courier rate", "เลือกค่าขนส่ง")
-        : $"{_selectedShippingRate.ProductName} · {FormatCurrency(_selectedShippingRate.TotalPrice)}";
+        : $"{RateSummaryLabel(_selectedShippingRate)} · {FormatCurrency(_selectedShippingRate.TotalPrice)}";
 
     protected override async Task OnInitializedAsync()
     {
@@ -329,7 +333,14 @@
     private string CourierLabel(CheckoutShippingCourierDto courier)
     {
         var name = string.IsNullOrWhiteSpace(courier.CourierName) ? courier.CourierCode : courier.CourierName;
-        return string.IsNullOrWhiteSpace(courier.Note) ? name : $"{name} - {courier.Note}";
+        var label = string.IsNullOrWhiteSpace(courier.Note) ? name : $"{name} - {courier.Note}";
+        return string.IsNullOrWhiteSpace(courier.Provider) ? label : $"{label} via {courier.Provider.Trim()}";
+    }
+
+    private static string RateSummaryLabel(CheckoutShippingRateDto rate)
+    {
+        var label = string.IsNullOrWhiteSpace(rate.ProductName) ? rate.CourierCode : rate.ProductName;
+        return string.IsNullOrWhiteSpace(rate.Provider) ? label : $"{label} via {rate.Provider.Trim()}";
     }
 
     private static string DisplayTitle(CartItemDto item) =>

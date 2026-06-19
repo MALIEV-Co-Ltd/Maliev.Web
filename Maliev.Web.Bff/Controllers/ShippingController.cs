@@ -61,7 +61,8 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
                 TotalPrice = rate.Price,
                 CurrencyCode = FirstNonEmpty(rate.Currency, "THB"),
                 EstimatedDeliveryDate = rate.EstimatedDelivery,
-                ServiceLevel = rate.ServiceLevel
+                ServiceLevel = rate.ServiceLevel,
+                Provider = rate.Provider
             }).ToList()
         });
     }
@@ -140,5 +141,7 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
         public string? ServiceLevel { get; set; }
 
         public string? EstimatedDelivery { get; set; }
+
+        public string Provider { get; set; } = string.Empty;
     }
 }

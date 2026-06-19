@@ -52,7 +52,8 @@ public sealed class CheckoutDraftServiceTests
                 ProductName = "Flash Express",
                 TotalPrice = 82.25m,
                 CurrencyCode = "THB",
-                ServiceLevel = "standard"
+                ServiceLevel = "standard",
+                Provider = "GoShip"
             },
             TermsAccepted = true,
             Items =
@@ -83,6 +84,7 @@ public sealed class CheckoutDraftServiceTests
         Assert.Equal(1250m, shipping.RootElement.GetProperty("parcelWeightGrams").GetDecimal());
         Assert.Equal("flash", shipping.RootElement.GetProperty("selectedRate").GetProperty("courierCode").GetString());
         Assert.Equal(82.25m, shipping.RootElement.GetProperty("selectedRate").GetProperty("totalPrice").GetDecimal());
+        Assert.Equal("GoShip", shipping.RootElement.GetProperty("selectedRate").GetProperty("provider").GetString());
         Assert.Equal("0105566000000", billing.RootElement.GetProperty("vatId").GetString());
         Assert.True(billing.RootElement.GetProperty("termsAccepted").GetBoolean());
     }

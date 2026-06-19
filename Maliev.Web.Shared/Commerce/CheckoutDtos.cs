@@ -136,6 +136,9 @@ public sealed class CheckoutShippingCourierDto
 
     /// <summary>Gets or sets shipping scope.</summary>
     public string Scope { get; set; } = "domestic";
+
+    /// <summary>Gets or sets the shipping gateway that served this courier option.</summary>
+    public string Provider { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -160,6 +163,9 @@ public sealed class CheckoutShippingRateDto
 
     /// <summary>Gets or sets service level.</summary>
     public string? ServiceLevel { get; set; }
+
+    /// <summary>Gets or sets the shipping gateway that served this rate option.</summary>
+    public string Provider { get; set; } = string.Empty;
 }
 
 /// <summary>
