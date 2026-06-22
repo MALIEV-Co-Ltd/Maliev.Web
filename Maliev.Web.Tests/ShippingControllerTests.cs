@@ -70,9 +70,42 @@ public sealed class ShippingControllerTests
         Assert.Equal("flash", client.Payload.RootElement.GetProperty("courierCodes")[0].GetString());
     }
 
-    private sealed class CapturingDeliveryServiceClient(HttpResponseMessage ratesResponse) : IDeliveryServiceClient
+    /// <summary>
+    /// Verifies shipment tracking is proxied through DeliveryService.
+    /// </summary>
+    [Fact]
+    public async Task GetTracking_MapsDeliveryServiceTrackingStatus()
+    {
+        var client = new CapturingDeliveryServiceClient(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = JsonContent.Create(new CheckoutShippingTrackingDto
+            {
+                TrackingCode = "TH-E2E-001",
+                CourierCode = "thaipost",
+                CourierName = "Thailand Post",
+                Status = "in_transit",
+                Description = "Parcel is in transit",
+                Provider = "Shippop"
+            })
+        });
+        var controller = new ShippingController(client);
+
+        var result = await controller.GetTracking("TH-E2E-001", CancellationToken.None);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var tracking = Assert.IsType<CheckoutShippingTrackingDto>(ok.Value);
+        Assert.Equal("TH-E2E-001", tracking.TrackingCode);
+        Assert.Equal("thaipost", tracking.CourierCode);
+        Assert.Equal("in_transit", tracking.Status);
+        Assert.Equal("Shippop", tracking.Provider);
+        Assert.Equal("TH-E2E-001", client.TrackingCode);
+    }
+
+    private sealed class CapturingDeliveryServiceClient(HttpResponseMessage response) : IDeliveryServiceClient
     {
         public JsonDocument? Payload { get; private set; }
+
+        public string? TrackingCode { get; private set; }
 
         public Task<HttpResponseMessage> GetShippingCouriersAsync(CancellationToken cancellationToken) =>
             throw new NotSupportedException();
@@ -81,10 +114,14 @@ public sealed class ShippingControllerTests
         {
             Payload = JsonDocument.Parse(JsonSerializer.Serialize(request));
             await Task.Yield();
-            return ratesResponse;
+            return response;
         }
 
-        public Task<HttpResponseMessage> GetShippingTrackingAsync(string trackingCode, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
+        public async Task<HttpResponseMessage> GetShippingTrackingAsync(string trackingCode, CancellationToken cancellationToken)
+        {
+            TrackingCode = trackingCode;
+            await Task.Yield();
+            return response;
+        }
     }
 }

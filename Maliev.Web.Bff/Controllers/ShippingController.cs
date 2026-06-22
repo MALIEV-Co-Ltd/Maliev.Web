@@ -67,6 +67,37 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
         });
     }
 
+    /// <summary>Gets current tracking status for a shipment.</summary>
+    [HttpGet("tracking/{trackingCode}")]
+    public async Task<ActionResult<CheckoutShippingTrackingDto>> GetTracking(
+        [FromRoute] string trackingCode,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(trackingCode))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Tracking code required",
+                Detail = "Enter a tracking code before checking shipment status.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        using var response = await deliveryServiceClient.GetShippingTrackingAsync(trackingCode.Trim(), cancellationToken);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
+
+        var tracking = await response.Content.ReadFromJsonAsync<CheckoutShippingTrackingDto>(cancellationToken);
+        return tracking is null ? NotFound() : Ok(tracking);
+    }
+
     private static string? ValidateRateRequest(CheckoutShippingRateRequest request)
     {
         var details = request.ShippingDetails;

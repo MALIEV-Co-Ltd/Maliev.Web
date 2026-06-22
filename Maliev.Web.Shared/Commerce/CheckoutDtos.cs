@@ -191,3 +191,27 @@ public sealed class CheckoutShippingRateResponse
     /// <summary>Gets or sets available rates.</summary>
     public List<CheckoutShippingRateDto> Rates { get; set; } = [];
 }
+
+/// <summary>
+/// Current tracking status for a checkout shipment.
+/// </summary>
+public sealed class CheckoutShippingTrackingDto
+{
+    /// <summary>Gets or sets the carrier tracking code.</summary>
+    public string TrackingCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets courier code.</summary>
+    public string CourierCode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets courier display name.</summary>
+    public string CourierName { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets latest tracking status.</summary>
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets latest tracking description.</summary>
+    public string? Description { get; set; }
+
+    /// <summary>Gets or sets the shipping gateway that served this tracking status.</summary>
+    public string Provider { get; set; } = string.Empty;
+}
