@@ -3004,11 +3004,11 @@ public sealed class HeroLayoutSourceTests
         var product = ReadRepoFile("Maliev.Web.Client", "Pages", "ProductDetail.razor");
         var error = ReadRepoFile("Maliev.Web.Client", "Pages", "Error.razor");
 
-        Assert.Contains("DefaultQuoteEngineUrl = \"https://quote.maliev.com\"", content);
+        Assert.Contains("DefaultQuoteEngineUrl = \"https://make.maliev.com\"", content);
         Assert.Contains("QuoteDemoUrl => $\"{QuoteEngineUrl}/demo\"", content);
         Assert.Contains("QuoteNewProjectUrl => $\"{QuoteEngineUrl}/quotes/new\"", content);
         Assert.Contains("QuoteEntryDisabled = true", content);
-        Assert.DoesNotContain("https://quote.maliev.com/quotes/new", content);
+        Assert.DoesNotContain("https://quote.maliev.com", content);
         Assert.Contains("QuoteDisabledButtonClass", shop);
         Assert.Contains("QuoteDisabledButtonClass", product);
         Assert.Contains("QuoteDisabledButtonClass", error);

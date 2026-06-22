@@ -105,7 +105,7 @@ public sealed class AuthController(
 
     /// <summary>
     /// Sends the user to the QuoteEngine. The shared identity cookie means no explicit
-    /// handoff token is needed — the session is already valid on quote.maliev.com.
+    /// handoff token is needed because the session is already valid on Make Studio.
     /// </summary>
     [HttpGet("/quote/start")]
     [AllowAnonymous]
@@ -443,7 +443,7 @@ public sealed class AuthController(
             ?? configuration["QuoteEngine__BaseUrl"]
             ?? Environment.GetEnvironmentVariable("QuoteEngine__BaseUrl")
             ?? Environment.GetEnvironmentVariable("QUOTEENGINE_BASE_URL")
-            ?? "https://quote.maliev.com";
+            ?? "https://make.maliev.com";
         return configured.TrimEnd('/');
     }
 

@@ -5,7 +5,7 @@ namespace Maliev.Web.Client.Content;
 
 internal static class SiteContent
 {
-    private const string DefaultQuoteEngineUrl = "https://quote.maliev.com";
+    private const string DefaultQuoteEngineUrl = "https://make.maliev.com";
     internal const bool QuoteEntryDisabled = true;
     internal static readonly LocalizedText QuoteDisabledTitle = Text(
         "Online quote intake is temporarily unavailable.",
