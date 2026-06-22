@@ -107,6 +107,9 @@ public sealed class CheckoutShippingDetailsDto
     /// <summary>Gets or sets postal code.</summary>
     public string Postcode { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets ISO 3166-1 alpha-2 destination country code.</summary>
+    public string CountryCode { get; set; } = "TH";
+
     /// <summary>Gets or sets parcel weight in grams.</summary>
     public decimal WeightGrams { get; set; } = 1000m;
 

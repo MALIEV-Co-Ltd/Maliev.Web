@@ -101,6 +101,7 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
                 state = "Pathum Wan",
                 province = "Bangkok",
                 postcode = "10400",
+                countryCode = "TH",
                 tel = "020000000"
             },
             to = new
@@ -111,6 +112,7 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
                 state = details.State.Trim(),
                 province = details.Province.Trim(),
                 postcode = details.Postcode.Trim(),
+                countryCode = FirstNonEmpty(details.CountryCode, "TH"),
                 tel = details.Phone.Trim()
             },
             parcel = new

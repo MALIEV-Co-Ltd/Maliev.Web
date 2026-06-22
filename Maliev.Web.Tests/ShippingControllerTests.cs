@@ -48,6 +48,7 @@ public sealed class ShippingControllerTests
                 State = "Bang Rak",
                 Province = "Bangkok",
                 Postcode = "10500",
+                CountryCode = "AU",
                 WeightGrams = 1250m,
                 LengthCm = 20m,
                 WidthCm = 15m,
@@ -65,6 +66,7 @@ public sealed class ShippingControllerTests
         Assert.Equal("GoShip", rate.Provider);
         Assert.NotNull(client.Payload);
         Assert.Equal("10500", client.Payload.RootElement.GetProperty("to").GetProperty("postcode").GetString());
+        Assert.Equal("AU", client.Payload.RootElement.GetProperty("to").GetProperty("countryCode").GetString());
         Assert.Equal("flash", client.Payload.RootElement.GetProperty("courierCodes")[0].GetString());
     }
 
