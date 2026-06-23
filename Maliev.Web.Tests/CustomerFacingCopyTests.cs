@@ -6,6 +6,24 @@ namespace Maliev.Web.Tests;
 public sealed class CustomerFacingCopyTests
 {
     /// <summary>
+    /// Verifies the BFF error route uses the public recovery page instead of the scaffolded diagnostic page.
+    /// </summary>
+    [Fact]
+    public void ErrorRoute_IsOwnedByClientRecoveryPageOnly()
+    {
+        var root = FindRepoRoot();
+        var bffErrorPage = Path.Combine(root, "Maliev.Web.Bff", "Components", "Pages", "Error.razor");
+        var clientErrorPage = File.ReadAllText(Path.Combine(root, "Maliev.Web.Client", "Pages", "Error.razor"));
+
+        Assert.False(File.Exists(bffErrorPage), "The BFF must not define a duplicate /Error route.");
+        Assert.Contains("@page \"/Error\"", clientErrorPage, StringComparison.Ordinal);
+        Assert.Contains("Something went wrong", clientErrorPage, StringComparison.Ordinal);
+        Assert.Contains("Open Make Studio", clientErrorPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("Development Mode", clientErrorPage, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Request ID", clientErrorPage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Verifies customer-visible client files do not mention internal backend service names.
     /// </summary>
     [Fact]
