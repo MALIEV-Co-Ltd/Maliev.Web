@@ -1,8 +1,11 @@
 const babylonCdn = "/lib/babylonjs/babylon.min.js";
 const babylonLoadersCdn = "/lib/babylonjs/babylonjs.loaders.min.js";
-const instances = new WeakMap();
-let babylonRuntime;
-let babylonLoadersRuntime;
+const sharedRuntime = globalThis.__malievManufacturingGizmo ??= {
+  instances: new WeakMap(),
+  babylonRuntime: null,
+  babylonLoadersRuntime: null
+};
+const instances = sharedRuntime.instances;
 const normalizedHeroModelSize = 2.28;
 
 mountDocumentGizmos();
@@ -212,8 +215,8 @@ function loadBabylonCore() {
     return Promise.resolve(window.BABYLON);
   }
 
-  if (!babylonRuntime) {
-    babylonRuntime = new Promise((resolve, reject) => {
+  if (!sharedRuntime.babylonRuntime) {
+    sharedRuntime.babylonRuntime = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = babylonCdn;
       script.async = true;
@@ -224,7 +227,7 @@ function loadBabylonCore() {
     });
   }
 
-  return babylonRuntime;
+  return sharedRuntime.babylonRuntime;
 }
 
 function loadBabylonLoaders() {
@@ -232,8 +235,8 @@ function loadBabylonLoaders() {
     return Promise.resolve();
   }
 
-  if (!babylonLoadersRuntime) {
-    babylonLoadersRuntime = new Promise((resolve, reject) => {
+  if (!sharedRuntime.babylonLoadersRuntime) {
+    sharedRuntime.babylonLoadersRuntime = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = babylonLoadersCdn;
       script.async = true;
@@ -244,7 +247,7 @@ function loadBabylonLoaders() {
     });
   }
 
-  return babylonLoadersRuntime;
+  return sharedRuntime.babylonLoadersRuntime;
 }
 
 function createEngine(canvas, BABYLON, options = {}) {
