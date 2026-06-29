@@ -109,12 +109,12 @@
                 <h3>@Text("Shop orders", "คำสั่งซื้อร้านค้า")</h3>
                 <p>@Text("Review storefront orders separately from manufacturing projects.", "ดูคำสั่งซื้อร้านค้าแยกจากโปรเจกต์งานผลิต")</p>
             </a>
-            <div class="account-action-card is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">
+            <a class="account-action-card" href="@SiteContent.QuoteNdasUrl">
                 <span class="card-meta">@Text("Confidentiality", "ความลับ")</span>
                 <h3>@Text("NDA agreement", "ข้อตกลง NDA")</h3>
                 <p>@NdaCardCopy</p>
-                <span class="button secondary is-disabled">@NdaActionLabel</span>
-            </div>
+                <span class="button secondary">@NdaActionLabel</span>
+            </a>
             <a class="account-action-card" href="/account/preferences">
                 <span class="card-meta">@Text("Preferences", "การตั้งค่า")</span>
                 <h3>@Text("Language and display", "ภาษาและการแสดงผล")</h3>
@@ -142,18 +142,17 @@
     private string NdaActionLabel => HasSignedNda ? Text("View NDA agreement", "ดูข้อตกลง NDA") : Text("Open NDA records", "เปิดรายการ NDA");
     private string NdaCardCopy => HasSignedNda
         ? Text(
-            $"Protected by {NdaStatusLabel}. Agreement access is temporarily unavailable.",
-            $"ได้รับการคุ้มครองด้วยสถานะ {NdaStatusLabel} การเปิดดูข้อตกลงยังไม่พร้อมใช้งานชั่วคราว")
+            $"Protected by {NdaStatusLabel}. Open NDA records and manufacturing documents in Make Studio.",
+            $"ได้รับการคุ้มครองด้วยสถานะ {NdaStatusLabel} เปิดรายการ NDA และเอกสารงานผลิตใน Make Studio")
         : Text(
-            "NDA records and manufacturing documents are temporarily unavailable while the MVP workflow is prepared.",
-            "รายการ NDA และเอกสารงานผลิตยังไม่พร้อมใช้งานชั่วคราวระหว่างเตรียมเวิร์กโฟลว์ MVP");
+            "Review NDA records and manufacturing documents in Make Studio.",
+            "ดูรายการ NDA และเอกสารงานผลิตใน Make Studio");
     private bool HasSignedNda => IsSignedNdaStatus(_profile?.NdaStatus);
     private string CompanyLabel => string.IsNullOrWhiteSpace(_profile?.CompanyName) ? Text("Not linked", "ยังไม่ได้เชื่อมโยง") : _profile.CompanyName;
     private string MobileLabel => string.IsNullOrWhiteSpace(_profile?.Mobile) ? Text("Not added", "ยังไม่ได้เพิ่ม") : _profile.Mobile;
     private string ResetPasswordHref => string.IsNullOrWhiteSpace(_profile?.Email)
         ? "/auth/forgot-password"
         : $"/auth/forgot-password?email={Uri.EscapeDataString(_profile.Email)}";
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
     private string AvatarInitials
     {
         get

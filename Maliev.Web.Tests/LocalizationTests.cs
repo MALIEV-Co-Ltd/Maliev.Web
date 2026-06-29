@@ -111,14 +111,14 @@ public sealed class LocalizationTests
         Assert.False(layout.Contains("L[\"", StringComparison.Ordinal));
         Assert.False(home.Contains("L[\"", StringComparison.Ordinal));
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout);
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", layout);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", layout);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", layout);
+        Assert.DoesNotContain("SiteContent.QuoteDisabledTitle", layout);
         Assert.DoesNotContain("data-quote-disabled", layout);
         Assert.Contains("Text(\"Start in Make Studio\", \"เริ่มใน Make Studio\")", home);
         Assert.Contains("Text(\"Talk to MALIEV\", \"คุยกับ MALIEV\")", home);
-        Assert.Contains("Text(\"Tell Make Studio what you want to build.", home);
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", home);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", home);
+        Assert.DoesNotContain("Text(\"Tell Make Studio what you want to build.", home);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", home);
+        Assert.DoesNotContain("SiteContent.QuoteDisabledTitle", home);
         Assert.DoesNotContain("private string QuoteDropzoneAction => Text(\"Browse files\", \"เลือกไฟล์\")", home);
         Assert.DoesNotContain("Configure material, finish and quantity after upload.", home);
         Assert.DoesNotContain("quantity at quote.maliev.com", home);
@@ -136,7 +136,7 @@ public sealed class LocalizationTests
 
         Assert.Contains("FormatsButtonText=\"@Text(\"Supported formats\", \"ไฟล์ที่รองรับ\")\"", servicePage);
         Assert.Contains("FormatsPanelLabel=\"@Text(\"Supported Make Studio file formats\", \"รายการไฟล์ที่ Make Studio รองรับ\")\"", servicePage);
-        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")</span>.", staticPage);
+        Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")</a>.", staticPage);
         Assert.Contains("Use Make Studio for RFQ CAD packages.", staticPage);
         Assert.Contains("Manufacturing quotes and production orders continue in Make Studio", chatbot);
         Assert.DoesNotContain("Supported QuoteEngine file formats", servicePage);

@@ -74,7 +74,7 @@
                 <div class="empty-state shop-empty-state">
                     <h2>@Text("No products listed yet", "ยังไม่มีสินค้า")</h2>
                     <p>@Text("New items will appear here after they are published. For custom parts, upload a model and request a manufacturing quote.", "สินค้าจะปรากฏที่นี่เมื่อพร้อมจำหน่าย หากเป็นชิ้นงานเฉพาะแบบ ให้อัปโหลดโมเดลเพื่อขอใบเสนอราคา")</p>
-                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Get part price", "ดูราคาชิ้นงาน")</button>
+                    <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
                 </div>
             }
             else
@@ -135,10 +135,6 @@
     {
         return collection == _selectedCollection ? "filter-chip shop-collection-card active" : "filter-chip shop-collection-card";
     }
-
-    private string QuoteDisabledButtonClass => "button primary is-disabled";
-
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     private string Price(ProductSummaryDto product)
     {

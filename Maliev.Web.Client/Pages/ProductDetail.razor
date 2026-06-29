@@ -73,7 +73,7 @@ else
             </dl>
             <div class="quote-actions">
                 <button type="button" class="button primary" @onclick="AddToCart" disabled="@(!CanBuy)">@Text("Add to cart", "เพิ่มลงตะกร้า")</button>
-                <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Request custom part", "ขอผลิตชิ้นงานเฉพาะแบบ")</button>
+                <a class="button secondary" href="@SiteContent.MakeStudioUrl">@Text("Request custom part", "ขอผลิตชิ้นงานเฉพาะแบบ")</a>
             </div>
         </div>
     </section>
@@ -95,8 +95,6 @@ else
         _product.IsPublished &&
         _product.AvailableQuantity.GetValueOrDefault(1) > 0 &&
         (SelectedVariant?.Available ?? true);
-    private string QuoteDisabledButtonClass => "button secondary is-disabled";
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     protected override async Task OnParametersSetAsync()
     {

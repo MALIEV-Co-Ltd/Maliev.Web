@@ -7,7 +7,6 @@
 @page "/cookie-policy"
 @page "/refund-policy"
 @page "/warranty-policy"
-@page "/materials"
 @page "/industries"
 @page "/case-studies"
 @page "/case-studies/{Slug}"
@@ -36,14 +35,7 @@
         @if (ShouldRenderPageHeroActions)
         {
             <div class="quote-actions">
-                @if (PrimaryActionDisabled)
-                {
-                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@PrimaryAction</button>
-                }
-                else
-                {
-                    <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
-                }
+                <a class="button primary" href="@PrimaryHref">@PrimaryAction</a>
                 <a class="button secondary" href="@SecondaryHref" aria-label="@SecondaryAction">
                     @if (SecondaryActionUsesLogo)
                     {
@@ -60,302 +52,7 @@
     </section>
 }
 
-@if (Path == "materials")
-{
-    <section class="section">
-        <div class="section-heading">
-            <div>
-                <h2>@Text("Choose by process, use case, and finishing expectation.", "เลือกจากกระบวนการ การใช้งาน และความคาดหวังเรื่องผิวงาน")</h2>
-            </div>
-        </div>
-        <div class="material-category-grid">
-            @foreach (var category in MaterialCategories)
-            {
-                <article class="material-category-card">
-                    <div class="material-category-media">
-                        <img src="@category.ImageUrl" alt="@category.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                    </div>
-                    <div class="material-category-body">
-                        <span class="card-meta">@category.Process</span>
-                        <h3>@category.Title.For(Preferences.Culture)</h3>
-                        <p>@category.Body.For(Preferences.Culture)</p>
-                        <div class="material-category-tags">
-                            @foreach (var highlight in category.Highlights)
-                            {
-                                <span class="chip">@highlight.For(Preferences.Culture)</span>
-                            }
-                        </div>
-                    </div>
-                </article>
-            }
-        </div>
-    </section>
-
-    <section class="section material-comparison-section">
-        <div class="section-heading">
-            <div>
-                <h2>@Text("Compare material properties before uploading CAD.", "เปรียบเทียบคุณสมบัติวัสดุก่อนอัปโหลด CAD")</h2>
-            </div>
-            <p>@Text("Review strength, heat, chemistry, finish, and trade-offs as practical selection bands. Final material grade, orientation, finish, and test requirements are confirmed during quotation.", "ดูความแข็งแรง การทนร้อน สารเคมี ผิวงาน และข้อแลกเปลี่ยนเป็นช่วงเลือกวัสดุเบื้องต้น เกรด ทิศทางการผลิต ผิวงาน และข้อกำหนดการทดสอบจะยืนยันระหว่างขอราคา")</p>
-        </div>
-
-        <div class="material-comparison-panel">
-            <div class="material-filter-block" aria-label="@Text("Material comparison filters", "ตัวกรองตารางเปรียบเทียบวัสดุ")">
-                <div>
-                    <span class="material-filter-label">@Text("Process", "กระบวนการ")</span>
-                    <div class="material-filter-row">
-                        @foreach (var filter in MaterialProcessFilters)
-                        {
-                            <button class="@MaterialFilterClass(_materialProcessFilter, filter.Key)" type="button" @onclick="() => _materialProcessFilter = filter.Key">
-                                @filter.Label.For(Preferences.Culture)
-                            </button>
-                        }
-                    </div>
-                </div>
-                <div>
-                    <span class="material-filter-label">@Text("Use case", "การใช้งาน")</span>
-                    <div class="material-filter-row">
-                        @foreach (var filter in MaterialUseFilters)
-                        {
-                            <button class="@MaterialFilterClass(_materialUseFilter, filter.Key)" type="button" @onclick="() => _materialUseFilter = filter.Key">
-                                @filter.Label.For(Preferences.Culture)
-                            </button>
-                        }
-                    </div>
-                </div>
-                <span class="material-comparison-count">@Text($"{FilteredMaterialComparisons.Count} materials shown", $"แสดง {FilteredMaterialComparisons.Count} วัสดุ")</span>
-            </div>
-
-            <div class="material-compare-workbench" @ref="_materialCompareWorkbench">
-                <div class="material-compare-toolbar">
-                    <div>
-                        <span class="material-filter-label">@Text("Direct comparison", "เปรียบเทียบโดยตรง")</span>
-                        <strong>@CompareGuidance</strong>
-                    </div>
-                    @if (SelectedMaterialComparisons.Count > 0)
-                    {
-                        <button class="material-clear-selection" type="button" @onclick="ClearMaterialComparison">@Text("Clear", "ล้าง")</button>
-                    }
-                </div>
-
-                @if (SelectedMaterialComparisons.Count > 0)
-                {
-                    <div class="material-compare-matrix" style="@CompareMatrixStyle">
-                        <div class="material-compare-row material-compare-head">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <strong class="material-compare-material-head">
-                                    <span class="material-compare-head-media">
-                                        <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                                    </span>
-                                    <span class="material-compare-head-copy">
-                                        <span class="material-compare-head-name">@material.Name</span>
-                                        <em>@material.Process.For(Preferences.Culture)</em>
-                                    </span>
-                                </strong>
-                            }
-                        </div>
-                        <div class="material-compare-row">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Best fit", "เหมาะกับ")</span>
-                                    <span>@material.BestFor.For(Preferences.Culture)</span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Mechanical", "เชิงกล")</span>
-                                    <span>@material.Mechanical.For(Preferences.Culture)</span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Heat", "ความร้อน")</span>
-                                    <span>@material.Heat.For(Preferences.Culture)</span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Chemical", "สารเคมี")</span>
-                                    <span>@material.Chemical.For(Preferences.Culture)</span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Finish", "ผิวงาน")</span>
-                                    <span>@material.Finish.For(Preferences.Culture)</span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row material-compare-tone-row material-pro-con-pro">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Pros", "ข้อดี")</span>
-                                    <span class="material-compare-insight">
-                                        <span class="material-insight-heading">
-                                            <span class="material-insight-icon">
-                                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
-                                            </span>
-                                            <strong>@Text("Advantage", "จุดเด่น")</strong>
-                                        </span>
-                                        <span class="material-insight-copy">@material.Pros.For(Preferences.Culture)</span>
-                                    </span>
-                                </span>
-                            }
-                        </div>
-                        <div class="material-compare-row material-compare-tone-row material-pro-con-con">
-                            @foreach (var material in SelectedMaterialComparisons)
-                            {
-                                <span class="material-compare-cell">
-                                    <span class="material-compare-cell-label">@Text("Watch", "ระวัง")</span>
-                                    <span class="material-compare-insight">
-                                        <span class="material-insight-heading">
-                                            <span class="material-insight-icon">
-                                                <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
-                                            </span>
-                                            <strong>@Text("Check before use", "ควรตรวจ")</strong>
-                                        </span>
-                                        <span class="material-insight-copy">@material.Cons.For(Preferences.Culture)</span>
-                                    </span>
-                                </span>
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="material-mobile-list" aria-label="@Text("Selectable material cards", "การ์ดวัสดุสำหรับเลือกเปรียบเทียบ")">
-                @foreach (var material in FilteredMaterialComparisons)
-                {
-                    <article class="@MaterialSelectionCardClass(material)">
-                        <div class="material-mobile-card-visual">
-                            <span class="material-mobile-card-media">
-                                <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                            </span>
-                        </div>
-                        <div class="material-mobile-card-basic">
-                            <div class="material-mobile-card-heading">
-                                <div class="material-mobile-card-title">
-                                    <span class="material-mobile-card-copy">
-                                        <strong>@material.Name</strong>
-                                        <span>@material.Family.For(Preferences.Culture)</span>
-                                    </span>
-                                </div>
-                                <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
-                                    @MaterialSelectButtonText(material)
-                                </button>
-                            </div>
-                            <div class="material-mobile-card-summary">
-                                <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
-                                <p class="material-mobile-card-best-fit">@material.BestFor.For(Preferences.Culture)</p>
-                            </div>
-                        </div>
-                        <div class="material-mobile-card-detail">
-                            <dl class="material-mobile-specs">
-                                <div>
-                                    <dt>@Text("Mechanical", "เชิงกล")</dt>
-                                    <dd>@material.Mechanical.For(Preferences.Culture)</dd>
-                                </div>
-                                <div>
-                                    <dt>@Text("Heat", "ความร้อน")</dt>
-                                    <dd>@material.Heat.For(Preferences.Culture)</dd>
-                                </div>
-                                <div>
-                                    <dt>@Text("Chemical", "สารเคมี")</dt>
-                                    <dd>@material.Chemical.For(Preferences.Culture)</dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </article>
-                }
-            </div>
-
-            <div class="material-table-shell" tabindex="0" aria-label="@Text("Scrollable material comparison table", "ตารางเปรียบเทียบวัสดุแบบเลื่อนแนวนอน")">
-                <table class="material-comparison-table">
-                    <thead>
-                        <tr>
-                            <th>@Text("Compare", "เปรียบเทียบ")</th>
-                            <th>@Text("Material", "วัสดุ")</th>
-                            <th>@Text("Process", "กระบวนการ")</th>
-                            <th>@Text("Best fit", "เหมาะกับ")</th>
-                            <th>@Text("Mechanical", "เชิงกล")</th>
-                            <th>@Text("Heat", "ความร้อน")</th>
-                            <th>@Text("Chemical", "สารเคมี")</th>
-                            <th>@Text("Finish", "ผิวงาน")</th>
-                            <th>@Text("Pros / watch", "ข้อดี / ระวัง")</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var material in FilteredMaterialComparisons)
-                        {
-                            <tr>
-                                <td>
-                                    <button class="@MaterialSelectButtonClass(material)" type="button" aria-pressed="@IsMaterialSelected(material)" disabled="@(!CanToggleMaterial(material))" @onclick="() => ToggleMaterialComparison(material)">
-                                        @MaterialSelectButtonText(material)
-                                    </button>
-                                </td>
-                                <th scope="row">
-                                    <div class="material-row-summary">
-                                        <span class="material-row-copy">
-                                            <strong>@material.Name</strong>
-                                            <span>@material.Family.For(Preferences.Culture)</span>
-                                        </span>
-                                        <span class="material-row-media">
-                                            <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
-                                        </span>
-                                    </div>
-                                </th>
-                                <td><span class="material-process-pill">@material.Process.For(Preferences.Culture)</span></td>
-                                <td>@material.BestFor.For(Preferences.Culture)</td>
-                                <td>@material.Mechanical.For(Preferences.Culture)</td>
-                                <td>@material.Heat.For(Preferences.Culture)</td>
-                                <td>@material.Chemical.For(Preferences.Culture)</td>
-                                <td>@material.Finish.For(Preferences.Culture)</td>
-                                <td>
-                                    <div class="material-pro-con">
-                                        <span class="material-pro-con-line material-pro-con-pro">
-                                            <span class="material-insight-heading">
-                                                <span class="material-insight-icon">
-                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
-                                                </span>
-                                                <strong>@Text("Advantage", "จุดเด่น")</strong>
-                                            </span>
-                                            <span class="material-insight-copy">@material.Pros.For(Preferences.Culture)</span>
-                                        </span>
-                                        <span class="material-pro-con-line material-pro-con-con">
-                                            <span class="material-insight-heading">
-                                                <span class="material-insight-icon">
-                                                    <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
-                                                </span>
-                                                <strong>@Text("Check before use", "ควรตรวจ")</strong>
-                                            </span>
-                                            <span class="material-insight-copy">@material.Cons.For(Preferences.Culture)</span>
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-}
-else if (Path == "case-studies")
+@if (Path == "case-studies")
 {
     <section class="section">
         <div class="case-grid">
@@ -510,7 +207,7 @@ else if (CurrentCaseStudy is { } caseStudyDetail)
                     <li>@outcome.For(Preferences.Culture)</li>
                 }
             </ul>
-            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</button>
+            <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Start a similar quote", "เริ่มขอราคางานคล้ายกัน")</a>
         </aside>
     </section>
 }
@@ -558,7 +255,7 @@ else if (CurrentBlogPost is { } blogPost)
                 }
             </ul>
             <div class="detail-sidebar-actions" aria-label="@Text("Blog sidebar actions", "ปุ่มดำเนินการในแถบบทความ")">
-                <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Get part price", "ดูราคาชิ้นงาน")</button>
+                <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
                 <a class="button secondary" href="/materials">@Text("Compare materials", "เปรียบเทียบวัสดุ")</a>
                 <button type="button" class="button secondary blog-pdf-button @(_pdfDownloading ? "is-loading" : "")"
                         @onclick="() => DownloadPdfAsync(blogPost)" disabled="@_pdfDownloading"
@@ -765,7 +462,7 @@ else if (Path == "contact")
                     <strong>@Text("This form is not the RFQ workspace.", "แบบฟอร์มนี้ไม่ใช่พื้นที่ขอใบเสนอราคา")</strong>
                     <p>
                         @Text("Attach small support references here. For CAD upload, price checks, lead time, and production RFQ, use the", "แนบไฟล์อ้างอิงขนาดเล็กสำหรับงานสนับสนุนที่นี่ หากต้องอัปโหลด CAD เช็กราคา ระยะเวลา หรือขอใบเสนอราคางานผลิต ให้ใช้")
-                        <span class="inline-link is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">@Text("Make Studio", "Make Studio")</span>.
+                        <a class="inline-link" href="@SiteContent.MakeStudioUrl">@Text("Make Studio", "Make Studio")</a>.
                     </p>
                 </div>
             </div>
@@ -911,18 +608,12 @@ else
     private bool _pdfDownloading;
     private bool _submittingContact;
     private bool _showContactMapDialog;
-    private bool _pendingMaterialComparisonScroll;
-    private ElementReference _materialCompareWorkbench;
     private string? _contactStatusTitle;
     private string? _contactStatus;
     private ContactFormStatus _contactStatusKind = ContactFormStatus.None;
     private CustomerAccountProfileDto? _contactProfile;
     private bool _useManualContactDetails;
     private bool _contactProfileLoadAttempted;
-    private const string AllMaterialsFilter = "all";
-    private readonly HashSet<string> _selectedMaterialNames = new(StringComparer.Ordinal);
-    private string _materialProcessFilter = AllMaterialsFilter;
-    private string _materialUseFilter = AllMaterialsFilter;
     private string Path => new Uri(Navigation.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
     private string CanonicalUrl => $"https://www.maliev.com/{Path}".TrimEnd('/');
     private string BlogSearch => ReadQueryStringValue("q").Trim();
@@ -1370,73 +1061,6 @@ else
         ]
     };
 
-    private const string CncCastMaterialsImageUrl = "https://images.unsplash.com/photo-1740209475472-aa7d280f7452?auto=format&fit=crop&w=900&q=80";
-
-    private IReadOnlyList<MaterialCategory> MaterialCategories =>
-    [
-        new(
-            SiteContent.Text("FDM thermoplastics", "เทอร์โมพลาสติก FDM"),
-            "PLA · PETG · ABS · ASA · TPU",
-            SiteContent.Text("Fast printed plastics for prototypes, brackets, guards, fixtures, and flexible parts.", "พลาสติกพิมพ์เร็วสำหรับต้นแบบ ขายึด การ์ด ฟิกซ์เจอร์ และชิ้นงานยืดหยุ่น"),
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("Colorful 3D printing filament spools", "ม้วนเส้นพลาสติกสำหรับพิมพ์ 3 มิติ"),
-            [SiteContent.Text("Fast prototypes", "ต้นแบบเร็ว"), SiteContent.Text("Low tooling cost", "ไม่ต้องทำแม่พิมพ์")]),
-        new(
-            SiteContent.Text("Powder-bed nylon", "ไนลอนพาวเดอร์เบด"),
-            "MJF · SLS",
-            SiteContent.Text("Tough nylon families for functional housings, living hinges, assemblies, and low-volume production.", "กลุ่มไนลอนทนทานสำหรับเคสใช้งานจริง บานพับ ชุดประกอบ และผลิตจำนวนน้อย"),
-            SiteContent.PowderBedNylonImageUrl,
-            SiteContent.Text("SLS printed nylon pulley shaft", "ชิ้นงานไนลอนที่ผลิตด้วย SLS"),
-            [SiteContent.Text("Functional", "ใช้งานจริง"), SiteContent.Text("Batch ready", "เหมาะกับจำนวนน้อย")]),
-        new(
-            SiteContent.Text("SLA engineering resins", "เรซินวิศวกรรม SLA"),
-            "Standard · Tough · Rigid",
-            SiteContent.Text("High-detail resin options for visual masters, fine features, fit checks, and selected functional prototypes.", "เรซินรายละเอียดสูงสำหรับ Master โมเดลผิวสวย ตรวจประกอบ และต้นแบบใช้งานบางประเภท"),
-            SiteContent.SlaResinImageUrl,
-            SiteContent.Text("Resin printer lifting a detailed part from the vat", "เครื่องพิมพ์เรซินยกชิ้นงานละเอียดออกจากถังเรซิน"),
-            [SiteContent.Text("Fine detail", "รายละเอียดสูง"), SiteContent.Text("Smooth finish", "ผิวเรียบ")]),
-        new(
-            SiteContent.Text("CNC and cast materials", "วัสดุ CNC และหล่อ"),
-            "Aluminum · Steel · Brass · Silicone",
-            SiteContent.Text("Metals and casting materials for machined fixtures, jigs, plates, inserts, seals, and end-use components.", "โลหะและวัสดุหล่อสำหรับฟิกซ์เจอร์ จิ๊ก แผ่นงาน อินเสิร์ต ซีล และชิ้นส่วนใช้งานจริง"),
-            CncCastMaterialsImageUrl,
-            SiteContent.Text("CNC milling an aluminum workpiece", "เครื่อง CNC กัดชิ้นงานอะลูมิเนียม"),
-            [SiteContent.Text("Precise", "แม่นยำ"), SiteContent.Text("Production ready", "พร้อมใช้งานจริง")])
-    ];
-
-    private IReadOnlyList<MaterialFilter> MaterialProcessFilters =>
-    [
-        new(AllMaterialsFilter, SiteContent.Text("All", "ทั้งหมด")),
-        new("fdm", SiteContent.Text("FDM", "FDM")),
-        new("powder-bed", SiteContent.Text("MJF / SLS", "MJF / SLS")),
-        new("sla", SiteContent.Text("SLA", "SLA")),
-        new("cnc", SiteContent.Text("CNC metals", "โลหะ CNC")),
-        new("casting", SiteContent.Text("Casting", "งานหล่อ"))
-    ];
-
-    private IReadOnlyList<MaterialFilter> MaterialUseFilters =>
-    [
-        new(AllMaterialsFilter, SiteContent.Text("All uses", "ทุกงาน")),
-        new("prototype", SiteContent.Text("Prototype", "ต้นแบบ")),
-        new("functional", SiteContent.Text("Functional", "ใช้งานจริง")),
-        new("heat", SiteContent.Text("Heat", "ทนร้อน")),
-        new("outdoor", SiteContent.Text("Outdoor", "กลางแจ้ง")),
-        new("flexible", SiteContent.Text("Flexible", "ยืดหยุ่น")),
-        new("metal", SiteContent.Text("Metal", "โลหะ")),
-        new("chemical", SiteContent.Text("Chemical", "สารเคมี"))
-    ];
-
-    private IReadOnlyList<MaterialComparisonItem> FilteredMaterialComparisons =>
-        MaterialComparisons
-            .Where(material => (_materialProcessFilter == AllMaterialsFilter || material.ProcessKey == _materialProcessFilter)
-                && (_materialUseFilter == AllMaterialsFilter || material.UseKeys.Contains(_materialUseFilter)))
-            .ToList();
-
-    private IReadOnlyList<MaterialComparisonItem> SelectedMaterialComparisons =>
-        MaterialComparisons
-            .Where(material => _selectedMaterialNames.Contains(material.Name))
-            .ToList();
-
     private string ReadQueryStringValue(string key)
     {
         var query = new Uri(Navigation.Uri).Query;
@@ -1608,293 +1232,6 @@ else
         return page == BlogPage ? "pagination-link is-current" : "pagination-link";
     }
 
-    private string CompareGuidance => SelectedMaterialComparisons.Count switch
-    {
-        0 => Text("Select 2-3 materials to compare side by side.", "เลือก 2-3 วัสดุเพื่อเปรียบเทียบแบบเทียบกันตรง ๆ"),
-        1 => Text("Select one or two more materials.", "เลือกเพิ่มอีกหนึ่งหรือสองวัสดุ"),
-        _ => Text($"{SelectedMaterialComparisons.Count} materials selected.", $"เลือกแล้ว {SelectedMaterialComparisons.Count} วัสดุ")
-    };
-
-    private string CompareMatrixStyle => $"--compare-columns: {Math.Max(SelectedMaterialComparisons.Count, 1)};";
-
-    private bool IsMaterialSelected(MaterialComparisonItem material)
-    {
-        return _selectedMaterialNames.Contains(material.Name);
-    }
-
-    private bool CanToggleMaterial(MaterialComparisonItem material)
-    {
-        return IsMaterialSelected(material) || _selectedMaterialNames.Count < 3;
-    }
-
-    private void ToggleMaterialComparison(MaterialComparisonItem material)
-    {
-        var wasSelected = IsMaterialSelected(material);
-        var previousSelectionCount = _selectedMaterialNames.Count;
-
-        if (wasSelected)
-        {
-            _selectedMaterialNames.Remove(material.Name);
-            return;
-        }
-
-        if (_selectedMaterialNames.Count >= 3)
-        {
-            return;
-        }
-
-        _selectedMaterialNames.Add(material.Name);
-
-        if (previousSelectionCount < _selectedMaterialNames.Count && _selectedMaterialNames.Count is >= 2 and <= 3)
-        {
-            _pendingMaterialComparisonScroll = true;
-        }
-    }
-
-    private void ClearMaterialComparison()
-    {
-        _selectedMaterialNames.Clear();
-        _pendingMaterialComparisonScroll = false;
-    }
-
-    /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!_pendingMaterialComparisonScroll)
-        {
-            return;
-        }
-
-        _pendingMaterialComparisonScroll = false;
-        await JS.InvokeVoidAsync("malievScroll.scrollIntoView", _materialCompareWorkbench);
-    }
-
-    private string MaterialSelectButtonText(MaterialComparisonItem material)
-    {
-        if (IsMaterialSelected(material))
-        {
-            return Text("Selected", "เลือกแล้ว");
-        }
-
-        return _selectedMaterialNames.Count >= 3
-            ? Text("Max 3", "สูงสุด 3")
-            : Text("Compare", "เทียบ");
-    }
-
-    private string MaterialSelectButtonClass(MaterialComparisonItem material)
-    {
-        return IsMaterialSelected(material) ? "material-select-button selected" : "material-select-button";
-    }
-
-    private string MaterialSelectionCardClass(MaterialComparisonItem material)
-    {
-        return IsMaterialSelected(material) ? "material-mobile-card selected" : "material-mobile-card";
-    }
-
-    private IReadOnlyList<MaterialComparisonItem> MaterialComparisons =>
-    [
-        new(
-            "PLA",
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("PLA filament and pellets", "เส้นพิมพ์และเม็ดพลาสติก PLA"),
-            "fdm",
-            SiteContent.Text("Commodity FDM thermoplastic", "เทอร์โมพลาสติก FDM ทั่วไป"),
-            SiteContent.Text("FDM", "FDM"),
-            SiteContent.Text("Visual models, simple jigs, low-load prototypes, education parts.", "โมเดลดูรูปทรง จิ๊กโหลดต่ำ ต้นแบบทั่วไป และชิ้นงานการศึกษา"),
-            SiteContent.Text("Stiff and dimensionally crisp, but brittle under impact and long-term load.", "แข็งและคุมรูปทรงได้ดี แต่เปราะเมื่อกระแทกหรือรับโหลดนาน"),
-            SiteContent.Text("Low heat resistance; avoid hot cars, ovens, and warm production areas.", "ทนร้อนต่ำ เลี่ยงรถร้อน เตาอบ และพื้นที่ผลิตที่อุณหภูมิสูง"),
-            SiteContent.Text("Fair with water and mild cleaners; poor with many solvents.", "พอใช้กับน้ำและน้ำยาทำความสะอาดอ่อน ไม่เหมาะกับตัวทำละลายหลายชนิด"),
-            SiteContent.Text("Clean printed detail, easy paint prep, visible layer lines.", "รายละเอียดดี เตรียมทำสีง่าย มีเส้นเลเยอร์ให้เห็น"),
-            SiteContent.Text("Lowest cost and fastest route for early validation.", "ต้นทุนต่ำและเร็วสำหรับตรวจแบบระยะแรก"),
-            SiteContent.Text("Not a good choice for heat, impact, or outdoor service.", "ไม่เหมาะกับความร้อน แรงกระแทก หรือใช้งานกลางแจ้ง"),
-            ["prototype"]),
-        new(
-            "PETG",
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("PETG filament sample", "ตัวอย่างเส้นพิมพ์ PETG"),
-            "fdm",
-            SiteContent.Text("Tough FDM thermoplastic", "เทอร์โมพลาสติก FDM เหนียว"),
-            SiteContent.Text("FDM", "FDM"),
-            SiteContent.Text("Brackets, covers, fluid-adjacent fixtures, and practical prototypes.", "ขายึด ฝาครอบ ฟิกซ์เจอร์ใกล้ของเหลว และต้นแบบใช้งาน"),
-            SiteContent.Text("Tougher and less brittle than PLA with moderate flexibility.", "เหนียวกว่า PLA และเปราะน้อยกว่า มีความยืดหยุ่นปานกลาง"),
-            SiteContent.Text("Moderate heat resistance; better than PLA but still limited.", "ทนร้อนปานกลาง ดีกว่า PLA แต่ยังมีข้อจำกัด"),
-            SiteContent.Text("Good water resistance and useful resistance to many mild chemicals.", "ทนน้ำดี และทนสารเคมีอ่อนหลายชนิดได้"),
-            SiteContent.Text("Slightly glossy, durable surface; stringing may need cleanup.", "ผิวค่อนข้างเงาและทนทาน อาจต้องเก็บเส้นใย"),
-            SiteContent.Text("Good default for tougher printed utility parts.", "เป็นตัวเลือกเริ่มต้นที่ดีสำหรับชิ้นงานพิมพ์ใช้งาน"),
-            SiteContent.Text("Less crisp than PLA and less heat-resistant than ABS/ASA.", "คมชัดน้อยกว่า PLA และทนร้อนน้อยกว่า ABS/ASA"),
-            ["prototype", "functional", "chemical"]),
-        new(
-            "ABS",
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("ABS filament and printed surface sample", "เส้นพิมพ์และตัวอย่างผิว ABS"),
-            "fdm",
-            SiteContent.Text("Impact-resistant FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนแรงกระแทก"),
-            SiteContent.Text("FDM", "FDM"),
-            SiteContent.Text("Housings, machine covers, impact-prone brackets, and paintable parts.", "เคส ฝาครอบเครื่องจักร ขายึดที่มีแรงกระแทก และชิ้นงานทำสี"),
-            SiteContent.Text("Good toughness and impact resistance with better creep behavior than PLA.", "เหนียวและทนแรงกระแทกดี มีพฤติกรรมรับโหลดนานดีกว่า PLA"),
-            SiteContent.Text("Moderate-high for printed plastics; suitable for warmer environments.", "ปานกลางถึงสูงสำหรับพลาสติกพิมพ์ เหมาะกับสภาพแวดล้อมอุ่น"),
-            SiteContent.Text("Fair chemical resistance; can be smoothed or attacked by acetone.", "ทนสารเคมีพอใช้ สามารถทำผิวหรือถูกละลายด้วยอะซิโตน"),
-            SiteContent.Text("Can be sanded, painted, or vapor-smoothed when specification allows.", "ขัด ทำสี หรืออบไอได้เมื่อสเปกอนุญาต"),
-            SiteContent.Text("Balanced printed engineering plastic for tough prototypes.", "พลาสติกวิศวกรรมพิมพ์ที่สมดุลสำหรับต้นแบบทนทาน"),
-            SiteContent.Text("Warps more than PLA/PETG and needs controlled printing.", "บิดงอง่ายกว่า PLA/PETG และต้องควบคุมการพิมพ์มากกว่า"),
-            ["functional", "heat"]),
-        new(
-            "ASA",
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("ASA outdoor plastic sample", "ตัวอย่างพลาสติก ASA สำหรับงานกลางแจ้ง"),
-            "fdm",
-            SiteContent.Text("Weatherable FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนสภาพอากาศ"),
-            SiteContent.Text("FDM", "FDM"),
-            SiteContent.Text("Outdoor covers, brackets, signage, guards, and UV-exposed parts.", "ฝาครอบกลางแจ้ง ขายึด ป้าย การ์ด และชิ้นงานโดน UV"),
-            SiteContent.Text("ABS-like strength with improved weathering behavior.", "ความแข็งแรงใกล้ ABS พร้อมทนสภาพอากาศดีกว่า"),
-            SiteContent.Text("Moderate-high; suitable for many outdoor and warm-use cases.", "ปานกลางถึงสูง เหมาะกับงานกลางแจ้งและงานอุ่นหลายประเภท"),
-            SiteContent.Text("Good weather and UV resistance; chemical resistance depends on exposure.", "ทนแดดและ UV ดี ส่วนสารเคมีขึ้นกับสภาพสัมผัส"),
-            SiteContent.Text("Matte functional finish; paintable after prep.", "ผิวแมตต์ใช้งานจริง ทำสีได้หลังเตรียมผิว"),
-            SiteContent.Text("Best FDM default when outdoor exposure matters.", "ตัวเลือก FDM หลักเมื่อมีงานกลางแจ้ง"),
-            SiteContent.Text("Needs more process control than PLA/PETG.", "ต้องควบคุมกระบวนการมากกว่า PLA/PETG"),
-            ["functional", "heat", "outdoor"]),
-        new(
-            "TPU",
-            SiteContent.FdmThermoplasticsImageUrl,
-            SiteContent.Text("Flexible TPU strip and spool", "เส้น TPU และตัวอย่างแถบยืดหยุ่น"),
-            "fdm",
-            SiteContent.Text("Flexible FDM elastomer", "อีลาสโตเมอร์ FDM ยืดหยุ่น"),
-            SiteContent.Text("FDM", "FDM"),
-            SiteContent.Text("Bumpers, grips, soft pads, seals, vibration isolation, and flexible covers.", "กันกระแทก กริป แผ่นรอง ซีล กันสั่น และฝาครอบยืดหยุ่น"),
-            SiteContent.Text("Flexible, abrasion-resistant, and tough; stiffness depends on shore hardness.", "ยืดหยุ่น ทนสึก และเหนียว ความแข็งขึ้นกับ Shore hardness"),
-            SiteContent.Text("Moderate; avoid sustained high-temperature compression.", "ปานกลาง เลี่ยงการกดทับต่อเนื่องที่อุณหภูมิสูง"),
-            SiteContent.Text("Often good against oils and abrasion; confirm fluid compatibility.", "มักทนน้ำมันและการสึกได้ดี แต่ควรยืนยันของเหลวที่จะสัมผัส"),
-            SiteContent.Text("Soft textured print surface with visible layers.", "ผิวพิมพ์นุ่มมีเท็กซ์เจอร์และเห็นเลเยอร์"),
-            SiteContent.Text("Useful when rubber-like behavior is needed quickly.", "เหมาะเมื่ออยากได้พฤติกรรมคล้ายยางอย่างรวดเร็ว"),
-            SiteContent.Text("Slower to print and less precise for tight assemblies.", "พิมพ์ช้ากว่าและไม่เหมาะกับชุดประกอบ tolerance แน่น"),
-            ["prototype", "functional", "flexible", "chemical"]),
-        new(
-            "PA12 nylon",
-            SiteContent.PowderBedNylonImageUrl,
-            SiteContent.Text("PA12 nylon powder and printed part", "ผงไนลอน PA12 และชิ้นงานพิมพ์"),
-            "powder-bed",
-            SiteContent.Text("Powder-bed engineering nylon", "ไนลอนวิศวกรรมพาวเดอร์เบด"),
-            SiteContent.Text("MJF / SLS", "MJF / SLS"),
-            SiteContent.Text("Functional prototypes, housings, clips, hinges, brackets, and short-run production.", "ต้นแบบใช้งาน เคส คลิป บานพับ ขายึด และผลิตจำนวนน้อย"),
-            SiteContent.Text("Balanced strength, toughness, fatigue behavior, and feature detail.", "สมดุลด้านความแข็งแรง ความเหนียว ความล้า และรายละเอียดชิ้นงาน"),
-            SiteContent.Text("Moderate-high for polymers; better service range than most FDM plastics.", "ปานกลางถึงสูงสำหรับพอลิเมอร์ ใช้งานกว้างกว่าพลาสติก FDM ส่วนใหญ่"),
-            SiteContent.Text("Good resistance to oils, greases, and many chemicals; absorbs moisture.", "ทนน้ำมัน จาระบี และสารเคมีหลายชนิดได้ดี แต่ดูดความชื้น"),
-            SiteContent.Text("Matte grain surface; can be dyed, tumbled, or coated.", "ผิวแมตต์เนื้อเม็ด ย้อม ขัดถัง หรือเคลือบได้"),
-            SiteContent.Text("Strong default for usable printed parts and small batches.", "ตัวเลือกหลักสำหรับชิ้นงานพิมพ์ใช้งานจริงและจำนวนน้อย"),
-            SiteContent.Text("Surface is not glossy without secondary finishing.", "ผิวไม่เงาหากไม่ทำ finishing เพิ่ม"),
-            ["prototype", "functional", "chemical"]),
-        new(
-            "PA-GF / PA-CF",
-            SiteContent.PowderBedNylonImageUrl,
-            SiteContent.Text("Glass or carbon filled nylon sample", "ตัวอย่างไนลอนผสมใยแก้วหรือคาร์บอน"),
-            "powder-bed",
-            SiteContent.Text("Glass or carbon-filled nylon", "ไนลอนผสมใยแก้วหรือคาร์บอน"),
-            SiteContent.Text("MJF / SLS", "MJF / SLS"),
-            SiteContent.Text("Stiffer brackets, fixtures, structural housings, and dimensional parts.", "ขายึด ฟิกซ์เจอร์ เคสรับแรง และชิ้นงานที่ต้องการคุมรูปทรง"),
-            SiteContent.Text("Higher stiffness and dimensional stability than unfilled nylon.", "แข็งและคุมมิติดีกว่าไนลอนไม่เติมใย"),
-            SiteContent.Text("Moderate-high; reinforced grades hold shape better under heat.", "ปานกลางถึงสูง เกรดเสริมใยคงรูปได้ดีกว่าเมื่อร้อน"),
-            SiteContent.Text("Good general chemical resistance; confirm harsh solvents.", "ทนสารเคมีทั่วไปได้ดี ควรยืนยันตัวทำละลายรุนแรง"),
-            SiteContent.Text("Technical matte surface, darker color options common.", "ผิวแมตต์เชิงเทคนิค มักมีสีเข้ม"),
-            SiteContent.Text("Good when stiffness matters more than ductility.", "ดีเมื่อความแข็งสำคัญกว่าความเหนียว"),
-            SiteContent.Text("More brittle than PA12 and less forgiving for snap features.", "เปราะกว่า PA12 และไม่เหมาะกับ snap-fit ที่ต้องยืดมาก"),
-            ["functional", "heat", "chemical"]),
-        new(
-            "Standard resin",
-            SiteContent.SlaResinImageUrl,
-            SiteContent.Text("Standard resin and detailed print sample", "เรซินทั่วไปและตัวอย่างพิมพ์ละเอียด"),
-            "sla",
-            SiteContent.Text("High-detail photopolymer", "โฟโตพอลิเมอร์รายละเอียดสูง"),
-            SiteContent.Text("SLA", "SLA"),
-            SiteContent.Text("Presentation models, fine details, masters, cosmetic prototypes, and visual checks.", "โมเดลนำเสนอ รายละเอียดเล็ก Master ต้นแบบผิวสวย และตรวจรูปลักษณ์"),
-            SiteContent.Text("Rigid and detailed, but brittle compared with engineering plastics.", "แข็งและละเอียด แต่เปราะกว่าพลาสติกวิศวกรรม"),
-            SiteContent.Text("Low-moderate; avoid hot service unless a heat-grade resin is selected.", "ต่ำถึงปานกลาง เลี่ยงงานร้อนหากไม่ได้เลือกเรซินทนร้อน"),
-            SiteContent.Text("Poor to fair for chemicals; many resins dislike solvents and UV exposure.", "ต่ำถึงพอใช้กับสารเคมี เรซินหลายชนิดไม่ชอบตัวทำละลายและ UV"),
-            SiteContent.Text("Smooth, high-detail surface with minimal visible layers.", "ผิวเรียบ รายละเอียดสูง เห็นเลเยอร์น้อย"),
-            SiteContent.Text("Best visual finish and small feature detail.", "ดีที่สุดด้านผิวสวยและรายละเอียดขนาดเล็ก"),
-            SiteContent.Text("Not the default for snap-fit, impact, or outdoor parts.", "ไม่ใช่ตัวเลือกหลักสำหรับ snap-fit กระแทก หรือกลางแจ้ง"),
-            ["prototype"]),
-        new(
-            "Tough resin",
-            SiteContent.SlaResinImageUrl,
-            SiteContent.Text("Tough engineering resin sample", "ตัวอย่างเรซินวิศวกรรมเหนียว"),
-            "sla",
-            SiteContent.Text("Engineering SLA resin", "เรซิน SLA วิศวกรรม"),
-            SiteContent.Text("SLA", "SLA"),
-            SiteContent.Text("Fit checks, clips, light functional prototypes, and precise housings.", "ตรวจประกอบ คลิป ต้นแบบใช้งานเบา และเคสที่ต้องการความแม่นยำ"),
-            SiteContent.Text("Improved impact behavior over standard resin, still process and post-cure dependent.", "ทนกระแทกดีกว่าเรซินทั่วไป แต่ขึ้นกับกระบวนการและการ post-cure"),
-            SiteContent.Text("Moderate; use dedicated heat resins for high-temperature fixtures.", "ปานกลาง หากเป็นฟิกซ์เจอร์ร้อนควรใช้เรซินทนร้อนเฉพาะ"),
-            SiteContent.Text("Fair; confirm exposure to solvents, oils, and cleaners.", "พอใช้ ควรยืนยันตัวทำละลาย น้ำมัน และน้ำยาทำความสะอาด"),
-            SiteContent.Text("Smooth and precise; supports paint and presentation finishing.", "ผิวเรียบและแม่นยำ รองรับการทำสีและ finishing นำเสนอ"),
-            SiteContent.Text("Good bridge between visual models and light-duty prototypes.", "เป็นสะพานที่ดีระหว่างโมเดลสวยกับต้นแบบใช้งานเบา"),
-            SiteContent.Text("Long-term load and chemical exposure should be reviewed.", "ควรตรวจการรับโหลดนานและการสัมผัสสารเคมี"),
-            ["prototype", "functional"]),
-        new(
-            "Aluminum 6061",
-            CncCastMaterialsImageUrl,
-            SiteContent.Text("Aluminum 6061 machined billet", "แท่งอะลูมิเนียม 6061 กัดขึ้นรูป"),
-            "cnc",
-            SiteContent.Text("General-purpose machined aluminum", "อะลูมิเนียมกัดขึ้นรูปอเนกประสงค์"),
-            SiteContent.Text("CNC", "CNC"),
-            SiteContent.Text("Fixtures, plates, brackets, machine parts, enclosures, and production tooling.", "ฟิกซ์เจอร์ แผ่นงาน ขายึด ชิ้นส่วนเครื่องจักร เคส และ tooling ผลิต"),
-            SiteContent.Text("High strength-to-weight, machinable, and stable for precision parts.", "แข็งแรงต่อน้ำหนักดี กัดง่าย และเสถียรสำหรับชิ้นงานแม่นยำ"),
-            SiteContent.Text("High compared with polymers; suitable near warm equipment.", "สูงเมื่อเทียบกับพอลิเมอร์ เหมาะใกล้อุปกรณ์ร้อน"),
-            SiteContent.Text("Good corrosion resistance; anodizing improves surface durability.", "ทนกัดกร่อนได้ดี อโนไดซ์ช่วยเพิ่มความทนผิว"),
-            SiteContent.Text("Machined, bead-blasted, anodized, or painted.", "ผิวกัด พ่นทราย อโนไดซ์ หรือทำสี"),
-            SiteContent.Text("Best all-round CNC metal for strong lightweight parts.", "โลหะ CNC ครอบคลุมที่สุดสำหรับชิ้นงานแข็งแรงแต่น้ำหนักเบา"),
-            SiteContent.Text("More expensive and slower than printed plastics.", "แพงและช้ากว่าพลาสติกพิมพ์"),
-            ["functional", "heat", "metal"]),
-        new(
-            "Stainless steel 304 / 316",
-            CncCastMaterialsImageUrl,
-            SiteContent.Text("Stainless steel machined bar stock", "แท่งสแตนเลสสำหรับกัดขึ้นรูป"),
-            "cnc",
-            SiteContent.Text("Corrosion-resistant machined steel", "สแตนเลสกัดขึ้นรูปทนกัดกร่อน"),
-            SiteContent.Text("CNC", "CNC"),
-            SiteContent.Text("Food-adjacent parts, wet environments, shafts, wear parts, and durable fixtures.", "ชิ้นงานใกล้อาหาร งานเปียก เพลา ชิ้นส่วนสึกหรอ และฟิกซ์เจอร์ทนทาน"),
-            SiteContent.Text("Strong, tough, and wear-resistant with high density.", "แข็งแรง เหนียว และทนสึก แต่น้ำหนักมาก"),
-            SiteContent.Text("High; suitable for demanding thermal environments.", "สูง เหมาะกับสภาพแวดล้อมร้อนที่ต้องการความทน"),
-            SiteContent.Text("Excellent corrosion and chemical resistance, especially with 316 in harsher environments.", "ทนกัดกร่อนและสารเคมีดีมาก โดยเฉพาะ 316 ในสภาพแวดล้อมรุนแรง"),
-            SiteContent.Text("Machined, brushed, passivated, or polished.", "ผิวกัด ขัดลาย passivate หรือขัดเงา"),
-            SiteContent.Text("Strong choice where corrosion and durability matter.", "ดีเมื่อต้องการความทนและทนกัดกร่อน"),
-            SiteContent.Text("Higher machining cost and weight than aluminum.", "ต้นทุนกัดและน้ำหนักสูงกว่าอะลูมิเนียม"),
-            ["functional", "heat", "metal", "chemical"]),
-        new(
-            "Brass",
-            CncCastMaterialsImageUrl,
-            SiteContent.Text("Brass machined alloy stock", "แท่งทองเหลืองสำหรับกัดขึ้นรูป"),
-            "cnc",
-            SiteContent.Text("Machinable copper alloy", "โลหะผสมทองแดงกัดง่าย"),
-            SiteContent.Text("CNC", "CNC"),
-            SiteContent.Text("Bushings, decorative hardware, electrical parts, inserts, and low-friction details.", "บูช ฮาร์ดแวร์ตกแต่ง ชิ้นส่วนไฟฟ้า อินเสิร์ต และจุดเสียดทานต่ำ"),
-            SiteContent.Text("Moderate strength, excellent machinability, and good wear behavior.", "แข็งแรงปานกลาง กัดง่ายมาก และทนสึกดี"),
-            SiteContent.Text("High for polymers, moderate for metals depending on alloy.", "สูงเมื่อเทียบกับพอลิเมอร์ และปานกลางสำหรับโลหะตามเกรด"),
-            SiteContent.Text("Good corrosion resistance in many indoor and water-adjacent uses.", "ทนกัดกร่อนได้ดีในงานภายในและใกล้น้ำหลายประเภท"),
-            SiteContent.Text("Machined bright finish; can tarnish or be polished.", "ผิวกัดเงา อาจหมองหรือขัดเงาได้"),
-            SiteContent.Text("Good for inserts, threads, wear, and conductive features.", "ดีสำหรับอินเสิร์ต เกลียว จุดสึกหรอ และงานนำไฟฟ้า"),
-            SiteContent.Text("Softer and heavier than aluminum.", "นิ่มกว่าและหนักกว่าอะลูมิเนียม"),
-            ["functional", "metal", "chemical"]),
-        new(
-            "Silicone / Urethane",
-            CncCastMaterialsImageUrl,
-            SiteContent.Text("Silicone and urethane casting samples", "ตัวอย่างงานหล่อซิลิโคนและยูรีเทน"),
-            "casting",
-            SiteContent.Text("Short-run elastomer or cast polymer", "อีลาสโตเมอร์หรืองานหล่อพอลิเมอร์จำนวนน้อย"),
-            SiteContent.Text("Casting", "งานหล่อ"),
-            SiteContent.Text("Soft grips, seals, bumpers, display parts, low-volume replicas, and overmold-like trials.", "กริปนุ่ม ซีล กันกระแทก ชิ้นงานโชว์ งานสำเนาจำนวนน้อย และทดลองงานคล้าย overmold"),
-            SiteContent.Text("Ranges from soft elastomer to semi-rigid plastic depending on selected system.", "ตั้งแต่นุ่มคล้ายยางถึงกึ่งแข็ง ขึ้นกับระบบวัสดุที่เลือก"),
-            SiteContent.Text("Low to moderate; high-temperature formulations must be selected intentionally.", "ต่ำถึงปานกลาง หากต้องทนร้อนสูงต้องเลือกสูตรเฉพาะ"),
-            SiteContent.Text("Highly formulation-dependent; confirm oils, fuels, cleaners, and UV exposure.", "ขึ้นกับสูตรมาก ควรยืนยันน้ำมัน เชื้อเพลิง น้ำยา และ UV"),
-            SiteContent.Text("Copies master surface well; color and shore hardness can be specified.", "ลอกผิว Master ได้ดี ระบุสีและ Shore hardness ได้"),
-            SiteContent.Text("Good for small batches when injection molding is not justified.", "เหมาะกับจำนวนน้อยเมื่อยังไม่คุ้มทำแม่พิมพ์ฉีด"),
-            SiteContent.Text("Tooling and material choice need review before quoting.", "ต้องตรวจแม่พิมพ์และระบบวัสดุก่อนเสนอราคา"),
-            ["prototype", "functional", "flexible", "chemical"])
-    ];
-
-    private string MaterialFilterClass(string activeFilter, string filter)
-    {
-        return activeFilter == filter ? "material-filter active" : "material-filter";
-    }
-
     private bool ShouldRenderPageHero => !string.Equals(Path, "blog", StringComparison.Ordinal);
 
     private bool ShouldRenderPageHeroActions => CurrentBlogPost is null;
@@ -1915,12 +1252,6 @@ else
         var path when IsPolicyPage(path) => "/contact",
         _ => SiteContent.QuoteNewProjectUrl
     };
-
-    private bool PrimaryActionDisabled => !IsPolicyPage(Path);
-
-    private string QuoteDisabledButtonClass => "button primary is-disabled";
-
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     private string SecondaryAction => Path switch
     {
@@ -2289,25 +1620,5 @@ else
 
     private sealed record ContentSection(LocalizedText Title, LocalizedText Body, IReadOnlyList<LocalizedText> Items);
 
-    private sealed record MaterialCategory(LocalizedText Title, string Process, LocalizedText Body, string ImageUrl, LocalizedText ImageAlt, IReadOnlyList<LocalizedText> Highlights);
-
-    private sealed record MaterialFilter(string Key, LocalizedText Label);
-
     private sealed record BlogCategoryFilter(string Key, LocalizedText Label, IReadOnlyList<string> Terms);
-
-    private sealed record MaterialComparisonItem(
-        string Name,
-        string ImageUrl,
-        LocalizedText ImageAlt,
-        string ProcessKey,
-        LocalizedText Family,
-        LocalizedText Process,
-        LocalizedText BestFor,
-        LocalizedText Mechanical,
-        LocalizedText Heat,
-        LocalizedText Chemical,
-        LocalizedText Finish,
-        LocalizedText Pros,
-        LocalizedText Cons,
-        IReadOnlyList<string> UseKeys);
 }

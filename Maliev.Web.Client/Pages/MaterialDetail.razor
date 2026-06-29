@@ -1,0 +1,284 @@
+@page "/materials/{Slug}"
+@inherits PreferenceAwareComponentBase
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>@PageTitleText - MALIEV</PageTitle>
+<HeadContent>
+    <meta name="description" content="@MetaDescription" />
+</HeadContent>
+
+@if (Material is null)
+{
+    <section class="section material-detail-missing">
+        <span class="material-kicker">@Text("Materials", "วัสดุ")</span>
+        <h1>@Text("Material not found", "ไม่พบวัสดุ")</h1>
+        <p>@Text("This material is no longer listed. Browse the full material library to find a close match.", "ไม่มีวัสดุนี้ในรายการแล้ว ดูคลังวัสดุทั้งหมดเพื่อหาตัวเลือกที่ใกล้เคียง")</p>
+        <a class="button primary" href="/materials">@Text("Back to materials", "กลับไปหน้าวัสดุ")</a>
+    </section>
+}
+else
+{
+    <section class="section material-detail" data-reveal>
+        <nav class="material-detail-breadcrumb" aria-label="@Text("Breadcrumb", "เส้นทางนำทาง")">
+            <a href="/materials">@Text("Materials", "วัสดุ")</a>
+            <span aria-hidden="true">/</span>
+            <span>@CategoryTitle</span>
+        </nav>
+
+        <div class="material-detail-head">
+            <div class="material-detail-media">
+                <img src="@Material.ImageUrl" alt="@Material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+            </div>
+            <div class="material-detail-headline">
+                <span class="material-process-pill">@Material.Process.For(Preferences.Culture)</span>
+                <h1>@Material.Name</h1>
+                <p class="material-detail-family">@Material.Family.For(Preferences.Culture)</p>
+                @if (Material.Standards is { Count: > 0 } standards)
+                {
+                    <div class="material-detail-standards" aria-label="@Text("Standard equivalents", "มาตรฐานเทียบเท่า")">
+                        <span class="material-detail-standards-label">@Text("Standards", "มาตรฐาน")</span>
+                        @foreach (var standard in standards)
+                        {
+                            <span class="material-detail-standard">@standard</span>
+                        }
+                    </div>
+                }
+                <p class="material-detail-bestfit">@Material.BestFor.For(Preferences.Culture)</p>
+                <div class="material-detail-actions">
+                    <button type="button" class="button primary" @onclick="DownloadDatasheetAsync" disabled="@_downloading" aria-busy="@_downloading.ToString().ToLowerInvariant()">
+                        <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Small" />
+                        <span>@(_downloading ? Text("Preparing datasheet…", "กำลังเตรียมดาต้าชีต…") : Text("Download datasheet (PDF)", "ดาวน์โหลดดาต้าชีต (PDF)"))</span>
+                    </button>
+                    <a class="button secondary" href="@SiteContent.MakeStudioUrl">@Text("Get part price", "ขอราคาชิ้นงาน")</a>
+                    <a class="button secondary" href="/contact">@Text("Contact MALIEV", "ติดต่อ MALIEV")</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="material-detail-grid">
+            <article class="material-detail-card material-detail-datasheet">
+                <h2>@Text("Datasheet", "ดาต้าชีต")</h2>
+                <dl class="material-detail-specs">
+                    @foreach (var spec in Material.Specs)
+                    {
+                        <div class="material-detail-spec">
+                            <dt>@spec.Label.For(Preferences.Culture)</dt>
+                            <dd>
+                                <span class="material-detail-spec-value">@spec.Value</span>
+                                @if (spec.Note is not null)
+                                {
+                                    <span class="material-detail-spec-note">@spec.Note.For(Preferences.Culture)</span>
+                                }
+                            </dd>
+                        </div>
+                    }
+                </dl>
+                <p class="material-detail-disclaimer">@SiteContent.MaterialDatasheetDisclaimer.For(Preferences.Culture)</p>
+            </article>
+
+            <article class="material-detail-card material-detail-guidance">
+                <h2>@Text("Selection guidance", "คำแนะนำการเลือก")</h2>
+                <dl class="material-detail-bands">
+                    @foreach (var band in Bands)
+                    {
+                        <div class="material-detail-band">
+                            <dt>@band.Label</dt>
+                            <dd>@band.Value</dd>
+                        </div>
+                    }
+                </dl>
+                <div class="material-detail-insights">
+                    <div class="material-compare-insight material-pro-con-pro">
+                        <span class="material-insight-heading">
+                            <span class="material-insight-icon"><MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" /></span>
+                            <strong>@Text("Advantage", "จุดเด่น")</strong>
+                        </span>
+                        <span class="material-insight-copy">@Material.Pros.For(Preferences.Culture)</span>
+                    </div>
+                    <div class="material-compare-insight material-pro-con-con">
+                        <span class="material-insight-heading">
+                            <span class="material-insight-icon"><MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" /></span>
+                            <strong>@Text("Check before use", "ควรตรวจ")</strong>
+                        </span>
+                        <span class="material-insight-copy">@Material.Cons.For(Preferences.Culture)</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        @if (SimilarMaterials.Count > 0)
+        {
+            <section class="material-detail-compare" aria-label="@Text("Compare with similar materials", "เปรียบเทียบกับวัสดุที่ใกล้เคียง")">
+                <div class="material-detail-compare-head">
+                    <span class="material-kicker">@Text("Compare", "เปรียบเทียบ")</span>
+                    <h2>@Text($"Compare {Material.Name} with similar {CategoryTitle}", $"เปรียบเทียบ {Material.Name} กับ{CategoryTitle}ที่ใกล้เคียง")</h2>
+                    <p>@Text("Only materials from the same process are shown, so you compare like with like.", "แสดงเฉพาะวัสดุในกระบวนการเดียวกัน เพื่อให้เทียบแบบเทียบกันตรง ๆ")</p>
+                </div>
+
+                <div class="material-similar-chips" role="group" aria-label="@Text("Add a material to the comparison", "เพิ่มวัสดุเข้าการเปรียบเทียบ")">
+                    @foreach (var peer in SimilarMaterials)
+                    {
+                        <button type="button"
+                                class="@SimilarChipClass(peer)"
+                                aria-pressed="@(_compareSlugs.Contains(peer.Slug).ToString().ToLowerInvariant())"
+                                disabled="@(!CanToggleSimilar(peer))"
+                                @onclick="() => ToggleSimilar(peer)">
+                            @peer.Name
+                        </button>
+                    }
+                </div>
+
+                <div class="material-compare-matrix" style="@CompareMatrixStyle">
+                    <div class="material-compare-grid">
+                        <div class="material-compare-row material-compare-head">
+                            <span class="material-compare-corner" aria-hidden="true"></span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <strong class="material-compare-material-head">
+                                    <span class="material-compare-head-media">
+                                        <img src="@entry.ImageUrl" alt="@entry.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                                    </span>
+                                    <span class="material-compare-head-copy">
+                                        <span class="material-compare-head-name">@entry.Name</span>
+                                        <em>@entry.Process.For(Preferences.Culture)</em>
+                                    </span>
+                                </strong>
+                            }
+                        </div>
+                        @for (var i = 0; i < Material.Specs.Count; i++)
+                        {
+                            var specIndex = i;
+                            <div class="material-compare-row">
+                                <span class="material-compare-row-label">@Material.Specs[specIndex].Label.For(Preferences.Culture)</span>
+                                @foreach (var entry in ComparedMaterials)
+                                {
+                                    <span class="material-compare-cell">@SpecValue(entry, specIndex)</span>
+                                }
+                            </div>
+                        }
+                        <div class="material-compare-row">
+                            <span class="material-compare-row-label">@Text("Best fit", "เหมาะกับ")</span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <span class="material-compare-cell">@entry.BestFor.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-row-label">@Text("Mechanical", "เชิงกล")</span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <span class="material-compare-cell">@entry.Mechanical.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-row-label">@Text("Heat", "ความร้อน")</span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <span class="material-compare-cell">@entry.Heat.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-row-label">@Text("Chemical", "สารเคมี")</span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <span class="material-compare-cell">@entry.Chemical.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                        <div class="material-compare-row">
+                            <span class="material-compare-row-label">@Text("Finish", "ผิวงาน")</span>
+                            @foreach (var entry in ComparedMaterials)
+                            {
+                                <span class="material-compare-cell">@entry.Finish.For(Preferences.Culture)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private bool _downloading;
+    private readonly HashSet<string> _compareSlugs = new(StringComparer.Ordinal);
+
+    private SiteContent.MaterialContent? Material => SiteContent.FindMaterial(Slug);
+
+    private string CategoryTitle => Material is null
+        ? string.Empty
+        : (SiteContent.FindMaterialCategory(Material.CategoryKey)?.Title.For(Preferences.Culture) ?? Material.Process.For(Preferences.Culture));
+
+    private string PageTitleText => Material?.Name ?? Text("Material not found", "ไม่พบวัสดุ");
+
+    private string MetaDescription => Material is null
+        ? Text("Material not found.", "ไม่พบวัสดุ")
+        : $"{Material.Name} — {Material.Family.For(Preferences.Culture)}. {Material.BestFor.For(Preferences.Culture)}";
+
+    private IReadOnlyList<SiteContent.MaterialContent> SimilarMaterials =>
+        Material is null ? [] : SiteContent.SimilarMaterials(Material);
+
+    private IReadOnlyList<SiteContent.MaterialContent> ComparedMaterials =>
+        Material is null
+            ? []
+            : new[] { Material }
+                .Concat(SimilarMaterials.Where(peer => _compareSlugs.Contains(peer.Slug)))
+                .ToList();
+
+    private IReadOnlyList<(string Label, string Value)> Bands => Material is null
+        ? []
+        :
+        [
+            (Text("Best fit", "เหมาะกับ"), Material.BestFor.For(Preferences.Culture)),
+            (Text("Mechanical", "เชิงกล"), Material.Mechanical.For(Preferences.Culture)),
+            (Text("Heat", "ความร้อน"), Material.Heat.For(Preferences.Culture)),
+            (Text("Chemical", "สารเคมี"), Material.Chemical.For(Preferences.Culture)),
+            (Text("Finish", "ผิวงาน"), Material.Finish.For(Preferences.Culture))
+        ];
+
+    private string CompareMatrixStyle => $"--compare-columns: {ComparedMaterials.Count};";
+
+    private bool CanToggleSimilar(SiteContent.MaterialContent peer) =>
+        _compareSlugs.Contains(peer.Slug) || _compareSlugs.Count < 2;
+
+    private void ToggleSimilar(SiteContent.MaterialContent peer)
+    {
+        if (_compareSlugs.Contains(peer.Slug))
+        {
+            _compareSlugs.Remove(peer.Slug);
+            return;
+        }
+
+        if (_compareSlugs.Count < 2)
+        {
+            _compareSlugs.Add(peer.Slug);
+        }
+    }
+
+    private string SimilarChipClass(SiteContent.MaterialContent peer) =>
+        _compareSlugs.Contains(peer.Slug) ? "material-similar-chip selected" : "material-similar-chip";
+
+    private static string SpecValue(SiteContent.MaterialContent material, int index) =>
+        index < material.Specs.Count ? material.Specs[index].Value : "—";
+
+    private async Task DownloadDatasheetAsync()
+    {
+        if (_downloading || Material is null)
+        {
+            return;
+        }
+
+        _downloading = true;
+        var href = SiteContent.BuildMaterialDatasheetHref(Material, Preferences.Culture);
+        var filename = SiteContent.BuildMaterialDatasheetFileName(Material);
+        await JS.InvokeVoidAsync("malievBlog.downloadFile", href, filename);
+        await Task.Delay(2000);
+        _downloading = false;
+    }
+
+    private string Text(string en, string th) =>
+        Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+}

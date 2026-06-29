@@ -8,25 +8,50 @@ namespace Maliev.Web.Tests;
 public sealed class HeroLayoutSourceTests
 {
     /// <summary>
-    /// Verifies the home hero uses the right-side GLB landing model and leaves quoting to the quote page.
+    /// Verifies the home hero shows the animated Make Studio window instead of the 3D gizmo,
+    /// with cycling demo scenes wired for the timeline module.
     /// </summary>
     [Fact]
-    public void HomeHeroUsesRightSideGlbLandingModel()
+    public void HomeHeroShowsAnimatedMakeStudioWindow()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
 
         Assert.Contains("landing-hero", source);
         Assert.Contains("landing-hero-visual", source);
-        Assert.Contains("ModelUrl=\"@_heroModel.Url\"", source);
-        Assert.Contains("@key=\"_heroModel.Key\"", source);
-        Assert.Contains("HeroModelCatalog.SelectRandomForService(_heroServiceSlug)", source);
-        Assert.Contains("home.hero.model", source);
-        Assert.Contains("EnableHoverMotion=\"true\"", source);
-        Assert.Contains("UsePlasticMaterial=\"@_heroModel.UsePlasticMaterial\"", source);
+        Assert.Contains("data-make-studio-hero=\"true\"", source);
+        Assert.Contains("class=\"ms-hero\"", source);
+        Assert.Contains("class=\"thread\"", source);
+        Assert.Contains("class=\"comp-wrap\"", source);
+        Assert.Contains("data-ms-composer=", source);
+        Assert.Contains("data-ms-project=", source);
+        Assert.Contains("data-ms-action=", source);
+        Assert.Contains("data-sc=\"0\"", source);
+        Assert.Contains("data-sc=\"3\"", source);
+        Assert.Contains("data-q=\"sketch\"", source);
+        Assert.DoesNotContain("ManufacturingGizmo", source);
+        Assert.DoesNotContain("manufacturing-gizmo--landing", source);
+        Assert.DoesNotContain("_heroModel", source);
         Assert.DoesNotContain("ModelScale", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("hero-workspace gizmo-workspace", source);
-        Assert.DoesNotContain("/models/hero-3d.glb", source);
+    }
+
+    /// <summary>
+    /// Verifies the landing product demo cannot be silently frozen by the browser's reduced-motion default.
+    /// </summary>
+    [Fact]
+    public void MakeStudioHeroDoesNotStopForReducedMotion()
+    {
+        var script = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-make-studio-hero.js");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        Assert.DoesNotContain("prefers-reduced-motion", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("matchMedia", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("reducedMotion", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("render the first scene", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("static first scene", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(".ms-hero .msg.on {\n    animation: none;", styles);
+        Assert.DoesNotContain(".ms-hero .cinput .cur {\n    animation: none;", styles);
     }
 
     /// <summary>
@@ -36,7 +61,6 @@ public sealed class HeroLayoutSourceTests
     public void HeroModelsUseRouteAwareCatalogAndScalableNames()
     {
         var root = FindRepoRoot();
-        var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var servicePage = ReadRepoFile("Maliev.Web.Client", "Pages", "ServicePage.razor");
         var catalog = ReadRepoFile("Maliev.Web.Client", "Content", "HeroModelCatalog.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
@@ -59,7 +83,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SelectRandomForService", catalog);
         Assert.Contains("ResolveForService", catalog);
         Assert.Contains("RandomNumberGenerator.GetInt32", catalog);
-        Assert.Contains("HeroModelCatalog.SelectRandomForService(_heroServiceSlug)", home);
         Assert.Contains("HeroModelCatalog.SelectRandomForService(Service.Slug)", servicePage);
         Assert.Contains("service.hero.model.", servicePage);
         Assert.Contains("service-page-hero", servicePage);
@@ -67,7 +90,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"manufacturing-gizmo--service\"", servicePage);
         Assert.Contains("@key=\"_heroModel.Key\"", servicePage);
         Assert.Contains(".manufacturing-gizmo--service", styles);
-        Assert.DoesNotContain("ModelScale", home);
         Assert.DoesNotContain("ModelScale", servicePage);
         Assert.DoesNotContain("DisplayScale", catalog);
         Assert.DoesNotContain("hero-3d-2.glb", catalog);
@@ -188,42 +210,37 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the home hero routes custom work into the chat-first Make Studio CTA.
+    /// Verifies the home hero and final CTA route custom work into the live Make Studio link.
     /// </summary>
     [Fact]
-    public void HomeHeroUsesMakeStudioCta()
+    public void HomeHeroAndFinalCtaLinkToLiveMakeStudio()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", source, StringComparison.Ordinal);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", source, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", source, StringComparison.Ordinal);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("SiteContent.QuoteDisabledTitle", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", source, StringComparison.Ordinal);
         Assert.Contains("Start in Make Studio", source);
-        Assert.Contains("Tell Make Studio what you want to build.", source);
-        Assert.Contains("Describe the part in plain language, then attach CAD, drawings, photos, or sketches when they help.", source);
-        Assert.Contains("make-studio-prompt", source);
+        Assert.Contains("make-studio-cta", source);
+        Assert.Contains("make-studio-primary", source);
+        Assert.Contains("make-studio-secondary", source);
         Assert.Contains("make-studio-artifacts", source);
+        Assert.Contains("final-make-studio", source);
         Assert.Contains("CAD", source);
         Assert.Contains("Drawings", source);
         Assert.Contains("Photos", source);
         Assert.Contains("Sketches", source);
-        Assert.Contains("DFM notes", source);
-        Assert.Contains("make-studio-cta", source);
-        Assert.Contains("make-studio-primary", source);
-        Assert.Contains("make-studio-note", source);
-        Assert.Contains("final-make-studio", source);
         Assert.Contains("Make Studio", content);
         Assert.Contains("MakeStudioUrl => QuoteEngineUrl", content);
         Assert.Contains(".make-studio-cta", styles);
-        Assert.Contains(".make-studio-prompt", styles);
-        Assert.Contains(".make-studio-artifacts", styles);
-        Assert.Contains(".make-studio-prompt span {\n    white-space: normal;", styles);
-        Assert.Contains(".make-studio-artifacts li {\n    min-width: 0;", styles);
         Assert.Contains(".make-studio-primary", styles);
         Assert.Contains(".final-make-studio", styles);
+        Assert.Contains(".ms-hero", styles);
+        Assert.DoesNotContain("Tell Make Studio what you want to build.", source);
+        Assert.DoesNotContain("make-studio-prompt", source);
         Assert.DoesNotContain("What do you want to make today?", source);
         Assert.DoesNotContain("Open Make Studio", source);
         Assert.DoesNotContain("old price button", source);
@@ -329,10 +346,10 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies QuoteEngine entry points are visibly disabled while QuoteEngine is out of the MVP path.
+    /// Verifies QuoteEngine / Make Studio entry points are live site-wide after launch.
     /// </summary>
     [Fact]
-    public void PublicQuoteEntryPointsAreDisabledForMvp()
+    public void PublicQuoteEntryPointsAreLive()
     {
         var layout = ReadRepoFile("Maliev.Web.Client", "Layout", "MainLayout.razor");
         var home = ReadRepoFile("Maliev.Web.Client", "Pages", "Home.razor");
@@ -344,48 +361,45 @@ public sealed class HeroLayoutSourceTests
         var product = ReadRepoFile("Maliev.Web.Client", "Pages", "ProductDetail.razor");
         var staticPage = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
         var dropzone = ReadRepoFile("Maliev.Web.Client", "Components", "Quote", "QuoteDropzone.razor");
+        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", layout, StringComparison.Ordinal);
-        Assert.DoesNotContain("NavigateToQuoteStart", layout, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", layout, StringComparison.Ordinal);
+        Assert.Contains("internal const bool QuoteEntryDisabled = false;", content, StringComparison.Ordinal);
+
+        Assert.Contains("class=\"nav-quote-link\" href=\"@SiteContent.MakeStudioUrl\"", layout, StringComparison.Ordinal);
+        Assert.Contains("class=\"mobile-nav-quote\" href=\"@SiteContent.MakeStudioUrl\"", layout, StringComparison.Ordinal);
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", layout, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledNavClass", layout, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledMobileNavClass", layout, StringComparison.Ordinal);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", layout, StringComparison.Ordinal);
-        Assert.DoesNotContain("data-quote-disabled", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledNavClass", layout, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledMobileNavClass", layout, StringComparison.Ordinal);
 
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", home, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", home, StringComparison.Ordinal);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", home, StringComparison.Ordinal);
-        Assert.DoesNotContain("Disabled=\"@SiteContent.QuoteEntryDisabled\"", home, StringComparison.Ordinal);
-        Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage, StringComparison.Ordinal);
-        Assert.DoesNotContain("QuoteDropzoneDisabledText", home, StringComparison.Ordinal);
-        Assert.Contains("QuoteDropzoneDisabledText", servicePage, StringComparison.Ordinal);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", home, StringComparison.Ordinal);
+        Assert.DoesNotContain("SiteContent.QuoteDisabledTitle", home, StringComparison.Ordinal);
 
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", quote, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", quote, StringComparison.Ordinal);
         Assert.DoesNotContain("http-equiv=\"refresh\"", quote, StringComparison.Ordinal);
-        Assert.DoesNotContain("SiteContent.QuoteDemoUrl", quote, StringComparison.Ordinal);
-        Assert.DoesNotContain("SiteContent.QuoteNewProjectUrl", quote, StringComparison.Ordinal);
-        Assert.Contains("disabled", quote, StringComparison.Ordinal);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", quote, StringComparison.Ordinal);
 
-        Assert.Contains("QuoteDisabledButtonClass", services, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", servicePage, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", shop, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", error, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", product, StringComparison.Ordinal);
-        Assert.Contains("QuoteDisabledButtonClass", staticPage, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", services, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", servicePage, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", shop, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", error, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", product, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", staticPage, StringComparison.Ordinal);
-        Assert.DoesNotContain("href=\"@SiteContent.QuoteNewProjectUrl\"", staticPage, StringComparison.Ordinal);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", services, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", services, StringComparison.Ordinal);
 
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", servicePage, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", servicePage, StringComparison.Ordinal);
+
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", shop, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", shop, StringComparison.Ordinal);
+
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", error, StringComparison.Ordinal);
+
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", product, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", product, StringComparison.Ordinal);
+
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", staticPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", staticPage, StringComparison.Ordinal);
+
+        // QuoteDropzone keeps an optional disabled capability for future use even though public pages are live.
         Assert.Contains("public bool Disabled { get; set; }", dropzone, StringComparison.Ordinal);
         Assert.Contains("disabled=\"@Disabled\"", dropzone, StringComparison.Ordinal);
-        Assert.Contains("aria-disabled=\"@DisabledAria\"", dropzone, StringComparison.Ordinal);
         Assert.Contains("if (Disabled)", dropzone, StringComparison.Ordinal);
         Assert.Contains(".landing-quote-dropzone.is-disabled", styles, StringComparison.Ordinal);
         Assert.Contains(".button.is-disabled", styles, StringComparison.Ordinal);
@@ -451,8 +465,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("industry-sector-band", source);
         Assert.Contains("industry-sector-band-inner", source);
         Assert.Contains("industry-sector-list", source);
-        Assert.Contains("Major industries served", source);
-        Assert.Contains("We help engineering teams move from prototype to usable production parts", source);
+        Assert.Contains("Who builds with Make Studio", source);
+        Assert.Contains("Engineering teams across demanding product categories bring parts to Make Studio", source);
         Assert.Contains("industry-sector-card", source);
         Assert.Contains("industry-sector-card-copy", source);
         Assert.Contains("industry-sector-link", source);
@@ -620,7 +634,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("transition: box-shadow .52s ease-in-out;", styles);
         Assert.Contains(".service-card:is(:hover, :focus-visible) {\n  box-shadow: rgba(17, 24, 39, .18) 0 24px 64px -30px, rgba(17, 24, 39, .10) 0 8px 22px -18px, var(--shadow-card);", styles);
         Assert.Contains(".service-card.primary:is(:hover, :focus-visible) {\n  box-shadow: rgba(0, 0, 0, .32) 0 26px 68px -30px, rgba(0, 0, 0, .20) 0 10px 24px -18px, var(--shadow-dark-card);", styles);
-        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--blue);", styles);
+        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--ink);", styles);
         Assert.Contains(".service-card.primary .card-link {\n  color: var(--inverse-text);", styles);
         Assert.Contains(".service-card.primary .card-link::after", styles);
         Assert.Contains("content: \"→\";", styles);
@@ -631,7 +645,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".body {\n  color: var(--muted);\n  font-size: 1rem;\n  line-height: 1.6;", styles);
         Assert.Contains(".service-card h3,\n.case-card h3,\n.blog-card h3 {\n  margin: 0;\n  font-size: 1.0625rem;", styles);
         Assert.Contains(".service-card p,\n.case-card p,\n.blog-card p,\n.product-card p {\n  margin: 0;\n  color: var(--muted);\n  font-size: .9375rem;", styles);
-        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--blue);\n  font-size: .875rem;", styles);
+        Assert.Contains(".card-link {\n  align-self: end;\n  color: var(--ink);\n  font-size: .875rem;", styles);
         Assert.Contains(".card-meta,\n.small,\n.load-message,\n.form-status,\n.success-message {\n  color: var(--muted);\n  font-size: .8125rem;", styles);
         Assert.Contains("filter: var(--logo-filter)", styles);
         Assert.Contains(".process-section", styles);
@@ -704,7 +718,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("SelectHomeService(service)", source);
         Assert.Contains("HomeServiceTabClass", source);
         Assert.Contains("home-services-title", source);
-        Assert.Contains("Our manufacturing services", source);
+        Assert.Contains("What MALIEV makes", source);
         Assert.Contains("home-services-proof-list", source);
         Assert.Contains("home-services-cta", source);
         Assert.Contains("home-services-media", source);
@@ -1217,7 +1231,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("object-fit: cover;", machineStyles);
         Assert.Contains(".machine-variant-button.is-selected", machineStyles);
         Assert.Contains(".machine-addon-option.is-selected", machineStyles);
-        Assert.Contains("border-color: var(--blue);", machineStyles);
+        Assert.Contains("border-color: var(--ink);", machineStyles);
         Assert.Contains(".machine-feature-backdrop--dark", machineStyles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--light", machineStyles);
         Assert.Contains("html[data-theme=\"dark\"] .machine-feature-backdrop--dark", machineStyles);
@@ -1657,7 +1671,7 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the quote page keeps quote intake visibly disabled for the MVP.
+    /// Verifies the quote page routes to the live Make Studio workspace.
     /// </summary>
     [Fact]
     public void QuotePageRoutesToDedicatedQuoteEngine()
@@ -1665,11 +1679,10 @@ public sealed class HeroLayoutSourceTests
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "Quote.razor");
 
         Assert.Contains("<ManufacturingGizmo />", source);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
-        Assert.Contains("QuoteDisabledButtonClass", source);
-        Assert.Contains("disabled", source);
-        Assert.DoesNotContain("SiteContent.QuoteDemoUrl", source);
-        Assert.DoesNotContain("SiteContent.QuoteNewUrl", source);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", source);
+        Assert.Contains("SiteContent.QuoteDemoUrl", source);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", source);
+        Assert.DoesNotContain("SiteContent.QuoteDisabledTitle", source);
         Assert.DoesNotContain("http-equiv=\"refresh\"", source);
         Assert.DoesNotContain("<InstantQuotePanel />", source);
         Assert.DoesNotContain("quote-engine-mock", source);
@@ -1693,11 +1706,10 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("Class=\"nav-icon-button cart-icon-button\"", source);
         Assert.Contains("Icons.Material.Filled.AccountCircle", source);
         Assert.Contains("Href=\"/account\"", source);
-        Assert.DoesNotContain("href=\"@SiteContent.MakeStudioUrl\"", source);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", source);
         Assert.Contains("@Text(\"Make Studio\", \"Make Studio\")", source);
-        Assert.Contains("QuoteDisabledNavClass", source);
-        Assert.Contains("QuoteDisabledMobileNavClass", source);
-        Assert.Contains("SiteContent.QuoteDisabledTitle", source);
+        Assert.DoesNotContain("QuoteDisabledNavClass", source);
+        Assert.DoesNotContain("QuoteDisabledMobileNavClass", source);
         Assert.DoesNotContain("data-quote-disabled", source);
         Assert.DoesNotContain("\"/quote/start?returnUrl=%2Fquotes%2Fnew\"", source);
         Assert.Contains("<NavLink href=\"/services\">@Text(\"Services\", \"บริการ\")</NavLink>", source);
@@ -1705,7 +1717,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("<NavLink href=\"/contact\">@Text(\"Contact\", \"ติดต่อ\")</NavLink>", source);
         Assert.Contains("class=\"mobile-nav-primary\"", source);
         Assert.Contains("class=\"mobile-nav-actions\"", source);
-        Assert.Contains("mobile-nav-quote is-disabled", source);
+        Assert.Contains("class=\"mobile-nav-quote\"", source);
         Assert.DoesNotContain("<NavLink href=\"/materials\" @onclick=\"CloseMobileNav\">", source);
         Assert.DoesNotContain("<NavLink href=\"/case-studies\" @onclick=\"CloseMobileNav\">", source);
         Assert.DoesNotContain("<NavLink href=\"/blog\" @onclick=\"CloseMobileNav\">", source);
@@ -1717,9 +1729,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("background: transparent;\n  border: 0;\n  border-radius: var(--radius);\n  box-shadow: none;", styles);
         Assert.Contains(".nav-icon-button.mud-button-root:hover,\n.nav-icon-button.mud-button-root:focus-visible {\n  color: var(--ink);\n  background: transparent;\n  box-shadow: none;", styles);
         Assert.DoesNotContain(".cart-icon-button.mud-button-root {\n  background: transparent;", styles);
-        Assert.Contains("--cta-bg: var(--blue);", styles);
+        Assert.Contains("--cta-bg: var(--active-pill-bg);", styles);
         Assert.Contains("--cta-hover: var(--blue-hover);", styles);
-        Assert.Contains("--cta-text: #ffffff;", styles);
+        Assert.Contains("--cta-text: var(--active-pill-text);", styles);
         Assert.Contains(".nav-quote-link {\n  border-radius: 999px;", styles);
         Assert.Contains("@media (min-width: 961px) and (max-width: 1060px)", styles);
         Assert.DoesNotContain("class=\"icon-link\"", source);
@@ -2031,6 +2043,35 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
+    /// Verifies the assistive popout can be dismissed with its own control without opening the chat panel.
+    /// </summary>
+    [Fact]
+    public void CustomerChatbotPopoutCanBeDismissedWithoutOpeningChat()
+    {
+        var component = ReadRepoFile("Maliev.Web.Client", "Components", "CustomerChatbot.razor");
+        var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
+
+        // The popout is a container <div>, not a single open-everywhere <button>.
+        Assert.Contains("<div class=\"customer-chatbot-popout\"", component);
+        Assert.DoesNotContain("class=\"customer-chatbot-popout\"\n                aria-label=\"@PopoutAriaLabel\"\n                data-chatbot-popout-kind", component);
+
+        // Opening and dismissing are separate sibling buttons with distinct handlers.
+        Assert.Contains("class=\"customer-chatbot-popout-open\"", component);
+        Assert.Contains("@onclick=\"OpenFromPopoutAsync\"", component);
+        Assert.Contains("class=\"customer-chatbot-popout-dismiss\"", component);
+        Assert.Contains("@onclick=\"DismissPopoutAsync\"", component);
+        Assert.Contains("aria-label=\"@Text(\"Dismiss\", \"ปิด\")\"", component);
+
+        // Dismiss hides the popout and reports analytics without invoking the open path.
+        Assert.Contains("private async Task DismissPopoutAsync()", component);
+        Assert.Contains("CancelPopoutTimer();", component);
+        Assert.Contains("assistant_popout_dismissed", component);
+
+        Assert.Contains(".customer-chatbot-popout-open", styles);
+        Assert.Contains(".customer-chatbot-popout-dismiss", styles);
+    }
+
+    /// <summary>
     /// Verifies chatbot JavaScript interop ignores pending Blazor element references before touching DOM methods.
     /// </summary>
     [Fact]
@@ -2161,10 +2202,12 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("--font-sans-th: \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: \"JetBrains Mono\", \"Noto Sans Thai\"", styles);
         Assert.Contains("--font-mono: var(--font-sans-th)", styles);
-        Assert.Contains("The default English typography is Inter.", design);
-        Assert.Contains("JetBrains Mono completes the system", design);
-        Assert.Contains("Noto Sans Thai preserved as the Thai fallback", design);
-        Assert.DoesNotContain("Geist", design);
+        Assert.Contains("Apple", design);
+        Assert.Contains("Albert Sans", design);
+        Assert.Contains("JetBrains Mono", design);
+        Assert.Contains("Noto Sans Thai", design);
+        Assert.Contains("No decorative gradients", design);
+        Assert.DoesNotContain("typography is Inter", design);
         Assert.Contains("html:lang(th)", styles);
         Assert.Contains("hyphens: none;", styles);
         Assert.Contains("line-break: strict;", styles);
@@ -2173,7 +2216,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("html[data-theme=\"dark\"]", styles);
         Assert.Contains("--logo-filter: brightness(0) invert(1)", styles);
         Assert.Contains("--blue-on: #ffffff;", styles);
-        Assert.Contains("--cta-text: #ffffff;", styles);
+        Assert.Contains("--cta-text: var(--active-pill-text);", styles);
         Assert.Contains("--reconnect-button-text: var(--blue-on);", styles);
         Assert.Contains("--reconnect-button-focus: rgba(10, 114, 239, .24);", styles);
         Assert.Contains("--reconnect-button-focus: rgba(10, 114, 239, .32);", styles);
@@ -2258,8 +2301,10 @@ public sealed class HeroLayoutSourceTests
 
         Assert.Contains("@page \"/services\"", services);
         Assert.Contains("@page \"/services/{Slug}\"", servicePage);
-        Assert.Contains("QuoteDisabledButtonClass", services);
-        Assert.Contains("QuoteDisabledButtonClass", servicePage);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", services);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", servicePage);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", services);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", servicePage);
         Assert.Contains("Disabled=\"@SiteContent.QuoteEntryDisabled\"", servicePage);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", services);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", servicePage);
@@ -2277,28 +2322,40 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies material direct comparison removes the property column and uses status icons for insight cards.
+    /// Verifies the full material comparison uses a single left-hand property-label column (Apple-style table)
+    /// instead of repeating the property name inside every material cell, and keeps status icons for insight cards.
     /// </summary>
     [Fact]
-    public void MaterialsDirectComparisonUsesInlinePropertyLabelsAndInsightIcons()
+    public void MaterialsDirectComparisonUsesSingleLabelColumnAndInsightIcons()
     {
-        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
+        var source = ReadRepoFile("Maliev.Web.Client", "Pages", "MaterialDetail.razor");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
+        // The repeated per-cell property label is gone; a single left label column replaces it.
+        Assert.DoesNotContain("material-compare-cell-label", source);
         Assert.DoesNotContain("material-compare-property-label", source);
-        Assert.DoesNotContain("@Text(\"Property\", \"คุณสมบัติ\")", source);
-        Assert.DoesNotContain("grid-template-columns: 140px repeat(var(--compare-columns), minmax(0, 1fr));", styles);
-        Assert.Contains("grid-template-columns: repeat(var(--compare-columns), minmax(0, 1fr));", styles);
+        Assert.Contains("material-compare-row-label", source);
+        Assert.Contains("material-compare-grid", source);
+        Assert.Contains("material-compare-corner", source);
         Assert.Contains("material-compare-cell", source);
-        Assert.Contains("material-compare-cell-label", source);
+
+        // Hairline grid: one label column + one column per selected material; rows collapse to grid cells.
+        Assert.Contains("grid-template-columns: minmax(120px, .72fr) repeat(var(--compare-columns), minmax(0, 1fr));", styles);
+        Assert.Contains(".material-compare-row {\n  display: contents;\n}", styles);
+        Assert.DoesNotContain("grid-template-columns: 140px repeat(var(--compare-columns), minmax(0, 1fr));", styles);
+        Assert.DoesNotContain(".material-compare-cell-label", styles);
+        Assert.Contains(".material-compare-row-label", styles);
+
         Assert.Contains("material-insight-heading", source);
         Assert.Contains("material-insight-icon", source);
         Assert.Contains("<MudIcon Icon=\"@Icons.Material.Filled.CheckCircle\" Size=\"Size.Small\" />", source);
         Assert.Contains("<MudIcon Icon=\"@Icons.Material.Filled.Warning\" Size=\"Size.Small\" />", source);
         Assert.Contains(".material-insight-heading", styles);
         Assert.Contains(".material-insight-icon", styles);
+
+        // Mobile keeps a sticky label column with horizontal scroll for the material columns.
         Assert.Contains("overflow-x: auto;", styles);
-        Assert.Contains("grid-template-columns: repeat(var(--compare-columns), minmax(240px, 1fr));", styles);
+        Assert.Contains("grid-template-columns: 140px repeat(var(--compare-columns), minmax(240px, 1fr));", styles);
         Assert.DoesNotContain(".material-compare-row {\n    grid-template-columns: 1fr;", styles);
         Assert.DoesNotContain(".material-pro-con-line strong::before", styles);
         Assert.DoesNotContain(".material-compare-insight strong::before", styles);
@@ -2311,12 +2368,8 @@ public sealed class HeroLayoutSourceTests
     public void StaticPagesCoverCustomerRoutesAndContactBoundary()
     {
         var source = ReadRepoFile("Maliev.Web.Client", "Pages", "StaticPage.razor");
-        var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
-        var app = ReadRepoFile("Maliev.Web.Bff", "Components", "App.razor");
-        var scrollScript = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "js", "maliev-scroll.js");
 
-        Assert.Contains("@page \"/materials\"", source);
         Assert.Contains("@page \"/case-studies/{Slug}\"", source);
         Assert.Contains("@page \"/blog/{Slug}\"", source);
         Assert.Contains("SiteContent.BlogPosts", source);
@@ -2343,8 +2396,8 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("IReadOnlyList<LocalizedText> Items", source);
         Assert.Contains("<li>@point.For(Preferences.Culture)</li>", source);
         Assert.Contains("SubmitContactMessageAsync", source);
-        Assert.Contains("QuoteDisabledButtonClass", source);
-        Assert.Contains("QuoteDisabledTitle", source);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", source);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", source);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", source);
         Assert.Contains("class=\"@ContactStatusClass\" role=\"@ContactStatusRole\"", source);
         Assert.Contains("@ContactStatusTitle", source);
@@ -2361,195 +2414,6 @@ public sealed class HeroLayoutSourceTests
         Assert.DoesNotContain("_contactStatus = ex.Message;", source);
         Assert.DoesNotContain("@page \"/account/orders\"", source);
         Assert.DoesNotContain("@page \"/account/preferences\"", source);
-        Assert.Contains("material-category-media", source);
-        Assert.Contains("material-category-body", source);
-        Assert.Contains("material-comparison-table", source);
-        Assert.Contains("material-mobile-list", source);
-        Assert.Contains("material-compare-workbench", source);
-        Assert.Contains("class=\"material-compare-workbench\" @ref=\"_materialCompareWorkbench\"", source);
-        Assert.Contains("@inject IJSRuntime JS", source);
-        Assert.Contains("private ElementReference _materialCompareWorkbench;", source);
-        Assert.Contains("private bool _pendingMaterialComparisonScroll;", source);
-        Assert.Contains("protected override async Task OnAfterRenderAsync(bool firstRender)", source);
-        Assert.Contains("await JS.InvokeVoidAsync(\"malievScroll.scrollIntoView\", _materialCompareWorkbench);", source);
-        Assert.Contains("_selectedMaterialNames.Count is >= 2 and <= 3", source);
-        Assert.Contains("_pendingMaterialComparisonScroll = true;", source);
-        Assert.Contains("_pendingMaterialComparisonScroll = false;", source);
-        Assert.Contains("material-row-summary", source);
-        Assert.Contains("material-row-media", source);
-        Assert.DoesNotContain("material-compare-property-label", source);
-        Assert.Contains("material-compare-cell-label", source);
-        Assert.Contains("material-compare-material-head", source);
-        Assert.Contains("material-compare-head-media", source);
-        Assert.Contains("material-compare-head-copy", source);
-        Assert.Contains("material-compare-head-name", source);
-        Assert.Contains("material-compare-insight", source);
-        Assert.Contains("material-insight-heading", source);
-        Assert.Contains("material-insight-icon", source);
-        Assert.Contains("material-mobile-card-visual", source);
-        Assert.Contains("material-mobile-card-basic", source);
-        Assert.Contains("material-mobile-card-detail", source);
-        Assert.Contains("material-mobile-card-heading", source);
-        Assert.Contains("material-mobile-card-summary", source);
-        Assert.Contains("material-mobile-card-best-fit", source);
-        Assert.Contains("material-mobile-card-media", source);
-        Assert.Contains("<img src=\"@material.ImageUrl\"", source);
-        Assert.Contains("string ImageUrl,\n        LocalizedText ImageAlt", source);
-        Assert.DoesNotContain("/images/materials/pla.svg", source);
-        Assert.DoesNotContain("/images/materials/petg.svg", source);
-        Assert.Contains("SiteContent.FdmThermoplasticsImageUrl", source);
-        Assert.Contains("SiteContent.PowderBedNylonImageUrl", source);
-        Assert.Contains("SiteContent.SlaResinImageUrl", source);
-        Assert.Contains("https://images.unsplash.com/photo-1742971239045-afabc9f7d744", content);
-        Assert.Contains("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg", content);
-        Assert.Contains("https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg", content);
-        Assert.Contains("https://images.unsplash.com/photo-1740209475472-aa7d280f7452", source);
-
-        var materialRowSummaryIndex = source.IndexOf("<div class=\"material-row-summary\">", StringComparison.Ordinal);
-        var materialRowCopyIndex = source.IndexOf("<span class=\"material-row-copy\">", materialRowSummaryIndex, StringComparison.Ordinal);
-        var materialRowMediaIndex = source.IndexOf("<span class=\"material-row-media\">", materialRowSummaryIndex, StringComparison.Ordinal);
-        Assert.True(materialRowSummaryIndex >= 0, "material row summary markup should exist");
-        Assert.True(materialRowCopyIndex >= 0, "material row copy should exist");
-        Assert.True(materialRowMediaIndex >= 0, "material row media should exist");
-        Assert.True(materialRowCopyIndex < materialRowMediaIndex, "desktop material table should render text before image");
-
-        var materialCompareHeadIndex = source.IndexOf("<strong class=\"material-compare-material-head\">", StringComparison.Ordinal);
-        var materialCompareHeadMediaIndex = source.IndexOf("<span class=\"material-compare-head-media\">", materialCompareHeadIndex, StringComparison.Ordinal);
-        var materialCompareHeadCopyIndex = source.IndexOf("<span class=\"material-compare-head-copy\">", materialCompareHeadIndex, StringComparison.Ordinal);
-        var materialCompareHeadImageIndex = source.IndexOf("<img src=\"@material.ImageUrl\"", materialCompareHeadMediaIndex, StringComparison.Ordinal);
-        var materialCompareHeadNameIndex = source.IndexOf("<span class=\"material-compare-head-name\">@material.Name</span>", materialCompareHeadCopyIndex, StringComparison.Ordinal);
-        Assert.True(materialCompareHeadIndex >= 0, "direct comparison material header should exist");
-        Assert.True(materialCompareHeadMediaIndex >= 0, "direct comparison header should include material imagery");
-        Assert.True(materialCompareHeadImageIndex >= 0, "direct comparison header should render material image");
-        Assert.True(materialCompareHeadCopyIndex >= 0, "direct comparison header should include material copy");
-        Assert.True(materialCompareHeadNameIndex >= 0, "direct comparison header should include material name");
-        Assert.True(materialCompareHeadMediaIndex < materialCompareHeadCopyIndex, "direct comparison header should render image before material copy");
-        Assert.True(materialCompareHeadImageIndex < materialCompareHeadNameIndex, "direct comparison header image should come before the material name");
-
-        var materialMobileVisualIndex = source.IndexOf("<div class=\"material-mobile-card-visual\">", StringComparison.Ordinal);
-        var materialMobileBasicIndex = source.IndexOf("<div class=\"material-mobile-card-basic\">", StringComparison.Ordinal);
-        var materialMobileDetailIndex = source.IndexOf("<div class=\"material-mobile-card-detail\">", StringComparison.Ordinal);
-        var materialMobileHeadingIndex = source.IndexOf("<div class=\"material-mobile-card-heading\">", materialMobileBasicIndex, StringComparison.Ordinal);
-        var materialMobileSummaryIndex = source.IndexOf("<div class=\"material-mobile-card-summary\">", materialMobileBasicIndex, StringComparison.Ordinal);
-        var materialMobileTitleIndex = source.IndexOf("<div class=\"material-mobile-card-title\">", materialMobileHeadingIndex, StringComparison.Ordinal);
-        var materialMobileMediaIndex = source.IndexOf("<span class=\"material-mobile-card-media\">", materialMobileVisualIndex, StringComparison.Ordinal);
-        var materialMobileCopyIndex = source.IndexOf("<span class=\"material-mobile-card-copy\">", materialMobileTitleIndex, StringComparison.Ordinal);
-        var materialMobileBestFitIndex = source.IndexOf("<p class=\"material-mobile-card-best-fit\">", materialMobileSummaryIndex, StringComparison.Ordinal);
-        var materialMobileSpecsIndex = source.IndexOf("<dl class=\"material-mobile-specs\">", materialMobileDetailIndex, StringComparison.Ordinal);
-        var materialMobileButtonIndex = source.IndexOf("<button class=\"@MaterialSelectButtonClass(material)\"", materialMobileHeadingIndex, StringComparison.Ordinal);
-        Assert.True(materialMobileVisualIndex >= 0, "material mobile card visual markup should exist");
-        Assert.True(materialMobileBasicIndex >= 0, "material mobile card basic markup should exist");
-        Assert.True(materialMobileDetailIndex >= 0, "material mobile card detail markup should exist");
-        Assert.True(materialMobileHeadingIndex >= 0, "material mobile card heading markup should exist");
-        Assert.True(materialMobileSummaryIndex >= 0, "material mobile card summary markup should exist");
-        Assert.True(materialMobileTitleIndex >= 0, "material mobile card title markup should exist");
-        Assert.True(materialMobileCopyIndex >= 0, "material mobile card copy should exist");
-        Assert.True(materialMobileMediaIndex >= 0, "material mobile card media should exist");
-        Assert.True(materialMobileBestFitIndex >= 0, "material mobile card best-fit copy should exist in the summary row");
-        Assert.True(materialMobileSpecsIndex >= 0, "material mobile card specs should exist in the detail row");
-        Assert.True(materialMobileButtonIndex >= 0, "material select button should exist in the heading row");
-        Assert.True(materialMobileVisualIndex < materialMobileBasicIndex, "mobile material cards should render the image before the basic information");
-        Assert.True(materialMobileBasicIndex < materialMobileDetailIndex, "mobile material cards should render detail data after the image/basic row");
-        Assert.True(materialMobileMediaIndex < materialMobileCopyIndex, "tablet material cards should render material imagery before the data copy");
-        Assert.True(materialMobileButtonIndex < materialMobileSummaryIndex, "tablet material cards should keep the compare button in the top heading row");
-        Assert.True(materialMobileBestFitIndex < materialMobileSpecsIndex, "material cards should render the summary before detailed material data");
-
-        Assert.Contains("material-pro-con-line material-pro-con-pro", source);
-        Assert.Contains("material-pro-con-line material-pro-con-con", source);
-        Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-pro", source);
-        Assert.Contains("material-compare-row material-compare-tone-row material-pro-con-con", source);
-        Assert.Contains("@Text(\"Pros / watch\", \"ข้อดี / ระวัง\")", source);
-        Assert.Contains("@Text(\"Advantage\", \"จุดเด่น\")", source);
-        Assert.Contains("@Text(\"Check before use\", \"ควรตรวจ\")", source);
-        Assert.Contains("Icons.Material.Filled.CheckCircle", source);
-        Assert.Contains("Icons.Material.Filled.Warning", source);
-        Assert.Contains("<span class=\"material-compare-insight\">", source);
-        Assert.Contains("Compare material properties before uploading CAD.", source);
-        Assert.Contains("เปรียบเทียบคุณสมบัติวัสดุก่อนอัปโหลด CAD", source);
-        Assert.DoesNotContain("Compare strength, heat, chemistry, finish, and trade-offs before uploading CAD.", source);
-        Assert.DoesNotContain("เปรียบเทียบความแข็งแรง ความร้อน สารเคมี ผิวงาน และข้อแลกเปลี่ยนก่อนอัปโหลด CAD", source);
-        Assert.Contains("FilteredMaterialComparisons", source);
-        Assert.Contains("SelectedMaterialComparisons", source);
-        Assert.Contains("ToggleMaterialComparison", source);
-        Assert.Contains("_selectedMaterialNames.Count < 3", source);
-        Assert.Contains("MaterialProcessFilters", source);
-        Assert.Contains("MaterialUseFilters", source);
-        Assert.Contains("ImageUrl", source);
-        Assert.Contains("ImageAlt", source);
-        Assert.Contains("js/maliev-scroll.js", app);
-        Assert.Contains("window.malievScroll", scrollScript);
-        Assert.Contains("scrollIntoView: function (element, offset)", scrollScript);
-        Assert.Contains("getBoundingClientRect", scrollScript);
-        Assert.Contains("window.scrollTo", scrollScript);
-        Assert.Contains("prefers-reduced-motion: reduce", scrollScript);
-        Assert.Contains("behavior: prefersReducedMotion ? 'auto' : 'smooth'", scrollScript);
-        Assert.Contains(".material-category-media", styles);
-        Assert.Contains(".material-category-body", styles);
-        Assert.DoesNotContain(".blog-hero-logo", styles);
-        Assert.Contains(".content-stack ul", styles);
-        Assert.Contains(".material-comparison-table", styles);
-        Assert.Contains("border-collapse: separate;", styles);
-        Assert.Contains("border-spacing: 0;", styles);
-        Assert.Contains(".material-comparison-table thead th:first-child,\n.material-comparison-table tbody td:first-child {\n  position: sticky;\n  left: 0;", styles);
-        Assert.Contains(".material-comparison-table tbody td:first-child {\n  z-index: 3;\n  background: var(--paper);", styles);
-        Assert.Contains(".material-row-media", styles);
-        Assert.Contains(".material-mobile-card-media", styles);
-        Assert.Contains(".material-comparison-section .section-heading", styles);
-        Assert.Contains(".material-comparison-section .section-heading p {\n  margin: 0;\n  max-width: 62ch;", styles);
-        Assert.Contains(".material-comparison-section {\n  max-width: none;\n  padding-left: clamp(24px, 4vw, 72px);\n  padding-right: clamp(24px, 4vw, 72px);", styles);
-        Assert.Contains(".material-comparison-panel {\n  display: grid;\n  width: 100%;", styles);
-        Assert.Contains(".material-table-shell {\n  width: 100%;", styles);
-        Assert.Contains("grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);", styles);
-        Assert.Contains(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: start;", styles);
-        Assert.Contains(".material-comparison-count {\n  align-self: end;\n  justify-self: end;", styles);
-        Assert.DoesNotContain(".material-filter-block {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;\n  align-items: end;", styles);
-        Assert.Contains("@media (max-width: 1180px)", styles);
-        Assert.Contains("@media (min-width: 681px) and (max-width: 1180px)", styles);
-        Assert.Contains(".material-mobile-card {\n    grid-template-columns: minmax(260px, .38fr) minmax(0, 1fr);", styles);
-        Assert.Contains("grid-template-areas:\n      \"visual basic\"\n      \"visual detail\";", styles);
-        Assert.Contains(".material-comparison-section {\n    padding-left: 24px;\n    padding-right: 24px;", styles);
-        Assert.Contains(".material-comparison-section .section-heading {\n    grid-template-columns: minmax(0, 1fr);\n    gap: 14px;", styles);
-        Assert.Contains("@media (max-width: 680px)", styles);
-        Assert.Contains(".material-comparison-section {\n    padding-left: 18px;\n    padding-right: 18px;", styles);
-        Assert.Contains("display: none;", styles);
-        Assert.Contains("display: grid;", styles);
-        Assert.Contains(".material-select-button", styles);
-        Assert.Contains(".material-compare-matrix", styles);
-        Assert.DoesNotContain(".material-compare-property-label", styles);
-        Assert.Contains(".material-compare-cell-label", styles);
-        Assert.Contains(".material-compare-material-head", styles);
-        Assert.Contains(".material-compare-head-media", styles);
-        Assert.Contains(".material-compare-insight", styles);
-        Assert.Contains(".material-insight-heading", styles);
-        Assert.Contains(".material-insight-icon", styles);
-        Assert.Contains(".material-pro-con-pro", styles);
-        Assert.Contains(".material-pro-con-con", styles);
-        Assert.Contains("color-mix(in srgb, #f59e0b 10%, var(--paper))", styles);
-        Assert.Contains("border-left: 4px solid var(--material-tone);", styles);
-        Assert.DoesNotContain(".material-pro-con-line strong::before", styles);
-        Assert.DoesNotContain(".material-compare-insight strong::before", styles);
-        Assert.DoesNotContain("color-mix(in srgb, var(--red) 72%, var(--ink))", styles);
-        Assert.Contains(".material-filter", styles);
-        Assert.Contains("grid-template-columns: repeat(4, minmax(0, 1fr));", styles);
-        Assert.Contains(".material-row-summary {\n  display: grid;\n  gap: 12px;", styles);
-        Assert.Contains("max-width: 168px;", styles);
-        Assert.DoesNotContain("grid-template-columns: 68px minmax(0, 1fr);", styles);
-        Assert.Contains(".material-mobile-card-title {\n  display: grid;\n  gap: 12px;", styles);
-        Assert.Contains(".material-mobile-card-basic {\n  grid-area: basic;\n  display: grid;\n  align-content: start;", styles);
-        Assert.Contains("justify-items: stretch;", styles);
-        Assert.Contains(".material-mobile-card-detail {\n  grid-area: detail;\n  display: grid;\n  align-content: start;\n  gap: 14px;", styles);
-        Assert.Contains(".material-mobile-card-heading {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;", styles);
-        Assert.Contains(".material-mobile-card-summary {\n  display: grid;\n  grid-template-columns: auto minmax(0, 1fr);", styles);
-        Assert.Contains("border-top: 1px solid var(--rule);", styles);
-        Assert.Contains(".material-mobile-card {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"visual\"\n      \"basic\"\n      \"detail\";", styles);
-        Assert.Contains(".material-mobile-card-media {\n    align-self: stretch;\n    height: 100%;\n    min-height: 260px;", styles);
-        Assert.Contains(".material-mobile-card-media {\n    align-self: stretch;\n    aspect-ratio: 16 / 10;", styles);
-        Assert.Contains(".material-mobile-card-heading .material-select-button {\n    flex: 0 0 auto;", styles);
-        Assert.Contains(".material-mobile-card-heading {\n    display: grid;\n    grid-template-columns: minmax(0, 1fr);", styles);
-        Assert.Contains(".material-mobile-card-heading .material-select-button {\n    justify-self: stretch;\n    inline-size: 100%;\n    min-width: 100%;\n    width: 100%;", styles);
-        Assert.Contains(".material-mobile-card-summary .material-process-pill {\n    width: 100%;\n    justify-content: flex-start;", styles);
-        Assert.Contains(".material-mobile-card-copy", styles);
-        Assert.DoesNotContain(".material-mobile-card-title {\n  display: grid;\n  grid-template-columns: 74px minmax(0, 1fr);", styles);
         Assert.DoesNotContain("href=\"/quote\"", source);
     }
 
@@ -2994,10 +2858,10 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies product and fallback quote CTAs leave the local bridge only for the SEO quote page.
+    /// Verifies product and fallback quote CTAs link to the live Make Studio workspace.
     /// </summary>
     [Fact]
-    public void CommerceQuoteCtasAreDisabledForMvp()
+    public void CommerceQuoteCtasAreLive()
     {
         var content = ReadRepoFile("Maliev.Web.Client", "Content", "SiteContent.cs");
         var shop = ReadRepoFile("Maliev.Web.Client", "Pages", "Shop.razor");
@@ -3007,11 +2871,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("DefaultQuoteEngineUrl = \"https://make.maliev.com\"", content);
         Assert.Contains("QuoteDemoUrl => $\"{QuoteEngineUrl}/demo\"", content);
         Assert.Contains("QuoteNewProjectUrl => $\"{QuoteEngineUrl}/quotes/new\"", content);
-        Assert.Contains("QuoteEntryDisabled = true", content);
+        Assert.Contains("QuoteEntryDisabled = false", content);
         Assert.DoesNotContain("https://quote.maliev.com", content);
-        Assert.Contains("QuoteDisabledButtonClass", shop);
-        Assert.Contains("QuoteDisabledButtonClass", product);
-        Assert.Contains("QuoteDisabledButtonClass", error);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", shop);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", product);
+        Assert.Contains("href=\"@SiteContent.MakeStudioUrl\"", error);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", shop);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", product);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", error);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", shop);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", product);
         Assert.DoesNotContain("href=\"@SiteContent.QuoteNewUrl\"", error);
@@ -3098,14 +2965,11 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("powerPreference: highQuality ? \"high-performance\" : \"low-power\"", source);
 
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
-        Assert.Contains(".manufacturing-gizmo--landing", styles);
         Assert.Contains("overflow: visible", styles);
-        Assert.DoesNotContain(".manufacturing-gizmo--landing::before", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
-        Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
-        Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
-        Assert.Contains("linear-gradient(180deg, #11263d 0%, #101d2d 48%, #0f1824 100%);", styles);
+        Assert.DoesNotContain(".manufacturing-gizmo--landing", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);", styles);
+        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(180deg, #0d1015 0%, #11151b 100%);", styles);
+        Assert.DoesNotContain("rgba(217, 233, 255", styles);
         Assert.Contains("background: var(--landing-gizmo-canvas-bg);", styles);
     }
 
@@ -3231,7 +3095,6 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("sparseAssemblyRatio < 18", source);
         Assert.Contains("meshes: [dominant.mesh]", source);
         Assert.Contains("node.getBoundingInfo().update(worldMatrix);", source);
-        Assert.Contains(".manufacturing-gizmo--landing .manufacturing-gizmo-canvas", styles);
         Assert.Contains("pointer-events: none;", styles);
         Assert.DoesNotContain("transform: scale(4.25);", styles);
         Assert.DoesNotContain("transform-origin: 50% 52%;", styles);
@@ -3241,28 +3104,24 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the home hero canvas paints a full-viewport backdrop in both color themes.
+    /// Verifies the animated Make Studio hero window is styled with theme-aware tokens for both color themes.
     /// </summary>
     [Fact]
-    public void LandingHeroCanvasBackdropSpansViewportInBothThemes()
+    public void LandingHeroMakeStudioWindowStylesAreThemeAware()
     {
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("--landing-gizmo-canvas-bg: linear-gradient(45deg, #ffffff 0%", styles);
-        Assert.Contains("rgba(217, 233, 255, .72) 68%, rgba(10, 114, 239, .16) 100%", styles);
-        Assert.Contains("--landing-gizmo-canvas-bg:\n    radial-gradient(circle at 100% 0%", styles);
-        Assert.Contains("linear-gradient(225deg, rgba(244, 246, 248, .06)", styles);
-        Assert.Contains("linear-gradient(180deg, #11263d 0%, #101d2d 48%, #0f1824 100%);", styles);
         Assert.Contains(".landing-hero {\n  position: relative;", styles);
         Assert.Contains("isolation: isolate;\n  display: grid;", styles);
-        Assert.Contains("overflow: visible;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  right: auto;\n  width: 100vw;\n  height: 100%;\n  transform: translateX(-50%);", styles);
-        Assert.Contains("z-index: 0;\n  pointer-events: none;", styles);
-        Assert.Contains("@media (min-width: 681px) and (max-width: 960px)", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: min(46vh, 470px);\n    min-height: 440px;\n    overflow: hidden;\n    transform: none;", styles);
-        Assert.Contains("@media (max-width: 680px)", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: clamp(240px, 58vw, 360px);\n    min-height: 0;\n    overflow: hidden;\n    transform: none;", styles);
-        Assert.DoesNotContain("--landing-gizmo-canvas-bg: transparent;", styles);
+        Assert.Contains(".ms-hero {", styles);
+        Assert.Contains(".ms-hero .msg.user .bubble {", styles);
+        Assert.Contains(".ms-hero .card {", styles);
+        Assert.Contains(".ms-hero .cinput .cur {", styles);
+        Assert.Contains("@keyframes msHeroIn", styles);
+        Assert.Contains("@keyframes msHeroBlink", styles);
+        Assert.DoesNotContain(".ms-hero .msg.on {\n    animation: none;", styles);
+        Assert.DoesNotContain(".ms-hero .cinput .cur {\n    animation: none;", styles);
+        Assert.DoesNotContain(".manufacturing-gizmo--landing", styles);
     }
 
     /// <summary>
@@ -3391,19 +3250,14 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("margin-top: 22px;", styles);
         Assert.Contains("width: min(100%, 640px);\n    margin-inline: auto;", styles);
         Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
-        Assert.Contains("width: 100vw;\n    margin-left: calc(50% - 50vw);\n    margin-right: calc(50% - 50vw);", styles);
-        Assert.Contains("min-height: 440px;", styles);
-        Assert.Contains("height: min(46vh, 470px);", styles);
         Assert.Contains("@media (max-width: 680px)", styles);
         Assert.DoesNotContain(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);
         Assert.Contains(".landing-hero {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-areas:\n      \"copy\"\n      \"visual\";", styles);
         Assert.Contains("align-content: start;", styles);
         Assert.Contains("min-height: auto;", styles);
         Assert.Contains(".landing-hero-copy {\n    grid-area: copy;\n    max-width: none;\n    text-align: center;", styles);
-        Assert.DoesNotContain(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: min(100%, 560px);\n    min-height: 320px;", styles);
-        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: 100vw;\n    margin-left: calc(50% - 50vw);\n    margin-right: calc(50% - 50vw);", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: clamp(240px, 58vw, 360px);\n    min-height: 0;\n    overflow: hidden;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing,\n  .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {\n    background: transparent;", styles);
+        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: 100%;\n    min-height: 0;\n    overflow: visible;", styles);
+        Assert.Contains(".ms-hero {\n    height: min(560px, 78svh);\n    min-height: 420px;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
         Assert.Contains(".metric-strip {\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  gap: clamp(34px, 4vw, 58px);", styles);
@@ -3442,9 +3296,9 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".landing-quote-dropzone-primary {\n    grid-template-columns: 38px minmax(0, 1fr);\n    gap: 10px;", styles);
         Assert.Contains(".landing-quote-dropzone-browse {\n    grid-template-columns: minmax(0, 1fr) auto;", styles);
         Assert.Contains(".landing-quote-dropzone-action {\n    justify-self: start;", styles);
-        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: 100vw;\n    margin-left: calc(50% - 50vw);\n    margin-right: calc(50% - 50vw);", styles);
-        Assert.Contains(".manufacturing-gizmo--landing {\n    position: relative;\n    inset: auto;\n    width: 100vw;\n    height: clamp(240px, 58vw, 360px);\n    min-height: 0;\n    overflow: hidden;", styles);
-        Assert.Contains(".manufacturing-gizmo--landing,\n  .manufacturing-gizmo--landing .manufacturing-gizmo-canvas {\n    background: transparent;", styles);
+        Assert.Contains(".landing-hero-visual {\n    position: relative;\n    grid-area: visual;\n    justify-self: center;\n    width: 100%;\n    min-height: 0;\n    overflow: visible;", styles);
+        Assert.Contains(".ms-hero {\n    height: min(560px, 78svh);\n    min-height: 420px;", styles);
+        Assert.Contains(".manufacturing-gizmo {\n    height: clamp(240px, 58vw, 360px);\n    min-height: 0;", styles);
         Assert.Contains(".metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));", styles);
         Assert.Contains(".metric-strip div {\n    min-width: 0;\n    justify-items: center;", styles);
         Assert.DoesNotContain("grid-template-areas:\n      \"visual\"\n      \"copy\";", styles);

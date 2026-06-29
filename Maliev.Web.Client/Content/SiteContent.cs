@@ -6,7 +6,7 @@ namespace Maliev.Web.Client.Content;
 internal static class SiteContent
 {
     private const string DefaultQuoteEngineUrl = "https://make.maliev.com";
-    internal const bool QuoteEntryDisabled = true;
+    internal const bool QuoteEntryDisabled = false;
     internal static readonly LocalizedText QuoteDisabledTitle = Text(
         "Online quote intake is temporarily unavailable.",
         "ระบบขอราคาชิ้นงานออนไลน์ยังไม่เปิดใช้งานชั่วคราว");
@@ -47,6 +47,40 @@ internal static class SiteContent
     internal const string FdmThermoplasticsImageUrl = "https://images.unsplash.com/photo-1742971239045-afabc9f7d744?auto=format&fit=crop&w=900&q=80";
     internal const string PowderBedNylonImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg/500px-SLS_3D_Systems_Printed_Duraform_HST_Pulley_Shaft_%2849014691207%29.jpg";
     internal const string SlaResinImageUrl = "https://images.pexels.com/photos/12268465/pexels-photo-12268465.jpeg?auto=compress&cs=tinysrgb&w=900";
+    internal const string CncCastMaterialsImageUrl = "https://images.unsplash.com/photo-1740209475472-aa7d280f7452?auto=format&fit=crop&w=900&q=80";
+
+    // Distinct per-material photos (Wikimedia Commons, Special:FilePath hotlinks) so overview/detail cards never duplicate.
+    private const string MaterialPlaImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/PLA_White_filament.jpg?width=900";
+    private const string MaterialPetgImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/1_kg_petg_filament_in_packaging.jpg?width=900";
+    private const string MaterialAbsImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/ABS_filament_spool.jpg?width=900";
+    private const string MaterialAsaImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D_Printing_Filament_789.jpg?width=900";
+    private const string MaterialTpuImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D-Druck-Filament_in_verschiedenen_Farben.jpg?width=900";
+    private const string MaterialPcImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Yarn_for_Printing_Nerds_%2812415770883%29.jpg?width=900";
+    private const string MaterialFilamentCompositeAImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D_Printing_Materials_%2816863368275%29.jpg?width=900";
+    private const string MaterialFilamentCompositeBImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Giunta_filamenti_stampa_3D.jpg?width=900";
+    private const string MaterialFilamentCompositeCImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Small_plastic_with_a_big_impact_%286175935%29.jpeg?width=900";
+    private const string MaterialFilamentCompositeDImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D_Printing_Materials_%2816837486456%29.jpg?width=900";
+    private const string MaterialPa6GfImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/BEETHEFIRST_3D_printer_and_3D-printed_filament_spools.jpg?width=900";
+    private const string MaterialPcFrImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Filament_Refill_%28Bambu_Lab%29_Step_1.jpg?width=900";
+    private const string MaterialEsdPaCfImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D_printing_filament.jpg?width=900";
+    private const string MaterialPaGfPaCfImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/3D_printed_snow_machine_nozzle.jpg?width=900";
+    private const string MaterialStandardResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/SLA_produced_part.JPG?width=900";
+    private const string MaterialToughResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Mammoth_Stereolithography.jpg?width=900";
+    private const string MaterialRigidResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Stereolithography_cycloidal_drive.JPG?width=900";
+    private const string MaterialHighTempResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Imagem_da_pr%C3%B3xima_gera%C3%A7%C3%A3o_em_estereolitografia_SLA.jpg?width=900";
+    private const string MaterialCastableResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Wedding_rings.jpg?width=900";
+    private const string MaterialClearResinImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Pour_Epoxy.jpg?width=900";
+    private const string MaterialAluminumA6061ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Aluminum_cutout_pattern.jpg?width=900";
+    private const string MaterialAluminumA5052ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Aluminiumblech.JPG?width=900";
+    private const string MaterialSteelS45CImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Billet_Grinding_%2811662285046%29.jpg?width=900";
+    private const string MaterialSteelSs400ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Mild_steel_sheet_metal_close_up.jpg?width=900";
+    private const string MaterialStainlessSus304ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/304_STAINLESS_STEEL_PIPE.png?width=900";
+    private const string MaterialStainlessSus316ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Piping01.JPG?width=900";
+    private const string MaterialBrassC3604ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Metal_cube_brass.jpg?width=900";
+    private const string MaterialToolSteelSkd11ImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Hardened_Steel_3D_Printing_Nozzle.jpg?width=900";
+    private const string MaterialTitaniumImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Titanium_products.jpg?width=900";
+    private const string MaterialSiliconeUrethaneImageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Silicone_mold_resin_cast_figure.jpg?width=900";
+
     internal const string EngineeringPolymerReviewImageUrl = "https://images.unsplash.com/photo-1756723902896-94e2d9332fbd?auto=format&fit=crop&w=900&q=80";
     private const string ThreeDimensionalPrinterImageUrl = "https://images.unsplash.com/photo-1756723902896-94e2d9332fbd?auto=format&fit=crop&w=1200&q=80";
     private const string ThreeDimensionalPrinterOperatorImageUrl = "https://images.unsplash.com/photo-1772566022519-e04921619df2?auto=format&fit=crop&w=1200&q=80";
@@ -2275,6 +2309,827 @@ internal static class SiteContent
                 Text("Critical surfaces, mating parts, and inspection requirements.", "ผิวสำคัญ ชิ้นส่วนที่ประกบ และข้อกำหนดการตรวจรับ")
             ]);
     }
+
+    // ── Materials catalog (overview + detail pages + datasheet PDF) ──
+
+    internal static readonly LocalizedText MaterialDatasheetDisclaimer = Text(
+        "Typical values for guidance only — final grade, orientation, finish, and test requirements are confirmed at quotation.",
+        "ค่าทั่วไปเพื่อใช้อ้างอิงเท่านั้น เกรด ทิศทางการผลิต ผิวงาน และข้อกำหนดการทดสอบจะยืนยันตอนเสนอราคา");
+
+    internal static MaterialContent? FindMaterial(string? slug) =>
+        string.IsNullOrWhiteSpace(slug)
+            ? null
+            : Materials.FirstOrDefault(material => material.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+
+    internal static MaterialCategoryContent? FindMaterialCategory(string? key) =>
+        string.IsNullOrWhiteSpace(key)
+            ? null
+            : MaterialCategoryList.FirstOrDefault(category => category.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+    internal static IReadOnlyList<MaterialContent> MaterialsInCategory(string categoryKey) =>
+        Materials.Where(material => material.CategoryKey.Equals(categoryKey, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    internal static IReadOnlyList<MaterialContent> SimilarMaterials(MaterialContent material) =>
+        Materials
+            .Where(candidate => candidate.CategoryKey == material.CategoryKey
+                && !candidate.Slug.Equals(material.Slug, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+    internal static string BuildMaterialDatasheetHref(MaterialContent material, string cultureName) =>
+        $"/web/v1/materials/{Uri.EscapeDataString(material.Slug)}/datasheet.pdf?culture={Uri.EscapeDataString(SupportedCultures.Normalize(cultureName))}";
+
+    internal static string BuildMaterialDatasheetFileName(MaterialContent material) =>
+        $"Datasheet - {material.Name} - MALIEV.pdf";
+
+    private static MaterialSpec Spec(string labelEn, string labelTh, string value) =>
+        new(Text(labelEn, labelTh), value);
+
+    internal static readonly IReadOnlyList<MaterialCategoryContent> MaterialCategoryList =
+    [
+        new(
+            "fdm",
+            Text("FDM thermoplastics", "เทอร์โมพลาสติก FDM"),
+            "FDM",
+            Text("Fast, affordable printed thermoplastics for prototypes, jigs, brackets, guards, and flexible parts.", "เทอร์โมพลาสติกพิมพ์ที่เร็วและคุ้มค่า สำหรับต้นแบบ จิ๊ก ขายึด การ์ด และงานยืดหยุ่น"),
+            FdmThermoplasticsImageUrl,
+            Text("Colorful 3D printing filament spools", "ม้วนเส้นพลาสติกพิมพ์ 3 มิติหลากสี"),
+            [Text("Fast prototypes", "ต้นแบบรวดเร็ว"), Text("Low tooling cost", "ต้นทุนแม่พิมพ์ต่ำ")]),
+        new(
+            "powder-bed",
+            Text("Powder-bed nylon", "ไนลอนพาวเดอร์เบด"),
+            "MJF / SLS",
+            Text("Tough nylon families for functional housings, hinges, assemblies, and low-volume production.", "กลุ่มไนลอนทนทานสำหรับเคสใช้งานจริง บานพับ ชุดประกอบ และผลิตจำนวนน้อย"),
+            PowderBedNylonImageUrl,
+            Text("SLS printed nylon pulley shaft", "ชิ้นงานไนลอนที่ผลิตด้วย SLS"),
+            [Text("Functional", "ใช้งานจริง"), Text("Batch ready", "เหมาะกับจำนวนน้อย")]),
+        new(
+            "sla",
+            Text("SLA engineering resins", "เรซินวิศวกรรม SLA"),
+            "SLA",
+            Text("High-detail resins for visual masters, fine features, fit checks, and selected functional prototypes.", "เรซินรายละเอียดสูงสำหรับ Master โมเดล รายละเอียดเล็ก ตรวจประกอบ และต้นแบบใช้งานบางประเภท"),
+            SlaResinImageUrl,
+            Text("Resin printer lifting a detailed part from the vat", "เครื่องพิมพ์เรซินยกชิ้นงานละเอียดออกจากถังเรซิน"),
+            [Text("Fine detail", "รายละเอียดสูง"), Text("Smooth finish", "ผิวเรียบ")]),
+        new(
+            "cnc",
+            Text("CNC metals", "โลหะ CNC"),
+            "CNC",
+            Text("Machined metals for fixtures, plates, brackets, inserts, wear parts, and end-use components.", "โลหะกัดขึ้นรูปสำหรับฟิกซ์เจอร์ แผ่นงาน ขายึด อินเสิร์ต ชิ้นส่วนสึกหรอ และชิ้นงานใช้งานจริง"),
+            CncCastMaterialsImageUrl,
+            Text("CNC milling an aluminum workpiece", "เครื่อง CNC กัดชิ้นงานอะลูมิเนียม"),
+            [Text("Precise", "แม่นยำ"), Text("Production ready", "พร้อมใช้งานจริง")]),
+        new(
+            "casting",
+            Text("Casting & elastomers", "งานหล่อและอีลาสโตเมอร์"),
+            "Casting",
+            Text("Cast elastomers and polymers for soft grips, seals, bumpers, and low-volume replicas.", "อีลาสโตเมอร์และพอลิเมอร์งานหล่อสำหรับกริปนุ่ม ซีล กันกระแทก และงานสำเนาจำนวนน้อย"),
+            CncCastMaterialsImageUrl,
+            Text("Silicone and urethane casting samples", "ตัวอย่างงานหล่อซิลิโคนและยูรีเทน"),
+            [Text("Soft-touch", "สัมผัสนุ่ม"), Text("Low volume", "จำนวนน้อย")])
+    ];
+
+    internal static readonly IReadOnlyList<MaterialContent> Materials =
+    [
+        new(
+            "pla", "PLA", "fdm",
+            MaterialPlaImageUrl,
+            Text("PLA filament and pellets", "เส้นพิมพ์และเม็ดพลาสติก PLA"),
+            Text("Commodity FDM thermoplastic", "เทอร์โมพลาสติก FDM ทั่วไป"),
+            Text("FDM", "FDM"),
+            Text("Visual models, simple jigs, low-load prototypes, education parts.", "โมเดลดูรูปทรง จิ๊กโหลดต่ำ ต้นแบบทั่วไป และชิ้นงานการศึกษา"),
+            Text("Stiff and dimensionally crisp, but brittle under impact and long-term load.", "แข็งและคุมรูปทรงได้ดี แต่เปราะเมื่อกระแทกหรือรับโหลดนาน"),
+            Text("Low heat resistance; avoid hot cars, ovens, and warm production areas.", "ทนร้อนต่ำ เลี่ยงรถร้อน เตาอบ และพื้นที่ผลิตที่อุณหภูมิสูง"),
+            Text("Fair with water and mild cleaners; poor with many solvents.", "พอใช้กับน้ำและน้ำยาทำความสะอาดอ่อน ไม่เหมาะกับตัวทำละลายหลายชนิด"),
+            Text("Clean printed detail, easy paint prep, visible layer lines.", "รายละเอียดดี เตรียมทำสีง่าย มีเส้นเลเยอร์ให้เห็น"),
+            Text("Lowest cost and fastest route for early validation.", "ต้นทุนต่ำและเร็วสำหรับตรวจแบบระยะแรก"),
+            Text("Not a good choice for heat, impact, or outdoor service.", "ไม่เหมาะกับความร้อน แรงกระแทก หรือใช้งานกลางแจ้ง"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.24 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~50 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~6%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~50 °C"),
+                Spec("Hardness", "ความแข็ง", "~83 Shore D")
+            ],
+            ["prototype"]),
+        new(
+            "petg", "PETG", "fdm",
+            MaterialPetgImageUrl,
+            Text("PETG filament sample", "ตัวอย่างเส้นพิมพ์ PETG"),
+            Text("Tough FDM thermoplastic", "เทอร์โมพลาสติก FDM เหนียว"),
+            Text("FDM", "FDM"),
+            Text("Brackets, covers, fluid-adjacent fixtures, and practical prototypes.", "ขายึด ฝาครอบ ฟิกซ์เจอร์ใกล้ของเหลว และต้นแบบใช้งาน"),
+            Text("Tougher and less brittle than PLA with moderate flexibility.", "เหนียวกว่า PLA และเปราะน้อยกว่า มีความยืดหยุ่นปานกลาง"),
+            Text("Moderate heat resistance; better than PLA but still limited.", "ทนร้อนปานกลาง ดีกว่า PLA แต่ยังมีข้อจำกัด"),
+            Text("Good water resistance and useful resistance to many mild chemicals.", "ทนน้ำดี และทนสารเคมีอ่อนหลายชนิดได้"),
+            Text("Slightly glossy, durable surface; stringing may need cleanup.", "ผิวค่อนข้างเงาและทนทาน อาจต้องเก็บเส้นใย"),
+            Text("Good default for tougher printed utility parts.", "เป็นตัวเลือกเริ่มต้นที่ดีสำหรับชิ้นงานพิมพ์ใช้งาน"),
+            Text("Less crisp than PLA and less heat-resistant than ABS/ASA.", "คมชัดน้อยกว่า PLA และทนร้อนน้อยกว่า ABS/ASA"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.27 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~47 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~25%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~70 °C"),
+                Spec("Hardness", "ความแข็ง", "~78 Shore D")
+            ],
+            ["prototype", "functional", "chemical"]),
+        new(
+            "abs", "ABS", "fdm",
+            MaterialAbsImageUrl,
+            Text("ABS filament and printed surface sample", "เส้นพิมพ์และตัวอย่างผิว ABS"),
+            Text("Impact-resistant FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนแรงกระแทก"),
+            Text("FDM", "FDM"),
+            Text("Housings, machine covers, impact-prone brackets, and paintable parts.", "เคส ฝาครอบเครื่องจักร ขายึดที่มีแรงกระแทก และชิ้นงานทำสี"),
+            Text("Good toughness and impact resistance with better creep behavior than PLA.", "เหนียวและทนแรงกระแทกดี มีพฤติกรรมรับโหลดนานดีกว่า PLA"),
+            Text("Moderate-high for printed plastics; suitable for warmer environments.", "ปานกลางถึงสูงสำหรับพลาสติกพิมพ์ เหมาะกับสภาพแวดล้อมอุ่น"),
+            Text("Fair chemical resistance; can be smoothed or attacked by acetone.", "ทนสารเคมีพอใช้ สามารถทำผิวหรือถูกละลายด้วยอะซิโตน"),
+            Text("Can be sanded, painted, or vapor-smoothed when specification allows.", "ขัด ทำสี หรืออบไอได้เมื่อสเปกอนุญาต"),
+            Text("Balanced printed engineering plastic for tough prototypes.", "พลาสติกวิศวกรรมพิมพ์ที่สมดุลสำหรับต้นแบบทนทาน"),
+            Text("Warps more than PLA/PETG and needs controlled printing.", "บิดงอง่ายกว่า PLA/PETG และต้องควบคุมการพิมพ์มากกว่า"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.04 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~40 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~15%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~90 °C"),
+                Spec("Hardness", "ความแข็ง", "~76 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "asa", "ASA", "fdm",
+            MaterialAsaImageUrl,
+            Text("ASA outdoor plastic sample", "ตัวอย่างพลาสติก ASA สำหรับงานกลางแจ้ง"),
+            Text("Weatherable FDM thermoplastic", "เทอร์โมพลาสติก FDM ทนสภาพอากาศ"),
+            Text("FDM", "FDM"),
+            Text("Outdoor covers, brackets, signage, guards, and UV-exposed parts.", "ฝาครอบกลางแจ้ง ขายึด ป้าย การ์ด และชิ้นงานโดน UV"),
+            Text("ABS-like strength with improved weathering behavior.", "ความแข็งแรงใกล้ ABS พร้อมทนสภาพอากาศดีกว่า"),
+            Text("Moderate-high; suitable for many outdoor and warm-use cases.", "ปานกลางถึงสูง เหมาะกับงานกลางแจ้งและงานอุ่นหลายประเภท"),
+            Text("Good weather and UV resistance; chemical resistance depends on exposure.", "ทนแดดและ UV ดี ส่วนสารเคมีขึ้นกับสภาพสัมผัส"),
+            Text("Matte functional finish; paintable after prep.", "ผิวแมตต์ใช้งานจริง ทำสีได้หลังเตรียมผิว"),
+            Text("Best FDM default when outdoor exposure matters.", "ตัวเลือก FDM หลักเมื่อมีงานกลางแจ้ง"),
+            Text("Needs more process control than PLA/PETG.", "ต้องควบคุมกระบวนการมากกว่า PLA/PETG"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.07 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~44 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~20%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~95 °C"),
+                Spec("Hardness", "ความแข็ง", "~76 Shore D")
+            ],
+            ["functional", "heat", "outdoor"]),
+        new(
+            "tpu", "TPU", "fdm",
+            MaterialTpuImageUrl,
+            Text("Flexible TPU strip and spool", "เส้น TPU และตัวอย่างแถบยืดหยุ่น"),
+            Text("Flexible FDM elastomer", "อีลาสโตเมอร์ FDM ยืดหยุ่น"),
+            Text("FDM", "FDM"),
+            Text("Bumpers, grips, soft pads, seals, vibration isolation, and flexible covers.", "กันกระแทก กริป แผ่นรอง ซีล กันสั่น และฝาครอบยืดหยุ่น"),
+            Text("Flexible, abrasion-resistant, and tough; stiffness depends on shore hardness.", "ยืดหยุ่น ทนสึก และเหนียว ความแข็งขึ้นกับ Shore hardness"),
+            Text("Moderate; avoid sustained high-temperature compression.", "ปานกลาง เลี่ยงการกดทับต่อเนื่องที่อุณหภูมิสูง"),
+            Text("Often good against oils and abrasion; confirm fluid compatibility.", "มักทนน้ำมันและการสึกได้ดี แต่ควรยืนยันของเหลวที่จะสัมผัส"),
+            Text("Soft textured print surface with visible layers.", "ผิวพิมพ์นุ่มมีเท็กซ์เจอร์และเห็นเลเยอร์"),
+            Text("Useful when rubber-like behavior is needed quickly.", "เหมาะเมื่ออยากได้พฤติกรรมคล้ายยางอย่างรวดเร็ว"),
+            Text("Slower to print and less precise for tight assemblies.", "พิมพ์ช้ากว่าและไม่เหมาะกับชุดประกอบ tolerance แน่น"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.21 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~35 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~450%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~80 °C"),
+                Spec("Hardness", "ความแข็ง", "~95 Shore A")
+            ],
+            ["prototype", "functional", "flexible", "chemical"]),
+        new(
+            "pc", "PC", "fdm",
+            MaterialPcImageUrl,
+            Text("Polycarbonate filament sample", "ตัวอย่างเส้นพิมพ์โพลีคาร์บอเนต"),
+            Text("High-toughness polycarbonate", "โพลีคาร์บอเนตเหนียวสูง"),
+            Text("FDM", "FDM"),
+            Text("Tough functional parts, enclosures, brackets, light guards, and heat-exposed fixtures.", "ชิ้นงานใช้งานเหนียว เคส ขายึด การ์ดบาง และฟิกซ์เจอร์ที่โดนความร้อน"),
+            Text("High toughness and impact strength; stronger and more heat-tolerant than ABS.", "เหนียวและทนกระแทกสูง แข็งแรงและทนร้อนกว่า ABS"),
+            Text("High for FDM; suitable near warm equipment.", "สูงสำหรับ FDM เหมาะใกล้อุปกรณ์ที่อุ่น"),
+            Text("Fair; sensitive to some solvents but good with many oils.", "พอใช้ ไวต่อตัวทำละลายบางชนิด แต่ทนน้ำมันได้ดี"),
+            Text("Glossy with strong layer bonding; warps without an enclosed chamber.", "ผิวเงา ยึดเลเยอร์ดี แต่บิดงอหากไม่มีห้องปิด"),
+            Text("Best balance of strength and heat among common FDM plastics.", "สมดุลความแข็งแรงและความร้อนดีที่สุดในกลุ่มพลาสติก FDM ทั่วไป"),
+            Text("Needs a heated chamber and dry filament; warps easily.", "ต้องมีห้องอุ่นและเส้นแห้ง บิดงอง่าย"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.20 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~62 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~6%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~110 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "pla-cf", "PLA-CF", "fdm",
+            MaterialFilamentCompositeAImageUrl,
+            Text("Carbon-fiber PLA filament sample", "ตัวอย่างเส้นพิมพ์ PLA ผสมคาร์บอน"),
+            Text("Carbon-fiber reinforced PLA", "PLA เสริมเส้นใยคาร์บอน"),
+            Text("FDM", "FDM"),
+            Text("Stiff visual-functional parts, jigs, and lightweight brackets with a matte finish.", "ชิ้นงานแข็งดูดี จิ๊ก และขายึดน้ำหนักเบาผิวแมตต์"),
+            Text("Stiffer and more dimensionally stable than PLA, but still brittle.", "แข็งและคุมมิติดีกว่า PLA แต่ยังเปราะ"),
+            Text("Low; similar to PLA, not for hot service.", "ต่ำ ใกล้เคียง PLA ไม่เหมาะงานร้อน"),
+            Text("Fair; similar to PLA.", "พอใช้ ใกล้เคียง PLA"),
+            Text("Matte carbon texture that hides layer lines; abrasive (use a hardened nozzle).", "ผิวคาร์บอนแมตต์ ซ่อนเส้นเลเยอร์ดี แต่กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Great stiffness-to-weight and premium matte look at low cost.", "แข็งต่อน้ำหนักดีและดูพรีเมียมผิวแมตต์ในต้นทุนต่ำ"),
+            Text("Brittle and abrasive; not for impact or heat.", "เปราะและกัดหัวฉีด ไม่เหมาะงานกระแทกหรือร้อน"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.24 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~50 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~3%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~55 °C"),
+                Spec("Hardness", "ความแข็ง", "~85 Shore D")
+            ],
+            ["prototype", "functional"]),
+        new(
+            "petg-cf", "PETG-CF", "fdm",
+            MaterialFilamentCompositeBImageUrl,
+            Text("Carbon-fiber PETG filament sample", "ตัวอย่างเส้นพิมพ์ PETG ผสมคาร์บอน"),
+            Text("Carbon-fiber reinforced PETG", "PETG เสริมเส้นใยคาร์บอน"),
+            Text("FDM", "FDM"),
+            Text("Tougher stiff brackets, fixtures, and semi-functional parts.", "ขายึดแข็งเหนียว ฟิกซ์เจอร์ และชิ้นงานกึ่งใช้งาน"),
+            Text("Stiffer than PETG with good toughness and dimensional stability.", "แข็งกว่า PETG เหนียวดีและคุมมิติได้ดี"),
+            Text("Moderate; better than PLA-CF.", "ปานกลาง ดีกว่า PLA-CF"),
+            Text("Good water and mild-chemical resistance.", "ทนน้ำและสารเคมีอ่อนได้ดี"),
+            Text("Matte carbon finish; abrasive (use a hardened nozzle).", "ผิวคาร์บอนแมตต์ กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Good stiffness and toughness balance for utility parts.", "สมดุลความแข็งและความเหนียวดีสำหรับงานใช้งาน"),
+            Text("Abrasive; lower elongation than plain PETG.", "กัดหัวฉีด ยืดตัวน้อยกว่า PETG ธรรมดา"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.30 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~55 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~5%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~75 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "chemical"]),
+        new(
+            "pa6-cf", "PA6-CF", "fdm",
+            MaterialFilamentCompositeCImageUrl,
+            Text("Carbon-fiber nylon filament sample", "ตัวอย่างเส้นพิมพ์ไนลอนผสมคาร์บอน"),
+            Text("Carbon-fiber reinforced nylon (high strength)", "ไนลอนเสริมเส้นใยคาร์บอน (แข็งแรงสูง)"),
+            Text("FDM", "FDM"),
+            Text("Strong functional parts, structural brackets, tooling, and end-use components.", "ชิ้นงานใช้งานแข็งแรง ขายึดรับแรง tooling และชิ้นงานใช้งานจริง"),
+            Text("Very high strength and stiffness with good fatigue resistance.", "แข็งแรงและแข็งสูงมาก ทนความล้าได้ดี"),
+            Text("High; holds shape under elevated temperature.", "สูง คงรูปได้เมื่ออุณหภูมิสูง"),
+            Text("Good against oils, greases, and many chemicals; absorbs moisture.", "ทนน้ำมัน จาระบี และสารเคมีหลายชนิด แต่ดูดความชื้น"),
+            Text("Technical matte; abrasive (hardened nozzle) and needs drying.", "ผิวแมตต์เชิงเทคนิค กัดหัวฉีด (หัวชุบแข็ง) และต้องอบแห้ง"),
+            Text("Among the strongest common FDM materials for functional parts.", "เป็นหนึ่งในวัสดุ FDM ที่แข็งแรงที่สุดสำหรับงานใช้งาน"),
+            Text("Hygroscopic; needs dry storage and a capable printer.", "ดูดความชื้น ต้องเก็บแห้งและใช้เครื่องที่รองรับ"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.15 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~110 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~4%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~120 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat", "chemical"]),
+        new(
+            "paht-cf", "PAHT-CF", "fdm",
+            MaterialFilamentCompositeDImageUrl,
+            Text("Heat-resistant carbon nylon sample", "ตัวอย่างไนลอนคาร์บอนทนร้อน"),
+            Text("Heat-resistant carbon-fiber nylon", "ไนลอนเสริมคาร์บอนทนร้อน"),
+            Text("FDM", "FDM"),
+            Text("High-temperature structural parts, under-hood fixtures, and durable tooling.", "ชิ้นงานรับแรงทนร้อน ฟิกซ์เจอร์ในห้องเครื่อง และ tooling ทนทาน"),
+            Text("High strength and stiffness with strong Z-bonding and low moisture uptake.", "แข็งแรงและแข็งสูง ยึดแกน Z ดี และดูดความชื้นต่ำ"),
+            Text("Very high for FDM; engineered for elevated-temperature service.", "สูงมากสำหรับ FDM ออกแบบสำหรับงานอุณหภูมิสูง"),
+            Text("Good chemical resistance; absorbs about 50% less water than typical CF nylon.", "ทนสารเคมีดี ดูดน้ำน้อยกว่า CF ไนลอนทั่วไปราว 50%"),
+            Text("Technical matte; abrasive (use a hardened nozzle).", "ผิวแมตต์เชิงเทคนิค กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Top heat and strength combination among Bambu engineering filaments.", "ผสมผสานความร้อนและความแข็งแรงดีที่สุดในกลุ่มเส้นวิศวกรรม Bambu"),
+            Text("Demanding to print; needs drying and high temperatures.", "พิมพ์ยาก ต้องอบแห้งและใช้อุณหภูมิสูง"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.18 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~115 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~4%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~140 °C"),
+                Spec("Hardness", "ความแข็ง", "~82 Shore D")
+            ],
+            ["functional", "heat", "chemical"]),
+        new(
+            "pet-cf", "PET-CF", "fdm",
+            MaterialFilamentCompositeBImageUrl,
+            Text("Carbon-fiber PET engineering filament", "เส้นพิมพ์วิศวกรรม PET ผสมคาร์บอน"),
+            Text("Carbon-fiber reinforced PET (engineering)", "PET เสริมเส้นใยคาร์บอน (วิศวกรรม)"),
+            Text("FDM", "FDM"),
+            Text("Load-bearing parts for high-temperature, humid, or chemical environments.", "ชิ้นงานรับโหลดในสภาพร้อน ชื้น หรือมีสารเคมี"),
+            Text("Stronger and more heat-stable than PETG-CF with low moisture absorption.", "แข็งแรงและทนร้อนกว่า PETG-CF ดูดความชื้นต่ำ"),
+            Text("High; suitable for demanding thermal environments.", "สูง เหมาะกับสภาพแวดล้อมร้อนที่ต้องการความทน"),
+            Text("Good chemical and humidity resistance.", "ทนสารเคมีและความชื้นได้ดี"),
+            Text("Matte carbon; abrasive (use a hardened nozzle).", "ผิวคาร์บอนแมตต์ กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Professional-grade strength and heat with dimensional stability.", "แข็งแรงและทนร้อนระดับมืออาชีพ คุมมิติได้ดี"),
+            Text("Abrasive and needs drying; higher cost.", "กัดหัวฉีดและต้องอบแห้ง ต้นทุนสูงกว่า"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.30 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~90 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~3%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~130 °C"),
+                Spec("Hardness", "ความแข็ง", "~82 Shore D")
+            ],
+            ["functional", "heat", "chemical"]),
+        new(
+            "pa6-gf", "PA6-GF", "fdm",
+            MaterialPa6GfImageUrl,
+            Text("Glass-fiber nylon filament sample", "ตัวอย่างเส้นพิมพ์ไนลอนผสมใยแก้ว"),
+            Text("Glass-fiber reinforced nylon", "ไนลอนเสริมใยแก้ว"),
+            Text("FDM", "FDM"),
+            Text("Rigid brackets, structural housings, and parts that must resist bending.", "ขายึดแข็ง เคสรับแรง และชิ้นงานที่ต้องไม่โก่งงอ"),
+            Text("Very high stiffness and dimensional stability with good durability.", "แข็งและคุมมิติสูงมาก ทนทานดี"),
+            Text("High; reinforced grade holds shape under heat.", "สูง เกรดเสริมใยคงรูปเมื่อร้อน"),
+            Text("Good resistance to oils and many chemicals; absorbs moisture.", "ทนน้ำมันและสารเคมีหลายชนิด แต่ดูดความชื้น"),
+            Text("Technical matte; abrasive (use a hardened nozzle).", "ผิวแมตต์เชิงเทคนิค กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Excellent stiffness and durability for heavy-use parts.", "แข็งและทนทานดีเยี่ยมสำหรับงานหนัก"),
+            Text("Hygroscopic; less ductile than unfilled nylon.", "ดูดความชื้น และเหนียวน้อยกว่าไนลอนไม่เติมใย"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.20 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~95 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~5%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~120 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "pc-fr", "PC FR", "fdm",
+            MaterialPcFrImageUrl,
+            Text("Flame-retardant polycarbonate sample", "ตัวอย่างโพลีคาร์บอเนตหน่วงไฟ"),
+            Text("Flame-retardant polycarbonate (UL 94 V-0)", "โพลีคาร์บอเนตหน่วงไฟ (UL 94 V-0)"),
+            Text("FDM", "FDM"),
+            Text("Electrical enclosures, rail and transit parts, and fixtures needing flame resistance.", "เคสไฟฟ้า ชิ้นส่วนงานราง/ขนส่ง และฟิกซ์เจอร์ที่ต้องหน่วงไฟ"),
+            Text("Tough, engineering-grade strength comparable to PAHT-CF.", "เหนียวระดับวิศวกรรม แข็งแรงเทียบ PAHT-CF"),
+            Text("High; suitable for warm electrical and industrial environments.", "สูง เหมาะกับงานไฟฟ้าและอุตสาหกรรมที่อุ่น"),
+            Text("Fair; confirm solvent exposure.", "พอใช้ ควรยืนยันการสัมผัสตัวทำละลาย"),
+            Text("Matte engineering finish; needs an enclosure and drying.", "ผิวแมตต์เชิงวิศวกรรม ต้องมีห้องปิดและอบแห้ง"),
+            Text("Certified UL 94 V-0 self-extinguishing with high toughness.", "ผ่าน UL 94 V-0 ดับไฟเองได้ และเหนียวสูง"),
+            Text("Demanding to print; warps without a heated chamber.", "พิมพ์ยาก บิดงอหากไม่มีห้องอุ่น"),
+            [
+                Spec("Flammability", "การหน่วงไฟ", "UL 94 V-0"),
+                Spec("Density", "ความหนาแน่น", "~1.20 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~60 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~6%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~110 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "esd-pa-cf", "ESD PA-CF", "fdm",
+            MaterialEsdPaCfImageUrl,
+            Text("ESD-safe carbon nylon sample", "ตัวอย่างไนลอนคาร์บอนป้องกันไฟฟ้าสถิต"),
+            Text("ESD-safe carbon-fiber nylon", "ไนลอนเสริมคาร์บอนแบบ ESD"),
+            Text("FDM", "FDM"),
+            Text("Electronics fixtures, jigs, and trays where static discharge must be controlled.", "ฟิกซ์เจอร์อิเล็กทรอนิกส์ จิ๊ก และถาดที่ต้องควบคุมไฟฟ้าสถิต"),
+            Text("Strong, stiff carbon-fiber nylon with controlled surface resistivity.", "ไนลอนคาร์บอนแข็งแรง พร้อมค่าความต้านทานผิวที่ควบคุมได้"),
+            Text("High; suitable for electronics assembly environments.", "สูง เหมาะกับงานประกอบอิเล็กทรอนิกส์"),
+            Text("Good; absorbs moisture, so keep it dry.", "ดี แต่ดูดความชื้น ต้องเก็บแห้ง"),
+            Text("Technical matte; abrasive (use a hardened nozzle).", "ผิวแมตต์เชิงเทคนิค กัดหัวฉีด (ใช้หัวชุบแข็ง)"),
+            Text("Combines structural strength with reliable ESD protection.", "ผสมความแข็งแรงเชิงโครงสร้างกับการป้องกัน ESD ที่เชื่อถือได้"),
+            Text("Third-party filament run on Bambu via external spool; needs drying.", "เป็นเส้นจากผู้ผลิตอื่น ใช้กับ Bambu ผ่านสปูลภายนอก และต้องอบแห้ง"),
+            [
+                Spec("Surface resistivity", "ความต้านทานผิว", "10⁶–10⁹ Ω (ESD-safe)"),
+                Spec("Density", "ความหนาแน่น", "~1.18 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~90 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~4%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~120 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "pa12-nylon", "PA12 nylon", "powder-bed",
+            PowderBedNylonImageUrl,
+            Text("PA12 nylon powder and printed part", "ผงไนลอน PA12 และชิ้นงานพิมพ์"),
+            Text("Powder-bed engineering nylon", "ไนลอนวิศวกรรมพาวเดอร์เบด"),
+            Text("MJF / SLS", "MJF / SLS"),
+            Text("Functional prototypes, housings, clips, hinges, brackets, and short-run production.", "ต้นแบบใช้งาน เคส คลิป บานพับ ขายึด และผลิตจำนวนน้อย"),
+            Text("Balanced strength, toughness, fatigue behavior, and feature detail.", "สมดุลด้านความแข็งแรง ความเหนียว ความล้า และรายละเอียดชิ้นงาน"),
+            Text("Moderate-high for polymers; better service range than most FDM plastics.", "ปานกลางถึงสูงสำหรับพอลิเมอร์ ใช้งานกว้างกว่าพลาสติก FDM ส่วนใหญ่"),
+            Text("Good resistance to oils, greases, and many chemicals; absorbs moisture.", "ทนน้ำมัน จาระบี และสารเคมีหลายชนิดได้ดี แต่ดูดความชื้น"),
+            Text("Matte grain surface; can be dyed, tumbled, or coated.", "ผิวแมตต์เนื้อเม็ด ย้อม ขัดถัง หรือเคลือบได้"),
+            Text("Strong default for usable printed parts and small batches.", "ตัวเลือกหลักสำหรับชิ้นงานพิมพ์ใช้งานจริงและจำนวนน้อย"),
+            Text("Surface is not glossy without secondary finishing.", "ผิวไม่เงาหากไม่ทำ finishing เพิ่ม"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.01 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~48 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~15%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~80 °C"),
+                Spec("Hardness", "ความแข็ง", "~75 Shore D")
+            ],
+            ["prototype", "functional", "chemical"]),
+        new(
+            "pa-gf-pa-cf", "PA-GF / PA-CF", "powder-bed",
+            MaterialPaGfPaCfImageUrl,
+            Text("Glass or carbon filled nylon sample", "ตัวอย่างไนลอนผสมใยแก้วหรือคาร์บอน"),
+            Text("Glass or carbon-filled nylon", "ไนลอนผสมใยแก้วหรือคาร์บอน"),
+            Text("MJF / SLS", "MJF / SLS"),
+            Text("Stiffer brackets, fixtures, structural housings, and dimensional parts.", "ขายึด ฟิกซ์เจอร์ เคสรับแรง และชิ้นงานที่ต้องการคุมรูปทรง"),
+            Text("Higher stiffness and dimensional stability than unfilled nylon.", "แข็งและคุมมิติดีกว่าไนลอนไม่เติมใย"),
+            Text("Moderate-high; reinforced grades hold shape better under heat.", "ปานกลางถึงสูง เกรดเสริมใยคงรูปได้ดีกว่าเมื่อร้อน"),
+            Text("Good general chemical resistance; confirm harsh solvents.", "ทนสารเคมีทั่วไปได้ดี ควรยืนยันตัวทำละลายรุนแรง"),
+            Text("Technical matte surface, darker color options common.", "ผิวแมตต์เชิงเทคนิค มักมีสีเข้ม"),
+            Text("Good when stiffness matters more than ductility.", "ดีเมื่อความแข็งสำคัญกว่าความเหนียว"),
+            Text("More brittle than PA12 and less forgiving for snap features.", "เปราะกว่า PA12 และไม่เหมาะกับ snap-fit ที่ต้องยืดมาก"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.15–1.30 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~55–70 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~4–9%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~110 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["functional", "heat", "chemical"]),
+        new(
+            "standard-resin", "Standard resin", "sla",
+            MaterialStandardResinImageUrl,
+            Text("Standard resin and detailed print sample", "เรซินทั่วไปและตัวอย่างพิมพ์ละเอียด"),
+            Text("High-detail photopolymer", "โฟโตพอลิเมอร์รายละเอียดสูง"),
+            Text("SLA", "SLA"),
+            Text("Presentation models, fine details, masters, cosmetic prototypes, and visual checks.", "โมเดลนำเสนอ รายละเอียดเล็ก Master ต้นแบบผิวสวย และตรวจรูปลักษณ์"),
+            Text("Rigid and detailed, but brittle compared with engineering plastics.", "แข็งและละเอียด แต่เปราะกว่าพลาสติกวิศวกรรม"),
+            Text("Low-moderate; avoid hot service unless a heat-grade resin is selected.", "ต่ำถึงปานกลาง เลี่ยงงานร้อนหากไม่ได้เลือกเรซินทนร้อน"),
+            Text("Poor to fair for chemicals; many resins dislike solvents and UV exposure.", "ต่ำถึงพอใช้กับสารเคมี เรซินหลายชนิดไม่ชอบตัวทำละลายและ UV"),
+            Text("Smooth, high-detail surface with minimal visible layers.", "ผิวเรียบ รายละเอียดสูง เห็นเลเยอร์น้อย"),
+            Text("Best visual finish and small feature detail.", "ดีที่สุดด้านผิวสวยและรายละเอียดขนาดเล็ก"),
+            Text("Not the default for snap-fit, impact, or outdoor parts.", "ไม่ใช่ตัวเลือกหลักสำหรับ snap-fit กระแทก หรือกลางแจ้ง"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.18 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~50 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~6%"),
+                Spec("Heat deflection (HDT)", "อุณหภูมิโก่งตัว (HDT)", "~55 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["prototype"]),
+        new(
+            "tough-resin", "Tough resin", "sla",
+            MaterialToughResinImageUrl,
+            Text("Tough engineering resin sample", "ตัวอย่างเรซินวิศวกรรมเหนียว"),
+            Text("Engineering SLA resin", "เรซิน SLA วิศวกรรม"),
+            Text("SLA", "SLA"),
+            Text("Fit checks, clips, light functional prototypes, and precise housings.", "ตรวจประกอบ คลิป ต้นแบบใช้งานเบา และเคสที่ต้องการความแม่นยำ"),
+            Text("Improved impact behavior over standard resin, still process and post-cure dependent.", "ทนกระแทกดีกว่าเรซินทั่วไป แต่ขึ้นกับกระบวนการและการ post-cure"),
+            Text("Moderate; use dedicated heat resins for high-temperature fixtures.", "ปานกลาง หากเป็นฟิกซ์เจอร์ร้อนควรใช้เรซินทนร้อนเฉพาะ"),
+            Text("Fair; confirm exposure to solvents, oils, and cleaners.", "พอใช้ ควรยืนยันตัวทำละลาย น้ำมัน และน้ำยาทำความสะอาด"),
+            Text("Smooth and precise; supports paint and presentation finishing.", "ผิวเรียบและแม่นยำ รองรับการทำสีและ finishing นำเสนอ"),
+            Text("Good bridge between visual models and light-duty prototypes.", "เป็นสะพานที่ดีระหว่างโมเดลสวยกับต้นแบบใช้งานเบา"),
+            Text("Long-term load and chemical exposure should be reviewed.", "ควรตรวจการรับโหลดนานและการสัมผัสสารเคมี"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.15 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~45 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~24%"),
+                Spec("Heat deflection (HDT)", "อุณหภูมิโก่งตัว (HDT)", "~50 °C"),
+                Spec("Hardness", "ความแข็ง", "~78 Shore D")
+            ],
+            ["prototype", "functional"]),
+        new(
+            "rigid-resin", "Rigid resin", "sla",
+            MaterialRigidResinImageUrl,
+            Text("Glass-reinforced rigid resin sample", "ตัวอย่างเรซินแข็งเสริมใยแก้ว"),
+            Text("Glass-reinforced SLA resin", "เรซิน SLA เสริมใยแก้ว"),
+            Text("SLA", "SLA"),
+            Text("Stiff jigs, fixtures, housings, and parts needing minimal flex.", "จิ๊กแข็ง ฟิกซ์เจอร์ เคส และชิ้นงานที่ต้องการความแข็งไม่ยืดหยุ่น"),
+            Text("Very high stiffness and dimensional stability; lower impact tolerance.", "แข็งและคุมมิติสูงมาก แต่ทนกระแทกได้น้อยกว่า"),
+            Text("Moderate-high; better than standard resin.", "ปานกลางถึงสูง ดีกว่าเรซินทั่วไป"),
+            Text("Fair; confirm solvents.", "พอใช้ ควรยืนยันตัวทำละลาย"),
+            Text("Smooth and precise with a slightly filled texture.", "ผิวเรียบและแม่นยำ มีเท็กซ์เจอร์เนื้อเติมเล็กน้อย"),
+            Text("Excellent stiffness and shape-holding for SLA.", "แข็งและคงรูปได้ดีเยี่ยมสำหรับ SLA"),
+            Text("Brittle under impact and heavier than standard resin.", "เปราะเมื่อกระแทกและหนักกว่าเรซินทั่วไป"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.6 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~60 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~2%"),
+                Spec("Heat deflection (HDT)", "อุณหภูมิโก่งตัว (HDT)", "~80 °C"),
+                Spec("Hardness", "ความแข็ง", "~85 Shore D")
+            ],
+            ["functional"]),
+        new(
+            "high-temp-resin", "High-temp resin", "sla",
+            MaterialHighTempResinImageUrl,
+            Text("Heat-resistant resin sample", "ตัวอย่างเรซินทนร้อน"),
+            Text("Heat-resistant SLA resin", "เรซิน SLA ทนร้อน"),
+            Text("SLA", "SLA"),
+            Text("Hot-air or fluid fixtures, molds, and parts exposed to elevated temperature.", "ฟิกซ์เจอร์ลมร้อน/ของเหลว แม่พิมพ์ และชิ้นงานที่โดนอุณหภูมิสูง"),
+            Text("Rigid and stable at temperature; brittle under impact.", "แข็งและเสถียรเมื่อร้อน แต่เปราะเมื่อกระแทก"),
+            Text("High; among the most heat-tolerant SLA options.", "สูง เป็นหนึ่งในเรซินที่ทนร้อนที่สุด"),
+            Text("Fair; confirm exposure.", "พอใช้ ควรยืนยันการสัมผัส"),
+            Text("Smooth and detailed.", "ผิวเรียบและละเอียด"),
+            Text("Highest heat deflection of common resins.", "ทนความร้อนโก่งตัวสูงสุดในกลุ่มเรซินทั่วไป"),
+            Text("Brittle; needs thorough post-cure.", "เปราะ ต้อง post-cure ให้ทั่วถึง"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.2 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~50 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~3%"),
+                Spec("Heat deflection (HDT)", "อุณหภูมิโก่งตัว (HDT)", "~120 °C"),
+                Spec("Hardness", "ความแข็ง", "~85 Shore D")
+            ],
+            ["functional", "heat"]),
+        new(
+            "flexible-resin", "Flexible resin", "sla",
+            SlaResinImageUrl,
+            Text("Elastic flexible resin sample", "ตัวอย่างเรซินยืดหยุ่น"),
+            Text("Elastic SLA resin", "เรซิน SLA ยืดหยุ่น"),
+            Text("SLA", "SLA"),
+            Text("Soft grips, gaskets, wearables, and parts needing bend or cushioning.", "กริปนุ่ม ปะเก็น อุปกรณ์สวมใส่ และชิ้นงานที่ต้องการความยืดหยุ่นหรือกันกระแทก"),
+            Text("Rubber-like elongation with low stiffness.", "ยืดตัวคล้ายยาง ความแข็งต่ำ"),
+            Text("Low-moderate.", "ต่ำถึงปานกลาง"),
+            Text("Formulation-dependent; confirm exposure.", "ขึ้นกับสูตร ควรยืนยันการสัมผัส"),
+            Text("Smooth, soft surface.", "ผิวเรียบนุ่ม"),
+            Text("Achieves rubber-like flexibility with fine SLA detail.", "ให้ความยืดหยุ่นคล้ายยางพร้อมรายละเอียด SLA ที่ดี"),
+            Text("Not for structural load; tears more easily than TPU.", "ไม่เหมาะรับโหลด ฉีกขาดง่ายกว่า TPU"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.1 g/cm³"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~100–160%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~60 °C"),
+                Spec("Hardness", "ความแข็ง", "~50–80 Shore A")
+            ],
+            ["prototype", "flexible"]),
+        new(
+            "castable-resin", "Castable resin", "sla",
+            MaterialCastableResinImageUrl,
+            Text("Castable burnout resin sample", "ตัวอย่างเรซินสำหรับงานหล่อเผาไหม้"),
+            Text("Burnout SLA resin (investment casting)", "เรซิน SLA เผาไหม้ (งานหล่อแม่พิมพ์)"),
+            Text("SLA", "SLA"),
+            Text("Investment-casting patterns for jewelry and small precision metal parts.", "แพตเทิร์นงานหล่อสำหรับเครื่องประดับและชิ้นงานโลหะขนาดเล็กที่ต้องการความละเอียด"),
+            Text("Highly detailed but fragile; designed to burn out cleanly.", "รายละเอียดสูงแต่เปราะ ออกแบบให้เผาไหม้สะอาด"),
+            Text("Engineered to burn out without ash residue.", "ออกแบบให้เผาไหม้โดยไม่เหลือเถ้า"),
+            Text("Specialized for casting workflows.", "เฉพาะสำหรับงานหล่อ"),
+            Text("Very fine detail for casting masters.", "รายละเอียดสูงมากสำหรับ Master งานหล่อ"),
+            Text("Clean, ash-free burnout for precise metal casting.", "เผาไหม้สะอาดไร้เถ้าเพื่อการหล่อโลหะที่แม่นยำ"),
+            Text("Fragile and single-use; not a functional part material.", "เปราะและใช้ครั้งเดียว ไม่ใช่วัสดุชิ้นงานใช้งาน"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.1 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~25 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~5%"),
+                Spec("Burnout", "การเผาไหม้", "Ash-free")
+            ],
+            ["prototype"]),
+        new(
+            "clear-resin", "Clear resin", "sla",
+            MaterialClearResinImageUrl,
+            Text("Transparent clear resin sample", "ตัวอย่างเรซินใส"),
+            Text("Transparent SLA resin", "เรซิน SLA ใส"),
+            Text("SLA", "SLA"),
+            Text("Light pipes, lenses, fluidic models, and see-through prototypes.", "ท่อนำแสง เลนส์ โมเดลของไหล และต้นแบบแบบมองทะลุ"),
+            Text("Rigid and detailed, but brittle like standard resin.", "แข็งและละเอียด แต่เปราะเหมือนเรซินทั่วไป"),
+            Text("Low-moderate.", "ต่ำถึงปานกลาง"),
+            Text("Fair; UV can yellow the part over time.", "พอใช้ UV อาจทำให้เหลืองเมื่อเวลาผ่านไป"),
+            Text("Polishable to near-transparent; needs careful post-processing.", "ขัดให้ใกล้ใสได้ แต่ต้องเก็บผิวอย่างพิถีพิถัน"),
+            Text("Optically clear prototypes with fine detail.", "ต้นแบบใสเชิงแสงพร้อมรายละเอียดสูง"),
+            Text("Requires polishing or coating for clarity and yellows under UV.", "ต้องขัดหรือเคลือบเพื่อความใส และเหลืองเมื่อโดน UV"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.18 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~50 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~6%"),
+                Spec("Heat deflection (HDT)", "อุณหภูมิโก่งตัว (HDT)", "~55 °C"),
+                Spec("Hardness", "ความแข็ง", "~80 Shore D")
+            ],
+            ["prototype"]),
+        new(
+            "aluminum-a6061", "Aluminum A6061 (6061-T6)", "cnc",
+            MaterialAluminumA6061ImageUrl,
+            Text("Aluminum A6061 machined billet", "แท่งอะลูมิเนียม A6061 กัดขึ้นรูป"),
+            Text("General-purpose machined aluminum", "อะลูมิเนียมกัดขึ้นรูปอเนกประสงค์"),
+            Text("CNC", "CNC"),
+            Text("Fixtures, plates, brackets, machine parts, enclosures, and production tooling.", "ฟิกซ์เจอร์ แผ่นงาน ขายึด ชิ้นส่วนเครื่องจักร เคส และ tooling ผลิต"),
+            Text("High strength-to-weight, machinable, and stable for precision parts.", "แข็งแรงต่อน้ำหนักดี กัดง่าย และเสถียรสำหรับชิ้นงานแม่นยำ"),
+            Text("High compared with polymers; suitable near warm equipment.", "สูงเมื่อเทียบกับพอลิเมอร์ เหมาะใกล้อุปกรณ์ร้อน"),
+            Text("Good corrosion resistance; anodizing improves surface durability.", "ทนกัดกร่อนได้ดี อโนไดซ์ช่วยเพิ่มความทนผิว"),
+            Text("Machined, bead-blasted, anodized, or painted.", "ผิวกัด พ่นทราย อโนไดซ์ หรือทำสี"),
+            Text("Best all-round CNC metal for strong lightweight parts.", "โลหะ CNC ครอบคลุมที่สุดสำหรับชิ้นงานแข็งแรงแต่น้ำหนักเบา"),
+            Text("More expensive and slower than printed plastics.", "แพงและช้ากว่าพลาสติกพิมพ์"),
+            [
+                Spec("Density", "ความหนาแน่น", "2.70 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~310 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~275 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~12%"),
+                Spec("Hardness", "ความแข็ง", "~95 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~150 °C")
+            ],
+            ["functional", "heat", "metal"],
+            ["JIS A6061", "AISI / ASTM 6061", "EN AW-6061", "DIN AlMg1SiCu"]),
+        new(
+            "aluminum-a5052", "Aluminum A5052", "cnc",
+            MaterialAluminumA5052ImageUrl,
+            Text("Aluminum A5052 sheet and plate", "แผ่นอะลูมิเนียม A5052"),
+            Text("Formable corrosion-resistant aluminum", "อะลูมิเนียมขึ้นรูปง่ายทนกัดกร่อน"),
+            Text("CNC", "CNC"),
+            Text("Sheet-metal brackets, enclosures, panels, and marine or wet-environment parts.", "ขายึดงานแผ่น เคส แผง และงานทางทะเลหรือสภาพเปียก"),
+            Text("Lower strength than 6061 but excellent formability and weldability.", "แข็งแรงน้อยกว่า 6061 แต่ขึ้นรูปและเชื่อมได้ดีเยี่ยม"),
+            Text("High compared with polymers.", "สูงเมื่อเทียบกับพอลิเมอร์"),
+            Text("Excellent corrosion resistance, including saltwater exposure.", "ทนกัดกร่อนดีเยี่ยม รวมถึงน้ำเค็ม"),
+            Text("Machined, brushed, anodized, or painted.", "ผิวกัด ขัดลาย อโนไดซ์ หรือทำสี"),
+            Text("Best aluminum for bending, forming, and corrosion resistance.", "อะลูมิเนียมที่ดีที่สุดสำหรับการดัด ขึ้นรูป และทนกัดกร่อน"),
+            Text("Not heat-treatable to high strength like 6061.", "ไม่สามารถชุบแข็งให้แข็งแรงสูงเท่า 6061"),
+            [
+                Spec("Density", "ความหนาแน่น", "2.68 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~230 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~195 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~12%"),
+                Spec("Hardness", "ความแข็ง", "~60 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~150 °C")
+            ],
+            ["functional", "metal", "chemical"],
+            ["JIS A5052", "AISI / ASTM 5052", "EN AW-5052", "DIN AlMg2.5"]),
+        new(
+            "steel-s45c", "Carbon steel S45C", "cnc",
+            MaterialSteelS45CImageUrl,
+            Text("Medium-carbon steel bar stock", "แท่งเหล็กกล้าคาร์บอนปานกลาง"),
+            Text("Medium-carbon machining steel", "เหล็กกล้าคาร์บอนปานกลางสำหรับกัด"),
+            Text("CNC", "CNC"),
+            Text("Shafts, gears, pins, jigs, and general machine components.", "เพลา เฟือง พิน จิ๊ก และชิ้นส่วนเครื่องจักรทั่วไป"),
+            Text("Higher strength and hardness than mild steel; can be heat-treated.", "แข็งแรงและแข็งกว่าเหล็กอ่อน ชุบแข็งได้"),
+            Text("High; suitable for warm mechanical service.", "สูง เหมาะกับงานกลไกที่อุ่น"),
+            Text("Poor without coating; rusts readily, so plating or oiling is needed.", "ไม่ทนหากไม่เคลือบ เป็นสนิมง่าย ต้องชุบหรือทาน้ำมัน"),
+            Text("Machined, ground, blackened, or plated.", "ผิวกัด เจียร ชุบดำ หรือชุบผิว"),
+            Text("Cost-effective strength for shafts and mechanical parts.", "ความแข็งแรงคุ้มค่าสำหรับเพลาและชิ้นส่วนกลไก"),
+            Text("Corrodes without surface treatment.", "เป็นสนิมหากไม่ผ่านการเคลือบผิว"),
+            [
+                Spec("Density", "ความหนาแน่น", "7.85 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~570–700 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~345 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~17%"),
+                Spec("Hardness", "ความแข็ง", "~170–200 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~300 °C")
+            ],
+            ["functional", "heat", "metal"],
+            ["JIS S45C", "AISI 1045", "DIN C45", "EN C45 / 1.0503"]),
+        new(
+            "steel-ss400", "Mild steel SS400", "cnc",
+            MaterialSteelSs400ImageUrl,
+            Text("Structural mild steel section", "เหล็กโครงสร้างอ่อน"),
+            Text("General structural mild steel", "เหล็กกล้าโครงสร้างทั่วไป"),
+            Text("CNC", "CNC"),
+            Text("Frames, base plates, weldments, brackets, and general fabrication.", "โครง แผ่นฐาน งานเชื่อม ขายึด และงานประกอบทั่วไป"),
+            Text("Tough and weldable with moderate strength; easy to machine.", "เหนียวและเชื่อมง่าย แข็งแรงปานกลาง กัดง่าย"),
+            Text("High; suitable for warm structural service.", "สูง เหมาะกับงานโครงสร้างที่อุ่น"),
+            Text("Poor without coating; rusts readily.", "ไม่ทนหากไม่เคลือบ เป็นสนิมง่าย"),
+            Text("Machined, welded, painted, or galvanized.", "ผิวกัด เชื่อม ทำสี หรือชุบสังกะสี"),
+            Text("Lowest-cost steel for frames and weld fabrication.", "เหล็กต้นทุนต่ำที่สุดสำหรับโครงและงานเชื่อม"),
+            Text("Lower strength than S45C; corrodes without coating.", "แข็งแรงน้อยกว่า S45C และเป็นสนิมหากไม่เคลือบ"),
+            [
+                Spec("Density", "ความหนาแน่น", "7.85 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~400–510 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~245 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~21%"),
+                Spec("Hardness", "ความแข็ง", "~120 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~300 °C")
+            ],
+            ["functional", "metal"],
+            ["JIS SS400", "ASTM A36", "EN S275JR", "DIN St37-2"]),
+        new(
+            "stainless-sus304", "Stainless SUS304", "cnc",
+            MaterialStainlessSus304ImageUrl,
+            Text("SUS304 stainless steel bar stock", "แท่งสแตนเลส SUS304"),
+            Text("Corrosion-resistant austenitic stainless", "สแตนเลสออสเทนิติกทนกัดกร่อน"),
+            Text("CNC", "CNC"),
+            Text("Food-adjacent parts, wet environments, shafts, wear parts, and durable fixtures.", "ชิ้นงานใกล้อาหาร งานเปียก เพลา ชิ้นส่วนสึกหรอ และฟิกซ์เจอร์ทนทาน"),
+            Text("Strong, tough, and wear-resistant with high density.", "แข็งแรง เหนียว และทนสึก แต่น้ำหนักมาก"),
+            Text("High; suitable for demanding thermal environments.", "สูง เหมาะกับสภาพแวดล้อมร้อนที่ต้องการความทน"),
+            Text("Excellent corrosion and chemical resistance for most indoor and food uses.", "ทนกัดกร่อนและสารเคมีดีมากสำหรับงานในร่มและงานอาหารส่วนใหญ่"),
+            Text("Machined, brushed, passivated, or polished.", "ผิวกัด ขัดลาย passivate หรือขัดเงา"),
+            Text("Default stainless where corrosion and durability matter.", "สแตนเลสหลักเมื่อต้องการความทนและทนกัดกร่อน"),
+            Text("Higher machining cost and weight than aluminum.", "ต้นทุนกัดและน้ำหนักสูงกว่าอะลูมิเนียม"),
+            [
+                Spec("Density", "ความหนาแน่น", "8.0 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~515 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~205 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~40%"),
+                Spec("Hardness", "ความแข็ง", "~150 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~400 °C")
+            ],
+            ["functional", "heat", "metal", "chemical"],
+            ["JIS SUS304", "AISI 304", "EN 1.4301 / X5CrNi18-10", "ASTM 304"]),
+        new(
+            "stainless-sus316", "Stainless SUS316", "cnc",
+            MaterialStainlessSus316ImageUrl,
+            Text("SUS316 stainless steel bar stock", "แท่งสแตนเลส SUS316"),
+            Text("Marine-grade molybdenum stainless", "สแตนเลสผสมโมลิบดีนัมเกรดทะเล"),
+            Text("CNC", "CNC"),
+            Text("Marine, chemical, medical-adjacent, and harsh-environment parts.", "งานทางทะเล เคมี ใกล้การแพทย์ และสภาพแวดล้อมรุนแรง"),
+            Text("Strong and tough like 304 with better pitting resistance from molybdenum.", "แข็งแรงและเหนียวเหมือน 304 แต่ทนการกัดเป็นรูดีกว่าด้วยโมลิบดีนัม"),
+            Text("High; suitable for demanding thermal environments.", "สูง เหมาะกับสภาพแวดล้อมร้อนที่ต้องการความทน"),
+            Text("Superior corrosion and chemical resistance, especially saltwater and acids.", "ทนกัดกร่อนและสารเคมีเหนือกว่า โดยเฉพาะน้ำเค็มและกรด"),
+            Text("Machined, brushed, passivated, or electropolished.", "ผิวกัด ขัดลาย passivate หรือ electropolish"),
+            Text("Best stainless for marine, chemical, and hygienic service.", "สแตนเลสที่ดีที่สุดสำหรับงานทะเล เคมี และสุขอนามัย"),
+            Text("Most expensive of the common stainless grades.", "แพงที่สุดในกลุ่มสแตนเลสทั่วไป"),
+            [
+                Spec("Density", "ความหนาแน่น", "8.0 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~515 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~205 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~40%"),
+                Spec("Hardness", "ความแข็ง", "~150 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~425 °C")
+            ],
+            ["functional", "heat", "metal", "chemical"],
+            ["JIS SUS316", "AISI 316", "EN 1.4401 / X5CrNiMo17-12-2", "ASTM 316"]),
+        new(
+            "brass-c3604", "Brass C3604", "cnc",
+            MaterialBrassC3604ImageUrl,
+            Text("Free-cutting brass bar stock", "แท่งทองเหลืองกัดง่าย"),
+            Text("Free-cutting leaded brass", "ทองเหลืองผสมตะกั่วกัดง่าย"),
+            Text("CNC", "CNC"),
+            Text("Bushings, decorative hardware, electrical parts, inserts, and low-friction details.", "บูช ฮาร์ดแวร์ตกแต่ง ชิ้นส่วนไฟฟ้า อินเสิร์ต และจุดเสียดทานต่ำ"),
+            Text("Moderate strength, excellent machinability, and good wear behavior.", "แข็งแรงปานกลาง กัดง่ายมาก และทนสึกดี"),
+            Text("Moderate for metals depending on alloy.", "ปานกลางสำหรับโลหะตามเกรด"),
+            Text("Good corrosion resistance in many indoor and water-adjacent uses.", "ทนกัดกร่อนได้ดีในงานภายในและใกล้น้ำหลายประเภท"),
+            Text("Machined bright finish; can tarnish or be polished.", "ผิวกัดเงา อาจหมองหรือขัดเงาได้"),
+            Text("Best machinability for inserts, threads, and conductive parts.", "กัดง่ายที่สุดสำหรับอินเสิร์ต เกลียว และงานนำไฟฟ้า"),
+            Text("Softer and heavier than aluminum.", "นิ่มกว่าและหนักกว่าอะลูมิเนียม"),
+            [
+                Spec("Density", "ความหนาแน่น", "8.5 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~360–470 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~250 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~20%"),
+                Spec("Hardness", "ความแข็ง", "~100 HB"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~200 °C")
+            ],
+            ["functional", "metal", "chemical"],
+            ["JIS C3604", "ASTM C36000", "EN CW603N / CuZn36Pb3", "DIN CuZn39Pb3"]),
+        new(
+            "tool-steel-skd11", "Tool steel SKD11", "cnc",
+            MaterialToolSteelSkd11ImageUrl,
+            Text("Hardened cold-work tool steel block", "บล็อกเหล็กเครื่องมือชุบแข็งงานเย็น"),
+            Text("Cold-work die and tool steel", "เหล็กเครื่องมือและแม่พิมพ์งานเย็น"),
+            Text("CNC", "CNC"),
+            Text("Cutting dies, punches, gauges, wear plates, and long-life tooling.", "ดาย แม่เจาะ เกจ แผ่นรับสึก และ tooling อายุยืน"),
+            Text("Very high hardness and wear resistance after heat treatment.", "แข็งและทนสึกสูงมากหลังชุบแข็ง"),
+            Text("High; retains hardness at warm tooling temperatures.", "สูง คงความแข็งที่อุณหภูมิ tooling ที่อุ่น"),
+            Text("Fair; protect from rust before hardening or coating.", "พอใช้ ควรกันสนิมก่อนชุบแข็งหรือเคลือบ"),
+            Text("Ground and polished; often coated (e.g. TiN) for tooling.", "เจียรและขัดเงา มักเคลือบ (เช่น TiN) สำหรับ tooling"),
+            Text("Outstanding wear life for dies, punches, and cutting tools.", "อายุการสึกหรอดีเยี่ยมสำหรับดาย แม่เจาะ และเครื่องมือตัด"),
+            Text("Brittle when hard; best machined soft then heat-treated.", "เปราะเมื่อแข็ง ควรกัดตอนอ่อนแล้วจึงชุบแข็ง"),
+            [
+                Spec("Density", "ความหนาแน่น", "7.7 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~1500+ MPa (hardened)"),
+                Spec("Hardness", "ความแข็ง", "~58–62 HRC (hardened)"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "low (brittle)"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~400 °C")
+            ],
+            ["functional", "heat", "metal"],
+            ["JIS SKD11", "AISI D2", "DIN 1.2379 / X153CrMoV12", "EN X153CrMoV12"]),
+        new(
+            "titanium-ti-6al-4v", "Titanium Ti-6Al-4V", "cnc",
+            MaterialTitaniumImageUrl,
+            Text("Titanium alloy machined component", "ชิ้นงานไทเทเนียมอัลลอยกัดขึ้นรูป"),
+            Text("Grade 5 aerospace titanium alloy", "ไทเทเนียมอัลลอยเกรด 5 สำหรับงานการบิน"),
+            Text("CNC", "CNC"),
+            Text("Aerospace, medical, motorsport, and lightweight high-strength components.", "งานการบิน การแพทย์ มอเตอร์สปอร์ต และชิ้นงานแข็งแรงน้ำหนักเบา"),
+            Text("Very high strength-to-weight with excellent fatigue resistance.", "แข็งแรงต่อน้ำหนักสูงมาก ทนความล้าดีเยี่ยม"),
+            Text("High; performs well at elevated temperatures.", "สูง ทำงานได้ดีที่อุณหภูมิสูง"),
+            Text("Outstanding corrosion resistance, including saltwater and biological use.", "ทนกัดกร่อนดีเยี่ยม รวมถึงน้ำเค็มและงานชีวภาพ"),
+            Text("Machined, bead-blasted, anodized, or polished.", "ผิวกัด พ่นทราย อโนไดซ์ หรือขัดเงา"),
+            Text("Best strength-to-weight and corrosion resistance of common CNC metals.", "แข็งแรงต่อน้ำหนักและทนกัดกร่อนดีที่สุดในกลุ่มโลหะ CNC ทั่วไป"),
+            Text("Expensive and slow to machine; needs careful tooling.", "ราคาสูงและกัดช้า ต้องใช้เครื่องมือที่เหมาะสม"),
+            [
+                Spec("Density", "ความหนาแน่น", "4.43 g/cm³"),
+                Spec("Tensile strength", "ความต้านแรงดึง", "~950 MPa"),
+                Spec("Yield strength", "ความต้านครากตัว", "~880 MPa"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~14%"),
+                Spec("Hardness", "ความแข็ง", "~36 HRC"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~400 °C")
+            ],
+            ["functional", "heat", "metal", "chemical"],
+            ["ASTM Grade 5 (Ti-6Al-4V)", "JIS Class 60 (60種)", "EN Ti6Al4V / 3.7165", "UNS R56400"]),
+        new(
+            "silicone-urethane", "Silicone / Urethane", "casting",
+            MaterialSiliconeUrethaneImageUrl,
+            Text("Silicone and urethane casting samples", "ตัวอย่างงานหล่อซิลิโคนและยูรีเทน"),
+            Text("Short-run elastomer or cast polymer", "อีลาสโตเมอร์หรืองานหล่อพอลิเมอร์จำนวนน้อย"),
+            Text("Casting", "งานหล่อ"),
+            Text("Soft grips, seals, bumpers, display parts, low-volume replicas, and overmold-like trials.", "กริปนุ่ม ซีล กันกระแทก ชิ้นงานโชว์ งานสำเนาจำนวนน้อย และทดลองงานคล้าย overmold"),
+            Text("Ranges from soft elastomer to semi-rigid plastic depending on selected system.", "ตั้งแต่นุ่มคล้ายยางถึงกึ่งแข็ง ขึ้นกับระบบวัสดุที่เลือก"),
+            Text("Low to moderate; high-temperature formulations must be selected intentionally.", "ต่ำถึงปานกลาง หากต้องทนร้อนสูงต้องเลือกสูตรเฉพาะ"),
+            Text("Highly formulation-dependent; confirm oils, fuels, cleaners, and UV exposure.", "ขึ้นกับสูตรมาก ควรยืนยันน้ำมัน เชื้อเพลิง น้ำยา และ UV"),
+            Text("Copies master surface well; color and shore hardness can be specified.", "ลอกผิว Master ได้ดี ระบุสีและ Shore hardness ได้"),
+            Text("Good for small batches when injection molding is not justified.", "เหมาะกับจำนวนน้อยเมื่อยังไม่คุ้มทำแม่พิมพ์ฉีด"),
+            Text("Tooling and material choice need review before quoting.", "ต้องตรวจแม่พิมพ์และระบบวัสดุก่อนเสนอราคา"),
+            [
+                Spec("Density", "ความหนาแน่น", "~1.1–1.2 g/cm³"),
+                Spec("Elongation at break", "การยืดตัว ณ จุดขาด", "~150–600%"),
+                Spec("Max service temperature", "อุณหภูมิใช้งานสูงสุด", "~150 °C"),
+                Spec("Hardness", "ความแข็ง", "~20–80 Shore A")
+            ],
+            ["prototype", "functional", "flexible", "chemical"])
+    ];
+
+    internal sealed record MaterialContent(
+        string Slug,
+        string Name,
+        string CategoryKey,
+        string ImageUrl,
+        LocalizedText ImageAlt,
+        LocalizedText Family,
+        LocalizedText Process,
+        LocalizedText BestFor,
+        LocalizedText Mechanical,
+        LocalizedText Heat,
+        LocalizedText Chemical,
+        LocalizedText Finish,
+        LocalizedText Pros,
+        LocalizedText Cons,
+        IReadOnlyList<MaterialSpec> Specs,
+        IReadOnlyList<string> UseKeys,
+        IReadOnlyList<string>? Standards = null);
+
+    internal sealed record MaterialSpec(LocalizedText Label, string Value, LocalizedText? Note = null);
+
+    internal sealed record MaterialCategoryContent(
+        string Key,
+        LocalizedText Title,
+        string ProcessLabel,
+        LocalizedText Body,
+        string ImageUrl,
+        LocalizedText ImageAlt,
+        IReadOnlyList<LocalizedText> Highlights);
 }
 
 internal sealed record MetricItem(LocalizedText Value, LocalizedText Label, int CountTarget, string Suffix = "");

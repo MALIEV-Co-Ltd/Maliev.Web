@@ -5,9 +5,5 @@
 <section class="page-hero compact">
     <h1>Something went wrong</h1>
     <p>The customer website could not complete this request. Try reloading or returning to the quote workspace.</p>
-    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@SiteContent.QuoteDisabledTitle.En">Open quote</button>
+    <a class="button primary" href="@SiteContent.MakeStudioUrl">Open Make Studio</a>
 </section>
-
-@code {
-    private const string QuoteDisabledButtonClass = "button primary is-disabled";
-}

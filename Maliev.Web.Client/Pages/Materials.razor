@@ -1,0 +1,133 @@
+@page "/materials"
+@inherits PreferenceAwareComponentBase
+@inject NavigationManager Navigation
+
+<PageTitle>@Text("Materials", "วัสดุ") - MALIEV</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Text("Browse MALIEV materials grouped by manufacturing process — FDM, powder-bed nylon, SLA resin, CNC metals, and casting. Open any material for its datasheet and selection guidance.", "เลือกดูวัสดุของ MALIEV จัดกลุ่มตามกระบวนการผลิต ทั้ง FDM ไนลอนพาวเดอร์เบด เรซิน SLA โลหะ CNC และงานหล่อ เปิดดูดาต้าชีตและคำแนะนำการเลือกของแต่ละวัสดุได้")" />
+</HeadContent>
+
+<section class="section material-overview">
+    <div class="material-overview-intro" data-reveal>
+        <span class="material-kicker">@Text("Materials", "วัสดุ")</span>
+        <h1>@Text("Materials grouped by manufacturing process.", "วัสดุจัดกลุ่มตามกระบวนการผลิต")</h1>
+        <p>@Text("Start from a process, then open a material for its datasheet, selection guidance, and like-for-like comparison.", "เริ่มจากกระบวนการ แล้วเปิดดูวัสดุเพื่อดูดาต้าชีต คำแนะนำการเลือก และการเปรียบเทียบแบบเทียบกันตรง ๆ")</p>
+    </div>
+
+    <div class="material-overview-search" role="search">
+        <MudIcon Icon="@Icons.Material.Filled.Search" Size="Size.Small" />
+        <input type="search"
+               class="material-overview-search-input"
+               value="@_search"
+               @oninput="OnSearchInput"
+               placeholder="@Text("Search materials — e.g. PA6-CF, SUS304, flame retardant, ESD…", "ค้นหาวัสดุ — เช่น PA6-CF, SUS304, หน่วงไฟ, ESD…")"
+               aria-label="@Text("Search materials", "ค้นหาวัสดุ")" />
+        @if (!string.IsNullOrWhiteSpace(_search))
+        {
+            <button type="button" class="material-overview-search-clear" aria-label="@Text("Clear search", "ล้างการค้นหา")" @onclick="ClearSearch">
+                <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+            </button>
+        }
+    </div>
+
+    @if (!HasAnyMatch)
+    {
+        <div class="material-overview-empty" role="status">
+            <span class="material-overview-empty-icon" aria-hidden="true">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" />
+            </span>
+            <p>@Text($"No materials match “{_search}”. Try a process, grade, or property.", $"ไม่พบวัสดุที่ตรงกับ “{_search}” ลองค้นด้วยกระบวนการ เกรด หรือคุณสมบัติ")</p>
+        </div>
+    }
+
+    @foreach (var category in SiteContent.MaterialCategoryList)
+    {
+        var materials = VisibleMaterials(category.Key);
+        if (materials.Count == 0)
+        {
+            continue;
+        }
+
+        <section class="material-overview-category" data-reveal>
+            <div class="material-overview-category-head">
+                <span class="card-meta">@category.ProcessLabel</span>
+                <h2>@category.Title.For(Preferences.Culture)</h2>
+                <p>@category.Body.For(Preferences.Culture)</p>
+            </div>
+            <div class="material-overview-grid" data-reveal-group>
+                @foreach (var material in materials)
+                {
+                    <a class="material-overview-card" href="/materials/@material.Slug" data-reveal>
+                        <div class="material-overview-card-media">
+                            <img src="@material.ImageUrl" alt="@material.ImageAlt.For(Preferences.Culture)" loading="lazy" />
+                        </div>
+                        <div class="material-overview-card-body">
+                            <div class="material-overview-card-head">
+                                <h3>@material.Name</h3>
+                                <span class="material-process-pill">@material.Process.For(Preferences.Culture)</span>
+                            </div>
+                            <p class="material-overview-card-family">@material.Family.For(Preferences.Culture)</p>
+                            @if (material.Specs.Count > 0)
+                            {
+                                <dl class="material-overview-card-specs">
+                                    @foreach (var spec in material.Specs.Take(2))
+                                    {
+                                        <div class="material-overview-spec">
+                                            <dt>@spec.Label.For(Preferences.Culture)</dt>
+                                            <dd>@spec.Value</dd>
+                                        </div>
+                                    }
+                                </dl>
+                            }
+                            <span class="material-overview-card-link">@Text("View material", "ดูวัสดุ")</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</section>
+
+@code {
+    private string _search = string.Empty;
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        _search = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private void ClearSearch()
+    {
+        _search = string.Empty;
+    }
+
+    private bool HasAnyMatch => SiteContent.Materials.Any(MatchesSearch);
+
+    private IReadOnlyList<SiteContent.MaterialContent> VisibleMaterials(string categoryKey) =>
+        SiteContent.MaterialsInCategory(categoryKey).Where(MatchesSearch).ToList();
+
+    private bool MatchesSearch(SiteContent.MaterialContent material)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            return true;
+        }
+
+        var query = _search.Trim();
+        var category = SiteContent.FindMaterialCategory(material.CategoryKey);
+
+        return Contains(material.Name)
+            || Contains(material.Family.En) || Contains(material.Family.Th)
+            || Contains(material.Process.En) || Contains(material.Process.Th)
+            || Contains(material.CategoryKey)
+            || Contains(category?.Title.En) || Contains(category?.Title.Th)
+            || Contains(material.BestFor.En) || Contains(material.BestFor.Th)
+            || (material.Standards?.Any(Contains) ?? false);
+
+        bool Contains(string? value) =>
+            value is not null && value.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string Text(string en, string th) =>
+        Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
+}

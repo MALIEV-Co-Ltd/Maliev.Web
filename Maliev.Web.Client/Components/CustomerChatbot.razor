@@ -134,14 +134,22 @@
     }
     else if (_showPopout)
     {
-        <button type="button"
-                class="customer-chatbot-popout"
-                aria-label="@PopoutAriaLabel"
-                data-chatbot-popout-kind="@_popoutKind"
-                @onclick="OpenFromPopoutAsync">
-            <strong>@PopoutTitle</strong>
-            <span>@_popoutMessage</span>
-        </button>
+        <div class="customer-chatbot-popout"
+             data-chatbot-popout-kind="@_popoutKind">
+            <button type="button"
+                    class="customer-chatbot-popout-open"
+                    aria-label="@PopoutAriaLabel"
+                    @onclick="OpenFromPopoutAsync">
+                <strong>@PopoutTitle</strong>
+                <span>@_popoutMessage</span>
+            </button>
+            <button type="button"
+                    class="customer-chatbot-popout-dismiss"
+                    aria-label="@Text("Dismiss", "ปิด")"
+                    @onclick="DismissPopoutAsync">
+                <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+            </button>
+        </div>
     }
 
     <button type="button"
@@ -456,6 +464,18 @@
         {
             await ApplyContextHintAsync(hint);
         }
+    }
+
+    private async Task DismissPopoutAsync()
+    {
+        var hint = _pendingContextHint;
+        CancelPopoutTimer();
+        _showPopout = false;
+        _pendingContextHint = null;
+        _popoutKind = "notification";
+        _lastContextHintShownAt = DateTimeOffset.UtcNow;
+        await RecordBehaviorEventAsync("assistant_popout_dismissed", hint?.Id ?? "manual-dismiss", hint?.AnalyticsKey);
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs args)

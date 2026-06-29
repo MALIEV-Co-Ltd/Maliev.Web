@@ -60,8 +60,9 @@ public sealed class AccountPageSourceTests
         Assert.Contains("CustomerSegmentLabel", account);
         Assert.Contains("NdaStatusLabel", account);
         Assert.Contains("NdaCardCopy", account);
-        Assert.Contains("QuoteDisabledTitle", account);
-        Assert.Contains("account-action-card is-disabled", account);
+        Assert.DoesNotContain("QuoteDisabledTitle", account);
+        Assert.DoesNotContain("account-action-card is-disabled", account);
+        Assert.Contains("href=\"@SiteContent.QuoteNdasUrl\"", account);
         Assert.DoesNotContain("QuoteEngineNdasHref", account);
         Assert.DoesNotContain("/quote/start?returnUrl=/ndas", account);
         Assert.Contains("@Text(\"NDA agreement\", \"ข้อตกลง NDA\")", account);
@@ -84,7 +85,7 @@ public sealed class AccountPageSourceTests
         Assert.Contains("ProfileImageUrl = GetString(root, \"profileImageUrl\", \"profile_image_url\", \"ProfileImageUrl\")", controller);
         Assert.DoesNotContain("Status = GetString(root, \"status\", \"Status\")", controller);
 
-        Assert.Contains("QuoteEntryDisabled = true", siteContent);
+        Assert.Contains("QuoteEntryDisabled = false", siteContent);
 
         Assert.Contains("[SupplyParameterFromQuery]\n    public string? Email", forgotPassword);
         Assert.Contains("value=\"@Email\"", forgotPassword);
@@ -113,16 +114,17 @@ public sealed class AccountPageSourceTests
     }
 
     /// <summary>
-    /// Verifies Web disables QuoteEngine account links while QuoteEngine is out of the MVP path.
+    /// Verifies Web links the account NDA card to the live Make Studio NDA workspace.
     /// </summary>
     [Fact]
-    public void AccountNdaLinkIsDisabledForMvp()
+    public void AccountNdaLinkIsLive()
     {
         var account = ReadRepoFile("Maliev.Web.Client", "Pages", "Account.razor");
         var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
 
-        Assert.Contains("QuoteDisabledTitle", account, StringComparison.Ordinal);
-        Assert.Contains("aria-disabled=\"true\"", account, StringComparison.Ordinal);
+        Assert.Contains("href=\"@SiteContent.QuoteNdasUrl\"", account, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuoteDisabledTitle", account, StringComparison.Ordinal);
+        Assert.DoesNotContain("account-action-card is-disabled", account, StringComparison.Ordinal);
         Assert.DoesNotContain("QuoteEngineNdasHref", account, StringComparison.Ordinal);
         Assert.DoesNotContain("/quote/start?returnUrl=/ndas", account, StringComparison.Ordinal);
         Assert.Contains("[HttpGet(\"/quote/start\")]", authController, StringComparison.Ordinal);
@@ -258,7 +260,8 @@ public sealed class AccountPageSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("class=\"empty-state compact account-orders-empty\"", orders);
-        Assert.Contains("QuoteDisabledButtonClass", orders);
+        Assert.Contains("href=\"@SiteContent.QuoteOrdersUrl\"", orders);
+        Assert.DoesNotContain("QuoteDisabledButtonClass", orders);
         Assert.Contains("Open manufacturing orders", orders);
         Assert.DoesNotContain("ManufacturingOrdersUrl", orders);
         Assert.Contains(".account-orders-empty", styles);

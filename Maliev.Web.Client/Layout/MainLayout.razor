@@ -57,7 +57,7 @@
                            Size="Size.Medium"
                            Class="nav-icon-button"
                            aria-label="@Text("Account", "บัญชี")" />
-            <button type="button" class="@QuoteDisabledNavClass" disabled title="@QuoteDisabledTitle">@Text("Make Studio", "Make Studio")</button>
+            <a class="nav-quote-link" href="@SiteContent.MakeStudioUrl">@Text("Make Studio", "Make Studio")</a>
             <button type="button"
                     class="mobile-menu-button"
                     aria-label="@Text("Open navigation", "เปิดเมนู")"
@@ -79,7 +79,7 @@
                 {
                     <NavLink class="mobile-nav-secondary" href="/cart" @onclick="CloseMobileNav">@Text("Cart", "ตะกร้า")</NavLink>
                 }
-                <button type="button" class="@QuoteDisabledMobileNavClass" disabled title="@QuoteDisabledTitle">@Text("Make Studio", "Make Studio")</button>
+                <a class="mobile-nav-quote" href="@SiteContent.MakeStudioUrl" @onclick="CloseMobileNav">@Text("Make Studio", "Make Studio")</a>
             </div>
         </nav>
     </header>
@@ -283,9 +283,6 @@
         $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} MALIEV Co., Ltd.",
         $"© {FoundingYear}-{CurrentYear.ToString(CultureInfo.InvariantCulture)} บริษัท มาลีฟ จำกัด");
     private string MobileNavClass => _mobileNavOpen ? "mobile-nav open" : "mobile-nav";
-    private string QuoteDisabledNavClass => "nav-quote-link is-disabled";
-    private string QuoteDisabledMobileNavClass => "mobile-nav-quote is-disabled";
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
     private bool IsDarkMode => _selectedTheme.Equals(PreferenceService.DarkTheme, StringComparison.OrdinalIgnoreCase);
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
     private string ThemeToggleAriaLabel => IsDarkMode

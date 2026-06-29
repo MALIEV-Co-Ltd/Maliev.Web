@@ -13,7 +13,7 @@
         <h1>@Service.Title.For(Preferences.Culture)</h1>
         <p>@Service.Summary.For(Preferences.Culture)</p>
         <div class="quote-actions">
-            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Get part price", "ดูราคาชิ้นงาน")</button>
+            <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             <a class="button secondary" href="/services">@Text("All services", "บริการทั้งหมด")</a>
         </div>
     </div>
@@ -44,7 +44,7 @@
             <h2 id="service-detail-title">@Detail.Title.For(Preferences.Culture)</h2>
             <p>@Detail.Intro.For(Preferences.Culture)</p>
         </div>
-        <span class="section-link is-disabled" role="link" aria-disabled="true" title="@QuoteDisabledTitle">@Text("Upload files", "อัปโหลดไฟล์")</span>
+        <a class="section-link" href="@SiteContent.QuoteNewProjectUrl">@Text("Upload files", "อัปโหลดไฟล์")</a>
     </div>
 
     <div class="service-answer-frame">
@@ -139,7 +139,7 @@
     <QuoteDropzone Href="@SiteContent.QuoteNewProjectUrl"
                    Class="final-dropzone"
                    Title="@Text("Open Make Studio", "เปิด Make Studio")"
-                   Description="@Text("CAD upload, configuration, and order tracking will continue in Make Studio when the MVP opens.", "อัปโหลด CAD ตั้งค่า และติดตามงานจะต่อใน Make Studio เมื่อ MVP เปิดใช้งาน")"
+                   Description="@Text("CAD upload, configuration, and order tracking continue in Make Studio.", "อัปโหลด CAD ตั้งค่า และติดตามงานต่อใน Make Studio")"
                    ActionText="@Text("Get part price", "ดูราคาชิ้นงาน")"
                    Disabled="@SiteContent.QuoteEntryDisabled"
                    DisabledText="@QuoteDropzoneDisabledText"
@@ -159,8 +159,6 @@
     private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
     private string HeroModelStateKey => $"service.hero.model.{Service.Slug}";
     private string ServiceDetailSectionClass => $"section service-detail-section service-detail-section--{Service.Slug}";
-    private string QuoteDisabledButtonClass => "button primary is-disabled";
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
     private string QuoteDropzoneDisabledText => SiteContent.QuoteDisabledAction.For(Preferences.Culture);
 
     protected override async Task OnInitializedAsync()

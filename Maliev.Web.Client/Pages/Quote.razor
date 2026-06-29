@@ -3,17 +3,17 @@
 
 <PageTitle>Custom manufacturing quote - MALIEV</PageTitle>
 <HeadContent>
-    <meta name="description" content="MALIEV custom manufacturing online quote intake is temporarily unavailable while the MVP workflow is prepared." />
+    <meta name="description" content="Get a custom manufacturing quote with MALIEV Make Studio — describe your part, upload CAD, drawings, photos, or sketches, and get DFM feedback and pricing in one conversation." />
     <link rel="canonical" href="https://www.maliev.com/quote" />
 </HeadContent>
 
 <section class="hero-band quote-hero">
     <div class="hero-copy">
-        <h1>@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)</h1>
-        <p>@SiteContent.QuoteDisabledBody.For(Preferences.Culture)</p>
+        <h1>@Text("Custom manufacturing quote", "ขอราคางานผลิตเฉพาะแบบ")</h1>
+        <p>@Text("Open Make Studio to describe your part, attach CAD, drawings, photos, or sketches, and get DFM feedback and pricing in one conversation.", "เปิด Make Studio เพื่ออธิบายชิ้นงาน แนบ CAD, Drawing, รูปถ่าย หรือสเก็ตช์ แล้วรับความเห็น DFM และราคาในบทสนทนาเดียว")</p>
         <div class="quote-actions">
-            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">@Text("Try demo", "ทดลองดูตัวอย่าง")</button>
-            <button type="button" class="button secondary is-disabled" disabled title="@SiteContent.QuoteDisabledTitle.For(Preferences.Culture)">@Text("Start project", "เริ่มโปรเจกต์")</button>
+            <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
+            <a class="button secondary" href="@SiteContent.QuoteDemoUrl">@Text("Try demo", "ทดลองดูตัวอย่าง")</a>
             <a class="button secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>
@@ -23,8 +23,6 @@
 </section>
 
 @code {
-    private string QuoteDisabledButtonClass => "button primary is-disabled";
-
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;

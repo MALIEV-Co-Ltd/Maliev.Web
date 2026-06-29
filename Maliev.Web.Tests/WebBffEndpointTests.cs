@@ -124,6 +124,39 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies material datasheets are downloaded as generated PDFs from the catalog.
+    /// </summary>
+    [Fact]
+    public async Task GET_MaterialDatasheetPdf_ReturnsGeneratedPdfDownload()
+    {
+        using var client = _factory.CreateClient();
+
+        using var response = await client.GetAsync("/web/v1/materials/pa12-nylon/datasheet.pdf?culture=en");
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var downloadFileName = response.Content.Headers.ContentDisposition?.FileNameStar
+            ?? response.Content.Headers.ContentDisposition?.FileName?.Trim('"');
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("attachment", response.Content.Headers.ContentDisposition?.DispositionType);
+        Assert.Equal("Datasheet - PA12 nylon - MALIEV.pdf", downloadFileName);
+        Assert.Equal(FakePdfServiceClient.PdfBytes, bytes);
+    }
+
+    /// <summary>
+    /// Verifies unknown material datasheet slugs fail cleanly.
+    /// </summary>
+    [Fact]
+    public async Task GET_MaterialDatasheetPdf_UnknownSlug_ReturnsNotFound()
+    {
+        using var client = _factory.CreateClient();
+
+        using var response = await client.GetAsync("/web/v1/materials/not-a-real-material/datasheet.pdf?culture=en");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    /// <summary>
     /// Verifies quote estimates preserve explicit bulk-discount fields returned by pricing.
     /// </summary>
     [Fact]
@@ -818,6 +851,22 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             Assert.NotNull(request.CoverImage);
             Assert.Equal("/images/blog/fdm-print-orientation.jpg", request.CoverImage.Url);
             Assert.Equal("image/jpeg", request.CoverImage.ContentType);
+            return Task.FromResult(PdfBytes);
+        }
+
+        public Task<byte[]> RenderMaterialDatasheetAsync(MaterialDatasheetPdfRequest request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("pa12-nylon", request.Slug);
+            Assert.Equal(SupportedCultures.DefaultCulture, request.CultureName);
+            Assert.Equal("PA12 nylon", request.Name);
+            Assert.Equal("MJF / SLS", request.ProcessLabel);
+            Assert.Contains("nylon", request.CategoryLabel, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal("https://www.maliev.com/materials/pa12-nylon", request.PublicUrl);
+            Assert.NotEmpty(request.Specs);
+            Assert.NotEmpty(request.Bands);
+            Assert.False(string.IsNullOrWhiteSpace(request.Pros));
+            Assert.False(string.IsNullOrWhiteSpace(request.Cons));
+            Assert.False(string.IsNullOrWhiteSpace(request.Disclaimer));
             return Task.FromResult(PdfBytes);
         }
     }

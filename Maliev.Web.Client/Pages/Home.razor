@@ -15,33 +15,14 @@
         <h1>
             @_heroCopy.HeadlineLead.For(Preferences.Culture)
             <br />
-            <span class="accent-blue">@_heroCopy.HeadlineAccent.For(Preferences.Culture)</span>
+            <span class="hero-headline-accent">@_heroCopy.HeadlineAccent.For(Preferences.Culture)</span>
         </h1>
         <p>@_heroCopy.Body.For(Preferences.Culture)</p>
         <div class="landing-hero-actions">
-            <div class="make-studio-cta" aria-label="@Text("Make Studio start", "เริ่มต้น Make Studio")">
-                <div>
-                    <span>@Text("Make Studio", "Make Studio")</span>
-                    <strong>@Text("Tell Make Studio what you want to build.", "บอก Make Studio ว่าต้องการสร้างอะไร")</strong>
-                    <p>@Text("Describe the part in plain language, then attach CAD, drawings, photos, or sketches when they help.", "อธิบายชิ้นงานด้วยภาษาปกติ แล้วแนบ CAD, Drawing, รูปถ่าย หรือสเก็ตช์เมื่อช่วยให้เข้าใจงาน")</p>
-                    <div class="make-studio-prompt" aria-label="@Text("Example Make Studio prompt", "ตัวอย่างข้อความ Make Studio")">
-                        <span>@Text("I need five nylon brackets for a test rig by Friday...", "ต้องการขายึดไนลอน 5 ชิ้นสำหรับแท่นทดสอบภายในวันศุกร์...")</span>
-                    </div>
-                    <ul class="make-studio-artifacts" aria-label="@Text("Make Studio accepted inputs", "ข้อมูลที่ Make Studio รองรับ")">
-                        <li>CAD</li>
-                        <li>@Text("Drawings", "Drawing")</li>
-                        <li>@Text("Photos", "รูปถ่าย")</li>
-                        <li>@Text("Sketches", "สเก็ตช์")</li>
-                        <li>@Text("DFM notes", "หมายเหตุ DFM")</li>
-                    </ul>
-                </div>
-                <div class="make-studio-actions">
-                    <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start in Make Studio", "เริ่มใน Make Studio")</button>
-                    <a class="button secondary make-studio-secondary" href="/contact">@Text("Talk to MALIEV", "คุยกับ MALIEV")</a>
-                </div>
-                <p class="make-studio-note">@Text("Make Studio keeps the conversation, uploads, assumptions, DFM review, and quote artifacts together from the first message.", "Make Studio เก็บบทสนทนา ไฟล์อัปโหลด สมมติฐาน การตรวจ DFM และไฟล์ใบเสนอราคาไว้ด้วยกันตั้งแต่ข้อความแรก")</p>
-            </div>
+            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
+            <a class="button secondary make-studio-secondary" href="/contact">@Text("Talk to MALIEV", "คุยกับ MALIEV")</a>
         </div>
+        <p class="landing-hero-note">@Text("Ask, sketch, or upload a file. Make Studio reads it, flags DFM, prices it, and places the order — in one conversation.", "พิมพ์ถาม สเก็ตช์ หรืออัปโหลดไฟล์ — Make Studio อ่านงาน ตรวจ DFM คิดราคา และเปิดออเดอร์ ในบทสนทนาเดียว")</p>
         <div class="metric-strip" aria-label="MALIEV manufacturing metrics">
             @foreach (var metric in SiteContent.HeroMetrics)
             {
@@ -62,21 +43,133 @@
             }
         </div>
     </div>
-    <div class="landing-hero-visual" aria-label="@Text("Interactive MALIEV manufacturing model", "โมเดลสามมิติ MALIEV")">
-        <ManufacturingGizmo Class="manufacturing-gizmo--landing"
-                            @key="_heroModel.Key"
-                            ModelUrl="@_heroModel.Url"
-                            EnableHoverMotion="true"
-                            UsePlasticMaterial="@_heroModel.UsePlasticMaterial"
-                            AriaLabel="@_heroModel.AriaLabel.For(Preferences.Culture)" />
+    <div class="landing-hero-visual">
+        <div class="ms-hero" data-make-studio-hero="true" @key="@($"ms-hero-{Preferences.Culture}")" aria-hidden="true">
+            <svg class="ms-defs" width="0" height="0" focusable="false"><defs><linearGradient id="msPhotoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfd6dc" /><stop offset=".5" stop-color="#aeb7bf" /><stop offset="1" stop-color="#7e878f" /></linearGradient></defs></svg>
+
+            <div class="ms-top">
+                <span class="dot"></span>
+                <span class="pn" data-ms-project>@Text("New project", "โปรเจกต์ใหม่")</span>
+                <span class="art">@Text("Artifacts", "ไฟล์งาน")<b>3</b></span>
+            </div>
+
+            <div class="thread">
+
+                @* Scene 0 — hand sketch -> DFM blocker *@
+                <div class="msg user" data-sc="0"
+                     data-ms-action="sketch"
+                     data-ms-project="@Text("Aluminum L-bracket", "ขายึดอะลูมิเนียม")"
+                     data-ms-composer="@Text("Quote this bracket — 50 pcs, 6061 aluminum.", "ขอราคาขายึดนี้ — 50 ชิ้น อะลูมิเนียม 6061")">
+                    <div class="bubble">
+                        <div class="att">
+                            <div class="tile"><svg viewBox="0 0 118 80" focusable="false"><rect class="skbg" width="118" height="80" /><path class="skline" d="M26 60 L26 26 L70 24 Q86 25 86 41 L85 60 Z" /><circle class="skline" cx="38" cy="42" r="4" /><circle class="skline" cx="70" cy="42" r="4" /><path class="skdim" d="M26 70 L86 70 M26 67 L26 73 M86 67 L86 73" /><text class="sktx" x="50" y="78">50.0</text></svg></div>
+                            <div class="meta"><strong>bracket_sketch.png</strong><small>@Text("Hand sketch", "สเก็ตช์มือ")</small></div>
+                        </div>
+                        @Text("Quote this bracket — 50 pcs, 6061 aluminum.", "ขอราคาขายึดนี้ — 50 ชิ้น อะลูมิเนียม 6061")
+                    </div>
+                </div>
+                <div class="msg ai" data-sc="0">
+                    <div class="bubble">
+                        @Text("Read your sketch — a bent sheet-metal L-bracket. I OCR'd the dimensions and assumed a 90° bend. One DFM blocker to review.", "อ่านสเก็ตช์แล้ว — ขายึดตัว L จากแผ่นโลหะพับ ผม OCR ขนาดและสมมติมุมพับ 90° มีจุด DFM ที่ต้องดู 1 จุด")
+                        <div class="card">
+                            <div class="ch"><div><strong>@Text("What I understood", "สิ่งที่เข้าใจ")</strong><div class="lbl">@Text("From your sketch + chat", "จากสเก็ตช์ + แชท")</div></div><span class="lbl">@Text("Sheet metal", "งานแผ่นโลหะ")</span></div>
+                            <div class="spec"><div><span>@Text("Part type", "ประเภท")</span><strong>@Text("L-bracket", "ขายึด L")</strong></div><div><span>@Text("Material", "วัสดุ")</span><strong>6061-T6</strong></div><div><span>@Text("Qty", "จำนวน")</span><strong>@Text("50 pcs", "50 ชิ้น")</strong></div></div>
+                            <table class="req"><thead><tr><th>@Text("Feature", "รายการ")</th><th>@Text("Value", "ค่า")</th><th>@Text("Source", "ที่มา")</th></tr></thead>
+                                <tbody><tr><td>@Text("Overall length", "ความยาวรวม")</td><td>50.0 mm</td><td><span class="sp">@Text("read", "อ่านได้")</span></td></tr><tr><td>@Text("Thickness", "ความหนา")</td><td>3.0 mm</td><td><span class="sp">@Text("read", "อ่านได้")</span></td></tr><tr><td>@Text("Bend angle", "มุมพับ")</td><td>90°</td><td><span class="sp assumed">@Text("assumed", "สมมติ")</span></td></tr></tbody></table>
+                            <div class="dfm"><header>@Text("Hole too close to bend", "รูใกล้แนวพับเกินไป") <span>@Text("BLOCKER", "ติดปัญหา")</span></header><p>@Text("Right hole sits 4 mm from the bend line — minimum safe is 8 mm. Fix: shift +4 mm or add a relief notch.", "รูขวาอยู่ห่างแนวพับ 4 มม. ค่าปลอดภัยขั้นต่ำคือ 8 มม. แก้: เลื่อน +4 มม. หรือเพิ่มร่องผ่อน")</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Scene 1 — 3D file -> instant quote *@
+                <div class="msg user" data-sc="1"
+                     data-ms-action="3d"
+                     data-ms-project="@Text("Nylon SLS enclosure", "กล่องไนลอน SLS")"
+                     data-ms-composer="@Text("25 of these in black nylon SLS, 7-day lead.", "ทำแบบนี้ 25 ชิ้น ไนลอน SLS สีดำ ส่งใน 7 วัน")">
+                    <div class="bubble">
+                        <div class="att">
+                            <div class="tile"><svg viewBox="0 0 118 80" focusable="false"><rect class="tdbg" width="118" height="80" /><polygon class="tdpoly" points="30,52 59,36 88,52 59,68" /><polygon class="tdpoly" points="59,36 59,18 88,34 88,52" /><polygon class="tdpoly" points="30,52 30,34 59,18 59,36" /><rect class="tdbadge" x="86" y="6" width="26" height="13" rx="3" /><text x="89" y="16" class="tdtx">3D</text></svg></div>
+                            <div class="meta"><strong>enclosure.step</strong><small>@Text("3D model · STEP", "โมเดล 3D · STEP")</small></div>
+                        </div>
+                        @Text("25 of these in black nylon SLS, 7-day lead.", "ทำแบบนี้ 25 ชิ้น ไนลอน SLS สีดำ ส่งใน 7 วัน")
+                    </div>
+                </div>
+                <div class="msg ai" data-sc="1">
+                    <div class="bubble">
+                        @Text("Loaded enclosure.step — checked wall thickness, threaded bosses, and trapped volumes. All printable in SLS PA12.", "โหลด enclosure.step แล้ว — ตรวจความหนาผนัง บอสเกลียว และโพรงปิด พิมพ์ได้ทั้งหมดด้วย SLS PA12")
+                        <div class="card">
+                            <div class="ch"><div><strong>@Text("Instant quote", "ราคาทันที")</strong><div class="lbl">@Text("PA12 nylon · SLS · 25 pcs · 7-day", "ไนลอน PA12 · SLS · 25 ชิ้น · 7 วัน")</div></div><span class="lbl">@Text("Rates live", "เรตปัจจุบัน")</span></div>
+                            <div class="ptotal"><strong>฿18,750</strong><span>@Text("฿750 / pc", "฿750 / ชิ้น")</span></div>
+                            <div class="qbreaks"><div class="qb"><span>@Text("10 pcs", "10 ชิ้น")</span><strong>฿9,200</strong><small>@Text("฿920 / pc", "฿920 / ชิ้น")</small></div><div class="qb sel"><span>@Text("25 pcs", "25 ชิ้น")</span><strong>฿18,750</strong><small>@Text("usual break", "ช่วงที่นิยม")</small></div><div class="qb"><span>@Text("100 pcs", "100 ชิ้น")</span><strong>฿61,000</strong><small>@Text("฿610 / pc", "฿610 / ชิ้น")</small></div></div>
+                            <div class="plines"><div><span>@Text("SLS print", "พิมพ์ SLS")</span><strong>฿15,500</strong></div><div><span>@Text("Dye black + finish", "ย้อมดำ + เก็บงาน")</span><strong>฿3,250</strong></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Scene 2 — photo -> reconstructed 3D model *@
+                <div class="msg user" data-sc="2"
+                     data-ms-action="photo"
+                     data-ms-project="@Text("Machined housing", "ตัวเรือนกลึง")"
+                     data-ms-composer="@Text("Make 10 like this in aluminum.", "ทำแบบนี้ 10 ชิ้น เป็นอะลูมิเนียม")">
+                    <div class="bubble">
+                        <div class="att">
+                            <div class="tile"><svg viewBox="0 0 118 80" focusable="false"><rect class="phbg" width="118" height="80" /><polygon class="phpart" points="24,54 60,34 94,52 58,72" /><polygon class="phpart2" points="60,34 60,20 94,38 94,52" /><ellipse class="phpart2" cx="52" cy="50" rx="8" ry="4.5" /><ellipse class="phpart2" cx="72" cy="46" rx="8" ry="4.5" /></svg></div>
+                            <div class="meta"><strong>part_photo.jpg</strong><small>@Text("Photo", "รูปถ่าย")</small></div>
+                        </div>
+                        @Text("Make 10 like this in aluminum.", "ทำแบบนี้ 10 ชิ้น เป็นอะลูมิเนียม")
+                    </div>
+                </div>
+                <div class="msg ai" data-sc="2">
+                    <div class="bubble">
+                        @Text("Recognized a machined housing from your photo and estimated the envelope. I built a draft 3D model — confirm the bore diameter and I'll lock the quote.", "จดจำตัวเรือนกลึงจากรูปและประเมินขอบเขตแล้ว ผมสร้างโมเดล 3D ฉบับร่าง — ยืนยันเส้นผ่านศูนย์กลางรู แล้วผมจะล็อกราคา")
+                        <div class="card">
+                            <div class="ch"><div><strong>@Text("3D model preview", "ตัวอย่างโมเดล 3D")</strong><div class="lbl">@Text("Reconstructed from your photo", "สร้างใหม่จากรูปของคุณ")</div></div><span class="lbl">@Text("Draft", "ฉบับร่าง")</span></div>
+                            <div class="model"><img src="/images/make-studio-3d-model.webp" alt="" loading="lazy" /><span class="model-dim">⌀30.0</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Scene 3 — plain text -> quote *@
+                <div class="msg user" data-sc="3"
+                     data-ms-action=""
+                     data-ms-project="@Text("Nylon test-rig bracket", "ขายึดแท่นทดสอบไนลอน")"
+                     data-ms-composer="@Text("5 nylon brackets for a test rig by Friday, ~80×40mm.", "ขายึดไนลอน 5 ชิ้นสำหรับแท่นทดสอบภายในวันศุกร์ ~80×40มม.")">
+                    <div class="bubble">@Text("5 nylon brackets for a test rig by Friday, ~80×40mm.", "ขายึดไนลอน 5 ชิ้นสำหรับแท่นทดสอบภายในวันศุกร์ ~80×40มม.")</div>
+                </div>
+                <div class="msg ai" data-sc="3">
+                    <div class="bubble">
+                        @Text("Got it — FDM nylon (PA12) suits a test rig. I read a thin 0.8 mm wall and bumped it to 1.5 mm for strength.", "รับทราบ — ไนลอน FDM (PA12) เหมาะกับแท่นทดสอบ ผมเจอผนังบาง 0.8 มม. และเพิ่มเป็น 1.5 มม. เพื่อความแข็งแรง")
+                        <div class="card">
+                            <div class="ch"><div><strong>@Text("Instant quote", "ราคาทันที")</strong><div class="lbl">@Text("PA12 nylon · FDM · 5 pcs", "ไนลอน PA12 · FDM · 5 ชิ้น")</div></div><span class="lbl">@Text("Rates live", "เรตปัจจุบัน")</span></div>
+                            <div class="ptotal"><strong>฿1,480</strong><span>@Text("฿296 / pc · ships Fri", "฿296 / ชิ้น · ส่งศุกร์")</span></div>
+                            <div class="qbreaks"><div class="qb"><span>@Text("3 pcs", "3 ชิ้น")</span><strong>฿1,020</strong><small>@Text("prototype", "ต้นแบบ")</small></div><div class="qb sel"><span>@Text("5 pcs", "5 ชิ้น")</span><strong>฿1,480</strong><small>@Text("usual break", "ช่วงที่นิยม")</small></div><div class="qb"><span>@Text("10 pcs", "10 ชิ้น")</span><strong>฿2,650</strong><small>@Text("best value", "คุ้มที่สุด")</small></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="comp-wrap">
+                <div class="comp">
+                    <span class="rb" aria-hidden="true">+</span>
+                    <div class="cinput"><span class="ph">@Text("Describe your part, paste dimensions, or attach files…", "อธิบายชิ้นงาน วางขนาด หรือแนบไฟล์…")</span><span class="typed"></span><span class="cur"></span></div>
+                    <span class="send" aria-hidden="true">↑</span>
+                </div>
+                <div class="qacts">
+                    <span class="qact" data-q="3d">@Text("Upload a 3D file", "อัปโหลดไฟล์ 3D")</span>
+                    <span class="qact" data-q="photo">@Text("Photo of a part", "รูปถ่ายชิ้นงาน")</span>
+                    <span class="qact" data-q="sketch">@Text("Hand sketch", "สเก็ตช์มือ")</span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <section class="industry-sector-band" aria-labelledby="industry-sector-title">
     <div class="industry-sector-band-inner">
         <div class="industry-sector-copy">
-            <h2 id="industry-sector-title">@Text("Major industries served", "อุตสาหกรรมหลักที่เราให้บริการ")</h2>
-            <p>@Text("We help engineering teams move from prototype to usable production parts across demanding product categories.", "เราช่วยทีมวิศวกรรมเปลี่ยนจากต้นแบบไปสู่ชิ้นงานใช้งานจริงในกลุ่มผลิตภัณฑ์ที่ต้องการความละเอียดสูง")</p>
+            <h2 id="industry-sector-title">@Text("Who builds with Make Studio", "ใครใช้ Make Studio สร้างงาน")</h2>
+            <p>@Text("Engineering teams across demanding product categories bring parts to Make Studio — from first prototype to usable production hardware.", "ทีมวิศวกรรมในกลุ่มผลิตภัณฑ์ที่ต้องการความละเอียดสูงนำชิ้นงานเข้ามาใน Make Studio ตั้งแต่ต้นแบบแรกจนถึงชิ้นงานผลิตที่ใช้งานจริง")</p>
         </div>
         <ul class="industry-sector-list" aria-label="@Text("Industrial sectors served", "กลุ่มอุตสาหกรรมที่รองรับ")">
             @foreach (var sector in IndustrySectors)
@@ -99,10 +192,34 @@
     </div>
 </section>
 
+<section id="workflow-carousel"
+         @ref="_workflowCarousel"
+         class="section process-section"
+         aria-labelledby="process-title">
+    <div class="section-lede process-lede">
+        <h2 id="process-title">@Text("From prompt to part", "จากข้อความสู่ชิ้นงาน")</h2>
+        <p>@Text("Start with a chat, attach files, sketch requirements, let MALIEV make it, and inspect or ship from the same workspace.", "เริ่มจากแชท แนบไฟล์ สเก็ตช์โจทย์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
+    </div>
+    <div class="process-grid" aria-label="@Text("Make Studio to made part workflow", "ขั้นตอนจาก Make Studio สู่ชิ้นงาน")">
+        @foreach (var step in ProcessSteps)
+        {
+            <button class="@WorkflowStepClass(step)"
+                    type="button"
+                    data-workflow-accent="@step.Accent"
+                    aria-current="@WorkflowAriaCurrent(step)"
+                    @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
+                <span class="workflow-step-number">@step.Number</span>
+                <h2>@step.Title.For(Preferences.Culture)</h2>
+                <p>@step.Body.For(Preferences.Culture)</p>
+            </button>
+        }
+    </div>
+</section>
+
 <section class="section home-services-section" aria-labelledby="services-title">
     <div class="home-services-shell">
         <div class="home-services-head">
-            <h2 id="services-title" class="home-services-title">@Text("Our manufacturing services", "บริการผลิตของเรา")</h2>
+            <h2 id="services-title" class="home-services-title">@Text("What MALIEV makes", "MALIEV ผลิตอะไรได้บ้าง")</h2>
         </div>
         <div class="home-services-tabs" role="tablist" aria-label="@Text("Manufacturing services", "บริการผลิต")">
             @foreach (var service in _services)
@@ -141,30 +258,6 @@
                 <figcaption>@SelectedHomeService.ProofTitle.For(Preferences.Culture)</figcaption>
             </figure>
         </div>
-    </div>
-</section>
-
-<section id="workflow-carousel"
-         @ref="_workflowCarousel"
-         class="section process-section"
-         aria-labelledby="process-title">
-    <div class="section-lede process-lede">
-        <h2 id="process-title">@Text("Make Studio to made part", "จาก Make Studio สู่ชิ้นงานจริง")</h2>
-        <p>@Text("Start with a chat, attach files, sketch requirements, let MALIEV make it, and inspect or ship from the same workspace.", "เริ่มจากแชท แนบไฟล์ สเก็ตช์โจทย์ ให้ MALIEV ผลิต และตรวจหรือจัดส่งจากพื้นที่เดียว")</p>
-    </div>
-    <div class="process-grid" aria-label="@Text("Make Studio to made part workflow", "ขั้นตอนจาก Make Studio สู่ชิ้นงาน")">
-        @foreach (var step in ProcessSteps)
-        {
-            <button class="@WorkflowStepClass(step)"
-                    type="button"
-                    data-workflow-accent="@step.Accent"
-                    aria-current="@WorkflowAriaCurrent(step)"
-                    @onclick="() => SelectWorkflowStepAsync(step, _machineFeaturePreview)">
-                <span class="workflow-step-number">@step.Number</span>
-                <h2>@step.Title.For(Preferences.Culture)</h2>
-                <p>@step.Body.For(Preferences.Culture)</p>
-            </button>
-        }
     </div>
 </section>
 
@@ -339,7 +432,7 @@
             <li>@Text("Sketches", "สเก็ตช์")</li>
         </ul>
         <div class="make-studio-actions">
-            <button type="button" class="@QuoteDisabledButtonClass" disabled title="@QuoteDisabledTitle">@Text("Start in Make Studio", "เริ่มใน Make Studio")</button>
+            <a class="button primary make-studio-primary" href="@SiteContent.MakeStudioUrl">@Text("Start in Make Studio", "เริ่มใน Make Studio")</a>
             <a class="button secondary make-studio-secondary" href="/services">@Text("Review services", "ดูบริการ")</a>
         </div>
     </div>
@@ -350,14 +443,12 @@
     private const string CaseStudiesOrderStateKey = "home.caseStudies.order";
     private const string BlogPostsOrderStateKey = "home.blogPosts.order";
     private const string HeroCopyStateKey = "home.hero.copy";
-    private const string HeroModelStateKey = "home.hero.model";
     private const int HomeBlogPostCount = 3;
     private PersistingComponentStateSubscription? _persistingSubscription;
     private IReadOnlyList<ServicePageContent> _services = SiteContent.Services;
     private IReadOnlyList<CaseStudyContent> _caseStudies = SiteContent.CaseStudies;
     private IReadOnlyList<BlogPostContent> _blogPosts = SiteContent.BlogPosts.Take(HomeBlogPostCount).ToList();
     private HeroCopy _heroCopy = HeroCopyCatalog.Default;
-    private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private string _heroTargetKey = HeroCopyCatalog.DefaultTargetKey;
     private string _heroServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
     private string _highlightServiceSlug = HeroCopyCatalog.ResolveServiceSlug(HeroCopyCatalog.DefaultTargetKey);
@@ -482,7 +573,6 @@
     {
         await Preferences.InitializeAsync();
         InitializeHeroCopy();
-        InitializeHeroModel();
         InitializeRandomizedHomeContent();
         _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistRandomizedHomeContent);
     }
@@ -512,9 +602,6 @@
         $"Home services selected: {SelectedHomeService.Title.En}",
         $"บริการผลิตที่เลือก: {SelectedHomeService.Title.Th}");
 
-    private string QuoteDisabledButtonClass => "button primary make-studio-primary is-disabled";
-
-    private string QuoteDisabledTitle => SiteContent.QuoteDisabledTitle.For(Preferences.Culture);
 
     private async Task SelectWorkflowStepAsync(ProcessStep step, ElementReference scrollTarget)
     {
@@ -661,19 +748,6 @@
         _highlightServiceSlug = _heroServiceSlug;
     }
 
-    private void InitializeHeroModel()
-    {
-        if (ApplicationState.TryTakeFromJson<HeroModelState>(HeroModelStateKey, out var persisted) &&
-            persisted is not null &&
-            string.Equals(persisted.ServiceSlug, _heroServiceSlug, StringComparison.OrdinalIgnoreCase))
-        {
-            _heroModel = HeroModelCatalog.Resolve(persisted.ModelKey);
-            return;
-        }
-
-        _heroModel = HeroModelCatalog.SelectRandomForService(_heroServiceSlug);
-    }
-
     private IReadOnlyList<ServicePageContent> RandomizeSupportingServices()
     {
         return Shuffle(SiteContent.Services);
@@ -712,7 +786,6 @@
     private Task PersistRandomizedHomeContent()
     {
         ApplicationState.PersistAsJson(HeroCopyStateKey, new HeroCopyState(_heroTargetKey, _heroVariantIndex));
-        ApplicationState.PersistAsJson(HeroModelStateKey, new HeroModelState(_heroServiceSlug, _heroModel.Key));
         ApplicationState.PersistAsJson(
             ServicesOrderStateKey,
             new ServicesOrderState(_heroTargetKey, _hasExplicitHeroTarget, _services.Select(service => service.Slug).ToArray()));
@@ -796,8 +869,6 @@
         string LinkUrl);
 
     private sealed record HeroCopyState(string TargetKey, int VariantIndex);
-
-    private sealed record HeroModelState(string ServiceSlug, string ModelKey);
 
     private sealed record ServicesOrderState(string TargetKey, bool HasExplicitHeroTarget, string[] Slugs);
 }

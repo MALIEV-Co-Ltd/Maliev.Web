@@ -148,6 +148,7 @@ builder.Services.AddScoped<IContactMessageService, ContactMessageService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<CustomerAssistantHandoffCookie>();
 builder.Services.AddScoped<BlogEbookPdfService>();
+builder.Services.AddScoped<MaterialDatasheetPdfService>();
 builder.Services.AddScoped<StaticMapService>();
 
 var app = builder.Build();
