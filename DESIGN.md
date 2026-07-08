@@ -14,8 +14,9 @@ This repository follows MALIEV's editorial social direction: white space, black 
 
 ## Typography
 
-- English: `Inter`, `Arial`, or the existing MALIEV system sans stack.
+- English: `Albert Sans`, `Arial`, or the existing MALIEV system sans stack.
 - Thai: `Noto Sans Thai` wherever Thai text is rendered.
+- Monospace and technical labels: `JetBrains Mono`, falling back to `Noto Sans Thai` for Thai contexts.
 - Use weight 600 for page and dialog headings, 400-500 for body/UI copy, and 650 only where the existing component system requires it.
 - Letter spacing is `0`. Do not tighten headings or utility text.
 - Body line height should read editorially: 1.45-1.6 for prose and 1.2-1.35 for compact controls.
@@ -27,7 +28,7 @@ This repository follows MALIEV's editorial social direction: white space, black 
 - Secondary buttons use white fill, `#333333` text, and a `#333333` or hairline border.
 - Inputs use white fill, `#333333` text, clear labels, and high-contrast placeholders.
 - Cards are for repeated items and framed tools only. Do not nest cards inside cards.
-- Avoid decorative gradients, tinted modal fills, large blue panels, glow effects, and low-contrast gray-on-blue treatments.
+- No decorative gradients, tinted modal fills, large blue panels, glow effects, or low-contrast gray-on-blue treatments.
 
 ## Layout
 
