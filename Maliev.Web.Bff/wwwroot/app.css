@@ -1163,12 +1163,6 @@ html:lang(th) .h1 {
   min-width: 0;
 }
 
-.service-page-hero-visual {
-  position: relative;
-  min-height: 380px;
-  overflow: visible;
-}
-
 .page-hero.compact + .section {
   padding-top: clamp(40px, 5vw, 60px);
 }
@@ -2187,72 +2181,6 @@ html[data-theme="dark"] .ms-hero .msg.user .bubble {
   align-items: center;
   min-height: 0;
   overflow: visible;
-}
-
-.manufacturing-gizmo {
-  position: relative;
-  width: 100%;
-  min-height: 420px;
-  overflow: hidden;
-  border-radius: 18px;
-  background: var(--gizmo-surface);
-  box-shadow: var(--shadow-card);
-}
-
-.manufacturing-gizmo--service {
-  height: min(42vh, 420px);
-  min-height: 340px;
-  overflow: visible;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
-}
-
-.manufacturing-gizmo-canvas {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: inherit;
-  background: transparent;
-  outline: none;
-}
-
-.manufacturing-gizmo-canvas:focus,
-.manufacturing-gizmo-canvas:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.manufacturing-gizmo-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.manufacturing-gizmo.is-loading .manufacturing-gizmo-fallback,
-.manufacturing-gizmo.is-offline .manufacturing-gizmo-fallback {
-  opacity: 1;
-}
-
-.manufacturing-gizmo-fallback span {
-  position: absolute;
-  width: 36%;
-  height: 16%;
-  border-radius: 999px;
-  background: var(--rule-soft);
-}
-
-.manufacturing-gizmo-fallback span:nth-child(2) {
-  transform: rotate(60deg);
-}
-
-.manufacturing-gizmo-fallback span:nth-child(3) {
-  transform: rotate(-60deg);
 }
 
 .metric-strip {
@@ -10728,11 +10656,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
     justify-content: center;
   }
 
-  .service-page-hero-visual {
-    width: min(100%, 720px);
-    min-height: 360px;
-  }
-
   .feature-band {
     padding-top: 80px;
     padding-bottom: 80px;
@@ -11209,16 +11132,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   .ms-hero {
     height: min(560px, 78svh);
     min-height: 420px;
-  }
-
-  .manufacturing-gizmo {
-    height: clamp(240px, 58vw, 360px);
-    min-height: 0;
-  }
-
-  .manufacturing-gizmo--service {
-    height: 320px;
-    min-height: 300px;
   }
 
   .metric-strip {

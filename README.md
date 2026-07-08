@@ -60,31 +60,27 @@ The local site runs from the BFF launch profile at `https://localhost:7236` or `
 
 ### Google Sign-In
 
-`Maliev.Web.Bff` uses its own customer-facing Google OAuth client. For direct local Web runs, store the Web client in the BFF user-secrets store:
+`Maliev.Web.Bff` signs in against the shared Maliev Google OAuth client — the same client backs `Maliev.Intranet` and `Maliev.QuoteEngine` (including QuoteEngine's Google Drive access). For direct local Web runs, store that client in the BFF user-secrets store:
 
 ```powershell
-dotnet user-secrets set "Authentication:Google:ClientId" "<web-google-oauth-client-id>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
-dotnet user-secrets set "Authentication:Google:ClientSecret" "<web-google-oauth-client-secret>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
+dotnet user-secrets set "Authentication:Google:ClientId" "<google-oauth-client-id>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
+dotnet user-secrets set "Authentication:Google:ClientSecret" "<google-oauth-client-secret>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
 ```
 
-When the site runs under Aspire, store the Web-specific client in `Maliev.Aspire.AppHost` user-secrets or in the git-ignored `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`. The shared root values stay available for internal apps such as `Maliev.Intranet`; Web can override them with:
+When the site runs under Aspire, store the client in `Maliev.Aspire.AppHost` user-secrets or in the git-ignored `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`:
 
 ```json
 {
   "Authentication": {
     "Google": {
       "ClientId": "<google-oauth-client-id>",
-      "ClientSecret": "<google-oauth-client-secret>",
-      "Web": {
-        "ClientId": "<web-google-oauth-client-id>",
-        "ClientSecret": "<web-google-oauth-client-secret>"
-      }
+      "ClientSecret": "<google-oauth-client-secret>"
     }
   }
 }
 ```
 
-Direct Web user-secrets take priority over the shared Aspire secrets file. `sharedsecrets.json` is only a Development fallback for missing values, so a customer-facing Web OAuth client cannot be silently replaced by the shared internal app client.
+Direct Web user-secrets still take priority over the shared Aspire secrets file; `sharedsecrets.json` is only a Development fallback for missing values.
 
 The Google OAuth client must allow these redirect URIs:
 
@@ -94,7 +90,7 @@ https://localhost:7236/auth/google/signin
 https://www.maliev.com/auth/google/signin
 ```
 
-When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the Web-specific values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`, falling back to the shared Google values only when no Web override is configured.
+When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the shared Google values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`.
 
 ## Google Ads Landing Routes
 

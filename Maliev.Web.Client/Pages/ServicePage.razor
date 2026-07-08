@@ -1,6 +1,5 @@
 @page "/services/{Slug}"
 @inherits PreferenceAwareComponentBase
-@inject PersistentComponentState ApplicationState
 
 <PageTitle>@Service.SeoTitle - MALIEV</PageTitle>
 <HeadContent>
@@ -16,14 +15,6 @@
             <a class="button primary" href="@SiteContent.MakeStudioUrl">@Text("Get part price", "ดูราคาชิ้นงาน")</a>
             <a class="button secondary" href="/services">@Text("All services", "บริการทั้งหมด")</a>
         </div>
-    </div>
-    <div class="service-page-hero-visual" aria-label="@_heroModel.AriaLabel.For(Preferences.Culture)">
-        <ManufacturingGizmo Class="manufacturing-gizmo--service"
-                            @key="_heroModel.Key"
-                            ModelUrl="@_heroModel.Url"
-                            EnableHoverMotion="true"
-                            UsePlasticMaterial="@_heroModel.UsePlasticMaterial"
-                            AriaLabel="@_heroModel.AriaLabel.For(Preferences.Culture)" />
     </div>
 </section>
 
@@ -152,52 +143,19 @@
     [Parameter]
     public string Slug { get; set; } = string.Empty;
 
-    private PersistingComponentStateSubscription? _persistingSubscription;
-    private HeroModelAsset _heroModel = HeroModelCatalog.Default;
     private ServicePageContent Service => SiteContent.GetService(Slug);
     private ServiceDetailProfile Detail => SiteContent.GetServiceDetail(Service.Slug);
     private string CanonicalUrl => $"https://www.maliev.com/services/{Service.Slug}";
-    private string HeroModelStateKey => $"service.hero.model.{Service.Slug}";
     private string ServiceDetailSectionClass => $"section service-detail-section service-detail-section--{Service.Slug}";
     private string QuoteDropzoneDisabledText => SiteContent.QuoteDisabledAction.For(Preferences.Culture);
 
     protected override async Task OnInitializedAsync()
     {
         await Preferences.InitializeAsync();
-        _persistingSubscription = ApplicationState.RegisterOnPersisting(PersistHeroModel);
-    }
-
-    protected override void OnParametersSet()
-    {
-        InitializeHeroModel();
     }
 
     private string Text(string en, string th)
     {
         return Preferences.Culture.StartsWith("th", StringComparison.OrdinalIgnoreCase) ? th : en;
-    }
-
-    private void InitializeHeroModel()
-    {
-        if (ApplicationState.TryTakeFromJson<string>(HeroModelStateKey, out var modelKey) &&
-            !string.IsNullOrWhiteSpace(modelKey))
-        {
-            _heroModel = HeroModelCatalog.Resolve(modelKey);
-            return;
-        }
-
-        _heroModel = HeroModelCatalog.SelectRandomForService(Service.Slug);
-    }
-
-    private Task PersistHeroModel()
-    {
-        ApplicationState.PersistAsJson(HeroModelStateKey, _heroModel.Key);
-        return Task.CompletedTask;
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        _persistingSubscription?.Dispose();
     }
 }
