@@ -5,6 +5,7 @@ namespace Maliev.Web.Client.Content;
 
 internal static class SiteContent
 {
+    internal const string MakeStudioLabel = "Make Studio";
     private const string DefaultQuoteEngineUrl = "https://make.maliev.com";
     internal const bool QuoteEntryDisabled = false;
     internal static readonly LocalizedText QuoteDisabledTitle = Text(
