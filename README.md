@@ -60,11 +60,10 @@ The local site runs from the BFF launch profile at `https://localhost:7236` or `
 
 ### Google Sign-In
 
-`Maliev.Web.Bff` signs in against the shared Maliev Google OAuth client — the same client backs `Maliev.Intranet` and `Maliev.QuoteEngine` (including QuoteEngine's Google Drive access). For direct local Web runs, store that client in the BFF user-secrets store:
+`Maliev.Web.Bff` renders Google's official Google Identity Services (GIS) button. The browser receives a one-time AuthService nonce, Google places that nonce in the ID token, and WebBff forwards the raw credential and nonce to AuthService for server-side verification. Web does not need or use a Google client secret for sign-in. For direct local Web runs, store the public Web client ID in the BFF user-secrets store:
 
 ```powershell
 dotnet user-secrets set "Authentication:Google:ClientId" "<google-oauth-client-id>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
-dotnet user-secrets set "Authentication:Google:ClientSecret" "<google-oauth-client-secret>" --project Maliev.Web.Bff/Maliev.Web.Bff.csproj
 ```
 
 When the site runs under Aspire, store the client in `Maliev.Aspire.AppHost` user-secrets or in the git-ignored `B:\maliev\Maliev.Aspire\Maliev.Aspire.AppHost\sharedsecrets.json`:
@@ -73,8 +72,7 @@ When the site runs under Aspire, store the client in `Maliev.Aspire.AppHost` use
 {
   "Authentication": {
     "Google": {
-      "ClientId": "<google-oauth-client-id>",
-      "ClientSecret": "<google-oauth-client-secret>"
+      "ClientId": "<google-oauth-client-id>"
     }
   }
 }
@@ -82,15 +80,15 @@ When the site runs under Aspire, store the client in `Maliev.Aspire.AppHost` use
 
 Direct Web user-secrets still take priority over the shared Aspire secrets file; `sharedsecrets.json` is only a Development fallback for missing values.
 
-The Google OAuth client must allow these redirect URIs:
+The Google OAuth client must allow these JavaScript origins:
 
 ```text
-http://localhost:5026/auth/google/signin
-https://localhost:7236/auth/google/signin
-https://www.maliev.com/auth/google/signin
+http://localhost:5026
+https://localhost:7236
+https://www.maliev.com
 ```
 
-When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the shared Google values as `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`.
+When Web runs under Aspire, `Maliev.Aspire.AppHost` injects the public client ID as `Authentication__Google__ClientId`. Google Drive and Google Maps keep their separate authorization and API-key settings; this sign-in flow does not reuse or remove those credentials.
 
 ## Google Ads Landing Routes
 

@@ -63,7 +63,7 @@
 
                 <div class="auth-divider" role="separator">@Text("or", "หรือ")</div>
 
-                <AuthGoogleButton Href="@GoogleHref" Label="@Text("Continue with Google", "ดำเนินการต่อด้วย Google")" />
+                <AuthGoogleButton ReturnUrl="@SafeReturnUrl" />
 
                 <div class="auth-links auth-mode-links">
                     @if (!_isSignUp)
@@ -167,7 +167,6 @@
 
     private string SafeReturnUrl => NormalizeClientReturnUrl(ReturnUrl);
 
-    private string GoogleHref => $"/auth/google?returnUrl={Uri.EscapeDataString(SafeReturnUrl)}";
     private bool ShowEmailStep => _authStep == AuthStep.Email;
     private bool ShowCredentialStep => _authStep == AuthStep.Credentials;
     private bool EmailLooksValid => !string.IsNullOrWhiteSpace(_email) && EmailValidator.IsValid(_email.Trim());

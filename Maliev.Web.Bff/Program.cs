@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
 
@@ -35,7 +33,7 @@ builder.Services.AddLocalization();
 builder.Services.AddMudServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
-var authentication = builder.AddMalievIdentityCookie();
+builder.AddMalievIdentityCookie();
 // Persist Data Protection keys to Redis so Web and QuoteEngine share the same key ring.
 // Both BFFs must use the same application name (set by AddMalievIdentityCookie) and this
 // Redis key to decrypt each other's __Secure-Maliev.Identity cookies.
@@ -51,27 +49,6 @@ builder.Services.AddSingleton<IPostConfigureOptions<KeyManagementOptions>>(sp =>
         }
     }));
 
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
-{
-    authentication.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-    {
-        options.SignInScheme = IdentityCookieExtensions.ExternalSchemeName;
-        options.ClientId = googleClientId;
-        options.ClientSecret = googleClientSecret;
-        options.CallbackPath = "/auth/google/signin";
-        options.Scope.Add("profile");
-        options.Scope.Add("email");
-        options.ClaimActions.MapJsonKey("picture", "picture");
-        options.SaveTokens = true;
-        options.Events.OnRedirectToAuthorizationEndpoint = context =>
-        {
-            context.Response.Redirect(context.RedirectUri + "&prompt=select_account");
-            return Task.CompletedTask;
-        };
-    });
-}
 builder.Services.AddPermissionAuthorization();
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(WebAuthorizationPolicies.CustomerAccount, policy =>
@@ -85,6 +62,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddTransient<InternalBrowserCookieForwardingHandler>();
 builder.Services.AddScoped<QuoteUploadHandoffToken>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<GoogleIdentityFlowProtector>();
 
 builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
 {

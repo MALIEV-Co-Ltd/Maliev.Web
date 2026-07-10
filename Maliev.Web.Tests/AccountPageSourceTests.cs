@@ -98,17 +98,16 @@ public sealed class AccountPageSourceTests
     }
 
     /// <summary>
-    /// Verifies Google customer sign-in captures the Google picture URL and sends it to the customer profile contract.
+    /// Verifies Google customer sign-in trusts only AuthService-verified profile data.
     /// </summary>
     [Fact]
     public void GoogleCustomerSignInPersistsProfileImageUrl()
     {
         var authController = ReadRepoFile("Maliev.Web.Bff", "Controllers", "AuthController.cs");
-        var program = ReadRepoFile("Maliev.Web.Bff", "Program.cs");
-
-        Assert.Contains("options.ClaimActions.MapJsonKey(\"picture\", \"picture\")", program);
-        Assert.Contains("GetExternalProfileImageUrl(external.Principal)", authController);
-        Assert.Contains("profile_image_url = profileImageUrl", authController);
+        Assert.Contains("credential = request.Credential", authController);
+        Assert.Contains("application = GoogleApplication", authController);
+        Assert.DoesNotContain("profile_image_url =", authController);
+        Assert.DoesNotContain("GetExternalProfileImageUrl", authController);
         Assert.Contains("new Claim(\"profile_image_url\", user.ProfileImageUrl)", authController);
         Assert.Contains("[JsonPropertyName(\"profile_image_url\")]", authController);
     }

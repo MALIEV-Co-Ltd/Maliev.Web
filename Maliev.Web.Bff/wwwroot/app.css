@@ -6910,69 +6910,31 @@ html[data-theme="dark"] .article-detail-layout.blog-detail .content-stack .detai
   filter: var(--logo-filter);
 }
 
-.auth-google {
+.auth-google-official-host {
   min-height: 44px;
-  display: inline-flex;
-  align-items: center;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.auth-google-official-button {
+  min-height: 44px;
+  width: 100%;
+  display: flex;
   justify-content: center;
-  gap: 10px;
-  padding: 0 12px;
-  color: #1F1F1F;
-  background: #FFFFFF;
-  border: 1px solid #747775;
-  border-radius: 4px;
-  box-shadow: none;
-  font-family: Roboto, var(--maliev-font-sans);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
 }
 
-.auth-google:hover {
-  background: #f8fafd;
+.auth-google-official-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.45;
+  text-align: center;
 }
 
-.auth-google:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.auth-google-icon {
-  width: 18px;
-  height: 18px;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 18px;
-  background: #FFFFFF;
-}
-
-.auth-google-icon svg {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-html[data-theme="dark"] .auth-google {
-  color: #1f1f1f;
-  background: #ffffff;
-  border-color: #747775;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
-}
-
-html[data-theme="dark"] .auth-google:hover {
-  color: #1f1f1f;
-  background: #f8fafd;
-  border-color: #747775;
-}
-
-html[data-theme="dark"] .auth-google:focus-visible {
-  color: #1f1f1f;
-  background: #ffffff;
-  outline-color: #8ab4f8;
-}
-
-html[data-theme="dark"] .auth-google-icon {
-  background: #ffffff;
+.auth-google-official-status.is-error {
+  color: var(--danger);
 }
 
 .auth-form,
@@ -9706,14 +9668,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
   margin-top: 2px;
 }
 
-.customer-chatbot-actions:has(.customer-chatbot-auth-google) {
-  width: min(100%, 290px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  margin-top: 4px;
-}
-
 .customer-chatbot-action {
   min-height: 34px;
   display: inline-flex;
@@ -9744,10 +9698,6 @@ html[data-theme="dark"] #components-reconnect-modal.maliev-reconnect-modal {
 
 .customer-chatbot-action .mud-icon-root {
   font-size: 1rem;
-}
-
-.customer-chatbot-auth-google {
-  width: 100%;
 }
 
 .customer-chatbot-auth-email {

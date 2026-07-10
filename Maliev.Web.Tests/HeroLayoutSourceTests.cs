@@ -1798,15 +1798,13 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains("maliev.customerAssistant.session.v1", component);
         Assert.Contains("IsAccountSpecificIntent", component);
         Assert.Contains("BeginChatSignInAsync", component);
-        Assert.Contains("ChatActionSignInGoogle", component);
         Assert.Contains("ChatActionSignInEmail", component);
         Assert.Contains("CreateSignInActions", component);
         Assert.Contains("AddSignInChoiceMessageAsync", component);
-        Assert.Contains("Continue with Google", component);
-        Assert.Contains("Use email and password", component);
-        Assert.Contains("customer-chatbot-auth-google", component);
+        Assert.Contains("Open secure sign-in", component);
         Assert.Contains("customer-chatbot-auth-email", component);
-        Assert.Contains("/auth/google?returnUrl", component);
+        Assert.Contains("/auth/sign-in?returnUrl", component);
+        Assert.DoesNotContain("auth-google-icon", component);
         Assert.Contains("RefreshIdentityAsync", component);
         Assert.Contains("Sign in to continue", component);
         Assert.Contains("/auth/chatbot-complete", component);
@@ -1883,7 +1881,7 @@ public sealed class HeroLayoutSourceTests
         Assert.Contains(".customer-chatbot-unread-badge", styles);
         Assert.Contains(".customer-chatbot-message-rich", styles);
         Assert.Contains(".customer-chatbot-actions", styles);
-        Assert.Contains(".customer-chatbot-actions:has(.customer-chatbot-auth-google)", styles);
+        Assert.DoesNotContain(".customer-chatbot-actions:has(.customer-chatbot-auth-google)", styles);
         Assert.Contains(".customer-chatbot-auth-email", styles);
         Assert.Contains(".customer-chatbot-action.primary", styles);
         Assert.Contains(".customer-chatbot-action {\n  min-height: 34px;\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 8px 10px;\n  color: var(--blue-ink);\n  background: var(--blue-soft);\n  border: 0;", styles);
@@ -2491,13 +2489,11 @@ public sealed class HeroLayoutSourceTests
         var orders = ReadRepoFile("Maliev.Web.Client", "Pages", "AccountOrders.razor");
 
         Assert.Contains("AddMalievIdentityCookie", program);
-        Assert.Contains("AddGoogle", program);
+        Assert.DoesNotContain("AddGoogle", program);
         Assert.Contains("sharedsecrets.json", program);
         Assert.Contains("Maliev.Aspire", program);
         Assert.Contains("Maliev.Aspire.AppHost", program);
-        Assert.Contains("options.Scope.Add(\"profile\")", program);
-        Assert.Contains("options.Scope.Add(\"email\")", program);
-        Assert.Contains("prompt=select_account", program);
+        Assert.Contains("GoogleIdentityFlowProtector", program);
         Assert.Contains("AddCascadingAuthenticationState", program);
         Assert.Contains("UseAuthentication", program);
         Assert.Contains("UseAuthorization", program);
@@ -2591,7 +2587,7 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies customer auth pages keep form titles text-only while using a Google-branded OAuth button.
+    /// Verifies customer auth pages keep form titles text-only while Google renders its official GIS button.
     /// </summary>
     [Fact]
     public void AuthPagesUseTextOnlyTitleAndGoogleBrandedButton()
@@ -2604,16 +2600,12 @@ public sealed class HeroLayoutSourceTests
 
         Assert.DoesNotContain("auth-title-logo", signIn);
         Assert.DoesNotContain("<img class=\"auth-title-logo\"", signIn);
-        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
-        Assert.Contains("auth-google-icon", googleButton);
-        Assert.Contains("viewBox=\"0 0 18 18\"", googleButton);
-        Assert.Contains("#4285F4", googleButton);
-        Assert.Contains("#34A853", googleButton);
-        Assert.Contains("#FBBC05", googleButton);
-        Assert.Contains("#EA4335", googleButton);
-        Assert.Contains("border: 1px solid #747775;", styles);
-        Assert.Contains("font-family: Roboto, var(--maliev-font-sans);", styles);
-        Assert.Contains("family=Roboto:wght@500", app);
+        Assert.Contains("<AuthGoogleButton ReturnUrl=\"@SafeReturnUrl\"", signIn);
+        Assert.Contains("auth-google-official-host", googleButton);
+        Assert.Contains("malievGoogleIdentity.renderButton", googleButton);
+        Assert.DoesNotContain("<svg", googleButton);
+        Assert.Contains(".auth-google-official-host", styles);
+        Assert.Contains("https://accounts.google.com/gsi/client", app);
         Assert.DoesNotContain("@Text(\"Sign in to MALIEV\", \"เข้าสู่ระบบ MALIEV\")", signIn);
         Assert.DoesNotContain("@Text(\"Create your MALIEV account\", \"สร้างบัญชี MALIEV\")", signUp);
         Assert.DoesNotContain("auth-google-mark", signIn);
@@ -2641,22 +2633,17 @@ public sealed class HeroLayoutSourceTests
     }
 
     /// <summary>
-    /// Verifies the Google OAuth button keeps the official light button treatment on dark pages.
+    /// Verifies MALIEV does not restyle Google's official iframe in dark mode.
     /// </summary>
     [Fact]
     public void GoogleAuthButtonUsesGoogleLightTreatmentInDarkTheme()
     {
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
-        Assert.Contains("html[data-theme=\"dark\"] .auth-google", styles);
-        Assert.Contains("html[data-theme=\"dark\"] .auth-google:hover", styles);
-        Assert.Contains("html[data-theme=\"dark\"] .auth-google:focus-visible", styles);
-        Assert.Contains("background: #ffffff;", styles);
-        Assert.Contains("color: #1f1f1f;", styles);
-        Assert.Contains("border-color: #747775;", styles);
-        Assert.Contains("box-shadow: 0 1px 2px rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);", styles);
-        Assert.Contains("background: #f8fafd;", styles);
-        Assert.Contains("outline-color: #8ab4f8;", styles);
+        Assert.Contains(".auth-google-official-host", styles);
+        Assert.Contains(".auth-google-official-button", styles);
+        Assert.DoesNotContain("html[data-theme=\"dark\"] .auth-google", styles);
+        Assert.DoesNotContain(".auth-google-icon", styles);
     }
 
     /// <summary>
@@ -2723,7 +2710,7 @@ public sealed class HeroLayoutSourceTests
         var styles = ReadRepoFile("Maliev.Web.Bff", "wwwroot", "app.css");
 
         Assert.Contains("@Text(\"Sign in or sign up\", \"เข้าสู่ระบบหรือสมัครสมาชิก\")", signIn);
-        Assert.Contains("<AuthGoogleButton Href=\"@GoogleHref\"", signIn);
+        Assert.Contains("<AuthGoogleButton ReturnUrl=\"@SafeReturnUrl\"", signIn);
         Assert.Contains("class=\"auth-email-entry-form", signIn);
         Assert.Contains("id=\"auth-email-entry\"", signIn);
         Assert.Contains("aria-describedby=\"auth-email-entry-requirements\"", signIn);

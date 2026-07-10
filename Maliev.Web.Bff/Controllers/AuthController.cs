@@ -4,9 +4,9 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Maliev.Web.Bff.Clients;
+using Maliev.Web.Bff.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Maliev.Web.Shared.Security;
@@ -21,9 +21,13 @@ public sealed class AuthController(
     IAuthServiceClient authClient,
     ICustomerServiceClient customerClient,
     IConfiguration configuration,
+    GoogleIdentityFlowProtector googleIdentityFlowProtector,
     ILogger<AuthController> logger) : Controller
 {
-    private const string ExternalScheme = "MalievExternal";
+    private const string GoogleApplication = "web";
+    private const string GoogleFlowCookiePrefix = "maliev.google.flow.";
+    private const string GoogleFlowCookiePath = "/auth/google";
+    private static readonly TimeSpan GoogleFlowLifetime = TimeSpan.FromMinutes(10);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private static readonly string[] CustomerAccountPermissions =
     [
@@ -34,54 +38,109 @@ public sealed class AuthController(
     ];
 
     /// <summary>
-    /// Starts customer Google sign-in.
+    /// Issues a one-time AuthService nonce for an official Google Identity Services button.
     /// </summary>
-    [HttpGet("google")]
+    [HttpPost("google/nonce")]
     [AllowAnonymous]
-    public IActionResult Google([FromQuery] string? returnUrl = null)
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> IssueGoogleNonce(
+        [FromBody] GoogleIdentityBrowserNonceRequest request,
+        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(configuration["Authentication:Google:ClientId"]) ||
-            string.IsNullOrWhiteSpace(configuration["Authentication:Google:ClientSecret"]))
+        var clientId = configuration["Authentication:Google:ClientId"];
+        if (string.IsNullOrWhiteSpace(clientId))
         {
-            return RedirectWithError("/auth/sign-in", "Google sign-in is not configured yet.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, GoogleProblem(
+                "google_not_configured",
+                "Google sign-in is not configured. Continue with email instead.",
+                StatusCodes.Status503ServiceUnavailable));
         }
 
-        var redirect = Url.Action(nameof(GoogleCallback), new { returnUrl = NormalizeReturnUrl(returnUrl) })!;
-        return Challenge(new AuthenticationProperties { RedirectUri = redirect }, GoogleDefaults.AuthenticationScheme);
+        using var response = await authClient.IssueCustomerGoogleNonceAsync(
+            new { application = GoogleApplication },
+            cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogWarning("AuthService Google nonce issuance failed with status {StatusCode}", response.StatusCode);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, GoogleProblem(
+                "google_temporarily_unavailable",
+                "Google sign-in is temporarily unavailable. Continue with email or try again shortly.",
+                StatusCodes.Status503ServiceUnavailable));
+        }
+
+        var nonce = await response.Content.ReadFromJsonAsync<GoogleIdentityNonceResponse>(JsonOptions, cancellationToken);
+        if (nonce is null ||
+            nonce.Nonce.Length is < 32 or > 256 ||
+            nonce.ExpiresAtUtc <= DateTimeOffset.UtcNow)
+        {
+            logger.LogWarning("AuthService returned an incomplete Google nonce response");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, GoogleProblem(
+                "google_temporarily_unavailable",
+                "Google sign-in is temporarily unavailable. Continue with email or try again shortly.",
+                StatusCodes.Status503ServiceUnavailable));
+        }
+
+        var flowId = Guid.NewGuid().ToString("N");
+        var protectedState = googleIdentityFlowProtector.Protect(
+            nonce.Nonce,
+            NormalizeReturnUrl(request.ReturnUrl),
+            GoogleFlowLifetime);
+        Response.Cookies.Append(
+            GetGoogleFlowCookieName(flowId),
+            protectedState,
+            CreateGoogleFlowCookieOptions(GoogleFlowLifetime));
+
+        return Ok(new
+        {
+            clientId,
+            nonce = nonce.Nonce,
+            flowId,
+            nonce.ExpiresAtUtc
+        });
     }
 
     /// <summary>
-    /// Completes customer Google sign-in after Google validates the browser identity.
+    /// Exchanges a GIS credential after verifying its nonce belongs to this browser flow.
     /// </summary>
-    [HttpGet("google/callback")]
+    [HttpPost("google/exchange")]
     [AllowAnonymous]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null, CancellationToken cancellationToken = default)
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> ExchangeGoogleCredential(
+        [FromBody] GoogleIdentityBrowserExchangeRequest request,
+        CancellationToken cancellationToken)
     {
-        var external = await HttpContext.AuthenticateAsync(ExternalScheme);
-        if (!external.Succeeded || external.Principal is null)
+        if (string.IsNullOrWhiteSpace(request.Credential) ||
+            request.Credential.Length > 8192 ||
+            string.IsNullOrWhiteSpace(request.Nonce) ||
+            request.Nonce.Length > 256 ||
+            !Guid.TryParseExact(request.FlowId, "N", out _))
         {
-            return RedirectWithError("/auth/sign-in", "Google sign-in could not be completed.");
+            return BadRequest(GoogleProblem(
+                "google_flow_invalid",
+                "Google sign-in could not be completed. Reload this page and try again.",
+                StatusCodes.Status400BadRequest));
         }
 
-        var email = external.Principal.FindFirstValue(ClaimTypes.Email);
-        var name = external.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
-        var googleUserId = external.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-        var profileImageUrl = GetExternalProfileImageUrl(external.Principal);
-
-        await HttpContext.SignOutAsync(ExternalScheme);
-
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(googleUserId))
+        var cookieName = GetGoogleFlowCookieName(request.FlowId);
+        Request.Cookies.TryGetValue(cookieName, out var protectedState);
+        DeleteGoogleFlowCookie(cookieName);
+        if (!googleIdentityFlowProtector.TryUnprotect(protectedState, out var flow) ||
+            flow is null ||
+            !GoogleIdentityFlowProtector.NonceMatches(flow.Nonce, request.Nonce))
         {
-            return RedirectWithError("/auth/sign-in", "Google did not return a verified customer identity.");
+            return BadRequest(GoogleProblem(
+                "google_flow_invalid",
+                "Google sign-in expired or was already used. Reload this page and try again.",
+                StatusCodes.Status400BadRequest));
         }
 
         using var response = await authClient.ExchangeCustomerGoogleAsync(new
         {
-            email,
-            full_name = name,
-            google_user_id = googleUserId,
-            email_verified = true,
-            profile_image_url = profileImageUrl,
+            credential = request.Credential,
+            application = GoogleApplication,
+            nonce = request.Nonce,
             preferred_language = GetLanguageCode(Request.Cookies["maliev.culture"]),
             timezone = "Asia/Bangkok"
         }, cancellationToken);
@@ -89,18 +148,41 @@ public sealed class AuthController(
         if (!response.IsSuccessStatusCode)
         {
             logger.LogWarning("Customer Google exchange failed with status {StatusCode}", response.StatusCode);
-            return RedirectWithError("/auth/sign-in", "Google sign-in could not create a MALIEV customer session.");
+            var error = await ReadGoogleExchangeErrorAsync(response, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.Conflict &&
+                string.Equals(error?.Error, "account_verification_required", StringComparison.Ordinal))
+            {
+                return Conflict(GoogleProblem(
+                    "account_verification_required",
+                    "This email already has a MALIEV account. Sign in with email and password first, then connect Google from your account.",
+                    StatusCodes.Status409Conflict));
+            }
+
+            var statusCode = response.StatusCode == HttpStatusCode.ServiceUnavailable
+                ? StatusCodes.Status503ServiceUnavailable
+                : StatusCodes.Status401Unauthorized;
+            return StatusCode(statusCode, GoogleProblem(
+                statusCode == StatusCodes.Status503ServiceUnavailable
+                    ? "google_temporarily_unavailable"
+                    : "google_identity_invalid",
+                statusCode == StatusCodes.Status503ServiceUnavailable
+                    ? "Google sign-in is temporarily unavailable. Continue with email or try again shortly."
+                    : "Google could not verify this sign-in. Reload this page and try again.",
+                statusCode));
         }
 
         var session = await response.Content.ReadFromJsonAsync<AuthLoginResponse>(JsonOptions, cancellationToken);
         if (session?.User is null)
         {
-            return RedirectWithError("/auth/sign-in", "Google sign-in returned an incomplete customer session.");
+            return StatusCode(StatusCodes.Status502BadGateway, GoogleProblem(
+                "google_session_incomplete",
+                "Google sign-in completed, but MALIEV could not start your session. Try again shortly.",
+                StatusCodes.Status502BadGateway));
         }
 
         session.User.EmailVerified = true;
         await SignInCustomerAsync(session.User);
-        return RedirectToReturnUrl(returnUrl);
+        return Ok(new { redirectUrl = flow.ReturnUrl });
     }
 
     /// <summary>
@@ -400,6 +482,59 @@ public sealed class AuthController(
             });
     }
 
+    private static async Task<GoogleExchangeErrorResponse?> ReadGoogleExchangeErrorAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<GoogleExchangeErrorResponse>(
+                JsonOptions,
+                cancellationToken);
+        }
+        catch (Exception exception) when (exception is JsonException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private static ProblemDetails GoogleProblem(string code, string detail, int statusCode)
+    {
+        var problem = new ProblemDetails
+        {
+            Type = $"https://www.maliev.com/problems/{code.Replace('_', '-')}",
+            Title = "Google sign-in could not be completed",
+            Detail = detail,
+            Status = statusCode
+        };
+        problem.Extensions["code"] = code;
+        return problem;
+    }
+
+    private static string GetGoogleFlowCookieName(string flowId) => $"{GoogleFlowCookiePrefix}{flowId}";
+
+    private CookieOptions CreateGoogleFlowCookieOptions(TimeSpan lifetime) => new()
+    {
+        HttpOnly = true,
+        Secure = Request.IsHttps,
+        SameSite = SameSiteMode.Strict,
+        IsEssential = true,
+        Path = GoogleFlowCookiePath,
+        MaxAge = lifetime
+    };
+
+    private void DeleteGoogleFlowCookie(string cookieName)
+    {
+        Response.Cookies.Delete(cookieName, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Strict,
+            IsEssential = true,
+            Path = GoogleFlowCookiePath
+        });
+    }
+
     private IActionResult RedirectWithError(string path, string error)
     {
         var separator = path.Contains('?', StringComparison.Ordinal) ? '&' : '?';
@@ -434,7 +569,9 @@ public sealed class AuthController(
             return false;
         var quoteEngineUrl = ResolveQuoteEngineUrl();
         return Uri.TryCreate(quoteEngineUrl, UriKind.Absolute, out var quoteUri)
-            && uri.Host.Equals(quoteUri.Host, StringComparison.OrdinalIgnoreCase);
+            && uri.Scheme.Equals(quoteUri.Scheme, StringComparison.OrdinalIgnoreCase)
+            && uri.Host.Equals(quoteUri.Host, StringComparison.OrdinalIgnoreCase)
+            && uri.Port == quoteUri.Port;
     }
 
     private string ResolveQuoteEngineUrl()
@@ -490,13 +627,6 @@ public sealed class AuthController(
         return "Customer";
     }
 
-    private static string? GetExternalProfileImageUrl(ClaimsPrincipal principal)
-    {
-        return principal.FindFirstValue("picture")
-            ?? principal.FindFirstValue("urn:google:picture")
-            ?? principal.FindFirstValue("profile_image_url");
-    }
-
     /// <summary>
     /// Posted email/password sign-in form.
     /// </summary>
@@ -510,6 +640,26 @@ public sealed class AuthController(
 
         /// <summary>Local return URL.</summary>
         public string? ReturnUrl { get; set; }
+    }
+
+    /// <summary>Browser request for a short-lived official GIS flow.</summary>
+    public sealed class GoogleIdentityBrowserNonceRequest
+    {
+        /// <summary>Requested post-authentication return location.</summary>
+        public string? ReturnUrl { get; set; }
+    }
+
+    /// <summary>Browser GIS credential exchange request.</summary>
+    public sealed class GoogleIdentityBrowserExchangeRequest
+    {
+        /// <summary>Raw GIS ID-token credential returned by Google.</summary>
+        public string Credential { get; set; } = string.Empty;
+
+        /// <summary>Nonce supplied to GIS and echoed in the verified ID token.</summary>
+        public string Nonce { get; set; } = string.Empty;
+
+        /// <summary>Opaque browser-flow identifier whose state is held in an HttpOnly cookie.</summary>
+        public string FlowId { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -564,6 +714,21 @@ public sealed class AuthController(
     {
         [JsonPropertyName("user")]
         public AuthUser? User { get; set; }
+    }
+
+    private sealed class GoogleIdentityNonceResponse
+    {
+        [JsonPropertyName("nonce")]
+        public string Nonce { get; set; } = string.Empty;
+
+        [JsonPropertyName("expires_at_utc")]
+        public DateTimeOffset ExpiresAtUtc { get; set; }
+    }
+
+    private sealed class GoogleExchangeErrorResponse
+    {
+        [JsonPropertyName("error")]
+        public string? Error { get; set; }
     }
 
     private sealed class AuthUser
