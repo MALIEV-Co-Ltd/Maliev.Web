@@ -97,29 +97,6 @@
         return tokenElement ? tokenElement.value : '';
     };
 
-    window.submitPasskeySignIn = (url, principalId, email, returnUrl, csrfToken) => {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = url;
-        form.style.display = 'none';
-
-        const addField = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value || '';
-            form.appendChild(input);
-        };
-
-        addField('__RequestVerificationToken', csrfToken);
-        addField('PrincipalId', principalId);
-        addField('Email', email || '');
-        addField('ReturnUrl', returnUrl || '');
-
-        document.body.appendChild(form);
-        form.submit();
-    };
-
     function base64urlToArray(base64url) {
         const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
         const padding = 4 - (base64.length % 4);

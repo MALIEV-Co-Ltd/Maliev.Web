@@ -405,34 +405,22 @@ public sealed class AuthController(
     }
 
     /// <summary>
-    /// Handles passkey sign-in — receives principalId from PasskeyService auth result and creates a cookie session.
+    /// Rejects the retired browser-authored passkey identity handoff.
     /// </summary>
     [AllowAnonymous]
     [HttpPost("passkey-sign-in")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PasskeySignIn([FromForm] PasskeySignInRequest request, CancellationToken ct)
+    public IActionResult PasskeySignIn()
     {
-        var customerResponse = await customerClient.GetCustomerByPrincipalIdAsync(request.PrincipalId, ct);
-        if (!customerResponse.IsSuccessStatusCode)
-            return BadRequest(new { error = "Customer not found" });
-
-        var customer = await customerResponse.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
-
-        var user = new AuthUser
+        var problem = new ProblemDetails
         {
-            Sub = request.PrincipalId.ToString(),
-            PrincipalId = request.PrincipalId.ToString(),
-            Email = request.Email ?? (customer.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : null),
-            EmailVerified = true,
-            Name = customer.TryGetProperty("firstName", out var firstNameProp) ? firstNameProp.GetString() ?? string.Empty : string.Empty,
-            ProfileImageUrl = customer.TryGetProperty("profileImageUrl", out var pictureProp) ? pictureProp.GetString() : null
+            Type = "https://www.maliev.com/problems/passkey-flow-retired",
+            Title = "Passkey sign-in is temporarily unavailable",
+            Detail = "Use Google or email sign-in while secure passkey verification is being restored.",
+            Status = StatusCodes.Status410Gone
         };
-        if (!string.IsNullOrWhiteSpace(request.ReturnUrl) && !request.ReturnUrl.Contains("/auth/sign-in", StringComparison.Ordinal))
-            user.ReturnUrl = request.ReturnUrl;
-
-        await SignInCustomerAsync(user);
-
-        return Ok(new { redirectUrl = user.ReturnUrl ?? "/account/profile" });
+        problem.Extensions["code"] = "passkey_flow_retired";
+        return StatusCode(StatusCodes.Status410Gone, problem);
     }
 
     private async Task SignInCustomerAsync(AuthUser user)
@@ -693,21 +681,6 @@ public sealed class AuthController(
 
         /// <summary>New password.</summary>
         public string Password { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// Posted passkey sign-in form with principalId and optional return URL.
-    /// </summary>
-    public class PasskeySignInRequest
-    {
-        /// <summary>The authenticated principal id.</summary>
-        public Guid PrincipalId { get; set; }
-
-        /// <summary>The principal email.</summary>
-        public string? Email { get; set; }
-
-        /// <summary>Local return URL.</summary>
-        public string? ReturnUrl { get; set; }
     }
 
     private sealed class AuthLoginResponse
