@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -18,8 +17,51 @@ env:
   DOTNET_NOLOGO: "1"
 
 jobs:
+  dependency-packages:
+    name: Build exact public-source dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Web source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact MessagingContracts source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: MALIEV-Co-Ltd/Maliev.MessagingContracts
+          ref: d4836f135d1cf311b2a490d9ba03809ff295e854
+          path: .ci-sources/Maliev.MessagingContracts
+          persist-credentials: false
+
+      - name: Checkout exact ServiceDefaults source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: MALIEV-Co-Ltd/Maliev.Aspire
+          ref: 7121d57705fc1eff6c7ebb6a69e33e9c26ebfccc
+          path: .ci-sources/Maliev.Aspire
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build exact dependency packages
+        run: bash scripts/prepare-web-ci-packages.sh
+
+      - name: Upload exact dependency packages
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: web-ci-packages
+          path: .ci-packages/*.nupkg
+          if-no-files-found: error
+          retention-days: 1
+
   build-and-test:
     name: Release build and test
+    needs: dependency-packages
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -33,11 +75,19 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Download exact dependency packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: web-ci-packages
+          path: .ci-packages
+
       - name: Restore
-        run: dotnet restore Maliev.Web.slnx /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
-        env:
-          NUGET_USERNAME: ${{ github.actor }}
-          NUGET_PASSWORD: ${{ github.token }}
+        run: >-
+          dotnet restore Maliev.Web.slnx
+          --source https://api.nuget.org/v3/index.json
+          --source .ci-packages
+          /p:GITHUB_ACTIONS=true
+          /p:SharedLibraryVersion="1.0.81-alpha"
 
       - name: Build
         run: dotnet build Maliev.Web.slnx --configuration Release --no-restore /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
@@ -47,6 +97,7 @@ jobs:
 
   container:
     name: Build and scan production image
+    needs: dependency-packages
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -56,6 +107,12 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+
+      - name: Download exact dependency packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: web-ci-packages
+          path: .ci-packages
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -68,9 +125,8 @@ jobs:
           load: true
           push: false
           tags: ${{ env.IMAGE_TAG }}
-          secrets: |
-            nuget_username=${{ github.actor }}
-            nuget_password=${{ github.token }}
+          build-args: |
+            dependency_restore_stage=restore-local
 
       - name: Validate runtime image metadata
         shell: bash

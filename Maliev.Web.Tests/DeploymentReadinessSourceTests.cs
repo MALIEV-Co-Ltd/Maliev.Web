@@ -26,6 +26,9 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_username,required=true", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_password,required=true", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ARG dependency_restore_stage=restore-private", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("FROM ${dependency_restore_stage} AS build", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("--source \"/ci-packages\"", dockerfile, StringComparison.Ordinal);
         Assert.Contains("/p:SharedLibraryVersion=\"1.0.81-alpha\"", dockerfile, StringComparison.Ordinal);
         Assert.DoesNotContain("1.0.*-alpha*", dockerfile, StringComparison.Ordinal);
         Assert.DoesNotContain("ARG NUGET_", dockerfile, StringComparison.OrdinalIgnoreCase);
@@ -48,10 +51,12 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("**/obj", dockerIgnore, StringComparison.Ordinal);
         Assert.Contains("**/.git", dockerIgnore, StringComparison.Ordinal);
         Assert.Contains("**/TestResults", dockerIgnore, StringComparison.Ordinal);
+        Assert.Contains("!.ci-packages/*.nupkg", dockerIgnore, StringComparison.Ordinal);
     }
 
     /// <summary>
-    /// Verifies PR validation exercises Release code and the local image without publishing or deploying it.
+    /// Verifies PR validation exercises Release code and the local image without publishing, deploying,
+    /// or granting untrusted pull requests access to private organization packages.
     /// </summary>
     [Fact]
     public void PullRequestValidationBuildsTestsAndScansWithoutPublishingOrDeploying()
@@ -69,7 +74,16 @@ public sealed class DeploymentReadinessSourceTests
         Assert.DoesNotContain("pull_request_target", workflow, StringComparison.Ordinal);
         Assert.Contains("permissions:", workflow, StringComparison.Ordinal);
         Assert.Contains("contents: read", workflow, StringComparison.Ordinal);
-        Assert.Contains("packages: read", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("packages: read", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("github.token", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("NUGET_USERNAME", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("NUGET_PASSWORD", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("MALIEV-Co-Ltd/Maliev.Aspire", workflow, StringComparison.Ordinal);
+        Assert.Contains("ref: 7121d57705fc1eff6c7ebb6a69e33e9c26ebfccc", workflow, StringComparison.Ordinal);
+        Assert.Contains("MALIEV-Co-Ltd/Maliev.MessagingContracts", workflow, StringComparison.Ordinal);
+        Assert.Contains("ref: d4836f135d1cf311b2a490d9ba03809ff295e854", workflow, StringComparison.Ordinal);
+        Assert.Contains("prepare-web-ci-packages.sh", workflow, StringComparison.Ordinal);
+        Assert.Contains("web-ci-packages", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("write-all", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("concurrency:", workflow, StringComparison.Ordinal);
         Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
@@ -79,6 +93,7 @@ public sealed class DeploymentReadinessSourceTests
         Assert.DoesNotContain("1.0.*-alpha*", workflow, StringComparison.Ordinal);
         Assert.Contains("push: false", workflow, StringComparison.Ordinal);
         Assert.Contains("load: true", workflow, StringComparison.Ordinal);
+        Assert.Contains("dependency_restore_stage=restore-local", workflow, StringComparison.Ordinal);
         Assert.Contains("docker image inspect", workflow, StringComparison.Ordinal);
         Assert.Contains("docker run --detach", workflow, StringComparison.Ordinal);
         Assert.Contains("/web/liveness", workflow, StringComparison.Ordinal);

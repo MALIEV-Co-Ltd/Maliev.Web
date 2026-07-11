@@ -2,6 +2,7 @@
 **/.env
 **/.git
 **/.github
+**/.ci-sources
 **/.idea
 **/.vs
 **/.vscode
@@ -14,6 +15,7 @@
 **/*.log
 **/*.nupkg
 **/*.snupkg
+!.ci-packages/*.nupkg
 **/*.suo
 **/*.user
 Maliev.Web.Tests/
