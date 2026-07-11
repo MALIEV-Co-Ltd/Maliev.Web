@@ -41,7 +41,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "dfm", "design", "prototype", "rapid prototyping", "manufacturing", "part", "fixture", "jig",
         "tooling", "mold", "mould", "molding", "injection", "pneumatic", "silicone", "urethane", "casting",
         "material", "pla", "petg", "abs", "asa", "nylon", "pa12", "tpu", "pp", "pc", "peek",
-        "quote", "quotation", "price", "pricing", "cost", "order", "checkout", "lead time", "delivery",
+        "quote", "quotation", "price", "pricing", "cost", "order", "project", "projects", "checkout", "lead time", "delivery",
         "shipping", "receipt", "invoice", "tax invoice", "payment", "profile", "account", "personal information",
         "address book", "shipping address", "billing address", "refund", "warranty", "file", "stl", "step", "stp", "iges", "obj", "3mf",
         "tolerance", "finish", "surface", "strength", "heat", "chemical", "contact", "phone", "address",
@@ -49,7 +49,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "line official", "service", "shop", "machine", "pimm", "mali", "what can you do", "who are you", "your name",
         "ผลิต", "พิมพ์", "ปริ้น", "ซีเอ็นซี", "กัด", "กลึง", "สแกน", "ออกแบบ", "วัสดุ", "ต้นแบบ",
         "ชิ้นงาน", "อะไหล่", "แม่พิมพ์", "หล่อ", "ซิลิโคน", "ยูรีเทน", "เครื่องฉีด", "ลม", "ราคา",
-        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "ใบเสร็จ", "ใบกำกับภาษี", "ชำระเงิน", "โปรไฟล์", "บัญชี",
+        "ใบเสนอราคา", "สั่งซื้อ", "โครงการ", "โปรเจกต์", "จัดส่ง", "ใบเสร็จ", "ใบกำกับภาษี", "ชำระเงิน", "โปรไฟล์", "บัญชี",
         "ข้อมูลส่วนตัว", "สมุดที่อยู่", "ที่อยู่จัดส่ง", "ที่อยู่ออกบิล", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์", "ชื่อ", "บริษัท", "มะลิ", "น้องมะลิ"
     ];
 
@@ -70,6 +70,19 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "address book", "my address", "shipping address", "billing address", "update address", "change address",
         "คำสั่งซื้อของฉัน", "ติดตามงาน", "ใบเสนอราคาของฉัน", "ใบเสร็จ", "ใบกำกับภาษี", "บัญชีของฉัน",
         "โปรไฟล์", "ข้อมูลส่วนตัว", "ที่อยู่ของฉัน", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่"
+    ];
+
+    private static readonly string[] CustomerOwnedResourceTerms =
+    [
+        "order", "orders", "quote", "quotes", "quotation", "quotations", "project", "projects", "account",
+        "คำสั่งซื้อ", "ออเดอร์", "ใบเสนอราคา", "โครงการ", "โปรเจกต์", "บัญชี"
+    ];
+
+    private static readonly string[] CustomerOwnedAccessTerms =
+    [
+        "my", "mine", "status", "track", "where", "where's", "find", "show", "view", "check",
+        "lookup", "download", "cancel", "history", "number", "#", "when will", "arrival",
+        "ของฉัน", "สถานะ", "ติดตาม", "อยู่ไหน", "ค้นหา", "ดู", "ตรวจสอบ", "ยกเลิก", "เลขที่"
     ];
 
     private static readonly string[] EnglishSessionGreetings =
@@ -295,7 +308,49 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
     private static bool IsAccountSpecificTopic(string message)
     {
         var normalized = message.Trim().ToLowerInvariant();
-        return AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase));
+        if (AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        var containsCustomerOwnedResource = CustomerOwnedResourceTerms.Any(term => ContainsAllowedTerm(normalized, term));
+        return containsCustomerOwnedResource
+            && (CustomerOwnedAccessTerms.Any(term => ContainsAllowedTerm(normalized, term))
+                || ContainsCustomerOwnedResourceIdentifier(normalized));
+    }
+
+    private static bool ContainsCustomerOwnedResourceIdentifier(string normalizedMessage)
+    {
+        foreach (var resourceTerm in CustomerOwnedResourceTerms)
+        {
+            var searchIndex = 0;
+            while (searchIndex < normalizedMessage.Length)
+            {
+                var resourceIndex = normalizedMessage.IndexOf(
+                    resourceTerm,
+                    searchIndex,
+                    StringComparison.OrdinalIgnoreCase);
+                if (resourceIndex < 0)
+                {
+                    break;
+                }
+
+                var remainder = normalizedMessage[(resourceIndex + resourceTerm.Length)..]
+                    .TrimStart(' ', '\t', ':', '#', '-', '–', '—');
+                var identifier = remainder.Split(
+                    [' ', '\t', '\r', '\n', '?', '？', ',', '.', ';', ')', ']'],
+                    StringSplitOptions.RemoveEmptyEntries)
+                    .FirstOrDefault();
+                if (identifier is { Length: >= 4 } && identifier.Any(char.IsDigit))
+                {
+                    return true;
+                }
+
+                searchIndex = resourceIndex + resourceTerm.Length;
+            }
+        }
+
+        return false;
     }
 
     private static string NormalizeConversationText(string message)
@@ -408,20 +463,29 @@ Customer message:
 
     private static bool IsBrowserAuthenticationAssertion(string line)
     {
-        var separatorIndex = line.IndexOf(':', StringComparison.Ordinal);
+        var separatorIndex = line.IndexOfAny([':', '=']);
         if (separatorIndex <= 0)
         {
             return false;
         }
 
-        var key = line[..separatorIndex].Trim();
-        return key.Equals("Authentication", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("Authenticated", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("Authentication status", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("User type", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("user_type", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("Customer ID", StringComparison.OrdinalIgnoreCase)
-            || key.Equals("customer_id", StringComparison.OrdinalIgnoreCase);
+        var key = string.Concat(line[..separatorIndex].Where(char.IsLetterOrDigit)).ToLowerInvariant();
+        return key is
+            "auth" or
+            "authenticated" or
+            "authentication" or
+            "authenticationstatus" or
+            "signedin" or
+            "signinstatus" or
+            "claim" or
+            "claims" or
+            "role" or
+            "usertype" or
+            "userid" or
+            "principalid" or
+            "customerid" or
+            "accountid" or
+            "tenantid";
     }
 
     private static string NormalizeLanguage(string? language, string message)

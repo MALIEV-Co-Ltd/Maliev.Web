@@ -565,6 +565,36 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies an indirect order-ownership phrase still fails closed at the anonymous HTTP boundary.
+    /// </summary>
+    [Fact]
+    public async Task POST_ChatbotMessage_AnonymousProjectIdentifier_ReturnsSignInWithoutDownstreamCall()
+    {
+        var chatbotClient = new AuthenticationBoundaryChatbotServiceClient();
+        using var factory = CreateAuthenticationBoundaryFactory(chatbotClient);
+        using var client = factory.CreateClient();
+        const string requestBody = """
+            {
+              "sessionId": "8d7d1778-f352-4701-8803-2305ca7bb9f2",
+              "message": "Project ABC-123",
+              "customerContext": "Page context: /account/projects",
+              "language": "en"
+            }
+            """;
+
+        using var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+        using var response = await client.PostAsync("/web/v1/chatbot/messages", content);
+        var chat = await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(chat);
+        Assert.Contains("identity verification", chat.Content, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("sign-in", Assert.Single(chat.SuggestedActions).Action);
+        Assert.Null(chatbotClient.InitiateRequest);
+        Assert.Null(chatbotClient.MessageRequest);
+    }
+
+    /// <summary>
     /// Verifies an authenticated customer principal with the canonical customer claims reaches the signed-in path.
     /// </summary>
     [Fact]
