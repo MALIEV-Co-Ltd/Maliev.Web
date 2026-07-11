@@ -90,6 +90,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("prepare-web-ci-packages.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("web-ci-packages", workflow, StringComparison.Ordinal);
         Assert.Contains("include-hidden-files: true", workflow, StringComparison.Ordinal);
+        Assert.Contains("CI_PACKAGE_SOURCE: ${{ github.workspace }}/.ci-packages", workflow, StringComparison.Ordinal);
+        Assert.Contains("--source \"$CI_PACKAGE_SOURCE\"", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("write-all", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("concurrency:", workflow, StringComparison.Ordinal);
         Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
