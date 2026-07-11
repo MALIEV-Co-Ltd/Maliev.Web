@@ -15,7 +15,6 @@ concurrency:
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   DOTNET_NOLOGO: "1"
-  CI_PACKAGE_SOURCE: ${{ github.workspace }}/.ci-packages
 
 jobs:
   dependency-packages:
@@ -59,6 +58,7 @@ jobs:
           path: .ci-packages/*.nupkg
           if-no-files-found: error
           include-hidden-files: true
+          overwrite: true
           retention-days: 1
 
   build-and-test:
@@ -86,8 +86,7 @@ jobs:
       - name: Restore
         run: >-
           dotnet restore Maliev.Web.slnx
-          --source https://api.nuget.org/v3/index.json
-          --source "$CI_PACKAGE_SOURCE"
+          --configfile NuGet.PRValidation.Config
           /p:GITHUB_ACTIONS=true
           /p:SharedLibraryVersion="1.0.81-alpha"
 
