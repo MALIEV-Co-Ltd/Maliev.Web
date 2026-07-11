@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Shared.Chatbot;
 using Microsoft.Extensions.Configuration;
@@ -21,9 +22,13 @@ public interface ICustomerChatbotService
     /// Sends a customer chatbot message.
     /// </summary>
     /// <param name="request">The customer chatbot request.</param>
+    /// <param name="caller">The server-authenticated caller principal.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The assistant response.</returns>
-    Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken);
+    Task<CustomerChatbotResponse> SendAsync(
+        CustomerChatbotRequest request,
+        ClaimsPrincipal caller,
+        CancellationToken cancellationToken);
 }
 
 internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient, IConfiguration? configuration = null) : ICustomerChatbotService
@@ -36,7 +41,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "dfm", "design", "prototype", "rapid prototyping", "manufacturing", "part", "fixture", "jig",
         "tooling", "mold", "mould", "molding", "injection", "pneumatic", "silicone", "urethane", "casting",
         "material", "pla", "petg", "abs", "asa", "nylon", "pa12", "tpu", "pp", "pc", "peek",
-        "quote", "quotation", "price", "pricing", "cost", "order", "checkout", "lead time", "delivery",
+        "quote", "quotation", "price", "pricing", "cost", "order", "project", "projects", "checkout", "lead time", "delivery",
         "shipping", "receipt", "invoice", "tax invoice", "payment", "profile", "account", "personal information",
         "address book", "shipping address", "billing address", "refund", "warranty", "file", "stl", "step", "stp", "iges", "obj", "3mf",
         "tolerance", "finish", "surface", "strength", "heat", "chemical", "contact", "phone", "address",
@@ -44,7 +49,7 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "line official", "service", "shop", "machine", "pimm", "mali", "what can you do", "who are you", "your name",
         "ผลิต", "พิมพ์", "ปริ้น", "ซีเอ็นซี", "กัด", "กลึง", "สแกน", "ออกแบบ", "วัสดุ", "ต้นแบบ",
         "ชิ้นงาน", "อะไหล่", "แม่พิมพ์", "หล่อ", "ซิลิโคน", "ยูรีเทน", "เครื่องฉีด", "ลม", "ราคา",
-        "ใบเสนอราคา", "สั่งซื้อ", "จัดส่ง", "ใบเสร็จ", "ใบกำกับภาษี", "ชำระเงิน", "โปรไฟล์", "บัญชี",
+        "ใบเสนอราคา", "สั่งซื้อ", "โครงการ", "โปรเจกต์", "จัดส่ง", "ใบเสร็จ", "ใบกำกับภาษี", "ชำระเงิน", "โปรไฟล์", "บัญชี",
         "ข้อมูลส่วนตัว", "สมุดที่อยู่", "ที่อยู่จัดส่ง", "ที่อยู่ออกบิล", "คืนเงิน", "รับประกัน", "ติดต่อ", "ที่อยู่", "โทร", "ไฟล์", "ชื่อ", "บริษัท", "มะลิ", "น้องมะลิ"
     ];
 
@@ -65,6 +70,24 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "address book", "my address", "shipping address", "billing address", "update address", "change address",
         "คำสั่งซื้อของฉัน", "ติดตามงาน", "ใบเสนอราคาของฉัน", "ใบเสร็จ", "ใบกำกับภาษี", "บัญชีของฉัน",
         "โปรไฟล์", "ข้อมูลส่วนตัว", "ที่อยู่ของฉัน", "เปลี่ยนที่อยู่", "แก้ไขที่อยู่"
+    ];
+
+    private static readonly string[] CustomerOwnedResourceTerms =
+    [
+        "order", "orders", "quote", "quotes", "quotation", "quotations", "project", "projects", "account",
+        "คำสั่งซื้อ", "ออเดอร์", "ใบเสนอราคา", "โครงการ", "โปรเจกต์", "บัญชี"
+    ];
+
+    private static readonly string[] CustomerOwnedAccessTerms =
+    [
+        "my", "mine", "status", "track", "where", "where's", "find", "show", "view", "check",
+        "lookup", "download", "cancel", "history", "number", "#", "when will", "arrival",
+        "ของฉัน", "สถานะ", "ติดตาม", "อยู่ไหน", "ค้นหา", "ดู", "ตรวจสอบ", "ยกเลิก", "เลขที่"
+    ];
+
+    private static readonly string[] CustomerResourceIdentifierLabels =
+    [
+        "id", "code", "number", "no", "ref", "reference", "เลข", "เลขที่", "รหัส"
     ];
 
     private static readonly string[] EnglishSessionGreetings =
@@ -111,17 +134,21 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         };
     }
 
-    public async Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
+    public async Task<CustomerChatbotResponse> SendAsync(
+        CustomerChatbotRequest request,
+        ClaimsPrincipal caller,
+        CancellationToken cancellationToken)
     {
         var message = request.Message.Trim();
         var language = NormalizeLanguage(request.Language, message);
+        var callerContext = CustomerChatbotCallerContext.FromPrincipal(caller);
 
         if (IsNaturalConversationOnly(message))
         {
             return CreateNaturalConversationResponse(request.SessionId, language);
         }
 
-        if (IsAccountSpecificTopic(message) && !HasSignedInCustomerContext(request.CustomerContext))
+        if (IsAccountSpecificTopic(message) && !callerContext.IsAuthenticatedCustomer)
         {
             return CreateSignInRequiredResponse(request.SessionId ?? Guid.NewGuid(), language);
         }
@@ -286,13 +313,58 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
     private static bool IsAccountSpecificTopic(string message)
     {
         var normalized = message.Trim().ToLowerInvariant();
-        return AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase));
+        if (AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        var containsCustomerOwnedResource = CustomerOwnedResourceTerms.Any(term => ContainsAllowedTerm(normalized, term));
+        return containsCustomerOwnedResource
+            && (CustomerOwnedAccessTerms.Any(term => ContainsAllowedTerm(normalized, term))
+                || ContainsCustomerOwnedResourceIdentifier(normalized));
     }
 
-    private static bool HasSignedInCustomerContext(string? customerContext)
+    private static bool ContainsCustomerOwnedResourceIdentifier(string normalizedMessage)
     {
-        return !string.IsNullOrWhiteSpace(customerContext)
-            && customerContext.Contains("Authentication: signed-in customer session", StringComparison.OrdinalIgnoreCase);
+        foreach (var resourceTerm in CustomerOwnedResourceTerms)
+        {
+            var searchIndex = 0;
+            while (searchIndex < normalizedMessage.Length)
+            {
+                var resourceIndex = normalizedMessage.IndexOf(
+                    resourceTerm,
+                    searchIndex,
+                    StringComparison.OrdinalIgnoreCase);
+                if (resourceIndex < 0)
+                {
+                    break;
+                }
+
+                var remainder = normalizedMessage[(resourceIndex + resourceTerm.Length)..]
+                    .TrimStart(' ', '\t', ':', '#', '-', '–', '—');
+                var identifierTokens = remainder.Split(
+                    [' ', '\t', '\r', '\n', '?', '？', ',', '.', ':', '#', ';', ')', ']'],
+                    StringSplitOptions.RemoveEmptyEntries);
+                var identifierIndex = 0;
+                while (identifierIndex < identifierTokens.Length
+                    && CustomerResourceIdentifierLabels.Contains(
+                        identifierTokens[identifierIndex],
+                        StringComparer.OrdinalIgnoreCase))
+                {
+                    identifierIndex++;
+                }
+
+                var identifier = identifierTokens.ElementAtOrDefault(identifierIndex);
+                if (identifier is { Length: >= 4 } && identifier.Any(char.IsDigit))
+                {
+                    return true;
+                }
+
+                searchIndex = resourceIndex + resourceTerm.Length;
+            }
+        }
+
+        return false;
     }
 
     private static string NormalizeConversationText(string message)
@@ -387,13 +459,47 @@ Customer message:
 
         var cleaned = new string(customerContext
             .Where(ch => !char.IsControl(ch) || ch is '\r' or '\n' or '\t')
-            .ToArray()).Trim();
+            .ToArray());
+        cleaned = string.Join(
+            '\n',
+            cleaned
+                .ReplaceLineEndings("\n")
+                .Split('\n')
+                .Where(line => !IsBrowserAuthenticationAssertion(line)))
+            .Trim();
         if (cleaned.Length > 1600)
         {
             cleaned = cleaned[..1600].Trim();
         }
 
         return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
+    }
+
+    private static bool IsBrowserAuthenticationAssertion(string line)
+    {
+        var separatorIndex = line.IndexOfAny([':', '=']);
+        if (separatorIndex <= 0)
+        {
+            return false;
+        }
+
+        var key = string.Concat(line[..separatorIndex].Where(char.IsLetterOrDigit)).ToLowerInvariant();
+        return key is
+            "auth" or
+            "authenticated" or
+            "authentication" or
+            "authenticationstatus" or
+            "signedin" or
+            "signinstatus" or
+            "claim" or
+            "claims" or
+            "role" or
+            "usertype" or
+            "userid" or
+            "principalid" or
+            "customerid" or
+            "accountid" or
+            "tenantid";
     }
 
     private static string NormalizeLanguage(string? language, string message)
@@ -518,5 +624,22 @@ Customer message:
         return language == "th"
             ? "ตอนนี้น้องมะลิยังตอบไม่ได้ครบถ้วน กรุณาถามเกี่ยวกับบริการของ MALIEV อีกครั้ง หรือติดต่อทีมงานเพื่อให้ช่วยตรวจไฟล์ค่ะ"
             : "Mali could not generate a complete answer right now. Please ask another MALIEV service question or contact the team for file review.";
+    }
+
+}
+
+internal readonly record struct CustomerChatbotCallerContext(bool IsAuthenticatedCustomer, Guid? CustomerId)
+{
+    public static CustomerChatbotCallerContext FromPrincipal(ClaimsPrincipal? caller)
+    {
+        if (caller?.Identity?.IsAuthenticated != true
+            || !string.Equals(caller.FindFirstValue("user_type"), "customer", StringComparison.OrdinalIgnoreCase)
+            || !Guid.TryParse(caller.FindFirstValue("customer_id"), out var customerId)
+            || customerId == Guid.Empty)
+        {
+            return default;
+        }
+
+        return new CustomerChatbotCallerContext(true, customerId);
     }
 }
