@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Chatbot;
@@ -136,7 +137,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.NotNull(client.MessageRequest);
         Assert.Equal(client.SessionId, client.MessageRequest.SessionId);
         Assert.Equal("en", client.MessageRequest.Language);
-        Assert.Contains("Customer message:\nWhich material should I choose for an FDM prototype?", client.MessageRequest.Content, StringComparison.Ordinal);
+        AssertDownstreamCustomerMessage(client.MessageRequest, "Which material should I choose for an FDM prototype?");
     }
 
     /// <summary>
@@ -203,7 +204,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Contains("Customer profile notes from MALIEV Web.", client.MessageRequest.Content, StringComparison.Ordinal);
         Assert.Contains("untrusted personalization context only", client.MessageRequest.Content, StringComparison.Ordinal);
         Assert.Contains("Company: MALIEV", client.MessageRequest.Content, StringComparison.Ordinal);
-        Assert.Contains("Customer message:\nCan you help with CNC fixtures?", client.MessageRequest.Content, StringComparison.Ordinal);
+        AssertDownstreamCustomerMessage(client.MessageRequest, "Can you help with CNC fixtures?");
     }
 
     /// <summary>
@@ -295,7 +296,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.Equal(client.SessionId, response.SessionId);
         Assert.NotNull(client.MessageRequest);
         Assert.Contains("Authentication: signed-in customer session", client.MessageRequest.Content, StringComparison.Ordinal);
-        Assert.Contains("Customer message:\nCan you check my order status and receipt?", client.MessageRequest.Content, StringComparison.Ordinal);
+        AssertDownstreamCustomerMessage(client.MessageRequest, "Can you check my order status and receipt?");
     }
 
     /// <summary>
@@ -324,7 +325,7 @@ public sealed class CustomerChatbotBoundaryTests
         Assert.NotNull(client.MessageRequest);
         Assert.Equal(client.SessionId, client.MessageRequest.SessionId);
         Assert.Equal("en", client.MessageRequest.Language);
-        Assert.Contains("Customer message:\nCan I get a price for 3D printing?", client.MessageRequest.Content, StringComparison.Ordinal);
+        AssertDownstreamCustomerMessage(client.MessageRequest, "Can I get a price for 3D printing?");
     }
 
     /// <summary>
@@ -422,13 +423,20 @@ public sealed class CustomerChatbotBoundaryTests
         await client.SendMessageAsync(new ChatbotSendMessageRequest
         {
             SessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
-            Content = "Can you help with FDM?"
+            Content = "Can you help with FDM?",
+            Language = "en"
         }, CancellationToken.None);
 
         Assert.NotNull(requestBody);
-        Assert.Contains("\"session_id\":\"8d7d1778-f352-4701-8803-2305ca7bb9f2\"", requestBody, StringComparison.Ordinal);
-        Assert.Contains("\"content\":\"Can you help with FDM?\"", requestBody, StringComparison.Ordinal);
-        Assert.DoesNotContain("sessionId", requestBody, StringComparison.Ordinal);
+        using var requestJson = JsonDocument.Parse(requestBody);
+        var requestRoot = requestJson.RootElement;
+        Assert.Equal(
+            new[] { "content", "language", "session_id" },
+            requestRoot.EnumerateObject().Select(property => property.Name).OrderBy(name => name, StringComparer.Ordinal).ToArray());
+        Assert.Equal(Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"), requestRoot.GetProperty("session_id").GetGuid());
+        Assert.Equal("Can you help with FDM?", requestRoot.GetProperty("content").GetString());
+        Assert.Equal("en", requestRoot.GetProperty("language").GetString());
+        Assert.False(requestRoot.TryGetProperty("sessionId", out _));
     }
 
     /// <summary>
@@ -466,10 +474,15 @@ public sealed class CustomerChatbotBoundaryTests
         }, CancellationToken.None);
 
         Assert.NotNull(requestBody);
-        Assert.Contains("\"channel\":\"website\"", requestBody, StringComparison.Ordinal);
-        Assert.Contains("\"external_user_id\":\"customer-123\"", requestBody, StringComparison.Ordinal);
-        Assert.Contains("\"language\":\"en\"", requestBody, StringComparison.Ordinal);
-        Assert.DoesNotContain("externalUserId", requestBody, StringComparison.Ordinal);
+        using var requestJson = JsonDocument.Parse(requestBody);
+        var requestRoot = requestJson.RootElement;
+        Assert.Equal(
+            new[] { "channel", "external_user_id", "language" },
+            requestRoot.EnumerateObject().Select(property => property.Name).OrderBy(name => name, StringComparer.Ordinal).ToArray());
+        Assert.Equal("website", requestRoot.GetProperty("channel").GetString());
+        Assert.Equal("customer-123", requestRoot.GetProperty("external_user_id").GetString());
+        Assert.Equal("en", requestRoot.GetProperty("language").GetString());
+        Assert.False(requestRoot.TryGetProperty("externalUserId", out _));
     }
 
     /// <summary>
@@ -568,6 +581,18 @@ public sealed class CustomerChatbotBoundaryTests
 
         Assert.Equal("ChatbotService", exception.BackendName);
         Assert.Contains("sending a chatbot message", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertDownstreamCustomerMessage(ChatbotSendMessageRequest request, string expectedMessage)
+    {
+        var normalizedContent = request.Content.ReplaceLineEndings("\n");
+        const string messageMarker = "Customer message:\n";
+        var markerIndex = normalizedContent.IndexOf(messageMarker, StringComparison.Ordinal);
+
+        Assert.True(markerIndex >= 0, "The downstream prompt must contain a distinct customer-message section.");
+        Assert.Equal(
+            expectedMessage.ReplaceLineEndings("\n"),
+            normalizedContent[(markerIndex + messageMarker.Length)..]);
     }
 
     private sealed class CapturingChatbotServiceClient : IChatbotServiceClient

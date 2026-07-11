@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Account;
@@ -488,11 +490,26 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     {
         using var client = _factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/web/v1/chatbot/messages", new CustomerChatbotRequest
+        var browserRequest = new CustomerChatbotRequest
         {
+            SessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
             Message = "Can MALIEV help with CNC aluminum parts?",
+            CustomerContext = "Page: /services/cnc-machining",
             Language = "en"
-        });
+        };
+        var requestBody = JsonSerializer.Serialize(browserRequest, JsonSerializerOptions.Web);
+        using var requestJson = JsonDocument.Parse(requestBody);
+        var requestRoot = requestJson.RootElement;
+        Assert.Equal(
+            new[] { "customerContext", "language", "message", "sessionId" },
+            requestRoot.EnumerateObject().Select(property => property.Name).OrderBy(name => name, StringComparer.Ordinal).ToArray());
+        Assert.Equal(Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"), requestRoot.GetProperty("sessionId").GetGuid());
+        Assert.Equal("Can MALIEV help with CNC aluminum parts?", requestRoot.GetProperty("message").GetString());
+        Assert.Equal("Page: /services/cnc-machining", requestRoot.GetProperty("customerContext").GetString());
+        Assert.Equal("en", requestRoot.GetProperty("language").GetString());
+
+        using var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("/web/v1/chatbot/messages", content);
         var chat = await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -515,10 +532,18 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     {
         using var client = _factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/web/v1/chatbot/sessions", new CustomerChatbotStartRequest
+        var browserRequest = new CustomerChatbotStartRequest
         {
             Language = "en"
-        });
+        };
+        var requestBody = JsonSerializer.Serialize(browserRequest, JsonSerializerOptions.Web);
+        using var requestJson = JsonDocument.Parse(requestBody);
+        var requestRoot = requestJson.RootElement;
+        Assert.Equal(new[] { "language" }, requestRoot.EnumerateObject().Select(property => property.Name).ToArray());
+        Assert.Equal("en", requestRoot.GetProperty("language").GetString());
+
+        using var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("/web/v1/chatbot/sessions", content);
         var chat = await response.Content.ReadFromJsonAsync<CustomerChatbotResponse>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -823,7 +848,10 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
 
         public Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
         {
+            Assert.Equal(Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"), request.SessionId);
             Assert.Equal("Can MALIEV help with CNC aluminum parts?", request.Message);
+            Assert.Equal("Page: /services/cnc-machining", request.CustomerContext);
+            Assert.Equal("en", request.Language);
             return Task.FromResult(new CustomerChatbotResponse
             {
                 SessionId = Guid.Parse("8d7d1778-f352-4701-8803-2305ca7bb9f2"),
