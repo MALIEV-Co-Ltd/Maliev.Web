@@ -34,16 +34,16 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Maliev.Web.slnx -p:GITHUB_ACTIONS=true -p:SharedLibraryVersion="1.0.*-alpha*"
+        run: dotnet restore Maliev.Web.slnx /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
         env:
           NUGET_USERNAME: ${{ github.actor }}
           NUGET_PASSWORD: ${{ github.token }}
 
       - name: Build
-        run: dotnet build Maliev.Web.slnx --configuration Release --no-restore -p:GITHUB_ACTIONS=true -p:SharedLibraryVersion="1.0.*-alpha*"
+        run: dotnet build Maliev.Web.slnx --configuration Release --no-restore /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
 
       - name: Test
-        run: dotnet test Maliev.Web.slnx --configuration Release --no-build --verbosity normal -p:GITHUB_ACTIONS=true -p:SharedLibraryVersion="1.0.*-alpha*"
+        run: dotnet test Maliev.Web.slnx --configuration Release --no-build --verbosity normal /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
 
   container:
     name: Build and scan production image

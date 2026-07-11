@@ -15,7 +15,7 @@ RUN --mount=type=secret,id=nuget_username,required=true \
     NUGET_PASSWORD="$(cat /run/secrets/nuget_password)" \
     dotnet restore "Maliev.Web.Bff/Maliev.Web.Bff.csproj" \
       /p:GITHUB_ACTIONS=true \
-      -p:SharedLibraryVersion="1.0.*-alpha*"
+      /p:SharedLibraryVersion="1.0.81-alpha"
 
 COPY . .
 RUN dotnet publish "Maliev.Web.Bff/Maliev.Web.Bff.csproj" \
@@ -23,7 +23,7 @@ RUN dotnet publish "Maliev.Web.Bff/Maliev.Web.Bff.csproj" \
     --output /app/publish \
     --no-restore \
     /p:GITHUB_ACTIONS=true \
-    -p:SharedLibraryVersion="1.0.*-alpha*" \
+    /p:SharedLibraryVersion="1.0.81-alpha" \
     /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
@@ -32,7 +32,7 @@ COPY --chown=app:app --from=build /app/publish .
 
 USER app
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080 \
+ENV ASPNETCORE_HTTP_PORTS=8080 \
     ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_EnableDiagnostics=0
 

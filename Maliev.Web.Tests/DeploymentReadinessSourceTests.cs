@@ -26,17 +26,22 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_username,required=true", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_password,required=true", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:SharedLibraryVersion=\"1.0.81-alpha\"", dockerfile, StringComparison.Ordinal);
+        Assert.DoesNotContain("1.0.*-alpha*", dockerfile, StringComparison.Ordinal);
         Assert.DoesNotContain("ARG NUGET_", dockerfile, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("dotnet publish", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--configuration Release", dockerfile, StringComparison.Ordinal);
         Assert.Contains("COPY --chown=app:app --from=build /app/publish .", dockerfile, StringComparison.Ordinal);
         Assert.Contains("USER app", dockerfile, StringComparison.Ordinal);
         Assert.Contains("EXPOSE 8080", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ASPNETCORE_HTTP_PORTS=8080", dockerfile, StringComparison.Ordinal);
+        Assert.DoesNotContain("ASPNETCORE_URLS", dockerfile, StringComparison.Ordinal);
         Assert.Contains("ENTRYPOINT [\"dotnet\", \"Maliev.Web.Bff.dll\"]", dockerfile, StringComparison.Ordinal);
 
         var restoreIndex = dockerfile.IndexOf("dotnet restore", StringComparison.Ordinal);
         var sourceCopyIndex = dockerfile.IndexOf("COPY . .", StringComparison.Ordinal);
         Assert.True(restoreIndex >= 0, "Expected a cached dependency restore layer.");
+        Assert.True(sourceCopyIndex >= 0, "Expected a source copy layer ('COPY . .').");
         Assert.True(sourceCopyIndex > restoreIndex, "Source must be copied only after the dependency restore layer.");
 
         Assert.Contains("**/bin", dockerIgnore, StringComparison.Ordinal);
@@ -70,6 +75,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
         Assert.Contains("dotnet build Maliev.Web.slnx --configuration Release --no-restore", workflow, StringComparison.Ordinal);
         Assert.Contains("dotnet test Maliev.Web.slnx --configuration Release --no-build", workflow, StringComparison.Ordinal);
+        Assert.Contains("/p:SharedLibraryVersion=\"1.0.81-alpha\"", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("1.0.*-alpha*", workflow, StringComparison.Ordinal);
         Assert.Contains("push: false", workflow, StringComparison.Ordinal);
         Assert.Contains("load: true", workflow, StringComparison.Ordinal);
         Assert.Contains("docker image inspect", workflow, StringComparison.Ordinal);
@@ -89,7 +96,7 @@ public sealed class DeploymentReadinessSourceTests
             workflow,
             @"uses:\s+[^\s@]+@(?![0-9a-f]{40}(?:\s|$))[^\s]+",
             RegexOptions.CultureInvariant);
-        Assert.Empty(unpinnedActions.Cast<Match>().Select(match => match.Value));
+        Assert.Empty(unpinnedActions.Select(match => match.Value));
     }
 
     private static string RepoPath(params string[] pathSegments)
