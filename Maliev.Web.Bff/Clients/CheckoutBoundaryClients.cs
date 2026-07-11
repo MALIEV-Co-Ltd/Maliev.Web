@@ -62,7 +62,7 @@ public interface ICustomerServiceClient
     /// <summary>Deletes a customer-owned address.</summary>
     Task<HttpResponseMessage> DeleteCustomerAddressAsync(Guid addressId, object request, CancellationToken cancellationToken);
 
-    /// <summary>Gets customer by principal id.</summary>
+    /// <summary>Gets the authoritative customer portal authentication context by principal id.</summary>
     Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken);
 }
 
@@ -204,7 +204,9 @@ internal sealed class CustomerServiceClient(HttpClient httpClient) : ICustomerSe
     }
 
     public Task<HttpResponseMessage> GetCustomerByPrincipalIdAsync(Guid principalId, CancellationToken cancellationToken) =>
-        httpClient.GetAsync($"/customer/v1/customers/by-principal/{principalId}", cancellationToken);
+        httpClient.GetAsync(
+            $"/customer/v1/customers/by-principal/{principalId}/authentication-context",
+            cancellationToken);
 }
 
 internal sealed class AuthServiceClient(HttpClient httpClient) : IAuthServiceClient
@@ -243,10 +245,10 @@ internal sealed class AuthServiceClient(HttpClient httpClient) : IAuthServiceCli
         httpClient.PostAsJsonAsync("/auth/v1/passkey/register/complete", request, ct);
 
     public Task<HttpResponseMessage> PasskeyAuthBeginAsync(object request, CancellationToken ct) =>
-        httpClient.PostAsJsonAsync("/auth/v1/passkey/auth/begin", request, ct);
+        httpClient.PostAsJsonAsync("/auth/v2/passkey/auth/begin", request, ct);
 
     public Task<HttpResponseMessage> PasskeyAuthCompleteAsync(object request, CancellationToken ct) =>
-        httpClient.PostAsJsonAsync("/auth/v1/passkey/auth/complete", request, ct);
+        httpClient.PostAsJsonAsync("/auth/v2/passkey/auth/complete", request, ct);
 
     public Task<HttpResponseMessage> ListPasskeyCredentialsAsync(Guid principalId, CancellationToken ct) =>
         httpClient.GetAsync($"/auth/v1/passkey/credentials?principalId={principalId}", ct);
