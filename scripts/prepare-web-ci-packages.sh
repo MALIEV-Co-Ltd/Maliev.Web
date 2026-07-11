@@ -29,10 +29,12 @@ mkdir -p -- "$output_path"
 find "$output_path" -maxdepth 1 -type f \( -name '*.nupkg' -o -name '*.snupkg' \) -delete
 readonly output_dir="$(cd "$output_path" && pwd)"
 
+readonly generator_project="$messaging_source/tools/Generator/Generator.csproj"
 readonly messaging_project="$messaging_source/generated/csharp/Maliev.MessagingContracts.csproj"
 readonly service_defaults_project="$aspire_source/Maliev.Aspire.ServiceDefaults/Maliev.Aspire.ServiceDefaults.csproj"
 
-(cd "$messaging_source" && dotnet run --project tools/Generator/Generator.csproj --configuration Release)
+dotnet restore "$generator_project" --configfile "$ci_nuget_config"
+(cd "$messaging_source" && dotnet run --project tools/Generator/Generator.csproj --configuration Release --no-restore)
 dotnet restore "$messaging_project" --configfile "$ci_nuget_config"
 dotnet pack "$messaging_project" \
   --configuration Release \

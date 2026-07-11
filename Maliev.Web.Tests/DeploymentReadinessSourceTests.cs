@@ -92,6 +92,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("<packageSource key=\"maliev-ci\">", ciNuGetConfig, StringComparison.Ordinal);
         Assert.Contains("<package pattern=\"Maliev.*\" />", ciNuGetConfig, StringComparison.Ordinal);
         Assert.Contains("--configfile \"$ci_nuget_config\"", packageScript, StringComparison.Ordinal);
+        Assert.Contains("dotnet restore \"$generator_project\" --configfile \"$ci_nuget_config\"", packageScript, StringComparison.Ordinal);
+        Assert.Contains("dotnet run --project tools/Generator/Generator.csproj --configuration Release --no-restore", packageScript, StringComparison.Ordinal);
         Assert.DoesNotContain("--source", packageScript, StringComparison.Ordinal);
         Assert.Contains("MALIEV-Co-Ltd/Maliev.Aspire", workflow, StringComparison.Ordinal);
         Assert.Contains("ref: 7121d57705fc1eff6c7ebb6a69e33e9c26ebfccc", workflow, StringComparison.Ordinal);
