@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Shared.Chatbot;
 using Microsoft.Extensions.Configuration;
@@ -21,9 +22,13 @@ public interface ICustomerChatbotService
     /// Sends a customer chatbot message.
     /// </summary>
     /// <param name="request">The customer chatbot request.</param>
+    /// <param name="caller">The server-authenticated caller principal.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The assistant response.</returns>
-    Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken);
+    Task<CustomerChatbotResponse> SendAsync(
+        CustomerChatbotRequest request,
+        ClaimsPrincipal caller,
+        CancellationToken cancellationToken);
 }
 
 internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient, IConfiguration? configuration = null) : ICustomerChatbotService
@@ -111,17 +116,21 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         };
     }
 
-    public async Task<CustomerChatbotResponse> SendAsync(CustomerChatbotRequest request, CancellationToken cancellationToken)
+    public async Task<CustomerChatbotResponse> SendAsync(
+        CustomerChatbotRequest request,
+        ClaimsPrincipal caller,
+        CancellationToken cancellationToken)
     {
         var message = request.Message.Trim();
         var language = NormalizeLanguage(request.Language, message);
+        var callerContext = CustomerChatbotCallerContext.FromPrincipal(caller);
 
         if (IsNaturalConversationOnly(message))
         {
             return CreateNaturalConversationResponse(request.SessionId, language);
         }
 
-        if (IsAccountSpecificTopic(message) && !HasSignedInCustomerContext(request.CustomerContext))
+        if (IsAccountSpecificTopic(message) && !callerContext.IsAuthenticatedCustomer)
         {
             return CreateSignInRequiredResponse(request.SessionId ?? Guid.NewGuid(), language);
         }
@@ -289,12 +298,6 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         return AccountSpecificTerms.Any(term => normalized.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static bool HasSignedInCustomerContext(string? customerContext)
-    {
-        return !string.IsNullOrWhiteSpace(customerContext)
-            && customerContext.Contains("Authentication: signed-in customer session", StringComparison.OrdinalIgnoreCase);
-    }
-
     private static string NormalizeConversationText(string message)
     {
         return message.Trim()
@@ -387,13 +390,38 @@ Customer message:
 
         var cleaned = new string(customerContext
             .Where(ch => !char.IsControl(ch) || ch is '\r' or '\n' or '\t')
-            .ToArray()).Trim();
+            .ToArray());
+        cleaned = string.Join(
+            '\n',
+            cleaned
+                .ReplaceLineEndings("\n")
+                .Split('\n')
+                .Where(line => !IsBrowserAuthenticationAssertion(line)))
+            .Trim();
         if (cleaned.Length > 1600)
         {
             cleaned = cleaned[..1600].Trim();
         }
 
         return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
+    }
+
+    private static bool IsBrowserAuthenticationAssertion(string line)
+    {
+        var separatorIndex = line.IndexOf(':', StringComparison.Ordinal);
+        if (separatorIndex <= 0)
+        {
+            return false;
+        }
+
+        var key = line[..separatorIndex].Trim();
+        return key.Equals("Authentication", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("Authenticated", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("Authentication status", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("User type", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("user_type", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("Customer ID", StringComparison.OrdinalIgnoreCase)
+            || key.Equals("customer_id", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeLanguage(string? language, string message)
@@ -518,5 +546,22 @@ Customer message:
         return language == "th"
             ? "ตอนนี้น้องมะลิยังตอบไม่ได้ครบถ้วน กรุณาถามเกี่ยวกับบริการของ MALIEV อีกครั้ง หรือติดต่อทีมงานเพื่อให้ช่วยตรวจไฟล์ค่ะ"
             : "Mali could not generate a complete answer right now. Please ask another MALIEV service question or contact the team for file review.";
+    }
+
+}
+
+internal readonly record struct CustomerChatbotCallerContext(bool IsAuthenticatedCustomer, Guid? CustomerId)
+{
+    public static CustomerChatbotCallerContext FromPrincipal(ClaimsPrincipal? caller)
+    {
+        if (caller?.Identity?.IsAuthenticated != true
+            || !string.Equals(caller.FindFirstValue("user_type"), "customer", StringComparison.OrdinalIgnoreCase)
+            || !Guid.TryParse(caller.FindFirstValue("customer_id"), out var customerId)
+            || customerId == Guid.Empty)
+        {
+            return default;
+        }
+
+        return new CustomerChatbotCallerContext(true, customerId);
     }
 }

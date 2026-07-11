@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Asp.Versioning;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
@@ -73,7 +72,7 @@ public sealed class ChatbotController(
 
         try
         {
-            var response = await chatbotService.SendAsync(request, cancellationToken);
+            var response = await chatbotService.SendAsync(request, User, cancellationToken);
             AppendHandoffCookie(response);
             return Ok(response);
         }
@@ -102,21 +101,13 @@ public sealed class ChatbotController(
             return;
         }
 
+        var callerContext = CustomerChatbotCallerContext.FromPrincipal(User);
         handoffCookie.Append(
             Request,
             Response,
             response.SessionId.Value,
-            ResolveUserKey(),
+            callerContext.CustomerId?.ToString("D"),
             response.Language,
-            User.Identity?.IsAuthenticated == true);
-    }
-
-    private string? ResolveUserKey()
-    {
-        return User.FindFirstValue("customer_id")
-            ?? User.FindFirstValue("customerId")
-            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue(ClaimTypes.Email)
-            ?? User.Identity?.Name;
+            callerContext.IsAuthenticatedCustomer);
     }
 }
