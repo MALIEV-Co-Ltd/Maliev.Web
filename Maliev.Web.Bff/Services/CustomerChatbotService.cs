@@ -85,6 +85,11 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
         "ของฉัน", "สถานะ", "ติดตาม", "อยู่ไหน", "ค้นหา", "ดู", "ตรวจสอบ", "ยกเลิก", "เลขที่"
     ];
 
+    private static readonly string[] CustomerResourceIdentifierLabels =
+    [
+        "id", "code", "number", "no", "ref", "reference", "เลข", "เลขที่", "รหัส"
+    ];
+
     private static readonly string[] EnglishSessionGreetings =
     [
         "Hi, Mali here. I am connected and ready to help with materials, CAD files, quotes, orders, or delivery.",
@@ -337,10 +342,19 @@ internal sealed class CustomerChatbotService(IChatbotServiceClient chatbotClient
 
                 var remainder = normalizedMessage[(resourceIndex + resourceTerm.Length)..]
                     .TrimStart(' ', '\t', ':', '#', '-', '–', '—');
-                var identifier = remainder.Split(
-                    [' ', '\t', '\r', '\n', '?', '？', ',', '.', ';', ')', ']'],
-                    StringSplitOptions.RemoveEmptyEntries)
-                    .FirstOrDefault();
+                var identifierTokens = remainder.Split(
+                    [' ', '\t', '\r', '\n', '?', '？', ',', '.', ':', '#', ';', ')', ']'],
+                    StringSplitOptions.RemoveEmptyEntries);
+                var identifierIndex = 0;
+                while (identifierIndex < identifierTokens.Length
+                    && CustomerResourceIdentifierLabels.Contains(
+                        identifierTokens[identifierIndex],
+                        StringComparer.OrdinalIgnoreCase))
+                {
+                    identifierIndex++;
+                }
+
+                var identifier = identifierTokens.ElementAtOrDefault(identifierIndex);
                 if (identifier is { Length: >= 4 } && identifier.Any(char.IsDigit))
                 {
                     return true;

@@ -308,8 +308,12 @@ public sealed class CustomerChatbotBoundaryTests
     [Theory]
     [InlineData("Where is order 12345?")]
     [InlineData("Order 12345")]
+    [InlineData("Order ID 12345")]
+    [InlineData("Order no. 12345")]
     [InlineData("Project ABC-123")]
+    [InlineData("Project code ABC-123")]
     [InlineData("Quote Q-7788")]
+    [InlineData("Quote reference Q-7788")]
     [InlineData("Account 78901")]
     public async Task SendAsync_CustomerOwnedResourceQuestionAsAnonymous_ReturnsSignInAction(string message)
     {
