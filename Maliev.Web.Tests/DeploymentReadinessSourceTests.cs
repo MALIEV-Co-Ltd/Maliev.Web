@@ -62,10 +62,13 @@ public sealed class DeploymentReadinessSourceTests
     public void PullRequestValidationBuildsTestsAndScansWithoutPublishingOrDeploying()
     {
         var workflowPath = RepoPath(".github", "workflows", "pr-validation.yml");
+        var ciNuGetConfigPath = RepoPath("NuGet.PRValidation.Config");
 
         Assert.True(File.Exists(workflowPath), "Expected a pull-request validation workflow.");
+        Assert.True(File.Exists(ciNuGetConfigPath), "Expected a credential-free PR validation NuGet configuration.");
 
         var workflow = File.ReadAllText(workflowPath);
+        var ciNuGetConfig = File.ReadAllText(ciNuGetConfigPath);
 
         Assert.Contains("pull_request:", workflow, StringComparison.Ordinal);
         Assert.Contains("branches: [develop]", workflow, StringComparison.Ordinal);
@@ -78,6 +81,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.DoesNotContain("github.token", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("NUGET_USERNAME", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("NUGET_PASSWORD", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("nuget.pkg.github.com", ciNuGetConfig, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("packageSourceCredentials", ciNuGetConfig, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("MALIEV-Co-Ltd/Maliev.Aspire", workflow, StringComparison.Ordinal);
         Assert.Contains("ref: 7121d57705fc1eff6c7ebb6a69e33e9c26ebfccc", workflow, StringComparison.Ordinal);
         Assert.Contains("MALIEV-Co-Ltd/Maliev.MessagingContracts", workflow, StringComparison.Ordinal);
