@@ -57,6 +57,7 @@ jobs:
           name: web-ci-packages
           path: .ci-packages/*.nupkg
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 1
 
   build-and-test:
