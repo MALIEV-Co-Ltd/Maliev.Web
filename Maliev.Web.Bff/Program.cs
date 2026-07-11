@@ -64,6 +64,9 @@ builder.Services.AddTransient<InternalBrowserCookieForwardingHandler>();
 builder.Services.AddScoped<QuoteUploadHandoffToken>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GoogleIdentityFlowProtector>();
+builder.Services.AddSingleton<PasskeyAuthenticationFlowProtector>();
+builder.Services.AddTrustedProxyForwarding(builder.Configuration);
+builder.Services.AddPasskeyAuthenticationRateLimiting(builder.Configuration);
 
 builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
 {
@@ -94,7 +97,8 @@ builder.AddAuthenticatedServiceClient<IPaymentServiceClient, PaymentServiceClien
 builder.AddAuthenticatedServiceClient<IDeliveryServiceClient, DeliveryServiceClient>("DeliveryService");
 builder.AddAuthenticatedServiceClient<ICustomerServiceClient, CustomerServiceClient>("CustomerService")
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
-builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService");
+builder.AddAuthenticatedServiceClient<IAuthServiceClient, AuthServiceClient>("AuthService")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.AddAuthenticatedServiceClient<ICountryServiceClient, CountryServiceClient>("CountryService");
 builder.AddAuthenticatedServiceClient<IRegistryServiceClient, RegistryServiceClient>("RegistryService");
 builder.AddAuthenticatedServiceClient<IContactServiceClient, ContactServiceClient>("ContactService");
@@ -132,6 +136,16 @@ builder.Services.AddScoped<StaticMapService>();
 
 var app = builder.Build();
 
+if (!app.Environment.IsEnvironment("Testing") &&
+    !PasskeyAuthenticationRateLimiting.HasTrustedProxyConfiguration(builder.Configuration))
+{
+    app.Logger.LogWarning(
+        "No trusted reverse proxy is configured. Passkey rate limits will conservatively group requests by the socket peer. " +
+        "Set ReverseProxy:KnownProxies or ReverseProxy:KnownNetworks to the immediate GKE ingress source before enabling passkeys.");
+}
+
+app.UseForwardedHeaders();
+
 if (app.Environment.IsDevelopment())
 {
 }
@@ -152,6 +166,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     app.UseHttpsRedirection();
 }
+app.UseRateLimiter();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

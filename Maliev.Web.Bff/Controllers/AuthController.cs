@@ -22,12 +22,19 @@ public sealed class AuthController(
     ICustomerServiceClient customerClient,
     IConfiguration configuration,
     GoogleIdentityFlowProtector googleIdentityFlowProtector,
+    PasskeyAuthenticationFlowProtector passkeyFlowProtector,
+    TimeProvider timeProvider,
+    IWebHostEnvironment environment,
     ILogger<AuthController> logger) : Controller
 {
     private const string GoogleApplication = "web";
     private const string GoogleFlowCookiePrefix = "maliev.google.flow.";
     private const string GoogleFlowCookiePath = "/auth/google";
+    private const string PasskeyApplication = "web";
+    private const string PasskeyFlowCookieName = "maliev.passkey.flow";
+    private const string PasskeyFlowCookiePath = "/auth/passkey";
     private static readonly TimeSpan GoogleFlowLifetime = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan MaximumPasskeyFlowLifetime = TimeSpan.FromMinutes(10);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private static readonly string[] CustomerAccountPermissions =
     [
@@ -405,6 +412,260 @@ public sealed class AuthController(
     }
 
     /// <summary>
+    /// Starts a browser-bound passkey ceremony without exposing AuthService flow state.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("passkey/begin")]
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
+    [RequestSizeLimit(4 * 1024)]
+    public async Task<IActionResult> BeginPasskeyAuthentication(
+        [FromBody] PasskeyBrowserBeginRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (request is null || request.ReturnUrl is { Length: > 2048 })
+        {
+            return BadRequest(PasskeyProblem(
+                "passkey_flow_invalid",
+                "Passkey sign-in could not be started. Reload this page and try again.",
+                StatusCodes.Status400BadRequest));
+        }
+
+        HttpResponseMessage authResponse;
+        try
+        {
+            authResponse = await authClient.PasskeyAuthBeginAsync(
+                new { application = PasskeyApplication },
+                cancellationToken);
+        }
+        catch (Exception exception) when (IsDownstreamUnavailable(exception, cancellationToken))
+        {
+            logger.LogWarning(
+                "AuthService passkey begin was unavailable with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return PasskeyUnavailable();
+        }
+
+        using (authResponse)
+        {
+            if (!authResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning(
+                    "AuthService passkey begin failed with status {StatusCode} and trace {TraceIdentifier}",
+                    authResponse.StatusCode,
+                    HttpContext.TraceIdentifier);
+                return PasskeyUnavailable();
+            }
+
+            var options = await ReadJsonAsync<PasskeyAuthBeginResponse>(
+                authResponse,
+                cancellationToken);
+            var now = timeProvider.GetUtcNow();
+            if (!IsValidBeginResponse(options, now))
+            {
+                logger.LogWarning(
+                    "AuthService returned incomplete passkey options with trace {TraceIdentifier}",
+                    HttpContext.TraceIdentifier);
+                return PasskeyUnavailable();
+            }
+
+            var lifetime = options!.ExpiresAtUtc - now;
+            var protectedFlow = passkeyFlowProtector.Protect(
+                options.FlowId,
+                NormalizeReturnUrl(request.ReturnUrl),
+                options.ExpiresAtUtc);
+            Response.Cookies.Append(
+                PasskeyFlowCookieName,
+                protectedFlow,
+                CreatePasskeyFlowCookieOptions(lifetime));
+
+            return Ok(new
+            {
+                publicKey = new
+                {
+                    rpId = options.RpId,
+                    challenge = options.Challenge,
+                    allowCredentials = options.AllowCredentials,
+                    userVerification = options.UserVerification,
+                    timeout = options.Timeout
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Completes a protected passkey flow and creates a session from canonical customer data.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("passkey/complete")]
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
+    [RequestSizeLimit(32 * 1024)]
+    public async Task<IActionResult> CompletePasskeyAuthentication(
+        [FromBody] PasskeyBrowserCompleteRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (request is null || !IsValidAssertionRequest(request))
+        {
+            return BadRequest(PasskeyProblem(
+                "passkey_flow_invalid",
+                "Passkey sign-in data was incomplete. Reload this page and try again.",
+                StatusCodes.Status400BadRequest));
+        }
+
+        Request.Cookies.TryGetValue(PasskeyFlowCookieName, out var protectedState);
+        DeletePasskeyFlowCookie();
+        if (!passkeyFlowProtector.TryUnprotect(protectedState, out var flow) || flow is null)
+        {
+            return BadRequest(PasskeyProblem(
+                "passkey_flow_invalid",
+                "Passkey sign-in expired or was already used. Reload this page and try again.",
+                StatusCodes.Status400BadRequest));
+        }
+
+        HttpResponseMessage authResponse;
+        try
+        {
+            authResponse = await authClient.PasskeyAuthCompleteAsync(new
+            {
+                application = PasskeyApplication,
+                flow_id = flow.FlowId,
+                credential_id = request.CredentialId,
+                authenticator_data = request.AuthenticatorData,
+                client_data_json = request.ClientDataJson,
+                signature = request.Signature,
+                user_handle = request.UserHandle
+            }, cancellationToken);
+        }
+        catch (Exception exception) when (IsDownstreamUnavailable(exception, cancellationToken))
+        {
+            logger.LogWarning(
+                "AuthService passkey completion was unavailable with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return PasskeyUnavailable();
+        }
+
+        PasskeyAuthCompleteResponse? verifiedIdentity;
+        using (authResponse)
+        {
+            if (!authResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning(
+                    "AuthService passkey completion failed with status {StatusCode} and trace {TraceIdentifier}",
+                    authResponse.StatusCode,
+                    HttpContext.TraceIdentifier);
+                if (authResponse.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return Unauthorized(PasskeyProblem(
+                        "passkey_identity_invalid",
+                        "MALIEV could not verify this passkey. Reload this page and try again.",
+                        StatusCodes.Status401Unauthorized));
+                }
+
+                return PasskeyUnavailable();
+            }
+
+            verifiedIdentity = await ReadJsonAsync<PasskeyAuthCompleteResponse>(
+                authResponse,
+                cancellationToken);
+        }
+
+        if (verifiedIdentity is not
+            {
+                Success: true,
+                PrincipalId: { } principalId,
+                Email: { Length: > 0 and <= 320 } verifiedEmail
+            } || principalId == Guid.Empty)
+        {
+            logger.LogWarning(
+                "AuthService returned incomplete verified passkey identity with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return PasskeyIdentityIncomplete();
+        }
+
+        HttpResponseMessage customerResponse;
+        try
+        {
+            customerResponse = await customerClient.GetCustomerByPrincipalIdAsync(
+                principalId,
+                cancellationToken);
+        }
+        catch (Exception exception) when (IsDownstreamUnavailable(exception, cancellationToken))
+        {
+            logger.LogWarning(
+                "CustomerService passkey identity lookup was unavailable with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return PasskeyUnavailable();
+        }
+
+        CustomerAuthenticationContextResponse? customer;
+        using (customerResponse)
+        {
+            if (!customerResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning(
+                    "CustomerService passkey identity lookup failed with status {StatusCode} and trace {TraceIdentifier}",
+                    customerResponse.StatusCode,
+                    HttpContext.TraceIdentifier);
+                return (int)customerResponse.StatusCode >= StatusCodes.Status500InternalServerError
+                    ? PasskeyUnavailable()
+                    : PasskeyIdentityIncomplete();
+            }
+
+            customer = await ReadJsonAsync<CustomerAuthenticationContextResponse>(
+                customerResponse,
+                cancellationToken);
+        }
+
+        if (customer is null ||
+            customer.CustomerId == Guid.Empty ||
+            customer.PrincipalId != principalId ||
+            string.IsNullOrWhiteSpace(customer.CustomerEmail) ||
+            customer.CustomerEmail.Length > 320 ||
+            string.IsNullOrWhiteSpace(customer.AccountEmail) ||
+            customer.AccountEmail.Length > 320 ||
+            string.IsNullOrWhiteSpace(customer.AccountStatus) ||
+            customer.AccountEmailVerified is not { } accountEmailVerified ||
+            !string.Equals(customer.CustomerEmail, customer.AccountEmail, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(customer.AccountEmail, verifiedEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning(
+                "AuthService and CustomerService passkey identities did not match with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return PasskeyIdentityIncomplete();
+        }
+
+        if (!string.Equals(customer.AccountStatus, "Active", StringComparison.Ordinal))
+        {
+            logger.LogWarning(
+                "Passkey session rejected because the canonical customer account is not active with trace {TraceIdentifier}",
+                HttpContext.TraceIdentifier);
+            return Unauthorized(PasskeyProblem(
+                "passkey_identity_invalid",
+                "MALIEV could not sign in this account with this passkey. Continue with another sign-in method or contact support.",
+                StatusCodes.Status401Unauthorized));
+        }
+
+        var canonicalName = !string.IsNullOrWhiteSpace(customer.Name)
+            ? customer.Name.Trim()
+            : $"{customer.FirstName} {customer.LastName}".Trim();
+        await SignInCustomerAsync(new AuthUser
+        {
+            UserId = principalId.ToString(),
+            PrincipalId = principalId.ToString(),
+            CustomerId = customer.CustomerId.ToString(),
+            Email = customer.CustomerEmail,
+            Name = canonicalName,
+            ProfileImageUrl = customer.ProfileImageUrl,
+            EmailVerified = accountEmailVerified
+        });
+        logger.LogInformation(
+            "Passkey customer session issued with trace {TraceIdentifier}",
+            HttpContext.TraceIdentifier);
+        return Ok(new { redirectUrl = flow.ReturnUrl });
+    }
+
+    /// <summary>
     /// Rejects the retired browser-authored passkey identity handoff.
     /// </summary>
     [AllowAnonymous]
@@ -499,6 +760,112 @@ public sealed class AuthController(
         return problem;
     }
 
+    private static ProblemDetails PasskeyProblem(string code, string detail, int statusCode)
+    {
+        var problem = new ProblemDetails
+        {
+            Type = $"https://www.maliev.com/problems/{code.Replace('_', '-')}",
+            Title = "Passkey sign-in could not be completed",
+            Detail = detail,
+            Status = statusCode
+        };
+        problem.Extensions["code"] = code;
+        return problem;
+    }
+
+    private ObjectResult PasskeyUnavailable() => StatusCode(
+        StatusCodes.Status503ServiceUnavailable,
+        PasskeyProblem(
+            "passkey_temporarily_unavailable",
+            "Passkey sign-in is temporarily unavailable. Continue with Google or email, or try again shortly.",
+            StatusCodes.Status503ServiceUnavailable));
+
+    private ObjectResult PasskeyIdentityIncomplete() => StatusCode(
+        StatusCodes.Status502BadGateway,
+        PasskeyProblem(
+            "passkey_identity_incomplete",
+            "Your passkey was verified, but MALIEV could not safely start the customer session. Try again shortly.",
+            StatusCodes.Status502BadGateway));
+
+    private static async Task<T?> ReadJsonAsync<T>(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<T>(JsonOptions, cancellationToken);
+        }
+        catch (Exception exception) when (
+            exception is JsonException or NotSupportedException or HttpRequestException or IOException)
+        {
+            return default;
+        }
+    }
+
+    private static bool IsDownstreamUnavailable(
+        Exception exception,
+        CancellationToken requestCancellationToken) =>
+        exception is HttpRequestException ||
+        exception is TaskCanceledException && !requestCancellationToken.IsCancellationRequested;
+
+    private static bool IsValidBeginResponse(
+        PasskeyAuthBeginResponse? response,
+        DateTimeOffset now) =>
+        response is not null &&
+        IsCanonicalBase64Url(response.FlowId, 32, 32) &&
+        response.ExpiresAtUtc - now >= TimeSpan.FromSeconds(30) &&
+        response.ExpiresAtUtc - now <= MaximumPasskeyFlowLifetime &&
+        response.RpId is { Length: > 0 and <= 253 } &&
+        Uri.CheckHostName(response.RpId) != UriHostNameType.Unknown &&
+        IsCanonicalBase64Url(response.Challenge, 32, 64) &&
+        response.AllowCredentials is { Count: <= 64 } &&
+        response.AllowCredentials.All(credential =>
+            string.Equals(credential.Type, "public-key", StringComparison.Ordinal) &&
+            IsCanonicalBase64Url(credential.Id, 1, 1024)) &&
+        string.Equals(response.UserVerification, "required", StringComparison.Ordinal) &&
+        response.Timeout is >= 30_000 and <= 600_000;
+
+    private static bool IsValidAssertionRequest(PasskeyBrowserCompleteRequest request) =>
+        IsCanonicalBase64Url(request.CredentialId, 1, 1024) &&
+        IsCanonicalBase64Url(request.AuthenticatorData, 37, 4096) &&
+        IsCanonicalBase64Url(request.ClientDataJson, 2, 8192) &&
+        IsCanonicalBase64Url(request.Signature, 1, 2048) &&
+        IsCanonicalBase64Url(request.UserHandle, 1, 64);
+
+    private static bool IsCanonicalBase64Url(
+        string? value,
+        int minimumBytes,
+        int maximumBytes)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            value.Length > ((maximumBytes + 2) / 3 * 4) ||
+            value.Contains('=') ||
+            value.Contains('+') ||
+            value.Contains('/') ||
+            value.Any(character =>
+                !(character is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '0' and <= '9' or '-' or '_')))
+        {
+            return false;
+        }
+
+        try
+        {
+            var padded = value.Replace('-', '+').Replace('_', '/');
+            padded += new string('=', (4 - padded.Length % 4) % 4);
+            var decoded = Convert.FromBase64String(padded);
+            return decoded.Length >= minimumBytes &&
+                decoded.Length <= maximumBytes &&
+                string.Equals(ToBase64Url(decoded), value, StringComparison.Ordinal);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+
+    private static string ToBase64Url(byte[] value) =>
+        Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
     private static string GetGoogleFlowCookieName(string flowId) => $"{GoogleFlowCookiePrefix}{flowId}";
 
     private CookieOptions CreateGoogleFlowCookieOptions(TimeSpan lifetime) => new()
@@ -520,6 +887,28 @@ public sealed class AuthController(
             SameSite = SameSiteMode.Strict,
             IsEssential = true,
             Path = GoogleFlowCookiePath
+        });
+    }
+
+    private CookieOptions CreatePasskeyFlowCookieOptions(TimeSpan lifetime) => new()
+    {
+        HttpOnly = true,
+        Secure = !environment.IsEnvironment("Testing"),
+        SameSite = SameSiteMode.Strict,
+        IsEssential = true,
+        Path = PasskeyFlowCookiePath,
+        MaxAge = lifetime
+    };
+
+    private void DeletePasskeyFlowCookie()
+    {
+        Response.Cookies.Delete(PasskeyFlowCookieName, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !environment.IsEnvironment("Testing"),
+            SameSite = SameSiteMode.Strict,
+            IsEssential = true,
+            Path = PasskeyFlowCookiePath
         });
     }
 
@@ -650,6 +1039,32 @@ public sealed class AuthController(
         public string FlowId { get; set; } = string.Empty;
     }
 
+    /// <summary>Browser request to start a protected passkey flow.</summary>
+    public sealed class PasskeyBrowserBeginRequest
+    {
+        /// <summary>Requested post-authentication return location.</summary>
+        public string? ReturnUrl { get; set; }
+    }
+
+    /// <summary>Browser WebAuthn assertion without trusted identity or flow fields.</summary>
+    public sealed class PasskeyBrowserCompleteRequest
+    {
+        /// <summary>Base64URL credential identifier.</summary>
+        public string CredentialId { get; set; } = string.Empty;
+
+        /// <summary>Base64URL authenticator data.</summary>
+        public string AuthenticatorData { get; set; } = string.Empty;
+
+        /// <summary>Base64URL raw client data JSON bytes.</summary>
+        public string ClientDataJson { get; set; } = string.Empty;
+
+        /// <summary>Base64URL authenticator signature.</summary>
+        public string Signature { get; set; } = string.Empty;
+
+        /// <summary>Base64URL discoverable-credential user handle.</summary>
+        public string UserHandle { get; set; } = string.Empty;
+    }
+
     /// <summary>
     /// Posted email/password sign-up form.
     /// </summary>
@@ -702,6 +1117,87 @@ public sealed class AuthController(
     {
         [JsonPropertyName("error")]
         public string? Error { get; set; }
+    }
+
+    private sealed class PasskeyAuthBeginResponse
+    {
+        [JsonPropertyName("flow_id")]
+        public string FlowId { get; set; } = string.Empty;
+
+        [JsonPropertyName("expires_at_utc")]
+        public DateTimeOffset ExpiresAtUtc { get; set; }
+
+        [JsonPropertyName("rp_id")]
+        public string RpId { get; set; } = string.Empty;
+
+        [JsonPropertyName("challenge")]
+        public string Challenge { get; set; } = string.Empty;
+
+        [JsonPropertyName("allow_credentials")]
+        public List<PasskeyAllowedCredentialResponse> AllowCredentials { get; set; } = [];
+
+        [JsonPropertyName("user_verification")]
+        public string UserVerification { get; set; } = string.Empty;
+
+        [JsonPropertyName("timeout")]
+        public int Timeout { get; set; }
+    }
+
+    private sealed class PasskeyAllowedCredentialResponse
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = string.Empty;
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+    }
+
+    private sealed class PasskeyAuthCompleteResponse
+    {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonPropertyName("error")]
+        public string? Error { get; set; }
+
+        [JsonPropertyName("principal_id")]
+        public Guid? PrincipalId { get; set; }
+
+        [JsonPropertyName("email")]
+        public string? Email { get; set; }
+    }
+
+    private sealed class CustomerAuthenticationContextResponse
+    {
+        [JsonPropertyName("customerId")]
+        public Guid CustomerId { get; set; }
+
+        [JsonPropertyName("principalId")]
+        public Guid? PrincipalId { get; set; }
+
+        [JsonPropertyName("firstName")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [JsonPropertyName("lastName")]
+        public string LastName { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("customerEmail")]
+        public string CustomerEmail { get; set; } = string.Empty;
+
+        [JsonPropertyName("accountEmail")]
+        public string AccountEmail { get; set; } = string.Empty;
+
+        [JsonPropertyName("accountStatus")]
+        public string AccountStatus { get; set; } = string.Empty;
+
+        [JsonPropertyName("accountEmailVerified")]
+        public bool? AccountEmailVerified { get; set; }
+
+        [JsonPropertyName("profileImageUrl")]
+        public string? ProfileImageUrl { get; set; }
     }
 
     private sealed class AuthUser

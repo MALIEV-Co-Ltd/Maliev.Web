@@ -1,120 +1,95 @@
 (() => {
-    window.malievPasskey = window.malievPasskey || {};
+    const beginEndpoint = '/auth/passkey/begin';
+    const completeEndpoint = '/auth/passkey/complete';
 
-    window.malievPasskey.isAvailable = () => {
-        return typeof PublicKeyCredential !== 'undefined';
-    };
+    window.malievPasskey = {
+        isAvailable() {
+            return typeof window.PublicKeyCredential !== 'undefined'
+                && typeof navigator.credentials?.get === 'function';
+        },
 
-    window.malievPasskey.createPasskey = async (registerBeginUrl, registerCompleteUrl, principalId, deviceName) => {
-        try {
-            const beginResp = await fetch(registerBeginUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ principalId })
-            });
-            if (!beginResp.ok) return { success: false, error: 'Failed to start registration' };
+        async authenticate(returnUrl = '/account') {
+            if (!this.isAvailable()) {
+                return { success: false, error: 'Passkeys are not available in this browser.' };
+            }
 
-            const options = await beginResp.json();
+            try {
+                const beginResponse = await fetch(beginEndpoint, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ returnUrl })
+                });
+                if (!beginResponse.ok) {
+                    return await failureFrom(beginResponse, 'Passkey sign-in could not be started.');
+                }
 
-            const publicKey = {
-                challenge: base64urlToArray(options.challenge),
-                rp: { id: options.rpId, name: options.rpName },
-                user: {
-                    id: base64urlToArray(options.userId),
-                    name: options.userName,
-                    displayName: options.userDisplayName
-                },
-                pubKeyCredParams: options.pubKeyCredParams,
-                authenticatorSelection: options.authenticatorSelection,
-                attestation: options.attestation || 'none'
-            };
+                const begin = await beginResponse.json();
+                const publicKey = begin.publicKey;
+                publicKey.challenge = base64urlToArrayBuffer(publicKey.challenge);
+                publicKey.allowCredentials = (publicKey.allowCredentials || []).map(credential => ({
+                    ...credential,
+                    id: base64urlToArrayBuffer(credential.id)
+                }));
 
-            const credential = await navigator.credentials.create({ publicKey });
-            if (!credential) return { success: false, error: 'User cancelled' };
+                const assertion = await navigator.credentials.get({ publicKey });
+                if (!assertion || !assertion.response?.userHandle) {
+                    return { success: false, error: 'This passkey could not identify its MALIEV account.' };
+                }
 
-            const completeResp = await fetch(registerCompleteUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    principalId,
-                    credentialId: arrayToBase64url(new Uint8Array(credential.rawId)),
-                    publicKey: arrayBufferToPem(credential.response.getPublicKey ? credential.response.getPublicKey() : null),
-                    deviceName: deviceName || 'Passkey',
-                    clientDataJson: new TextDecoder().decode(credential.response.clientDataJSON),
-                    attestationObject: arrayToBase64url(new Uint8Array(credential.response.attestationObject))
-                })
-            });
-            return await completeResp.json();
-        } catch (e) {
-            return { success: false, error: e.message || 'Passkey registration failed' };
+                const completeResponse = await fetch(completeEndpoint, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        credentialId: arrayBufferToBase64url(assertion.rawId),
+                        authenticatorData: arrayBufferToBase64url(assertion.response.authenticatorData),
+                        clientDataJson: arrayBufferToBase64url(assertion.response.clientDataJSON),
+                        signature: arrayBufferToBase64url(assertion.response.signature),
+                        userHandle: arrayBufferToBase64url(assertion.response.userHandle)
+                    })
+                });
+                if (!completeResponse.ok) {
+                    return await failureFrom(completeResponse, 'Passkey sign-in could not be completed.');
+                }
+
+                return { success: true, ...(await completeResponse.json()) };
+            } catch (error) {
+                if (error?.name === 'NotAllowedError') {
+                    return { success: false, error: 'Passkey sign-in was cancelled or timed out.' };
+                }
+
+                return { success: false, error: 'Passkey sign-in is temporarily unavailable.' };
+            }
         }
     };
 
-    window.malievPasskey.authenticatePasskey = async (authBeginUrl, authCompleteUrl, principalId) => {
+    async function failureFrom(response, fallback) {
         try {
-            const beginResp = await fetch(authBeginUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ principalId: principalId || null })
-            });
-            if (!beginResp.ok) return { success: false, error: 'Failed to start authentication' };
-
-            const options = await beginResp.json();
-
-            const publicKey = {
-                challenge: base64urlToArray(options.challenge),
-                rpId: options.rpId,
-                allowCredentials: options.allowCredentials || [],
-                userVerification: options.userVerification || 'required'
-            };
-
-            const assertion = await navigator.credentials.get({ publicKey });
-            if (!assertion) return { success: false, error: 'User cancelled' };
-
-            const userHandle = assertion.response.userHandle
-                ? arrayToBase64url(new Uint8Array(assertion.response.userHandle))
-                : null;
-
-            const completeResp = await fetch(authCompleteUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    credentialId: arrayToBase64url(new Uint8Array(assertion.rawId)),
-                    signature: arrayToBase64url(new Uint8Array(assertion.response.signature)),
-                    authenticatorData: arrayToBase64url(new Uint8Array(assertion.response.authenticatorData)),
-                    clientDataJson: new TextDecoder().decode(assertion.response.clientDataJSON),
-                    userHandle: userHandle
-                })
-            });
-            return await completeResp.json();
-        } catch (e) {
-            return { success: false, error: e.message || 'Passkey authentication failed' };
+            const problem = await response.json();
+            return { success: false, error: problem.detail || fallback, code: problem.code || null };
+        } catch {
+            return { success: false, error: fallback };
         }
-    };
-
-    window.getAntiForgeryToken = () => {
-        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-        return tokenElement ? tokenElement.value : '';
-    };
-
-    function base64urlToArray(base64url) {
-        const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-        const padding = 4 - (base64.length % 4);
-        const padded = padding < 4 ? base64 + '='.repeat(padding) : base64;
-        const raw = atob(padded);
-        return Uint8Array.from(raw, c => c.charCodeAt(0)).buffer;
     }
 
-    function arrayToBase64url(array) {
+    function base64urlToArrayBuffer(value) {
+        const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+        const binary = window.atob(padded);
+        return Uint8Array.from(binary, character => character.charCodeAt(0)).buffer;
+    }
+
+    function arrayBufferToBase64url(value) {
+        const bytes = new Uint8Array(value);
         let binary = '';
-        for (let i = 0; i < array.length; i++) binary += String.fromCharCode(array[i]);
-        const base64 = btoa(binary);
-        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    }
+        for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+        }
 
-    function arrayBufferToPem(keyData) {
-        if (!keyData) return '';
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(keyData)));
-        return '-----BEGIN PUBLIC KEY-----\n' + base64.match(/.{1,64}/g).join('\n') + '\n-----END PUBLIC KEY-----';
+        return window.btoa(binary)
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/g, '');
     }
 })();
