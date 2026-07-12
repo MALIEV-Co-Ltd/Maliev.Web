@@ -72,7 +72,18 @@ internal sealed class UploadServiceClient(HttpClient httpClient, IHttpClientFact
                 throw new BackendUnavailableException("UploadService", $"UploadService returned {(int)response.StatusCode} while loading upload metadata.");
             }
 
-            return await response.Content.ReadFromJsonAsync<UploadResponse>(cancellationToken);
+            var upload = await response.Content.ReadFromJsonAsync<UploadResponse>(cancellationToken);
+            if (upload is null)
+            {
+                return null;
+            }
+
+            var canonicalPath = upload.StoragePath.Replace('\\', '/');
+            return upload with
+            {
+                FileName = Path.GetFileName(canonicalPath),
+                StoragePath = canonicalPath
+            };
         }
         catch (BackendUnavailableException)
         {
@@ -157,7 +168,11 @@ internal sealed record UploadInitiationResponse(string UploadId, string SessionU
 
 internal sealed record UploadResponse
 {
+    public string? FileId { get; init; }
+
     public string UploadId { get; init; } = string.Empty;
+
+    public string ServiceId { get; init; } = string.Empty;
 
     public string FileName { get; init; } = string.Empty;
 

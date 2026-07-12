@@ -170,7 +170,10 @@ public sealed class QuoteController(
     [HttpPost("uploads/handoff-token")]
     [ProducesResponseType(typeof(WebUploadHandoffTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public IActionResult CreateHandoffToken([FromBody] WebUploadHandoffTokenRequest request)
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> CreateHandoffToken(
+        [FromBody] WebUploadHandoffTokenRequest request,
+        CancellationToken cancellationToken)
     {
         var validationError = ValidateHandoffTokenRequest(request);
         if (validationError is not null)
@@ -178,7 +181,35 @@ public sealed class QuoteController(
             return BadRequest(validationError);
         }
 
-        var token = handoffToken.Create(request);
+        var canonicalFiles = new List<WebUploadHandoffFileDto>(request.Files.Count);
+        try
+        {
+            foreach (var file in request.Files)
+            {
+                var canonicalFile = await uploadService.ResolveCompletedHandoffFileAsync(
+                    request.QuoteSessionId,
+                    file,
+                    cancellationToken);
+                if (canonicalFile is null)
+                {
+                    return BadRequest(HandoffProblem(
+                        "Invalid uploaded file handoff",
+                        "One or more uploaded files could not be verified for QuoteEngine handoff."));
+                }
+
+                canonicalFiles.Add(canonicalFile);
+            }
+        }
+        catch (BackendUnavailableException ex)
+        {
+            return BackendUnavailable(ex);
+        }
+
+        var token = handoffToken.Create(new WebUploadHandoffTokenRequest
+        {
+            QuoteSessionId = request.QuoteSessionId,
+            Files = canonicalFiles
+        });
         if (token.Length > WebQuoteUploadConstraints.MaxQuoteEngineHandoffTokenLength)
         {
             return BadRequest(HandoffProblem(

@@ -18,4 +18,10 @@ public interface IQuoteUploadService
 
     /// <summary>Gets the current upload-backed analysis status for polling clients.</summary>
     Task<WebAnalysisStatusResponse> GetAnalysisStatusAsync(string uploadId, CancellationToken cancellationToken);
+
+    /// <summary>Resolves and validates one completed Web upload from authoritative UploadService metadata.</summary>
+    Task<WebUploadHandoffFileDto?> ResolveCompletedHandoffFileAsync(
+        Guid quoteSessionId,
+        WebUploadHandoffFileDto claimedFile,
+        CancellationToken cancellationToken);
 }

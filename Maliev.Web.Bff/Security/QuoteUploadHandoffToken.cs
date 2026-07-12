@@ -41,9 +41,10 @@ public sealed class QuoteUploadHandoffToken(IConfiguration configuration, IHostE
         var configured = configuration["QuoteUploadHandoff:SigningKey"];
         if (string.IsNullOrWhiteSpace(configured))
         {
-            if (hostEnvironment.IsProduction())
+            if (!hostEnvironment.IsDevelopment() && !hostEnvironment.IsEnvironment("Testing"))
             {
-                throw new InvalidOperationException("QuoteUploadHandoff:SigningKey must be configured in production.");
+                throw new InvalidOperationException(
+                    "QuoteUploadHandoff:SigningKey must be configured outside Development and Testing.");
             }
 
             configured = "maliev-local-development-quote-upload-handoff-key";
