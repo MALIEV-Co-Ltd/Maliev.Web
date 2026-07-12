@@ -66,12 +66,69 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
         };
     }
 
+    public async Task<WebUploadHandoffFileDto?> ResolveCompletedHandoffFileAsync(
+        Guid quoteSessionId,
+        WebUploadHandoffFileDto claimedFile,
+        CancellationToken cancellationToken)
+    {
+        if (quoteSessionId == Guid.Empty || string.IsNullOrWhiteSpace(claimedFile.UploadId))
+        {
+            return null;
+        }
+
+        var uploadId = claimedFile.UploadId.Trim();
+        var upload = await uploadClient.GetFileAsync(uploadId, cancellationToken);
+        if (upload is null ||
+            !string.Equals(upload.UploadId, uploadId, StringComparison.Ordinal) ||
+            !string.Equals(upload.ServiceId, "WebBff", StringComparison.Ordinal) ||
+            !string.Equals(upload.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var canonicalPath = upload.StoragePath.Replace('\\', '/');
+        var expectedPrefix = $"quotes/temp/{quoteSessionId:N}/";
+        var canonicalName = Path.GetFileName(canonicalPath);
+        var claimedName = Path.GetFileName(claimedFile.FileName.Replace('\\', '/'))
+            .Replace(" ", "-", StringComparison.Ordinal);
+        if (!string.Equals(upload.StoragePath, canonicalPath, StringComparison.Ordinal) ||
+            !canonicalPath.StartsWith(expectedPrefix, StringComparison.Ordinal) ||
+            !WebQuoteUploadConstraints.IsSupportedFileName(canonicalName) ||
+            upload.FileSize is <= 0 or > WebQuoteUploadConstraints.MaxFileSizeBytes ||
+            string.IsNullOrWhiteSpace(upload.ContentType) ||
+            !Guid.TryParse(upload.FileId, out var fileId) ||
+            !string.Equals(claimedFile.UploadId, uploadId, StringComparison.Ordinal) ||
+            !string.Equals(claimedName, canonicalName, StringComparison.Ordinal) ||
+            !string.Equals(claimedFile.StoragePath, canonicalPath, StringComparison.Ordinal) ||
+            !string.Equals(claimedFile.ContentType, upload.ContentType, StringComparison.OrdinalIgnoreCase) ||
+            claimedFile.FileSizeBytes != upload.FileSize ||
+            !string.Equals(claimedFile.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return new WebUploadHandoffFileDto
+        {
+            UploadId = upload.UploadId,
+            FileId = fileId,
+            FileName = canonicalName,
+            StoragePath = canonicalPath,
+            ContentType = upload.ContentType,
+            FileSizeBytes = upload.FileSize,
+            Status = "Completed"
+        };
+    }
+
     private static WebUploadCompleteResponse MapUpload(UploadResponse upload)
     {
         return new WebUploadCompleteResponse
         {
             UploadId = upload.UploadId,
-            FileId = Guid.TryParse(upload.UploadId, out var fileId) ? fileId : null,
+            FileId = Guid.TryParse(upload.FileId, out var fileId)
+                ? fileId
+                : Guid.TryParse(upload.UploadId, out var uploadFileId)
+                    ? uploadFileId
+                    : null,
             FileName = upload.FileName,
             StoragePath = upload.StoragePath,
             Status = upload.Status

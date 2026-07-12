@@ -448,6 +448,100 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
+    /// Verifies browser-provided upload metadata cannot override the UploadService source of truth.
+    /// </summary>
+    /// <param name="forgery">The browser field or authoritative state to forge.</param>
+    [Theory]
+    [InlineData("uploadId")]
+    [InlineData("status")]
+    [InlineData("storagePath")]
+    [InlineData("fileSize")]
+    [InlineData("fileName")]
+    [InlineData("contentType")]
+    [InlineData("serviceId")]
+    public async Task POST_QuoteUploadHandoffToken_ForgedUploadMetadata_ReturnsBadRequest(string forgery)
+    {
+        var quoteSessionId = Guid.NewGuid();
+        var canonical = CreateCanonicalUpload(quoteSessionId);
+        var uploadClient = new AuthoritativeUploadServiceClient(
+            forgery == "uploadId"
+                ? []
+                : [canonical with
+                {
+                    Status = forgery == "status" ? "Processing" : "Completed",
+                    ServiceId = forgery == "serviceId" ? "OtherService" : "WebBff"
+                }]);
+        using var handoffFactory = CreateUploadHandoffFactory(uploadClient);
+        using var client = handoffFactory.CreateClient();
+        var requestFile = new WebUploadHandoffFileDto
+        {
+            UploadId = canonical.UploadId,
+            FileName = forgery == "fileName" ? "different.step" : canonical.FileName,
+            StoragePath = forgery == "storagePath"
+                ? $"quotes/temp/{quoteSessionId:N}/999/different.step"
+                : canonical.StoragePath,
+            ContentType = forgery == "contentType" ? "application/octet-stream" : canonical.ContentType,
+            FileSizeBytes = forgery == "fileSize" ? canonical.FileSize + 1 : canonical.FileSize,
+            Status = "Completed"
+        };
+
+        using var response = await client.PostAsJsonAsync(
+            "/web/v1/quote/uploads/handoff-token",
+            new WebUploadHandoffTokenRequest
+            {
+                QuoteSessionId = quoteSessionId,
+                Files = [requestFile]
+            });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    /// <summary>
+    /// Verifies the signed handoff contains canonical UploadService values.
+    /// </summary>
+    [Fact]
+    public async Task POST_QuoteUploadHandoffToken_CanonicalCompletedUpload_ReturnsCanonicalSignedToken()
+    {
+        var quoteSessionId = Guid.NewGuid();
+        var canonical = CreateCanonicalUpload(quoteSessionId);
+        var uploadClient = new AuthoritativeUploadServiceClient([canonical]);
+        using var handoffFactory = CreateUploadHandoffFactory(uploadClient);
+        using var client = handoffFactory.CreateClient();
+
+        using var response = await client.PostAsJsonAsync(
+            "/web/v1/quote/uploads/handoff-token",
+            new WebUploadHandoffTokenRequest
+            {
+                QuoteSessionId = quoteSessionId,
+                Files =
+                [
+                    new WebUploadHandoffFileDto
+                    {
+                        UploadId = canonical.UploadId,
+                        FileName = canonical.FileName,
+                        StoragePath = canonical.StoragePath,
+                        ContentType = canonical.ContentType,
+                        FileSizeBytes = canonical.FileSize,
+                        Status = canonical.Status
+                    }
+                ]
+            });
+        var handoff = await response.Content.ReadFromJsonAsync<WebUploadHandoffTokenResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(handoff);
+        var payloadJson = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(handoff.HandoffToken.Split('.')[0]));
+        using var payload = JsonDocument.Parse(payloadJson);
+        var signedFile = payload.RootElement.GetProperty("files")[0];
+        Assert.Equal(canonical.UploadId, signedFile.GetProperty("uploadId").GetString());
+        Assert.Equal(canonical.FileName, signedFile.GetProperty("fileName").GetString());
+        Assert.Equal(canonical.StoragePath, signedFile.GetProperty("storagePath").GetString());
+        Assert.Equal(canonical.ContentType, signedFile.GetProperty("contentType").GetString());
+        Assert.Equal(canonical.FileSize, signedFile.GetProperty("fileSizeBytes").GetInt64());
+        Assert.Equal("Completed", signedFile.GetProperty("status").GetString());
+    }
+
+    /// <summary>
     /// Verifies customer website contact messages are routed through the contact boundary.
     /// </summary>
     [Fact]
@@ -911,6 +1005,63 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         }
     }
 
+    private WebApplicationFactory<Program> CreateUploadHandoffFactory(IUploadServiceClient uploadClient)
+    {
+        return _factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUploadServiceClient>();
+            services.RemoveAll<IQuoteUploadService>();
+            services.AddSingleton(uploadClient);
+            services.AddScoped<IQuoteUploadService, QuoteUploadService>();
+        }));
+    }
+
+    private static UploadResponse CreateCanonicalUpload(Guid quoteSessionId)
+    {
+        return new UploadResponse
+        {
+            FileId = Guid.NewGuid().ToString("D"),
+            UploadId = "web-upload-canonical",
+            ServiceId = "WebBff",
+            FileName = "fixture.step",
+            ContentType = "application/step",
+            FileSize = 420_000,
+            StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/fixture.step",
+            Status = "Completed"
+        };
+    }
+
+    private sealed class AuthoritativeUploadServiceClient(IEnumerable<UploadResponse> uploads) : IUploadServiceClient
+    {
+        private readonly IReadOnlyDictionary<string, UploadResponse> _uploads = uploads
+            .ToDictionary(upload => upload.UploadId, StringComparer.Ordinal);
+
+        public Task<UploadInitiationResponse> InitiateResumableUploadAsync(
+            UploadInitiationRequest request,
+            CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task<UploadResponse> CompleteResumableUploadAsync(
+            string uploadId,
+            CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task<HttpResponseMessage> ResumeResumableUploadAsync(
+            string uploadId,
+            Stream content,
+            string? contentType,
+            long? contentLength,
+            string contentRange,
+            CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+
+        public Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
+            => Task.FromResult(_uploads.GetValueOrDefault(uploadId));
+
+        public Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+    }
+
     private sealed class FakeQuoteUploadService : IQuoteUploadService
     {
         public Task<WebUploadInitiationResponse> InitiateAsync(WebUploadInitiationRequest request, CancellationToken cancellationToken)
@@ -948,6 +1099,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 Message = "File upload is complete."
             });
         }
+
+        public Task<WebUploadHandoffFileDto?> ResolveCompletedHandoffFileAsync(
+            Guid quoteSessionId,
+            WebUploadHandoffFileDto claimedFile,
+            CancellationToken cancellationToken)
+            => Task.FromResult<WebUploadHandoffFileDto?>(claimedFile);
     }
 
     private sealed class FakeCheckoutDraftService : ICheckoutDraftService
