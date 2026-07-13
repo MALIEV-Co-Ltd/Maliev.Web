@@ -169,12 +169,14 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     /// <summary>
-    /// Verifies quote estimates preserve explicit bulk-discount fields returned by pricing.
+    /// Verifies browser-authored volume cannot reach pricing before authoritative geometry is available.
     /// </summary>
     [Fact]
-    public async Task POST_QuoteEstimate_RoutesThroughQuoteService()
+    public async Task POST_QuoteEstimate_WithoutAuthoritativeGeometry_ReturnsConflict()
     {
         using var client = _factory.CreateClient();
+        var uploadId = "estimate-upload";
+        var storagePath = "quotes/temp/estimate/2000000/bracket.stl";
         var request = new QuoteEstimateRequest
         {
             Parts =
@@ -187,6 +189,14 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                     Quantity = 10,
                     EstimatedVolumeCc = 20,
                     DfmAcknowledged = true,
+                    UploadId = uploadId,
+                    UploadCapability = CreateUploadCapability(
+                        _factory,
+                        uploadId,
+                        Guid.NewGuid(),
+                        storagePath,
+                        2_000_000),
+                    StoragePath = storagePath,
                     FileId = Guid.NewGuid(),
                     MaterialId = Guid.NewGuid(),
                     ManufacturingProcessId = Guid.NewGuid()
@@ -195,12 +205,11 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         };
 
         var response = await client.PostAsJsonAsync("/web/v1/quote/estimate", request);
-        var estimate = await response.Content.ReadFromJsonAsync<QuoteEstimateResponse>();
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(estimate);
-        Assert.Equal("test-pricing", estimate.PricingSource);
-        Assert.Equal(150m, estimate.BulkDiscountTotal);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Authoritative geometry analysis is required", problem.Title);
     }
 
     /// <summary>
@@ -322,6 +331,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 new WebUploadHandoffFileDto
                 {
                     UploadId = "upload-a",
+                    UploadCapability = CreateUploadCapability(
+                        _factory,
+                        "upload-a",
+                        quoteSessionId,
+                        $"quotes/temp/{quoteSessionId:N}/420000/bracket.step",
+                        420_000),
                     FileName = "bracket.step",
                     StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/bracket.step",
                     ContentType = "application/step",
@@ -331,6 +346,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 new WebUploadHandoffFileDto
                 {
                     UploadId = "upload-b",
+                    UploadCapability = CreateUploadCapability(
+                        _factory,
+                        "upload-b",
+                        quoteSessionId,
+                        $"quotes/temp/{quoteSessionId:N}/120000/cover.stl",
+                        120_000),
                     FileName = "cover.stl",
                     StoragePath = $"quotes/temp/{quoteSessionId:N}/120000/cover.stl",
                     ContentType = "model/stl",
@@ -365,6 +386,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 new WebUploadHandoffFileDto
                 {
                     UploadId = "upload-pdf",
+                    UploadCapability = CreateUploadCapability(
+                        _factory,
+                        "upload-pdf",
+                        quoteSessionId,
+                        $"quotes/temp/{quoteSessionId:N}/420000/requirements.pdf",
+                        420_000),
                     FileName = "requirements.pdf",
                     StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/requirements.pdf",
                     ContentType = "application/pdf",
@@ -484,6 +511,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             FileSizeBytes = forgery == "fileSize" ? canonical.FileSize + 1 : canonical.FileSize,
             Status = "Completed"
         };
+        requestFile.UploadCapability = CreateUploadCapability(
+            handoffFactory,
+            requestFile.UploadId,
+            quoteSessionId,
+            requestFile.StoragePath,
+            requestFile.FileSizeBytes);
 
         using var response = await client.PostAsJsonAsync(
             "/web/v1/quote/uploads/handoff-token",
@@ -518,6 +551,12 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                     new WebUploadHandoffFileDto
                     {
                         UploadId = canonical.UploadId,
+                        UploadCapability = CreateUploadCapability(
+                            handoffFactory,
+                            canonical.UploadId,
+                            quoteSessionId,
+                            canonical.StoragePath,
+                            canonical.FileSize),
                         FileName = canonical.FileName,
                         StoragePath = canonical.StoragePath,
                         ContentType = canonical.ContentType,
@@ -539,6 +578,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal(canonical.ContentType, signedFile.GetProperty("contentType").GetString());
         Assert.Equal(canonical.FileSize, signedFile.GetProperty("fileSizeBytes").GetInt64());
         Assert.Equal("Completed", signedFile.GetProperty("status").GetString());
+        Assert.False(signedFile.TryGetProperty("uploadCapability", out _));
     }
 
     /// <summary>
@@ -1030,6 +1070,18 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             Status = "Completed"
         };
     }
+
+    private static string CreateUploadCapability(
+        WebApplicationFactory<Program> factory,
+        string uploadId,
+        Guid quoteSessionId,
+        string storagePath,
+        long fileSizeBytes) =>
+        factory.Services.GetRequiredService<UploadCapabilityProtector>().Create(
+            uploadId,
+            quoteSessionId,
+            storagePath,
+            fileSizeBytes);
 
     private sealed class AuthoritativeUploadServiceClient(IEnumerable<UploadResponse> uploads) : IUploadServiceClient
     {

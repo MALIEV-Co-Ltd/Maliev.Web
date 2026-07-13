@@ -21,7 +21,14 @@ public sealed class QuoteUploadHandoffToken(IConfiguration configuration, IHostE
         var now = DateTimeOffset.UtcNow;
         var payload = new QuoteUploadHandoffTokenPayload(
             request.QuoteSessionId.ToString("D"),
-            request.Files,
+            request.Files.Select(file => new QuoteUploadHandoffTokenFilePayload(
+                file.UploadId,
+                file.FileId,
+                file.FileName,
+                file.StoragePath,
+                file.ContentType,
+                file.FileSizeBytes,
+                file.Status)).ToList(),
             now,
             now.AddMinutes(15));
 
@@ -56,6 +63,15 @@ public sealed class QuoteUploadHandoffToken(IConfiguration configuration, IHostE
 
 internal sealed record QuoteUploadHandoffTokenPayload(
     string QuoteSessionId,
-    List<WebUploadHandoffFileDto> Files,
+    List<QuoteUploadHandoffTokenFilePayload> Files,
     DateTimeOffset IssuedAt,
     DateTimeOffset ExpiresAt);
+
+internal sealed record QuoteUploadHandoffTokenFilePayload(
+    string UploadId,
+    Guid? FileId,
+    string FileName,
+    string StoragePath,
+    string ContentType,
+    long FileSizeBytes,
+    string Status);

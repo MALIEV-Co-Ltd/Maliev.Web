@@ -24,7 +24,10 @@ internal sealed class WebQuoteService(IPricingServiceClient pricingClient, IManu
                 option.Code.Equals(part.MaterialCode, StringComparison.OrdinalIgnoreCase) ||
                 option.Id == part.MaterialId);
 
-            if (fileId is null || process?.Id is null || material?.Id is null || part.EstimatedVolumeCc <= 0m)
+            if (fileId is null ||
+                process?.Id is null ||
+                material?.Id is null ||
+                part.AuthoritativeVolumeCc is null or <= 0m)
             {
                 throw new QuoteNotReadyException("Pricing requires a completed UploadService upload, downstream process/material identifiers, and GeometryService volume metrics.");
             }
@@ -44,7 +47,7 @@ internal sealed class WebQuoteService(IPricingServiceClient pricingClient, IManu
                 StoragePath = part.StoragePath,
                 Geometry = new PricingGeometryMetrics
                 {
-                    VolumeCm3 = part.EstimatedVolumeCc,
+                    VolumeCm3 = part.AuthoritativeVolumeCc.Value,
                     IsManifold = true
                 }
             }, cancellationToken);

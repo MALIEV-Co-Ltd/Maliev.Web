@@ -241,9 +241,10 @@
                 });
                 var upload = await Api.UploadFileAsync(file, session);
                 part.UploadId = upload.UploadId;
+                part.UploadCapability = session.UploadCapability;
                 part.FileId = upload.FileId;
                 part.StoragePath = upload.StoragePath;
-                var status = await Api.GetAnalysisStatusAsync(upload.UploadId);
+                var status = await Api.GetAnalysisStatusAsync(upload.UploadId, session.UploadCapability);
                 _statusMessage = status.Message;
             }
             catch (MalievApiException ex)

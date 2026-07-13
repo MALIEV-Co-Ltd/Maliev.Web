@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Http.Metadata;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var redisConnectionString = builder.Configuration.GetConnectionString("redis") ??
+    builder.Configuration["Redis:ConnectionString"];
 
 if (builder.Environment.IsDevelopment())
 {
@@ -50,6 +52,11 @@ builder.Services.AddSingleton<IPostConfigureOptions<KeyManagementOptions>>(sp =>
                 IdentityCookieExtensions.DataProtectionRedisKey);
         }
     }));
+if (!string.IsNullOrWhiteSpace(redisConnectionString))
+{
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+        ConnectionMultiplexer.Connect(redisConnectionString));
+}
 
 builder.Services.AddPermissionAuthorization();
 builder.Services.AddAuthorizationBuilder()
@@ -67,6 +74,7 @@ builder.Services.AddScoped<QuoteUploadHandoffToken>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GoogleIdentityFlowProtector>();
 builder.Services.AddSingleton<PasskeyAuthenticationFlowProtector>();
+builder.Services.AddSingleton<UploadCapabilityProtector>();
 builder.Services.AddTrustedProxyForwarding(builder.Configuration);
 builder.Services.AddPasskeyAuthenticationRateLimiting(builder.Configuration);
 builder.Services.AddPublicIngressRateLimiting(builder.Configuration);
@@ -139,13 +147,24 @@ builder.Services.AddScoped<StaticMapService>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment() &&
-    !app.Environment.IsEnvironment("Testing") &&
+var requiresProductionInfrastructure = app.Environment.IsProduction() || app.Environment.IsStaging();
+if (requiresProductionInfrastructure &&
     !PasskeyAuthenticationRateLimiting.HasTrustedProxyConfiguration(builder.Configuration))
 {
     throw new InvalidOperationException(
         "A trusted reverse proxy is required for production client-IP rate limiting. " +
         "Set ReverseProxy:KnownProxies or ReverseProxy:KnownNetworks to the immediate GKE ingress source.");
+}
+
+if (requiresProductionInfrastructure)
+{
+    if (string.IsNullOrWhiteSpace(redisConnectionString))
+    {
+        throw new InvalidOperationException(
+            "A shared Redis connection is required for the production Data Protection key ring.");
+    }
+
+    _ = app.Services.GetRequiredService<IConnectionMultiplexer>();
 }
 
 app.UseForwardedHeaders();

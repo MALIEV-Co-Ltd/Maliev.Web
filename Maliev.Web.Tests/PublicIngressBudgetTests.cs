@@ -12,6 +12,7 @@ using Maliev.Web.Shared.Commerce;
 using Maliev.Web.Shared.Contact;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
@@ -129,6 +130,19 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
         Assert.Contains("trusted reverse proxy", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>Production refuses pod-local Data Protection keys that would invalidate upload capabilities.</summary>
+    [Fact]
+    public void ProductionWithoutSharedRedisKeyRing_FailsClosed()
+    {
+        using var productionFactory = _factory.WithWebHostBuilder(builder => builder
+            .UseEnvironment("Production")
+            .UseSetting("ReverseProxy:KnownProxies:0", "127.0.0.1"));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => productionFactory.CreateClient());
+
+        Assert.Contains("shared Redis", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// Verifies a public caller cannot select the PricingService customer identity in JSON.
     /// </summary>
@@ -158,7 +172,7 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
     {
         var claimedCustomerId = Guid.NewGuid();
         var quoteService = new CapturingWebQuoteService();
-        var controller = new QuoteController(null!, quoteService, null!, null!)
+        var controller = new QuoteController(null!, quoteService, null!, null!, CreateUploadCapabilityProtector())
         {
             ControllerContext = new ControllerContext
             {
@@ -294,7 +308,13 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
         httpContext.Request.Headers.ContentRange = contentRange;
         httpContext.Request.ContentLength = 1;
         httpContext.Request.Body = new MemoryStream([0x01]);
-        var controller = new QuoteController(null!, null!, uploadService, null!)
+        var protector = CreateUploadCapabilityProtector();
+        httpContext.Request.Headers[UploadCapabilityProtector.HeaderName] = protector.Create(
+            "upload-id",
+            Guid.NewGuid(),
+            "quotes/temp/test/file.step",
+            1);
+        var controller = new QuoteController(null!, null!, uploadService, null!, protector)
         {
             ControllerContext = new ControllerContext { HttpContext = httpContext }
         };
@@ -498,6 +518,9 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
         Subject = "Manufacturing request",
         Message = "Please review the attached manufacturing files."
     };
+
+    private static UploadCapabilityProtector CreateUploadCapabilityProtector() =>
+        new(new EphemeralDataProtectionProvider(), TimeProvider.System);
 
     private static CheckoutShippingDetailsDto ValidShippingDetails() => new()
     {
