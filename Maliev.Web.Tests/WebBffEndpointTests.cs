@@ -477,10 +477,9 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
     /// <summary>
     /// Verifies browser-provided upload metadata cannot override the UploadService source of truth.
     /// </summary>
-    /// <param name="forgery">The browser field or authoritative state to forge.</param>
+    /// <param name="forgery">The browser field or authoritative ownership state to forge.</param>
     [Theory]
     [InlineData("uploadId")]
-    [InlineData("status")]
     [InlineData("storagePath")]
     [InlineData("fileSize")]
     [InlineData("fileName")]
@@ -495,7 +494,6 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                 ? []
                 : [canonical with
                 {
-                    Status = forgery == "status" ? "Processing" : "Completed",
                     ServiceId = forgery == "serviceId" ? "OtherService" : "WebBff"
                 }]);
         using var handoffFactory = CreateUploadHandoffFactory(uploadClient);
@@ -503,7 +501,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         var requestFile = new WebUploadHandoffFileDto
         {
             UploadId = canonical.UploadId,
-            FileName = forgery == "fileName" ? "different.step" : canonical.FileName,
+            FileName = forgery == "fileName" ? "different.step" : Path.GetFileName(canonical.StoragePath),
             StoragePath = forgery == "storagePath"
                 ? $"quotes/temp/{quoteSessionId:N}/999/different.step"
                 : canonical.StoragePath,
@@ -557,11 +555,11 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
                             quoteSessionId,
                             canonical.StoragePath,
                             canonical.FileSize),
-                        FileName = canonical.FileName,
+                        FileName = Path.GetFileName(canonical.StoragePath),
                         StoragePath = canonical.StoragePath,
                         ContentType = canonical.ContentType,
                         FileSizeBytes = canonical.FileSize,
-                        Status = canonical.Status
+                        Status = "Completed"
                     }
                 ]
             });
@@ -573,7 +571,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         using var payload = JsonDocument.Parse(payloadJson);
         var signedFile = payload.RootElement.GetProperty("files")[0];
         Assert.Equal(canonical.UploadId, signedFile.GetProperty("uploadId").GetString());
-        Assert.Equal(canonical.FileName, signedFile.GetProperty("fileName").GetString());
+        Assert.Equal(Path.GetFileName(canonical.StoragePath), signedFile.GetProperty("fileName").GetString());
         Assert.Equal(canonical.StoragePath, signedFile.GetProperty("storagePath").GetString());
         Assert.Equal(canonical.ContentType, signedFile.GetProperty("contentType").GetString());
         Assert.Equal(canonical.FileSize, signedFile.GetProperty("fileSizeBytes").GetInt64());
@@ -1056,18 +1054,16 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
         }));
     }
 
-    private static UploadResponse CreateCanonicalUpload(Guid quoteSessionId)
+    private static FileMetadataResponse CreateCanonicalUpload(Guid quoteSessionId)
     {
-        return new UploadResponse
+        return new FileMetadataResponse
         {
             FileId = Guid.NewGuid().ToString("D"),
             UploadId = "web-upload-canonical",
             ServiceId = "WebBff",
-            FileName = "fixture.step",
             ContentType = "application/step",
             FileSize = 420_000,
             StoragePath = $"quotes/temp/{quoteSessionId:N}/420000/fixture.step",
-            Status = "Completed"
         };
     }
 
@@ -1083,9 +1079,9 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             storagePath,
             fileSizeBytes);
 
-    private sealed class AuthoritativeUploadServiceClient(IEnumerable<UploadResponse> uploads) : IUploadServiceClient
+    private sealed class AuthoritativeUploadServiceClient(IEnumerable<FileMetadataResponse> uploads) : IUploadServiceClient
     {
-        private readonly IReadOnlyDictionary<string, UploadResponse> _uploads = uploads
+        private readonly IReadOnlyDictionary<string, FileMetadataResponse> _uploads = uploads
             .ToDictionary(upload => upload.UploadId, StringComparer.Ordinal);
 
         public Task<UploadInitiationResponse> InitiateResumableUploadAsync(
@@ -1107,7 +1103,7 @@ public sealed class WebBffEndpointTests : IClassFixture<WebApplicationFactory<Pr
             CancellationToken cancellationToken)
             => throw new NotSupportedException();
 
-        public Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
+        public Task<FileMetadataResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
             => Task.FromResult(_uploads.GetValueOrDefault(uploadId));
 
         public Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken)

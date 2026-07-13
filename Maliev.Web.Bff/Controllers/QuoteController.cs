@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Asp.Versioning;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
+using Maliev.Web.Bff.Geometry;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,8 @@ public sealed class QuoteController(
     IWebQuoteService quoteService,
     IQuoteUploadService uploadService,
     QuoteUploadHandoffToken handoffToken,
-    UploadCapabilityProtector uploadCapabilityProtector) : ControllerBase
+    UploadCapabilityProtector uploadCapabilityProtector,
+    GeometryAnalysisAccessor geometryAnalysisStore) : ControllerBase
 {
     /// <summary>Gets manufacturing and pricing reference data from downstream services.</summary>
     [HttpGet("reference-data")]
@@ -92,16 +94,19 @@ public sealed class QuoteController(
                 part.File.ContentType = canonicalFile.ContentType;
                 part.File.SizeBytes = canonicalFile.FileSizeBytes;
                 part.EstimatedVolumeCc = 0m;
-            }
-
-            if (request.Parts.Count > 0)
-            {
-                return Conflict(new ProblemDetails
+                var analysis = await ResolveGeometryAsync(
+                    canonicalFile.FileId.Value.ToString("D"),
+                    canonicalFile.UploadId,
+                    canonicalFile.StoragePath,
+                    cancellationToken);
+                if (analysis?.State is not GeometryAnalysisState.Ready ||
+                    analysis.Metrics is null ||
+                    !analysis.Metrics.IsUsable)
                 {
-                    Title = "Authoritative geometry analysis is required",
-                    Detail = "Wait for server-side geometry analysis before calculating an instant price.",
-                    Status = StatusCodes.Status409Conflict
-                });
+                    return GeometryNotReady();
+                }
+
+                ApplyAuthoritativeGeometry(part, analysis.Metrics);
             }
 
             return Ok(await quoteService.EstimateAsync(request, cancellationToken));
@@ -338,20 +343,116 @@ public sealed class QuoteController(
             });
         }
 
-        if (!TryGetUploadCapability(uploadId, out _))
+        if (!TryGetUploadCapability(uploadId, out var capability) || capability is null)
         {
             return UploadCapabilityRejected();
         }
 
         try
         {
-            return Ok(await uploadService.GetAnalysisStatusAsync(uploadId, cancellationToken));
+            var status = await uploadService.GetAnalysisStatusAsync(uploadId, cancellationToken);
+            if (status.AuthoritativeFileId is null || status.CanonicalStoragePath is null)
+            {
+                return Ok(status);
+            }
+
+            if (!string.Equals(
+                    status.CanonicalStoragePath,
+                    GeometryAnalysisSnapshot.CanonicalizePath(capability.StoragePath),
+                    StringComparison.Ordinal) ||
+                status.CanonicalFileSizeBytes != capability.FileSizeBytes)
+            {
+                return UploadCapabilityRejected();
+            }
+
+            var analysis = await ResolveGeometryAsync(
+                status.AuthoritativeFileId,
+                uploadId,
+                status.CanonicalStoragePath,
+                cancellationToken);
+            return Ok(MapAnalysisStatus(uploadId, analysis));
         }
         catch (BackendUnavailableException ex)
         {
             return BackendUnavailable(ex);
         }
     }
+
+    private async ValueTask<GeometryAnalysisSnapshot?> ResolveGeometryAsync(
+        string canonicalFileId,
+        string uploadId,
+        string canonicalStoragePath,
+        CancellationToken cancellationToken)
+    {
+        var analysis = await geometryAnalysisStore.GetAsync(
+            canonicalFileId,
+            canonicalStoragePath,
+            cancellationToken);
+        return analysis ?? await geometryAnalysisStore.GetAsync(
+            uploadId,
+            canonicalStoragePath,
+            cancellationToken);
+    }
+
+    private static void ApplyAuthoritativeGeometry(
+        QuotePartDraftDto part,
+        GeometryPricingMetrics metrics)
+    {
+        part.AuthoritativeVolumeCc = (decimal)metrics.VolumeCm3;
+        part.AuthoritativeSupportVolumeCc = (decimal)metrics.SupportVolumeCm3;
+        part.AuthoritativeSurfaceAreaCm2 = (decimal)metrics.SurfaceAreaCm2;
+        part.AuthoritativeBoundingBoxX = (decimal)metrics.BoundingBoxX;
+        part.AuthoritativeBoundingBoxY = (decimal)metrics.BoundingBoxY;
+        part.AuthoritativeBoundingBoxZ = (decimal)metrics.BoundingBoxZ;
+        part.AuthoritativeIsManifold = metrics.IsManifold;
+        part.AuthoritativeTriangleCount = metrics.TriangleCount;
+    }
+
+    private static WebAnalysisStatusResponse MapAnalysisStatus(
+        string uploadId,
+        GeometryAnalysisSnapshot? analysis)
+    {
+        if (analysis?.State is GeometryAnalysisState.Failed)
+        {
+            return new WebAnalysisStatusResponse
+            {
+                UploadId = uploadId,
+                Status = "Failed",
+                IsTerminal = true,
+                Message = "We could not analyze this file. Check the model and try uploading it again."
+            };
+        }
+
+        if (analysis?.State is GeometryAnalysisState.Ready && analysis.Metrics?.IsUsable is true)
+        {
+            return new WebAnalysisStatusResponse
+            {
+                UploadId = uploadId,
+                Status = "Ready",
+                IsTerminal = true,
+                Message = "Geometry analysis is ready.",
+                VolumeCm3 = (decimal)analysis.Metrics.VolumeCm3,
+                BoundingBoxX = (decimal)analysis.Metrics.BoundingBoxX,
+                BoundingBoxY = (decimal)analysis.Metrics.BoundingBoxY,
+                BoundingBoxZ = (decimal)analysis.Metrics.BoundingBoxZ
+            };
+        }
+
+        return new WebAnalysisStatusResponse
+        {
+            UploadId = uploadId,
+            Status = "Queued",
+            IsTerminal = false,
+            Message = "Geometry analysis is still in progress."
+        };
+    }
+
+    private static ConflictObjectResult GeometryNotReady() => new(new ProblemDetails
+    {
+        Title = "Authoritative geometry analysis is required",
+        Detail = "Wait for server-side geometry analysis before calculating an instant price.",
+        Status = StatusCodes.Status409Conflict
+    });
 
     private static ProblemDetails? ValidateHandoffTokenRequest(WebUploadHandoffTokenRequest request)
     {

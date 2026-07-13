@@ -54,15 +54,27 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
             };
         }
 
-        var completed = upload.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase);
+        if (!string.Equals(upload.UploadId, uploadId, StringComparison.Ordinal) ||
+            !string.Equals(upload.ServiceId, "WebBff", StringComparison.Ordinal))
+        {
+            return new WebAnalysisStatusResponse
+            {
+                UploadId = uploadId,
+                Status = "NotFound",
+                IsTerminal = true,
+                Message = "We could not find upload details for this file."
+            };
+        }
+
         return new WebAnalysisStatusResponse
         {
             UploadId = upload.UploadId,
-            Status = completed ? "Uploaded" : upload.Status,
+            Status = "Uploaded",
             IsTerminal = false,
-            Message = completed
-                ? "File upload is complete. Analysis results will appear when processing finishes."
-                : "This file is still uploading."
+            Message = "File upload is complete. Analysis results will appear when processing finishes.",
+            AuthoritativeFileId = upload.FileId,
+            CanonicalStoragePath = upload.StoragePath,
+            CanonicalFileSizeBytes = upload.FileSize
         };
     }
 
@@ -80,8 +92,7 @@ internal sealed class QuoteUploadService(IUploadServiceClient uploadClient) : IQ
         var upload = await uploadClient.GetFileAsync(uploadId, cancellationToken);
         if (upload is null ||
             !string.Equals(upload.UploadId, uploadId, StringComparison.Ordinal) ||
-            !string.Equals(upload.ServiceId, "WebBff", StringComparison.Ordinal) ||
-            !string.Equals(upload.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+            !string.Equals(upload.ServiceId, "WebBff", StringComparison.Ordinal))
         {
             return null;
         }

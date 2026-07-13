@@ -18,6 +18,10 @@ internal sealed class PricingServiceClient(HttpClient httpClient, ILogger<Pricin
         {
             return await httpClient.GetFromJsonAsync<List<PricingLeadTimeResponse>>("/pricing/v1/catalog/lead-times", cancellationToken) ?? [];
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)
         {
             logger.LogWarning(ex, "PricingService failed while loading lead times");
@@ -39,6 +43,10 @@ internal sealed class PricingServiceClient(HttpClient httpClient, ILogger<Pricin
                 ?? throw new BackendUnavailableException("PricingService", "PricingService returned an empty pricing response.");
         }
         catch (BackendUnavailableException)
+        {
+            throw;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
@@ -81,7 +89,19 @@ internal sealed record PricingGeometryMetrics
 {
     public decimal VolumeCm3 { get; init; }
 
+    public decimal SupportVolumeCm3 { get; init; }
+
+    public decimal SurfaceAreaCm2 { get; init; }
+
+    public decimal BoundingBoxX { get; init; }
+
+    public decimal BoundingBoxY { get; init; }
+
+    public decimal BoundingBoxZ { get; init; }
+
     public bool IsManifold { get; init; } = true;
+
+    public int TriangleCount { get; init; }
 }
 
 internal sealed record PricingCalculationResponse

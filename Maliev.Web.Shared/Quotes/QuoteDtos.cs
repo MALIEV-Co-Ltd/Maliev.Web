@@ -217,6 +217,34 @@ public sealed class QuotePartDraftDto : IValidatableObject
     [JsonIgnore]
     public decimal? AuthoritativeVolumeCc { get; set; }
 
+    /// <summary>Gets or sets server-resolved support volume; never accepted from browser JSON.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeSupportVolumeCc { get; set; }
+
+    /// <summary>Gets or sets server-resolved surface area; never accepted from browser JSON.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeSurfaceAreaCm2 { get; set; }
+
+    /// <summary>Gets or sets server-resolved X extent in millimeters.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeBoundingBoxX { get; set; }
+
+    /// <summary>Gets or sets server-resolved Y extent in millimeters.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeBoundingBoxY { get; set; }
+
+    /// <summary>Gets or sets server-resolved Z extent in millimeters.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeBoundingBoxZ { get; set; }
+
+    /// <summary>Gets or sets server-resolved mesh manifold state.</summary>
+    [JsonIgnore]
+    public bool? AuthoritativeIsManifold { get; set; }
+
+    /// <summary>Gets or sets server-resolved triangle count.</summary>
+    [JsonIgnore]
+    public int? AuthoritativeTriangleCount { get; set; }
+
     /// <summary>Gets or sets whether the customer acknowledged DFM warnings.</summary>
     public bool DfmAcknowledged { get; set; }
 
@@ -454,4 +482,28 @@ public sealed class WebAnalysisStatusResponse
 
     /// <summary>Gets or sets an optional customer-visible message.</summary>
     public string? Message { get; set; }
+
+    /// <summary>Gets or sets the canonical UploadService file id for server-side correlation.</summary>
+    [JsonIgnore]
+    public string? AuthoritativeFileId { get; set; }
+
+    /// <summary>Gets or sets the canonical UploadService storage path for ownership checks.</summary>
+    [JsonIgnore]
+    public string? CanonicalStoragePath { get; set; }
+
+    /// <summary>Gets or sets the canonical UploadService size for ownership checks.</summary>
+    [JsonIgnore]
+    public long? CanonicalFileSizeBytes { get; set; }
+
+    /// <summary>Gets or sets the authoritative analyzed volume in cubic centimeters.</summary>
+    public decimal? VolumeCm3 { get; set; }
+
+    /// <summary>Gets or sets the authoritative X extent in millimeters.</summary>
+    public decimal? BoundingBoxX { get; set; }
+
+    /// <summary>Gets or sets the authoritative Y extent in millimeters.</summary>
+    public decimal? BoundingBoxY { get; set; }
+
+    /// <summary>Gets or sets the authoritative Z extent in millimeters.</summary>
+    public decimal? BoundingBoxZ { get; set; }
 }

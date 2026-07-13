@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
+using Maliev.Web.Bff.Geometry;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -293,9 +294,203 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
         Assert.Equal(0, quoteService.EstimateCalls);
     }
 
+    /// <summary>Only ready canonical geometry is attached to the request sent to pricing.</summary>
+    [Fact]
+    public async Task POST_Estimate_ReadyCanonicalGeometry_IgnoresBrowserClaimsAndCallsPricing()
+    {
+        var uploadService = new TrackingQuoteUploadService();
+        var quoteService = new TrackingWebQuoteService();
+        var geometryStore = new TrackingGeometryStore();
+        using var factory = CreateFactory(uploadService, quoteService, geometryStore);
+        using var client = factory.CreateClient();
+        var session = await InitiateAsync(client, Guid.NewGuid());
+        geometryStore.Snapshot = GeometryAnalysisSnapshot.Ready(
+            uploadService.CanonicalFileId.ToString("D"),
+            session.StoragePath,
+            new GeometryPricingMetrics(12.5, 1.25, 42.5, 10, 20, 30, false, 456),
+            DateTimeOffset.UtcNow,
+            Guid.NewGuid());
+
+        using var response = await client.PostAsJsonAsync(
+            "/web/v1/quote/estimate",
+            new QuoteEstimateRequest
+            {
+                Parts =
+                [
+                    new QuotePartDraftDto
+                    {
+                        UploadId = session.UploadId,
+                        UploadCapability = session.UploadCapability,
+                        StoragePath = session.StoragePath,
+                        FileId = Guid.NewGuid(),
+                        File = new QuoteFileDraftDto
+                        {
+                            Name = "fixture.step",
+                            ContentType = "application/step",
+                            SizeBytes = 420_000
+                        },
+                        EstimatedVolumeCc = 999_999m,
+                        ManufacturingProcessId = Guid.NewGuid(),
+                        MaterialId = Guid.NewGuid(),
+                        DfmAcknowledged = true
+                    }
+                ]
+            });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, geometryStore.GetCalls);
+        Assert.Equal(1, quoteService.EstimateCalls);
+        var part = Assert.Single(Assert.IsType<QuoteEstimateRequest>(quoteService.LastRequest).Parts);
+        Assert.Equal(uploadService.CanonicalFileId, part.FileId);
+        Assert.Equal(12.5m, part.AuthoritativeVolumeCc);
+        Assert.Equal(1.25m, part.AuthoritativeSupportVolumeCc);
+        Assert.Equal(42.5m, part.AuthoritativeSurfaceAreaCm2);
+        Assert.Equal(10m, part.AuthoritativeBoundingBoxX);
+        Assert.Equal(20m, part.AuthoritativeBoundingBoxY);
+        Assert.Equal(30m, part.AuthoritativeBoundingBoxZ);
+        Assert.False(part.AuthoritativeIsManifold);
+        Assert.Equal(456, part.AuthoritativeTriangleCount);
+        Assert.Equal(0m, part.EstimatedVolumeCc);
+    }
+
+    /// <summary>Protected status polling returns only geometry tied to canonical UploadService metadata.</summary>
+    [Fact]
+    public async Task GET_AnalysisStatus_ReadyOwnedGeometry_ReturnsAuthoritativeDimensions()
+    {
+        var uploadService = new TrackingQuoteUploadService();
+        var geometryStore = new TrackingGeometryStore();
+        using var factory = CreateFactory(uploadService, geometryStore: geometryStore);
+        using var client = factory.CreateClient();
+        var session = await InitiateAsync(client, Guid.NewGuid());
+        geometryStore.Snapshot = GeometryAnalysisSnapshot.Ready(
+            uploadService.CanonicalFileId.ToString("D"),
+            session.StoragePath,
+            new GeometryPricingMetrics(12.5, 1.25, 42.5, 10, 20, 30, true, 456),
+            DateTimeOffset.UtcNow,
+            Guid.NewGuid());
+
+        using var response = await SendFollowUpAsync(
+            client,
+            "status",
+            session.UploadId,
+            session.UploadCapability);
+        var status = await response.Content.ReadFromJsonAsync<WebAnalysisStatusResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(status);
+        Assert.Equal("Ready", status.Status);
+        Assert.True(status.IsTerminal);
+        Assert.Equal(12.5m, status.VolumeCm3);
+        Assert.Equal(10m, status.BoundingBoxX);
+        Assert.Equal(20m, status.BoundingBoxY);
+        Assert.Equal(30m, status.BoundingBoxZ);
+    }
+
+    /// <summary>A failed authoritative analysis blocks pricing without exposing provider details.</summary>
+    [Fact]
+    public async Task POST_Estimate_FailedCanonicalGeometry_ReturnsConflictWithoutPricing()
+    {
+        var uploadService = new TrackingQuoteUploadService();
+        var quoteService = new TrackingWebQuoteService();
+        var geometryStore = new TrackingGeometryStore();
+        using var factory = CreateFactory(uploadService, quoteService, geometryStore);
+        using var client = factory.CreateClient();
+        var session = await InitiateAsync(client, Guid.NewGuid());
+        geometryStore.Snapshot = GeometryAnalysisSnapshot.Failed(
+            uploadService.CanonicalFileId.ToString("D"),
+            session.StoragePath,
+            "provider_secret_failure",
+            DateTimeOffset.UtcNow,
+            Guid.NewGuid());
+
+        using var response = await client.PostAsJsonAsync(
+            "/web/v1/quote/estimate",
+            new QuoteEstimateRequest
+            {
+                Parts =
+                [
+                    new QuotePartDraftDto
+                    {
+                        UploadId = session.UploadId,
+                        UploadCapability = session.UploadCapability,
+                        StoragePath = session.StoragePath,
+                        File = new QuoteFileDraftDto
+                        {
+                            Name = "fixture.step",
+                            ContentType = "application/step",
+                            SizeBytes = 420_000
+                        },
+                        ManufacturingProcessId = Guid.NewGuid(),
+                        MaterialId = Guid.NewGuid()
+                    }
+                ]
+            });
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(0, quoteService.EstimateCalls);
+        Assert.DoesNotContain("provider_secret_failure", body, StringComparison.Ordinal);
+    }
+
+    /// <summary>Extreme finite geometry never overflows estimate or status DTO conversion.</summary>
+    [Fact]
+    public async Task ExtremeFiniteGeometry_EstimateConflictsAndStatusRemainsQueued()
+    {
+        var uploadService = new TrackingQuoteUploadService();
+        var quoteService = new TrackingWebQuoteService();
+        var geometryStore = new TrackingGeometryStore();
+        using var factory = CreateFactory(uploadService, quoteService, geometryStore);
+        using var client = factory.CreateClient();
+        var session = await InitiateAsync(client, Guid.NewGuid());
+        geometryStore.Snapshot = GeometryAnalysisSnapshot.Ready(
+            uploadService.CanonicalFileId.ToString("D"),
+            session.StoragePath,
+            new GeometryPricingMetrics(double.MaxValue, 0, 1, 1, 1, 1, true, 1),
+            DateTimeOffset.UtcNow,
+            Guid.NewGuid());
+
+        using var estimate = await client.PostAsJsonAsync(
+            "/web/v1/quote/estimate",
+            new QuoteEstimateRequest
+            {
+                Parts =
+                [
+                    new QuotePartDraftDto
+                    {
+                        UploadId = session.UploadId,
+                        UploadCapability = session.UploadCapability,
+                        StoragePath = session.StoragePath,
+                        File = new QuoteFileDraftDto
+                        {
+                            Name = "fixture.step",
+                            ContentType = "application/step",
+                            SizeBytes = 420_000
+                        },
+                        ManufacturingProcessId = Guid.NewGuid(),
+                        MaterialId = Guid.NewGuid()
+                    }
+                ]
+            });
+        using var statusResponse = await SendFollowUpAsync(
+            client,
+            "status",
+            session.UploadId,
+            session.UploadCapability);
+        var status = await statusResponse.Content.ReadFromJsonAsync<WebAnalysisStatusResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, estimate.StatusCode);
+        Assert.Equal(0, quoteService.EstimateCalls);
+        Assert.Equal(HttpStatusCode.OK, statusResponse.StatusCode);
+        Assert.NotNull(status);
+        Assert.Equal("Queued", status.Status);
+        Assert.False(status.IsTerminal);
+        Assert.Null(status.VolumeCm3);
+    }
+
     private WebApplicationFactory<Program> CreateFactory(
         TrackingQuoteUploadService uploadService,
-        TrackingWebQuoteService? quoteService = null)
+        TrackingWebQuoteService? quoteService = null,
+        IGeometryAnalysisStore? geometryStore = null)
     {
         return _factory.WithWebHostBuilder(builder => builder
             .UseEnvironment("Testing")
@@ -303,6 +498,11 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
             {
                 services.RemoveAll<IQuoteUploadService>();
                 services.AddSingleton<IQuoteUploadService>(uploadService);
+                if (geometryStore is not null)
+                {
+                    services.RemoveAll<IGeometryAnalysisStore>();
+                    services.AddSingleton(geometryStore);
+                }
                 if (quoteService is not null)
                 {
                     services.RemoveAll<IWebQuoteService>();
@@ -371,6 +571,9 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
 
     private sealed class TrackingQuoteUploadService : IQuoteUploadService
     {
+        public Guid CanonicalFileId { get; } = Guid.NewGuid();
+
+        private string _canonicalStoragePath = string.Empty;
         public int InitiateCalls { get; private set; }
 
         public int ResumeCalls { get; private set; }
@@ -388,11 +591,12 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
             CancellationToken cancellationToken)
         {
             InitiateCalls++;
+            _canonicalStoragePath = $"quotes/temp/{request.QuoteSessionId:N}/{request.FileSize}/{request.FileName}";
             return Task.FromResult(new WebUploadInitiationResponse
             {
                 UploadId = "web-upload-123",
                 ProxyUploadUrl = "/web/v1/quote/uploads/resumable/web-upload-123",
-                StoragePath = $"quotes/temp/{request.QuoteSessionId:N}/{request.FileSize}/{request.FileName}"
+                StoragePath = _canonicalStoragePath
             });
         }
 
@@ -430,7 +634,10 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
             return Task.FromResult(new WebAnalysisStatusResponse
             {
                 UploadId = uploadId,
-                Status = "Uploaded"
+                Status = "Uploaded",
+                AuthoritativeFileId = CanonicalFileId.ToString("D"),
+                CanonicalStoragePath = _canonicalStoragePath,
+                CanonicalFileSizeBytes = 420_000
             });
         }
 
@@ -440,6 +647,7 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
             CancellationToken cancellationToken)
         {
             ResolveCalls++;
+            claimedFile.FileId = CanonicalFileId;
             return Task.FromResult<WebUploadHandoffFileDto?>(claimedFile);
         }
     }
@@ -448,12 +656,38 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
     {
         public int EstimateCalls { get; private set; }
 
+        public QuoteEstimateRequest? LastRequest { get; private set; }
+
         public Task<QuoteEstimateResponse> EstimateAsync(
             QuoteEstimateRequest request,
             CancellationToken cancellationToken)
         {
             EstimateCalls++;
+            LastRequest = request;
             return Task.FromResult(new QuoteEstimateResponse());
         }
+    }
+
+    private sealed class TrackingGeometryStore : IGeometryAnalysisStore
+    {
+        public GeometryAnalysisSnapshot? Snapshot { get; set; }
+
+        public int GetCalls { get; private set; }
+
+        public ValueTask<GeometryAnalysisSnapshot?> GetAsync(
+            string fileId,
+            string canonicalStoragePath,
+            CancellationToken cancellationToken)
+        {
+            GetCalls++;
+            return ValueTask.FromResult(Snapshot is not null &&
+                string.Equals(Snapshot.FileId, fileId, StringComparison.Ordinal) &&
+                string.Equals(Snapshot.StoragePath, canonicalStoragePath, StringComparison.Ordinal)
+                    ? Snapshot
+                    : null);
+        }
+
+        public ValueTask SetAsync(GeometryAnalysisSnapshot snapshot, CancellationToken cancellationToken) =>
+            ValueTask.CompletedTask;
     }
 }
