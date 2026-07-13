@@ -119,6 +119,20 @@ public sealed class GeometryAnalysisStoreTests
             await store.GetAsync("file-123", "quotes/temp/part.step", cancellation.Token));
     }
 
+    /// <summary>Finite values outside decimal range cannot reach DTO conversion.</summary>
+    [Fact]
+    public void IsUsable_FiniteValuesAboveDecimalRange_ReturnsFalse()
+    {
+        var extreme = (double)decimal.MaxValue * 2d;
+
+        Assert.False(new GeometryPricingMetrics(extreme, 0, 1, 1, 1, 1, true, 1).IsUsable);
+        Assert.False(new GeometryPricingMetrics(1, extreme, 1, 1, 1, 1, true, 1).IsUsable);
+        Assert.False(new GeometryPricingMetrics(1, 0, extreme, 1, 1, 1, true, 1).IsUsable);
+        Assert.False(new GeometryPricingMetrics(1, 0, 1, extreme, 1, 1, true, 1).IsUsable);
+        Assert.False(new GeometryPricingMetrics(1, 0, 1, 1, extreme, 1, true, 1).IsUsable);
+        Assert.False(new GeometryPricingMetrics(1, 0, 1, 1, 1, extreme, true, 1).IsUsable);
+    }
+
     private sealed class ManualTimeProvider(DateTimeOffset utcNow) : TimeProvider
     {
         private DateTimeOffset _utcNow = utcNow;

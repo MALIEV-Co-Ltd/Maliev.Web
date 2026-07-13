@@ -21,18 +21,22 @@ internal sealed record GeometryPricingMetrics(
     bool IsManifold,
     int TriangleCount)
 {
+    private static readonly double DecimalUpperExclusive = (double)decimal.MaxValue;
+
     public bool IsUsable =>
-        IsPositiveFinite(VolumeCm3) &&
-        IsNonNegativeFinite(SupportVolumeCm3) &&
-        IsPositiveFinite(SurfaceAreaCm2) &&
-        IsPositiveFinite(BoundingBoxX) &&
-        IsPositiveFinite(BoundingBoxY) &&
-        IsPositiveFinite(BoundingBoxZ) &&
+        IsPositiveDecimalConvertible(VolumeCm3) &&
+        IsNonNegativeDecimalConvertible(SupportVolumeCm3) &&
+        IsPositiveDecimalConvertible(SurfaceAreaCm2) &&
+        IsPositiveDecimalConvertible(BoundingBoxX) &&
+        IsPositiveDecimalConvertible(BoundingBoxY) &&
+        IsPositiveDecimalConvertible(BoundingBoxZ) &&
         TriangleCount > 0;
 
-    private static bool IsPositiveFinite(double value) => double.IsFinite(value) && value > 0;
+    private static bool IsPositiveDecimalConvertible(double value) =>
+        double.IsFinite(value) && value > 0 && value < DecimalUpperExclusive;
 
-    private static bool IsNonNegativeFinite(double value) => double.IsFinite(value) && value >= 0;
+    private static bool IsNonNegativeDecimalConvertible(double value) =>
+        double.IsFinite(value) && value >= 0 && value < DecimalUpperExclusive;
 }
 
 internal sealed record GeometryAnalysisSnapshot(

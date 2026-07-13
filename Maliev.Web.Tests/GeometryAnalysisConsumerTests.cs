@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Maliev.MessagingContracts.Contracts.Geometry;
 using Maliev.MessagingContracts.Contracts.Shared;
 using Maliev.Web.Bff.Geometry;
@@ -90,6 +91,56 @@ public sealed class GeometryAnalysisConsumerTests
         Assert.Equal("invalid_mesh", snapshot.FailureCode);
         Assert.Null(snapshot.Metrics);
         Assert.DoesNotContain("secret", snapshot.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The generated contract deserializes the runtime JSON wire shape consumed by Web.</summary>
+    [Fact]
+    public async Task FileMetricsReadyEvent_RuntimeJson_DeserializesAndMaps()
+    {
+        var messageId = Guid.NewGuid();
+        var json = $$"""
+            {
+              "messageId": "{{messageId}}",
+              "messageName": "FileMetricsReadyEvent",
+              "messageType": "Event",
+              "messageVersion": "1.0",
+              "publishedBy": "GeometryService",
+              "consumedBy": ["WebBff"],
+              "correlationId": "{{Guid.NewGuid()}}",
+              "causationId": null,
+              "occurredAtUtc": "2026-07-13T01:02:03Z",
+              "isPublic": false,
+              "payload": {
+                "fileId": "file-wire-123",
+                "storagePath": "quotes/temp/session/part.step",
+                "metrics": {
+                  "volumeCm3": 12.5,
+                  "supportVolumeCm3": 1.25,
+                  "surfaceAreaCm2": 42.5,
+                  "boundingBox": { "x": 10, "y": 20, "z": 30 },
+                  "isManifold": true,
+                  "triangleCount": 456,
+                  "eulerNumber": 2,
+                  "nonManifoldReason": null,
+                  "nonManifoldFaceCount": null
+                },
+                "processedAt": "2026-07-13T01:02:03Z",
+                "bodyCount": 1,
+                "bodies": []
+              }
+            }
+            """;
+        var message = JsonSerializer.Deserialize<FileMetricsReadyEvent>(json);
+        var store = new RecordingGeometryStore();
+
+        await new GeometryAnalysisConsumer(store).ConsumeAsync(
+            Assert.IsType<FileMetricsReadyEvent>(message),
+            CancellationToken.None);
+
+        var snapshot = Assert.Single(store.Writes);
+        Assert.Equal(messageId, snapshot.EventId);
+        Assert.Equal("file-wire-123", snapshot.FileId);
+        Assert.Equal(12.5, snapshot.Metrics?.VolumeCm3);
     }
 
     private sealed class RecordingGeometryStore : IGeometryAnalysisStore

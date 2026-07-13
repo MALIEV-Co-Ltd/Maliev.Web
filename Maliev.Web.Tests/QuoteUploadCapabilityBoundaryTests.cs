@@ -432,6 +432,61 @@ public sealed class QuoteUploadCapabilityBoundaryTests : IClassFixture<WebApplic
         Assert.DoesNotContain("provider_secret_failure", body, StringComparison.Ordinal);
     }
 
+    /// <summary>Extreme finite geometry never overflows estimate or status DTO conversion.</summary>
+    [Fact]
+    public async Task ExtremeFiniteGeometry_EstimateConflictsAndStatusRemainsQueued()
+    {
+        var uploadService = new TrackingQuoteUploadService();
+        var quoteService = new TrackingWebQuoteService();
+        var geometryStore = new TrackingGeometryStore();
+        using var factory = CreateFactory(uploadService, quoteService, geometryStore);
+        using var client = factory.CreateClient();
+        var session = await InitiateAsync(client, Guid.NewGuid());
+        geometryStore.Snapshot = GeometryAnalysisSnapshot.Ready(
+            uploadService.CanonicalFileId.ToString("D"),
+            session.StoragePath,
+            new GeometryPricingMetrics(double.MaxValue, 0, 1, 1, 1, 1, true, 1),
+            DateTimeOffset.UtcNow,
+            Guid.NewGuid());
+
+        using var estimate = await client.PostAsJsonAsync(
+            "/web/v1/quote/estimate",
+            new QuoteEstimateRequest
+            {
+                Parts =
+                [
+                    new QuotePartDraftDto
+                    {
+                        UploadId = session.UploadId,
+                        UploadCapability = session.UploadCapability,
+                        StoragePath = session.StoragePath,
+                        File = new QuoteFileDraftDto
+                        {
+                            Name = "fixture.step",
+                            ContentType = "application/step",
+                            SizeBytes = 420_000
+                        },
+                        ManufacturingProcessId = Guid.NewGuid(),
+                        MaterialId = Guid.NewGuid()
+                    }
+                ]
+            });
+        using var statusResponse = await SendFollowUpAsync(
+            client,
+            "status",
+            session.UploadId,
+            session.UploadCapability);
+        var status = await statusResponse.Content.ReadFromJsonAsync<WebAnalysisStatusResponse>();
+
+        Assert.Equal(HttpStatusCode.Conflict, estimate.StatusCode);
+        Assert.Equal(0, quoteService.EstimateCalls);
+        Assert.Equal(HttpStatusCode.OK, statusResponse.StatusCode);
+        Assert.NotNull(status);
+        Assert.Equal("Queued", status.Status);
+        Assert.False(status.IsTerminal);
+        Assert.Null(status.VolumeCm3);
+    }
+
     private WebApplicationFactory<Program> CreateFactory(
         TrackingQuoteUploadService uploadService,
         TrackingWebQuoteService? quoteService = null,
