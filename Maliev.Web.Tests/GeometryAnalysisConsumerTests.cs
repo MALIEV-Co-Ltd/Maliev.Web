@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Maliev.MessagingContracts.Contracts.Geometry;
 using Maliev.MessagingContracts.Contracts.Shared;
 using Maliev.Web.Bff.Geometry;
+using MassTransit.Serialization;
 
 namespace Maliev.Web.Tests;
 
@@ -93,45 +93,67 @@ public sealed class GeometryAnalysisConsumerTests
         Assert.DoesNotContain("secret", snapshot.ToString(), StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>The generated contract deserializes the runtime JSON wire shape consumed by Web.</summary>
+    /// <summary>The Python producer's complete MassTransit envelope reaches the generated consumer contract.</summary>
     [Fact]
-    public async Task FileMetricsReadyEvent_RuntimeJson_DeserializesAndMaps()
+    public async Task FileMetricsReadyEvent_PythonMassTransitEnvelope_DeserializesAndMaps()
     {
+        var envelopeId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
+        var correlationId = Guid.NewGuid();
         var json = $$"""
             {
-              "messageId": "{{messageId}}",
-              "messageName": "FileMetricsReadyEvent",
-              "messageType": "Event",
-              "messageVersion": "1.0",
-              "publishedBy": "GeometryService",
-              "consumedBy": ["WebBff"],
-              "correlationId": "{{Guid.NewGuid()}}",
-              "causationId": null,
-              "occurredAtUtc": "2026-07-13T01:02:03Z",
-              "isPublic": false,
-              "payload": {
-                "fileId": "file-wire-123",
-                "storagePath": "quotes/temp/session/part.step",
-                "metrics": {
-                  "volumeCm3": 12.5,
-                  "supportVolumeCm3": 1.25,
-                  "surfaceAreaCm2": 42.5,
-                  "boundingBox": { "x": 10, "y": 20, "z": 30 },
-                  "isManifold": true,
-                  "triangleCount": 456,
-                  "eulerNumber": 2,
-                  "nonManifoldReason": null,
-                  "nonManifoldFaceCount": null
-                },
-                "processedAt": "2026-07-13T01:02:03Z",
-                "bodyCount": 1,
-                "bodies": []
+              "messageId": "{{envelopeId}}",
+              "correlationId": "{{correlationId}}",
+              "conversationId": null,
+              "sourceAddress": null,
+              "destinationAddress": null,
+              "messageType": [
+                "urn:message:Maliev.MessagingContracts.Contracts.Geometry:FileMetricsReadyEvent"
+              ],
+              "headers": { "source": "GeometryService" },
+              "message": {
+                "messageId": "{{messageId}}",
+                "messageName": "FileMetricsReadyEvent",
+                "messageType": "Event",
+                "messageVersion": "1.0.0",
+                "publishedBy": "GeometryService",
+                "consumedBy": ["WebBff"],
+                "correlationId": "{{correlationId}}",
+                "causationId": null,
+                "occurredAtUtc": "2026-07-13T01:02:03Z",
+                "isPublic": false,
+                "payload": {
+                  "fileId": "file-wire-123",
+                  "storagePath": "quotes/temp/session/part.step",
+                  "metrics": {
+                    "volumeCm3": 12.5,
+                    "supportVolumeCm3": 1.25,
+                    "surfaceAreaCm2": 42.5,
+                    "boundingBox": { "x": 10, "y": 20, "z": 30 },
+                    "isManifold": true,
+                    "triangleCount": 456,
+                    "eulerNumber": 2,
+                    "nonManifoldReason": null,
+                    "nonManifoldFaceCount": null
+                  },
+                  "processedAt": "2026-07-13T01:02:03Z",
+                  "bodyCount": 1,
+                  "bodies": []
+                }
               }
             }
             """;
-        var message = JsonSerializer.Deserialize<FileMetricsReadyEvent>(json);
+        var deserializer = SystemTextJsonMessageSerializer.Instance;
+        var serializerContext = deserializer.Deserialize(
+            deserializer.GetMessageBody(json),
+            EmptyHeaders.Instance);
         var store = new RecordingGeometryStore();
+
+        Assert.Equal("application/vnd.masstransit+json", deserializer.ContentType.MediaType);
+        Assert.Contains(
+            "urn:message:Maliev.MessagingContracts.Contracts.Geometry:FileMetricsReadyEvent",
+            serializerContext.SupportedMessageTypes);
+        Assert.True(serializerContext.TryGetMessage<FileMetricsReadyEvent>(out var message));
 
         await new GeometryAnalysisConsumer(store).ConsumeAsync(
             Assert.IsType<FileMetricsReadyEvent>(message),
