@@ -1,8 +1,10 @@
 using System.Net.Http.Json;
 using Asp.Versioning;
 using Maliev.Web.Bff.Clients;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Shared.Commerce;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -16,6 +18,7 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
 {
     /// <summary>Gets available courier options.</summary>
     [HttpGet("couriers")]
+    [EnableRateLimiting(WebRateLimiterPolicies.ShippingRead)]
     public async Task<ActionResult<IReadOnlyList<CheckoutShippingCourierDto>>> GetCouriers(CancellationToken cancellationToken)
     {
         using var response = await deliveryServiceClient.GetShippingCouriersAsync(cancellationToken);
@@ -30,6 +33,8 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
 
     /// <summary>Gets live courier rates for checkout.</summary>
     [HttpPost("rates")]
+    [EnableRateLimiting(WebRateLimiterPolicies.ShippingRate)]
+    [RequestSizeLimit(32_000)]
     public async Task<ActionResult<CheckoutShippingRateResponse>> GetRates(
         [FromBody] CheckoutShippingRateRequest request,
         CancellationToken cancellationToken)
@@ -69,11 +74,12 @@ public sealed class ShippingController(IDeliveryServiceClient deliveryServiceCli
 
     /// <summary>Gets current tracking status for a shipment.</summary>
     [HttpGet("tracking/{trackingCode}")]
+    [EnableRateLimiting(WebRateLimiterPolicies.ShippingRead)]
     public async Task<ActionResult<CheckoutShippingTrackingDto>> GetTracking(
         [FromRoute] string trackingCode,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(trackingCode))
+        if (string.IsNullOrWhiteSpace(trackingCode) || trackingCode.Length > 128)
         {
             return BadRequest(new ProblemDetails
             {

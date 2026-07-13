@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Asp.Versioning;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Commerce;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -20,6 +23,8 @@ public sealed class CheckoutController(
     /// <summary>Creates a customer checkout draft through the CommerceService cart and checkout-session boundary.</summary>
     [HttpPost("draft")]
     [AllowAnonymous]
+    [EnableRateLimiting(WebRateLimiterPolicies.Checkout)]
+    [RequestSizeLimit(256_000)]
     [ProducesResponseType(typeof(CheckoutDraftResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -57,6 +62,8 @@ public sealed class CheckoutController(
     /// <summary>Creates a customer checkout draft from the cart page progressive-enhancement form.</summary>
     [HttpPost("draft-form")]
     [AllowAnonymous]
+    [EnableRateLimiting(WebRateLimiterPolicies.Checkout)]
+    [RequestSizeLimit(256_000)]
     [ValidateAntiForgeryToken]
     [ProducesResponseType(StatusCodes.Status302Found)]
     public async Task<IActionResult> CreateDraftForm([FromForm] CheckoutDraftForm form, CancellationToken cancellationToken)
@@ -73,6 +80,10 @@ public sealed class CheckoutController(
             ShippingAddress = form.ShippingAddress,
             TermsAccepted = form.TermsAccepted
         };
+        if (!IsValidCheckoutDraft(request))
+        {
+            return LocalRedirect("/checkout?checkout=cart");
+        }
 
         try
         {
@@ -134,6 +145,18 @@ public sealed class CheckoutController(
         {
             return [];
         }
+    }
+
+    private static bool IsValidCheckoutDraft(CheckoutDraftRequest request)
+    {
+        if (!Validator.TryValidateObject(request, new ValidationContext(request), [], validateAllProperties: true))
+        {
+            return false;
+        }
+
+        return request.Items.All(item =>
+            item is not null &&
+            Validator.TryValidateObject(item, new ValidationContext(item), [], validateAllProperties: true));
     }
 
     /// <summary>

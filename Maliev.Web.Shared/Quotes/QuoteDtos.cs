@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Maliev.Web.Shared.Localization;
 
 namespace Maliev.Web.Shared.Quotes;
@@ -140,19 +141,22 @@ public sealed class QuoteReferenceDataDto
 public sealed class QuoteFileDraftDto
 {
     /// <summary>Gets or sets the browser file name.</summary>
+    [MaxLength(WebQuoteUploadConstraints.MaxFileNameLength)]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the browser file size in bytes.</summary>
+    [Range(1, WebQuoteUploadConstraints.MaxFileSizeBytes)]
     public long SizeBytes { get; set; }
 
     /// <summary>Gets or sets the content type reported by the browser.</summary>
+    [MaxLength(128)]
     public string ContentType { get; set; } = "application/octet-stream";
 }
 
 /// <summary>
 /// A part being quoted.
 /// </summary>
-public sealed class QuotePartDraftDto
+public sealed class QuotePartDraftDto : IValidatableObject
 {
     /// <summary>Gets or sets the temporary part id.</summary>
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -161,9 +165,11 @@ public sealed class QuotePartDraftDto
     public Guid? FileId { get; set; }
 
     /// <summary>Gets or sets the UploadService upload session identifier.</summary>
+    [MaxLength(128)]
     public string? UploadId { get; set; }
 
     /// <summary>Gets or sets the storage path assigned by UploadService.</summary>
+    [MaxLength(512)]
     public string? StoragePath { get; set; }
 
     /// <summary>Gets or sets the browser file identity.</summary>
@@ -173,24 +179,29 @@ public sealed class QuotePartDraftDto
     public Guid? ManufacturingProcessId { get; set; }
 
     /// <summary>Gets or sets the selected process code.</summary>
+    [MaxLength(64)]
     public string ProcessCode { get; set; } = "FDM";
 
     /// <summary>Gets or sets the downstream material identifier.</summary>
     public Guid? MaterialId { get; set; }
 
     /// <summary>Gets or sets the selected material code.</summary>
+    [MaxLength(64)]
     public string MaterialCode { get; set; } = "PLA";
 
     /// <summary>Gets or sets the downstream surface finish identifier.</summary>
     public Guid? SurfaceFinishId { get; set; }
 
     /// <summary>Gets or sets the selected surface finish code.</summary>
+    [MaxLength(64)]
     public string SurfaceFinishCode { get; set; } = string.Empty;
 
     /// <summary>Gets or sets selected process-specific option values keyed by MaterialService config key.</summary>
+    [MaxLength(32)]
     public Dictionary<string, string> ProcessOptionValues { get; set; } = [];
 
     /// <summary>Gets or sets the requested quantity.</summary>
+    [Range(1, 100_000)]
     public int Quantity { get; set; } = 1;
 
     /// <summary>Gets or sets the analyzed model volume in cubic centimeters.</summary>
@@ -198,6 +209,21 @@ public sealed class QuotePartDraftDto
 
     /// <summary>Gets or sets whether the customer acknowledged DFM warnings.</summary>
     public bool DfmAcknowledged { get; set; }
+
+    /// <inheritdoc />
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (ProcessOptionValues is null || ProcessOptionValues.Any(option =>
+                string.IsNullOrWhiteSpace(option.Key) ||
+                option.Key.Length > 80 ||
+                option.Value is null ||
+                option.Value.Length > 400))
+        {
+            yield return new ValidationResult(
+                "Process option keys and values exceed the supported quote limits.",
+                [nameof(ProcessOptionValues)]);
+        }
+    }
 }
 
 /// <summary>
@@ -209,15 +235,19 @@ public sealed class QuoteEstimateRequest
     public Guid? CustomerId { get; set; }
 
     /// <summary>Gets or sets the requested currency code.</summary>
+    [MaxLength(8)]
     public string CurrencyCode { get; set; } = "THB";
 
     /// <summary>Gets or sets the requested culture.</summary>
+    [MaxLength(16)]
     public string Culture { get; set; } = SupportedCultures.DefaultCulture;
 
     /// <summary>Gets or sets the lead-time code.</summary>
+    [MaxLength(64)]
     public string LeadTimeCode { get; set; } = "STANDARD";
 
     /// <summary>Gets or sets the part drafts to estimate.</summary>
+    [MaxLength(WebQuoteUploadConstraints.MaxPartsPerEstimate)]
     public List<QuotePartDraftDto> Parts { get; set; } = [];
 }
 
@@ -281,9 +311,12 @@ public sealed class QuoteEstimateResponse
 public sealed class WebUploadInitiationRequest
 {
     /// <summary>Gets or sets the browser file name.</summary>
+    [Required]
+    [MaxLength(WebQuoteUploadConstraints.MaxFileNameLength)]
     public string FileName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the browser content type.</summary>
+    [MaxLength(128)]
     public string ContentType { get; set; } = "application/octet-stream";
 
     /// <summary>Gets or sets the browser file size.</summary>
@@ -347,24 +380,33 @@ public sealed class WebUploadHandoffTokenRequest
 public sealed class WebUploadHandoffFileDto
 {
     /// <summary>Gets or sets the UploadService upload id.</summary>
+    [Required]
+    [MaxLength(128)]
     public string UploadId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the UploadService file id when available.</summary>
     public Guid? FileId { get; set; }
 
     /// <summary>Gets or sets the browser file name.</summary>
+    [Required]
+    [MaxLength(WebQuoteUploadConstraints.MaxFileNameLength)]
     public string FileName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the UploadService storage path.</summary>
+    [Required]
+    [MaxLength(512)]
     public string StoragePath { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the browser content type.</summary>
+    [MaxLength(128)]
     public string ContentType { get; set; } = "application/octet-stream";
 
     /// <summary>Gets or sets the browser file size.</summary>
+    [Range(1, WebQuoteUploadConstraints.MaxFileSizeBytes)]
     public long FileSizeBytes { get; set; }
 
     /// <summary>Gets or sets the UploadService status.</summary>
+    [MaxLength(32)]
     public string Status { get; set; } = "Completed";
 }
 

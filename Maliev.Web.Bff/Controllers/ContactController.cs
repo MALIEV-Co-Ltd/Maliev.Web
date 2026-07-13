@@ -1,8 +1,10 @@
 using Asp.Versioning;
+using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Contact;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -19,6 +21,8 @@ public sealed class ContactController(IContactMessageService contactMessageServi
     /// Submits a customer contact message to ContactService.
     /// </summary>
     [HttpPost("messages")]
+    [EnableRateLimiting(WebRateLimiterPolicies.Contact)]
+    [RequestSizeLimit(72 * 1024 * 1024)]
     public async Task<IActionResult> Submit([FromBody] ContactMessageRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)

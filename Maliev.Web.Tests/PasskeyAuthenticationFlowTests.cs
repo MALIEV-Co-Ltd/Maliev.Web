@@ -78,7 +78,9 @@ public sealed class PasskeyAuthenticationFlowTests : IClassFixture<WebApplicatio
     public async Task PasskeyFlowCookies_OutsideTesting_AreAlwaysSecure()
     {
         using var productionFactory = _factory.WithWebHostBuilder(builder =>
-            builder.UseEnvironment("Production"));
+            builder
+                .UseEnvironment("Production")
+                .UseSetting("ReverseProxy:KnownProxies:0", "127.0.0.1"));
         using var client = productionFactory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,

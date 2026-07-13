@@ -1,9 +1,11 @@
+using System.Net.Http.Headers;
 using Asp.Versioning;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Quotes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -22,6 +24,7 @@ public sealed class QuoteController(
 {
     /// <summary>Gets manufacturing and pricing reference data from downstream services.</summary>
     [HttpGet("reference-data")]
+    [EnableRateLimiting(WebRateLimiterPolicies.QuoteReference)]
     [ProducesResponseType(typeof(QuoteReferenceDataDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetReferenceData(CancellationToken cancellationToken)
@@ -38,11 +41,14 @@ public sealed class QuoteController(
 
     /// <summary>Calculates a quote estimate through PricingService.</summary>
     [HttpPost("estimate")]
+    [EnableRateLimiting(WebRateLimiterPolicies.QuoteEstimate)]
+    [RequestSizeLimit(256_000)]
     [ProducesResponseType(typeof(QuoteEstimateResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> Estimate([FromBody] QuoteEstimateRequest request, CancellationToken cancellationToken)
     {
+        request.CustomerId = ResolveCurrentCustomerId();
         try
         {
             return Ok(await quoteService.EstimateAsync(request, cancellationToken));
@@ -64,12 +70,15 @@ public sealed class QuoteController(
 
     /// <summary>Initiates a resumable upload session in UploadService.</summary>
     [HttpPost("uploads/resumable")]
+    [EnableRateLimiting(WebRateLimiterPolicies.UploadInitiate)]
+    [RequestSizeLimit(16_384)]
     [ProducesResponseType(typeof(WebUploadInitiationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> InitiateUpload([FromBody] WebUploadInitiationRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.FileName) ||
+            request.FileName.Length > WebQuoteUploadConstraints.MaxFileNameLength ||
             !WebQuoteUploadConstraints.IsSupportedFileName(request.FileName))
         {
             return BadRequest(new ProblemDetails
@@ -112,7 +121,8 @@ public sealed class QuoteController(
 
     /// <summary>Proxies a raw resumable upload body to UploadService without request-body retries.</summary>
     [HttpPut("uploads/resumable/{uploadId}")]
-    [DisableRequestSizeLimit]
+    [EnableRateLimiting(WebRateLimiterPolicies.UploadStream)]
+    [RequestSizeLimit(WebQuoteUploadConstraints.MaxFileSizeBytes)]
     [ProducesResponseType(typeof(WebUploadCompleteResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status308PermanentRedirect)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -120,11 +130,12 @@ public sealed class QuoteController(
     public async Task<IActionResult> ResumeUpload(string uploadId, CancellationToken cancellationToken)
     {
         var contentRange = Request.Headers.ContentRange.ToString();
-        if (string.IsNullOrWhiteSpace(contentRange))
+        if (!TryValidateContentRange(contentRange, Request.ContentLength))
         {
             return BadRequest(new ProblemDetails
             {
-                Title = "Content-Range header is required",
+                Title = "Valid Content-Range header is required",
+                Detail = $"Upload chunks must declare a byte range and a total size no larger than {WebQuoteUploadConstraints.MaxFileSizeMegabytes} MB.",
                 Status = StatusCodes.Status400BadRequest
             });
         }
@@ -152,6 +163,8 @@ public sealed class QuoteController(
 
     /// <summary>Completes a resumable UploadService session after bytes have reached storage.</summary>
     [HttpPost("uploads/resumable/{uploadId}/complete")]
+    [EnableRateLimiting(WebRateLimiterPolicies.UploadFinalize)]
+    [RequestSizeLimit(16_384)]
     [ProducesResponseType(typeof(WebUploadCompleteResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CompleteUpload(string uploadId, CancellationToken cancellationToken)
@@ -168,6 +181,8 @@ public sealed class QuoteController(
 
     /// <summary>Signs completed Web uploads for QuoteEngine handoff.</summary>
     [HttpPost("uploads/handoff-token")]
+    [EnableRateLimiting(WebRateLimiterPolicies.UploadHandoff)]
+    [RequestSizeLimit(512_000)]
     [ProducesResponseType(typeof(WebUploadHandoffTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -225,10 +240,20 @@ public sealed class QuoteController(
 
     /// <summary>Gets upload analysis status for quote polling.</summary>
     [HttpGet("uploads/{uploadId}/analysis-status")]
+    [EnableRateLimiting(WebRateLimiterPolicies.UploadStatus)]
     [ProducesResponseType(typeof(WebAnalysisStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetAnalysisStatus(string uploadId, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(uploadId) || uploadId.Length > 128)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid upload identifier",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
         try
         {
             return Ok(await uploadService.GetAnalysisStatusAsync(uploadId, cancellationToken));
@@ -251,6 +276,13 @@ public sealed class QuoteController(
             return HandoffProblem("Uploaded files are required", "Upload at least one manufacturing file or supplemental attachment before continuing to Make Studio.");
         }
 
+        if (request.Files.Count > WebQuoteUploadConstraints.MaxFilesPerHandoff)
+        {
+            return HandoffProblem(
+                "Too many uploaded files",
+                $"Upload no more than {WebQuoteUploadConstraints.MaxFilesPerHandoff} files at a time.");
+        }
+
         var expectedPrefix = $"quotes/temp/{request.QuoteSessionId:N}/";
         foreach (var file in request.Files)
         {
@@ -270,6 +302,32 @@ public sealed class QuoteController(
         }
 
         return null;
+    }
+
+    private Guid? ResolveCurrentCustomerId() =>
+        Guid.TryParse(User.FindFirst("customer_id")?.Value, out var customerId)
+            ? customerId
+            : null;
+
+    private static bool TryValidateContentRange(string contentRange, long? contentLength)
+    {
+        if (!ContentRangeHeaderValue.TryParse(contentRange, out var parsed) ||
+            !parsed.HasRange ||
+            !parsed.HasLength ||
+            parsed.From is null ||
+            parsed.To is null ||
+            parsed.Length is null ||
+            parsed.From < 0 ||
+            parsed.To < parsed.From ||
+            parsed.Length <= 0 ||
+            parsed.Length > WebQuoteUploadConstraints.MaxFileSizeBytes ||
+            parsed.To >= parsed.Length)
+        {
+            return false;
+        }
+
+        var declaredChunkLength = parsed.To.Value - parsed.From.Value + 1;
+        return contentLength is not null && contentLength == declaredChunkLength;
     }
 
     private static ProblemDetails HandoffProblem(string title, string detail)

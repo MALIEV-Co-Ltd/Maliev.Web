@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -31,29 +30,6 @@ internal static class PasskeyAuthenticationRateLimiting
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
                 CreatePerClientLimiter(settings),
                 CreateConcurrencyLimiter(settings));
-            options.OnRejected = async (context, cancellationToken) =>
-            {
-                var retryAfterSeconds = 1;
-                if (context.Lease.TryGetMetadata(
-                        MetadataName.RetryAfter,
-                        out var retryAfter))
-                {
-                    retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
-                }
-
-                context.HttpContext.Response.Headers.RetryAfter =
-                    retryAfterSeconds.ToString(CultureInfo.InvariantCulture);
-                await context.HttpContext.Response.WriteAsJsonAsync(
-                    new
-                    {
-                        type = "https://www.maliev.com/problems/passkey-rate-limit",
-                        title = "Too many passkey sign-in attempts",
-                        status = StatusCodes.Status429TooManyRequests,
-                        detail = "Wait briefly before trying passkey sign-in again.",
-                        code = "passkey_rate_limited"
-                    },
-                    cancellationToken);
-            };
         });
 
         return services;
