@@ -275,7 +275,7 @@ public sealed class CommerceCatalogBoundaryTests : IClassFixture<WebApplicationF
             throw new NotSupportedException("Catalog boundary tests do not resume uploads.");
         }
 
-        public Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
+        public Task<FileMetadataResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
         {
             throw new NotSupportedException("Catalog boundary tests do not load upload metadata.");
         }

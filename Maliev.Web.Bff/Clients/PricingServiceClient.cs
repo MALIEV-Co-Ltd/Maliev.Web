@@ -81,7 +81,19 @@ internal sealed record PricingGeometryMetrics
 {
     public decimal VolumeCm3 { get; init; }
 
+    public decimal SupportVolumeCm3 { get; init; }
+
+    public decimal SurfaceAreaCm2 { get; init; }
+
+    public decimal BoundingBoxX { get; init; }
+
+    public decimal BoundingBoxY { get; init; }
+
+    public decimal BoundingBoxZ { get; init; }
+
     public bool IsManifold { get; init; } = true;
+
+    public int TriangleCount { get; init; }
 }
 
 internal sealed record PricingCalculationResponse

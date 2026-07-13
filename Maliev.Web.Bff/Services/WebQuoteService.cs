@@ -27,7 +27,14 @@ internal sealed class WebQuoteService(IPricingServiceClient pricingClient, IManu
             if (fileId is null ||
                 process?.Id is null ||
                 material?.Id is null ||
-                part.AuthoritativeVolumeCc is null or <= 0m)
+                part.AuthoritativeVolumeCc is null or <= 0m ||
+                part.AuthoritativeSupportVolumeCc is null or < 0m ||
+                part.AuthoritativeSurfaceAreaCm2 is null or <= 0m ||
+                part.AuthoritativeBoundingBoxX is null or <= 0m ||
+                part.AuthoritativeBoundingBoxY is null or <= 0m ||
+                part.AuthoritativeBoundingBoxZ is null or <= 0m ||
+                part.AuthoritativeIsManifold is null ||
+                part.AuthoritativeTriangleCount is null or <= 0)
             {
                 throw new QuoteNotReadyException("Pricing requires a completed UploadService upload, downstream process/material identifiers, and GeometryService volume metrics.");
             }
@@ -48,7 +55,13 @@ internal sealed class WebQuoteService(IPricingServiceClient pricingClient, IManu
                 Geometry = new PricingGeometryMetrics
                 {
                     VolumeCm3 = part.AuthoritativeVolumeCc.Value,
-                    IsManifold = true
+                    SupportVolumeCm3 = part.AuthoritativeSupportVolumeCc.Value,
+                    SurfaceAreaCm2 = part.AuthoritativeSurfaceAreaCm2.Value,
+                    BoundingBoxX = part.AuthoritativeBoundingBoxX.Value,
+                    BoundingBoxY = part.AuthoritativeBoundingBoxY.Value,
+                    BoundingBoxZ = part.AuthoritativeBoundingBoxZ.Value,
+                    IsManifold = part.AuthoritativeIsManifold.Value,
+                    TriangleCount = part.AuthoritativeTriangleCount.Value
                 }
             }, cancellationToken);
 

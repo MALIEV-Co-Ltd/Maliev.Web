@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Controllers;
+using Maliev.Web.Bff.Geometry;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Chatbot;
@@ -172,7 +173,8 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
     {
         var claimedCustomerId = Guid.NewGuid();
         var quoteService = new CapturingWebQuoteService();
-        var controller = new QuoteController(null!, quoteService, null!, null!, CreateUploadCapabilityProtector())
+        var controller = new QuoteController(
+            null!, quoteService, null!, null!, CreateUploadCapabilityProtector(), CreateGeometryAccessor())
         {
             ControllerContext = new ControllerContext
             {
@@ -314,7 +316,7 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
             Guid.NewGuid(),
             "quotes/temp/test/file.step",
             1);
-        var controller = new QuoteController(null!, null!, uploadService, null!, protector)
+        var controller = new QuoteController(null!, null!, uploadService, null!, protector, CreateGeometryAccessor())
         {
             ControllerContext = new ControllerContext { HttpContext = httpContext }
         };
@@ -324,6 +326,9 @@ public sealed class PublicIngressBudgetTests : IClassFixture<WebApplicationFacto
         Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(0, uploadService.ResumeCallCount);
     }
+
+    private static GeometryAnalysisAccessor CreateGeometryAccessor() =>
+        new(new InMemoryGeometryAnalysisStore(TimeProvider.System));
 
     /// <summary>
     /// Verifies attachment count is bounded before contact payloads are decoded or forwarded.

@@ -13,7 +13,7 @@ internal interface IUploadServiceClient
 
     Task<HttpResponseMessage> ResumeResumableUploadAsync(string uploadId, Stream content, string? contentType, long? contentLength, string contentRange, CancellationToken cancellationToken);
 
-    Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken);
+    Task<FileMetadataResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken);
 
     Task<string?> GetSignedUrlAsync(string uploadId, CancellationToken cancellationToken);
 }
@@ -57,7 +57,7 @@ internal sealed class UploadServiceClient(HttpClient httpClient, IHttpClientFact
         return await streamingClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
-    public async Task<UploadResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
+    public async Task<FileMetadataResponse?> GetFileAsync(string uploadId, CancellationToken cancellationToken)
     {
         try
         {
@@ -72,20 +72,20 @@ internal sealed class UploadServiceClient(HttpClient httpClient, IHttpClientFact
                 throw new BackendUnavailableException("UploadService", $"UploadService returned {(int)response.StatusCode} while loading upload metadata.");
             }
 
-            var upload = await response.Content.ReadFromJsonAsync<UploadResponse>(cancellationToken);
+            var upload = await response.Content.ReadFromJsonAsync<FileMetadataResponse>(cancellationToken);
             if (upload is null)
             {
                 return null;
             }
 
             var canonicalPath = upload.StoragePath.Replace('\\', '/');
-            return upload with
-            {
-                FileName = Path.GetFileName(canonicalPath),
-                StoragePath = canonicalPath
-            };
+            return upload with { StoragePath = canonicalPath };
         }
         catch (BackendUnavailableException)
+        {
+            throw;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
@@ -183,6 +183,21 @@ internal sealed record UploadResponse
     public string StoragePath { get; init; } = string.Empty;
 
     public string Status { get; init; } = string.Empty;
+}
+
+internal sealed record FileMetadataResponse
+{
+    public string FileId { get; init; } = string.Empty;
+
+    public string UploadId { get; init; } = string.Empty;
+
+    public string ServiceId { get; init; } = string.Empty;
+
+    public string StoragePath { get; init; } = string.Empty;
+
+    public long FileSize { get; init; }
+
+    public string ContentType { get; init; } = string.Empty;
 }
 
 internal sealed record SignedUrlResponse

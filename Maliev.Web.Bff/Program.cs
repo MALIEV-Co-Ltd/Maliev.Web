@@ -4,6 +4,7 @@ using Maliev.Aspire.ServiceDefaults;
 using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Components;
+using Maliev.Web.Bff.Geometry;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
 using Maliev.Web.Client.Services;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
 using Microsoft.Extensions.Options;
+using MassTransit;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -31,6 +33,62 @@ if (builder.Environment.IsDevelopment())
 builder.WebHost.UseStaticWebAssets();
 builder.AddServiceDefaults();
 builder.AddDefaultApiVersioning();
+builder.Services.AddSingleton<IGeometryAnalysisStore>(sp =>
+{
+    var redis = sp.GetService<IConnectionMultiplexer>();
+    if (redis is not null)
+    {
+        return new RedisGeometryAnalysisStore(redis);
+    }
+
+    var environment = sp.GetRequiredService<IHostEnvironment>();
+    if (environment.IsProduction() || environment.IsStaging())
+    {
+        throw new InvalidOperationException(
+            "Shared Redis is required for authoritative Web geometry analysis state.");
+    }
+
+    return new InMemoryGeometryAnalysisStore(sp.GetRequiredService<TimeProvider>());
+});
+builder.Services.AddSingleton(sp => new GeometryAnalysisAccessor(
+    sp.GetRequiredService<IGeometryAnalysisStore>()));
+builder.Services.AddMassTransit(configurator =>
+{
+    configurator.DisableUsageTelemetry();
+    configurator.AddConsumer<GeometryAnalysisConsumer>();
+    if (builder.Environment.IsEnvironment("Testing") ||
+        builder.Environment.IsEnvironment("SecurityTest"))
+    {
+        configurator.UsingInMemory((context, bus) => bus.ConfigureEndpoints(context));
+        return;
+    }
+
+    var rabbitMqConnectionString = builder.Configuration.GetConnectionString("rabbitmq") ??
+        builder.Configuration.GetConnectionString("RabbitMQ") ??
+        "amqp://localhost";
+    configurator.UsingRabbitMq((context, bus) =>
+    {
+        bus.Host(NormalizeRabbitMqConnectionString(rabbitMqConnectionString));
+        bus.ReceiveEndpoint("web-bff-geometry-analysis-v1", endpoint =>
+        {
+            endpoint.ConfigureConsumeTopology = false;
+            endpoint.ConfigureConsumer<GeometryAnalysisConsumer>(context);
+            foreach (var routingKey in new[]
+            {
+                "maliev.geometryservice.v1.metrics.ready",
+                "maliev.geometryservice.v1.analysis.completed",
+                "maliev.geometryservice.v1.analysis.failed"
+            })
+            {
+                endpoint.Bind("maliev.events", binding =>
+                {
+                    binding.ExchangeType = "topic";
+                    binding.RoutingKey = routingKey;
+                });
+            }
+        });
+    });
+});
 builder.AddIAMServiceClient("WebBff");
 
 builder.Services.AddLocalization();
@@ -165,6 +223,12 @@ if (requiresProductionInfrastructure)
     }
 
     _ = app.Services.GetRequiredService<IConnectionMultiplexer>();
+
+    if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("rabbitmq")) &&
+        string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("RabbitMQ")))
+    {
+        throw new InvalidOperationException("RabbitMQ is required for Web geometry events.");
+    }
 }
 
 app.UseForwardedHeaders();
@@ -280,6 +344,33 @@ static void ApplyMissingSharedSecretValue(IConfiguration target, IConfigurationS
 static bool HasValidCustomerId(ClaimsPrincipal user)
 {
     return Guid.TryParse(user.FindFirst("customer_id")?.Value, out _);
+}
+
+static Uri NormalizeRabbitMqConnectionString(string connectionString)
+{
+    if (Uri.TryCreate(connectionString, UriKind.Absolute, out var uri))
+    {
+        return uri;
+    }
+
+    var values = connectionString
+        .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(value => value.Split('=', 2, StringSplitOptions.TrimEntries))
+        .Where(value => value.Length == 2)
+        .ToDictionary(value => value[0], value => value[1], StringComparer.OrdinalIgnoreCase);
+    var host = values.GetValueOrDefault("host") ?? "localhost";
+    var port = int.TryParse(values.GetValueOrDefault("port"), out var configuredPort)
+        ? configuredPort
+        : 5672;
+    var uriBuilder = new UriBuilder("amqp", host, port);
+    var user = values.GetValueOrDefault("username") ?? values.GetValueOrDefault("user");
+    if (!string.IsNullOrWhiteSpace(user))
+    {
+        uriBuilder.UserName = user;
+        uriBuilder.Password = values.GetValueOrDefault("password") ?? values.GetValueOrDefault("pass");
+    }
+
+    return uriBuilder.Uri;
 }
 
 /// <summary>
