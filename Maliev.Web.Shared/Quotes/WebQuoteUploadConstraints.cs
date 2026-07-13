@@ -14,6 +14,15 @@ public static class WebQuoteUploadConstraints
     /// <summary>Maximum signed handoff token length accepted by QuoteEngine.</summary>
     public const int MaxQuoteEngineHandoffTokenLength = 20_000;
 
+    /// <summary>Maximum parts accepted by one public estimate request.</summary>
+    public const int MaxPartsPerEstimate = 20;
+
+    /// <summary>Maximum completed files resolved for one signed handoff.</summary>
+    public const int MaxFilesPerHandoff = 20;
+
+    /// <summary>Maximum browser file-name length accepted at the public boundary.</summary>
+    public const int MaxFileNameLength = 255;
+
     /// <summary>CAD and 3D file extensions accepted by the public website quote handoff.</summary>
     public static IReadOnlyList<string> SupportedCadExtensions { get; } =
     [

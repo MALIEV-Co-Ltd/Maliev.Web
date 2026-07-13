@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Maliev.Aspire.ServiceDefaults;
 using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.AspNetCore.Http.Metadata;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,6 +69,7 @@ builder.Services.AddSingleton<GoogleIdentityFlowProtector>();
 builder.Services.AddSingleton<PasskeyAuthenticationFlowProtector>();
 builder.Services.AddTrustedProxyForwarding(builder.Configuration);
 builder.Services.AddPasskeyAuthenticationRateLimiting(builder.Configuration);
+builder.Services.AddPublicIngressRateLimiting(builder.Configuration);
 
 builder.Services.AddHttpClient("MalievAPI", (sp, client) =>
 {
@@ -136,12 +139,13 @@ builder.Services.AddScoped<StaticMapService>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsEnvironment("Testing") &&
+if (!app.Environment.IsDevelopment() &&
+    !app.Environment.IsEnvironment("Testing") &&
     !PasskeyAuthenticationRateLimiting.HasTrustedProxyConfiguration(builder.Configuration))
 {
-    app.Logger.LogWarning(
-        "No trusted reverse proxy is configured. Passkey rate limits will conservatively group requests by the socket peer. " +
-        "Set ReverseProxy:KnownProxies or ReverseProxy:KnownNetworks to the immediate GKE ingress source before enabling passkeys.");
+    throw new InvalidOperationException(
+        "A trusted reverse proxy is required for production client-IP rate limiting. " +
+        "Set ReverseProxy:KnownProxies or ReverseProxy:KnownNetworks to the immediate GKE ingress source.");
 }
 
 app.UseForwardedHeaders();
@@ -167,6 +171,31 @@ if (!app.Environment.IsEnvironment("Testing"))
     app.UseHttpsRedirection();
 }
 app.UseRateLimiter();
+app.Use(async (context, next) =>
+{
+    var maximumBodySize = context.GetEndpoint()?
+        .Metadata.GetMetadata<IRequestSizeLimitMetadata>()?
+        .MaxRequestBodySize;
+    if (maximumBodySize is not null && context.Request.ContentLength > maximumBodySize)
+    {
+        context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;
+        context.Response.ContentType = "application/problem+json";
+        await JsonSerializer.SerializeAsync(
+            context.Response.Body,
+            new
+            {
+                type = "https://www.maliev.com/problems/request-too-large",
+                title = "Request payload is too large",
+                status = StatusCodes.Status413PayloadTooLarge,
+                detail = "Reduce the request size and try again.",
+                code = "request_too_large"
+            },
+            cancellationToken: context.RequestAborted);
+        return;
+    }
+
+    await next(context);
+});
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

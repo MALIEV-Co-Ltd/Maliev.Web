@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Maliev.Web.Shared.Commerce;
 
 /// <summary>
@@ -6,21 +8,29 @@ namespace Maliev.Web.Shared.Commerce;
 public sealed class CartItemDto
 {
     /// <summary>Gets or sets the product handle.</summary>
+    [Required]
+    [MaxLength(160)]
     public string ProductHandle { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the variant SKU.</summary>
+    [Required]
+    [MaxLength(160)]
     public string VariantSku { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the requested quantity.</summary>
+    [Range(1, 10_000)]
     public int Quantity { get; set; } = 1;
 
     /// <summary>Gets or sets the product title captured for cart display.</summary>
+    [MaxLength(300)]
     public string Title { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the selected variant title captured for cart display.</summary>
+    [MaxLength(300)]
     public string VariantTitle { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the product image URL captured for cart display.</summary>
+    [MaxLength(2_048)]
     public string ImageUrl { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the unit price captured for cart display.</summary>
@@ -33,24 +43,31 @@ public sealed class CartItemDto
 public sealed class CheckoutDraftRequest
 {
     /// <summary>Gets or sets the requested culture.</summary>
+    [MaxLength(16)]
     public string Culture { get; set; } = "en-US";
 
     /// <summary>Gets or sets the cart lines.</summary>
+    [MaxLength(50)]
     public List<CartItemDto> Items { get; set; } = [];
 
     /// <summary>Gets or sets the customer phone number for checkout contact and delivery.</summary>
+    [MaxLength(80)]
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the legal company name for billing.</summary>
+    [MaxLength(200)]
     public string CompanyName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the VAT or tax identifier for invoice records.</summary>
+    [MaxLength(80)]
     public string VatId { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the billing address entered at checkout.</summary>
+    [MaxLength(2_000)]
     public string BillingAddress { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the shipping address entered at checkout.</summary>
+    [MaxLength(2_000)]
     public string ShippingAddress { get; set; } = string.Empty;
 
     /// <summary>Gets or sets structured shipping details entered at checkout.</summary>
@@ -87,39 +104,51 @@ public sealed class CheckoutDraftResponse
 public sealed class CheckoutShippingDetailsDto
 {
     /// <summary>Gets or sets recipient name.</summary>
+    [MaxLength(200)]
     public string RecipientName { get; set; } = string.Empty;
 
     /// <summary>Gets or sets recipient phone.</summary>
+    [MaxLength(80)]
     public string Phone { get; set; } = string.Empty;
 
     /// <summary>Gets or sets street address.</summary>
+    [MaxLength(500)]
     public string Address { get; set; } = string.Empty;
 
     /// <summary>Gets or sets district or subdistrict.</summary>
+    [MaxLength(120)]
     public string District { get; set; } = string.Empty;
 
     /// <summary>Gets or sets state or amphoe.</summary>
+    [MaxLength(120)]
     public string State { get; set; } = string.Empty;
 
     /// <summary>Gets or sets province.</summary>
+    [MaxLength(120)]
     public string Province { get; set; } = string.Empty;
 
     /// <summary>Gets or sets postal code.</summary>
+    [MaxLength(20)]
     public string Postcode { get; set; } = string.Empty;
 
     /// <summary>Gets or sets ISO 3166-1 alpha-2 destination country code.</summary>
+    [StringLength(2, MinimumLength = 2)]
     public string CountryCode { get; set; } = "TH";
 
     /// <summary>Gets or sets parcel weight in grams.</summary>
+    [Range(1, 1_000_000)]
     public decimal WeightGrams { get; set; } = 1000m;
 
     /// <summary>Gets or sets parcel length in centimeters.</summary>
+    [Range(0.1, 1_000)]
     public decimal LengthCm { get; set; } = 20m;
 
     /// <summary>Gets or sets parcel width in centimeters.</summary>
+    [Range(0.1, 1_000)]
     public decimal WidthCm { get; set; } = 15m;
 
     /// <summary>Gets or sets parcel height in centimeters.</summary>
+    [Range(0.1, 1_000)]
     public decimal HeightCm { get; set; } = 10m;
 }
 
@@ -180,6 +209,7 @@ public sealed class CheckoutShippingRateRequest
     public CheckoutShippingDetailsDto ShippingDetails { get; set; } = new();
 
     /// <summary>Gets or sets optional courier codes.</summary>
+    [MaxLength(20)]
     public List<string> CourierCodes { get; set; } = [];
 }
 

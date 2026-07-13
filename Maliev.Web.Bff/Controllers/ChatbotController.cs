@@ -4,6 +4,7 @@ using Maliev.Web.Bff.Services;
 using Maliev.Web.Shared.Chatbot;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Maliev.Web.Bff.Controllers;
 
@@ -22,6 +23,8 @@ public sealed class ChatbotController(
     /// Starts a public website customer chatbot session.
     /// </summary>
     [HttpPost("sessions")]
+    [EnableRateLimiting(WebRateLimiterPolicies.ChatbotSession)]
+    [RequestSizeLimit(4_096)]
     [ProducesResponseType(typeof(CustomerChatbotResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
@@ -60,6 +63,8 @@ public sealed class ChatbotController(
     /// Sends a public website customer message to the MALIEV assistant.
     /// </summary>
     [HttpPost("messages")]
+    [EnableRateLimiting(WebRateLimiterPolicies.ChatbotMessage)]
+    [RequestSizeLimit(8_192)]
     [ProducesResponseType(typeof(CustomerChatbotResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
