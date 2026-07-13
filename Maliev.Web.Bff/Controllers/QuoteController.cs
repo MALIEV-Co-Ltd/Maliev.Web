@@ -20,7 +20,8 @@ public sealed class QuoteController(
     IManufacturingCatalogService manufacturingCatalog,
     IWebQuoteService quoteService,
     IQuoteUploadService uploadService,
-    QuoteUploadHandoffToken handoffToken) : ControllerBase
+    QuoteUploadHandoffToken handoffToken,
+    UploadCapabilityProtector uploadCapabilityProtector) : ControllerBase
 {
     /// <summary>Gets manufacturing and pricing reference data from downstream services.</summary>
     [HttpGet("reference-data")]
@@ -44,6 +45,7 @@ public sealed class QuoteController(
     [EnableRateLimiting(WebRateLimiterPolicies.QuoteEstimate)]
     [RequestSizeLimit(256_000)]
     [ProducesResponseType(typeof(QuoteEstimateResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> Estimate([FromBody] QuoteEstimateRequest request, CancellationToken cancellationToken)
@@ -51,6 +53,57 @@ public sealed class QuoteController(
         request.CustomerId = ResolveCurrentCustomerId();
         try
         {
+            foreach (var part in request.Parts)
+            {
+                if (part.File is null ||
+                    string.IsNullOrWhiteSpace(part.UploadId) ||
+                    !uploadCapabilityProtector.TryValidate(part.UploadCapability, part.UploadId, out var capability) ||
+                    capability is null ||
+                    !string.Equals(
+                        capability.StoragePath,
+                        part.StoragePath?.Replace('\\', '/'),
+                        StringComparison.Ordinal) ||
+                    capability.FileSizeBytes != part.File.SizeBytes)
+                {
+                    return UploadCapabilityRejected();
+                }
+
+                var canonicalFile = await uploadService.ResolveCompletedHandoffFileAsync(
+                    capability.QuoteSessionId,
+                    new WebUploadHandoffFileDto
+                    {
+                        UploadId = part.UploadId,
+                        FileId = part.FileId,
+                        FileName = part.File.Name,
+                        StoragePath = part.StoragePath ?? string.Empty,
+                        ContentType = part.File.ContentType,
+                        FileSizeBytes = part.File.SizeBytes,
+                        Status = "Completed"
+                    },
+                    cancellationToken);
+                if (canonicalFile?.FileId is null)
+                {
+                    return UploadCapabilityRejected();
+                }
+
+                part.FileId = canonicalFile.FileId;
+                part.StoragePath = canonicalFile.StoragePath;
+                part.File.Name = canonicalFile.FileName;
+                part.File.ContentType = canonicalFile.ContentType;
+                part.File.SizeBytes = canonicalFile.FileSizeBytes;
+                part.EstimatedVolumeCc = 0m;
+            }
+
+            if (request.Parts.Count > 0)
+            {
+                return Conflict(new ProblemDetails
+                {
+                    Title = "Authoritative geometry analysis is required",
+                    Detail = "Wait for server-side geometry analysis before calculating an instant price.",
+                    Status = StatusCodes.Status409Conflict
+                });
+            }
+
             return Ok(await quoteService.EstimateAsync(request, cancellationToken));
         }
         catch (QuoteNotReadyException)
@@ -111,7 +164,13 @@ public sealed class QuoteController(
 
         try
         {
-            return Ok(await uploadService.InitiateAsync(request, cancellationToken));
+            var response = await uploadService.InitiateAsync(request, cancellationToken);
+            response.UploadCapability = uploadCapabilityProtector.Create(
+                response.UploadId,
+                request.QuoteSessionId,
+                response.StoragePath,
+                request.FileSize);
+            return Ok(response);
         }
         catch (BackendUnavailableException ex)
         {
@@ -126,11 +185,17 @@ public sealed class QuoteController(
     [ProducesResponseType(typeof(WebUploadCompleteResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status308PermanentRedirect)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> ResumeUpload(string uploadId, CancellationToken cancellationToken)
     {
+        if (!TryGetUploadCapability(uploadId, out var uploadCapability) || uploadCapability is null)
+        {
+            return UploadCapabilityRejected();
+        }
+
         var contentRange = Request.Headers.ContentRange.ToString();
-        if (!TryValidateContentRange(contentRange, Request.ContentLength))
+        if (!TryValidateContentRange(contentRange, Request.ContentLength, uploadCapability.FileSizeBytes))
         {
             return BadRequest(new ProblemDetails
             {
@@ -166,9 +231,15 @@ public sealed class QuoteController(
     [EnableRateLimiting(WebRateLimiterPolicies.UploadFinalize)]
     [RequestSizeLimit(16_384)]
     [ProducesResponseType(typeof(WebUploadCompleteResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CompleteUpload(string uploadId, CancellationToken cancellationToken)
     {
+        if (!TryGetUploadCapability(uploadId, out _))
+        {
+            return UploadCapabilityRejected();
+        }
+
         try
         {
             return Ok(await uploadService.CompleteAsync(uploadId, cancellationToken));
@@ -185,6 +256,7 @@ public sealed class QuoteController(
     [RequestSizeLimit(512_000)]
     [ProducesResponseType(typeof(WebUploadHandoffTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateHandoffToken(
         [FromBody] WebUploadHandoffTokenRequest request,
@@ -201,6 +273,17 @@ public sealed class QuoteController(
         {
             foreach (var file in request.Files)
             {
+                if (!uploadCapabilityProtector.TryValidate(
+                        file.UploadCapability,
+                        file.UploadId,
+                        request.QuoteSessionId,
+                        file.StoragePath,
+                        file.FileSizeBytes,
+                        out _))
+                {
+                    return UploadCapabilityRejected();
+                }
+
                 var canonicalFile = await uploadService.ResolveCompletedHandoffFileAsync(
                     request.QuoteSessionId,
                     file,
@@ -242,6 +325,7 @@ public sealed class QuoteController(
     [HttpGet("uploads/{uploadId}/analysis-status")]
     [EnableRateLimiting(WebRateLimiterPolicies.UploadStatus)]
     [ProducesResponseType(typeof(WebAnalysisStatusResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetAnalysisStatus(string uploadId, CancellationToken cancellationToken)
     {
@@ -252,6 +336,11 @@ public sealed class QuoteController(
                 Title = "Invalid upload identifier",
                 Status = StatusCodes.Status400BadRequest
             });
+        }
+
+        if (!TryGetUploadCapability(uploadId, out _))
+        {
+            return UploadCapabilityRejected();
         }
 
         try
@@ -291,7 +380,7 @@ public sealed class QuoteController(
                 !WebQuoteUploadConstraints.IsSupportedFileName(file.FileName) ||
                 file.FileSizeBytes <= 0 ||
                 file.FileSizeBytes > WebQuoteUploadConstraints.MaxFileSizeBytes ||
-                !file.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(file.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
                 string.IsNullOrWhiteSpace(file.StoragePath) ||
                 !file.StoragePath.Replace('\\', '/').StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
             {
@@ -309,7 +398,24 @@ public sealed class QuoteController(
             ? customerId
             : null;
 
-    private static bool TryValidateContentRange(string contentRange, long? contentLength)
+    private bool TryGetUploadCapability(string uploadId, out UploadCapabilityState? state) =>
+        uploadCapabilityProtector.TryValidate(
+            Request.Headers[UploadCapabilityProtector.HeaderName].ToString(),
+            uploadId,
+            out state);
+
+    private UnauthorizedObjectResult UploadCapabilityRejected() =>
+        Unauthorized(new ProblemDetails
+        {
+            Title = "Upload access could not be verified",
+            Detail = "Start this upload again before continuing.",
+            Status = StatusCodes.Status401Unauthorized
+        });
+
+    private static bool TryValidateContentRange(
+        string contentRange,
+        long? contentLength,
+        long expectedTotalLength)
     {
         if (!ContentRangeHeaderValue.TryParse(contentRange, out var parsed) ||
             !parsed.HasRange ||
@@ -321,6 +427,7 @@ public sealed class QuoteController(
             parsed.To < parsed.From ||
             parsed.Length <= 0 ||
             parsed.Length > WebQuoteUploadConstraints.MaxFileSizeBytes ||
+            parsed.Length != expectedTotalLength ||
             parsed.To >= parsed.Length)
         {
             return false;

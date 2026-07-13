@@ -59,14 +59,28 @@ internal sealed class MalievApiClient(HttpClient httpClient)
         content.Headers.ContentLength = file.Size;
         content.Headers.ContentRange = new ContentRangeHeaderValue(0, file.Size - 1, file.Size);
 
-        var response = await httpClient.PutAsync(session.ProxyUploadUrl.TrimStart('/'), content, cancellationToken);
+        using var request = new HttpRequestMessage(HttpMethod.Put, session.ProxyUploadUrl.TrimStart('/'))
+        {
+            Content = content
+        };
+        request.Headers.TryAddWithoutValidation("X-Maliev-Upload-Capability", session.UploadCapability);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<WebUploadCompleteResponse>(cancellationToken) ?? new WebUploadCompleteResponse();
     }
 
-    internal async Task<WebAnalysisStatusResponse> GetAnalysisStatusAsync(string uploadId, CancellationToken cancellationToken = default)
+    internal async Task<WebAnalysisStatusResponse> GetAnalysisStatusAsync(
+        string uploadId,
+        string uploadCapability,
+        CancellationToken cancellationToken = default)
     {
-        return await GetJsonAsync<WebAnalysisStatusResponse>($"web/v1/quote/uploads/{Uri.EscapeDataString(uploadId)}/analysis-status", cancellationToken) ?? new WebAnalysisStatusResponse();
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"web/v1/quote/uploads/{Uri.EscapeDataString(uploadId)}/analysis-status");
+        request.Headers.TryAddWithoutValidation("X-Maliev-Upload-Capability", uploadCapability);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<WebAnalysisStatusResponse>(cancellationToken) ?? new WebAnalysisStatusResponse();
     }
 
     internal async Task<CheckoutDraftResponse> CreateCheckoutDraftAsync(CheckoutDraftRequest request, CancellationToken cancellationToken = default)

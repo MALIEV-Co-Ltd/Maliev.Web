@@ -190,6 +190,9 @@ window.malievQuoteDropzone = (() => {
         throw new Error(`Failed to initiate upload for "${file.name}".${detail ? " " + detail : ""}`);
       }
       const session = await initRes.json();
+      if (!session.uploadCapability) {
+        throw new Error(`Upload authorization was not returned for "${file.name}".`);
+      }
 
       // Stream file bytes to proxy
       const lastByte = file.size - 1;
@@ -197,7 +200,8 @@ window.malievQuoteDropzone = (() => {
         method: "PUT",
         headers: {
           "Content-Type": file.type || "application/octet-stream",
-          "Content-Range": `bytes 0-${lastByte}/${file.size}`
+          "Content-Range": `bytes 0-${lastByte}/${file.size}`,
+          "X-Maliev-Upload-Capability": session.uploadCapability
         },
         body: file
       });
@@ -207,7 +211,8 @@ window.malievQuoteDropzone = (() => {
 
       // Complete the upload
       const completeRes = await fetch(`/web/v1/quote/uploads/resumable/${session.uploadId}/complete`, {
-        method: "POST"
+        method: "POST",
+        headers: { "X-Maliev-Upload-Capability": session.uploadCapability }
       });
       if (!completeRes.ok) {
         throw new Error(`Failed to complete upload for "${file.name}".`);
@@ -216,6 +221,7 @@ window.malievQuoteDropzone = (() => {
 
       uploadedFiles.push({
         uploadId: completed.uploadId ?? session.uploadId,
+        uploadCapability: session.uploadCapability,
         fileId: completed.fileId ?? null,
         fileName: file.name,
         storagePath: completed.storagePath ?? session.storagePath,

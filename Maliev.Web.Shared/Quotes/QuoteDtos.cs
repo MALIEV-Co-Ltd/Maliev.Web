@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Maliev.Web.Shared.Localization;
 
 namespace Maliev.Web.Shared.Quotes;
@@ -168,11 +169,16 @@ public sealed class QuotePartDraftDto : IValidatableObject
     [MaxLength(128)]
     public string? UploadId { get; set; }
 
+    /// <summary>Gets or sets the short-lived Web upload capability retained only by this browser.</summary>
+    [MaxLength(2_048)]
+    public string? UploadCapability { get; set; }
+
     /// <summary>Gets or sets the storage path assigned by UploadService.</summary>
     [MaxLength(512)]
     public string? StoragePath { get; set; }
 
     /// <summary>Gets or sets the browser file identity.</summary>
+    [Required]
     public QuoteFileDraftDto File { get; set; } = new();
 
     /// <summary>Gets or sets the downstream manufacturing process identifier.</summary>
@@ -206,6 +212,10 @@ public sealed class QuotePartDraftDto : IValidatableObject
 
     /// <summary>Gets or sets the analyzed model volume in cubic centimeters.</summary>
     public decimal EstimatedVolumeCc { get; set; }
+
+    /// <summary>Gets or sets server-resolved geometry volume; never accepted from browser JSON.</summary>
+    [JsonIgnore]
+    public decimal? AuthoritativeVolumeCc { get; set; }
 
     /// <summary>Gets or sets whether the customer acknowledged DFM warnings.</summary>
     public bool DfmAcknowledged { get; set; }
@@ -247,6 +257,7 @@ public sealed class QuoteEstimateRequest
     public string LeadTimeCode { get; set; } = "STANDARD";
 
     /// <summary>Gets or sets the part drafts to estimate.</summary>
+    [Required]
     [MaxLength(WebQuoteUploadConstraints.MaxPartsPerEstimate)]
     public List<QuotePartDraftDto> Parts { get; set; } = [];
 }
@@ -339,6 +350,9 @@ public sealed class WebUploadInitiationResponse
 
     /// <summary>Gets or sets the storage path assigned by the upload boundary.</summary>
     public string StoragePath { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the short-lived bearer proof required for this upload lifecycle.</summary>
+    public string UploadCapability { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -371,6 +385,7 @@ public sealed class WebUploadHandoffTokenRequest
     public Guid QuoteSessionId { get; set; }
 
     /// <summary>Gets or sets the completed files to hand off.</summary>
+    [Required]
     public List<WebUploadHandoffFileDto> Files { get; set; } = [];
 }
 
@@ -383,6 +398,10 @@ public sealed class WebUploadHandoffFileDto
     [Required]
     [MaxLength(128)]
     public string UploadId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the short-lived Web upload proof; it is removed from the QuoteEngine token.</summary>
+    [MaxLength(2_048)]
+    public string? UploadCapability { get; set; }
 
     /// <summary>Gets or sets the UploadService file id when available.</summary>
     public Guid? FileId { get; set; }
