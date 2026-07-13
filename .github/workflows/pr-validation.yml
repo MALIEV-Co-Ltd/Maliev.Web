@@ -21,6 +21,9 @@ jobs:
     name: Build exact public-source dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      messaging-contracts-version: ${{ steps.package-versions.outputs.messaging-contracts-version }}
+      service-defaults-version: ${{ steps.package-versions.outputs.service-defaults-version }}
     steps:
       - name: Checkout Web source
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -49,6 +52,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Build exact dependency packages
+        id: package-versions
         run: bash scripts/prepare-web-ci-packages.sh
 
       - name: Upload exact dependency packages
@@ -66,6 +70,9 @@ jobs:
     needs: dependency-packages
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      SHARED_LIBRARY_VERSION: ${{ needs.dependency-packages.outputs.service-defaults-version }}
+      MESSAGING_CONTRACTS_VERSION: ${{ needs.dependency-packages.outputs.messaging-contracts-version }}
     steps:
       - name: Checkout source
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -88,13 +95,14 @@ jobs:
           dotnet restore Maliev.Web.slnx
           --configfile NuGet.PRValidation.Config
           /p:GITHUB_ACTIONS=true
-          /p:SharedLibraryVersion="1.0.81-alpha"
+          /p:SharedLibraryVersion="${SHARED_LIBRARY_VERSION}"
+          /p:MessagingContractsVersion="${MESSAGING_CONTRACTS_VERSION}"
 
       - name: Build
-        run: dotnet build Maliev.Web.slnx --configuration Release --no-restore /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
+        run: dotnet build Maliev.Web.slnx --configuration Release --no-restore /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="${SHARED_LIBRARY_VERSION}" /p:MessagingContractsVersion="${MESSAGING_CONTRACTS_VERSION}"
 
       - name: Test
-        run: dotnet test Maliev.Web.slnx --configuration Release --no-build --verbosity normal /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="1.0.81-alpha"
+        run: dotnet test Maliev.Web.slnx --configuration Release --no-build --verbosity normal /p:GITHUB_ACTIONS=true /p:SharedLibraryVersion="${SHARED_LIBRARY_VERSION}" /p:MessagingContractsVersion="${MESSAGING_CONTRACTS_VERSION}"
 
   container:
     name: Build and scan production image
@@ -128,6 +136,8 @@ jobs:
           tags: ${{ env.IMAGE_TAG }}
           build-args: |
             dependency_restore_stage=restore-local
+            shared_library_version=${{ needs.dependency-packages.outputs.service-defaults-version }}
+            messaging_contracts_version=${{ needs.dependency-packages.outputs.messaging-contracts-version }}
 
       - name: Validate runtime image metadata
         shell: bash

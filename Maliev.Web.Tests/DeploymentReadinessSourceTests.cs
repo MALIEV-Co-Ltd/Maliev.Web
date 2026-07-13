@@ -15,21 +15,37 @@ public sealed class DeploymentReadinessSourceTests
     {
         var dockerfilePath = RepoPath("Maliev.Web.Bff", "Dockerfile");
         var dockerIgnorePath = RepoPath(".dockerignore");
+        var directoryBuildPropsPath = RepoPath("Directory.Build.props");
+        var bffProjectPath = RepoPath("Maliev.Web.Bff", "Maliev.Web.Bff.csproj");
 
         Assert.True(File.Exists(dockerfilePath), "Expected a production Dockerfile for the Web BFF.");
         Assert.True(File.Exists(dockerIgnorePath), "Expected a root .dockerignore for the production build context.");
 
         var dockerfile = File.ReadAllText(dockerfilePath);
         var dockerIgnore = File.ReadAllText(dockerIgnorePath);
+        var directoryBuildProps = File.ReadAllText(directoryBuildPropsPath);
+        var bffProject = File.ReadAllText(bffProjectPath);
 
         Assert.Contains("FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build", dockerfile, StringComparison.Ordinal);
         Assert.Contains("FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_username,required=true", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--mount=type=secret,id=nuget_password,required=true", dockerfile, StringComparison.Ordinal);
         Assert.Contains("ARG dependency_restore_stage=restore-private", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ARG shared_library_version", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ARG messaging_contracts_version", dockerfile, StringComparison.Ordinal);
+        Assert.Contains(
+            "${shared_library_version:?shared_library_version build argument is required}",
+            dockerfile,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "${messaging_contracts_version:?messaging_contracts_version build argument is required}",
+            dockerfile,
+            StringComparison.Ordinal);
         Assert.Contains("FROM ${dependency_restore_stage} AS build", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--configfile \"NuGet.PRValidation.Config\"", dockerfile, StringComparison.Ordinal);
-        Assert.Contains("/p:SharedLibraryVersion=\"1.0.81-alpha\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:SharedLibraryVersion=\"$shared_library_version\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:MessagingContractsVersion=\"$messaging_contracts_version\"", dockerfile, StringComparison.Ordinal);
+        Assert.DoesNotContain("1.0.81-alpha", dockerfile, StringComparison.Ordinal);
         Assert.DoesNotContain("1.0.*-alpha*", dockerfile, StringComparison.Ordinal);
         Assert.DoesNotContain("ARG NUGET_", dockerfile, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("dotnet publish", dockerfile, StringComparison.Ordinal);
@@ -52,6 +68,14 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("**/.git", dockerIgnore, StringComparison.Ordinal);
         Assert.Contains("**/TestResults", dockerIgnore, StringComparison.Ordinal);
         Assert.Contains("!.ci-packages/*.nupkg", dockerIgnore, StringComparison.Ordinal);
+        Assert.Contains(
+            "<MessagingContractsVersion Condition=\"'$(MessagingContractsVersion)' == ''\">$(SharedLibraryVersion)</MessagingContractsVersion>",
+            directoryBuildProps,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "<PackageReference Include=\"Maliev.MessagingContracts\" Version=\"$(MessagingContractsVersion)\" />",
+            bffProject,
+            StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -100,6 +124,12 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("MALIEV-Co-Ltd/Maliev.MessagingContracts", workflow, StringComparison.Ordinal);
         Assert.Contains("ref: d4836f135d1cf311b2a490d9ba03809ff295e854", workflow, StringComparison.Ordinal);
         Assert.Contains("prepare-web-ci-packages.sh", workflow, StringComparison.Ordinal);
+        Assert.Contains("id: package-versions", workflow, StringComparison.Ordinal);
+        Assert.Contains("messaging-contracts-version: ${{ steps.package-versions.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("service-defaults-version: ${{ steps.package-versions.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("messaging-contracts-version=$messaging_version", packageScript, StringComparison.Ordinal);
+        Assert.Contains("service-defaults-version=$service_defaults_version", packageScript, StringComparison.Ordinal);
+        Assert.Contains("$GITHUB_OUTPUT", packageScript, StringComparison.Ordinal);
         Assert.Contains("web-ci-packages", workflow, StringComparison.Ordinal);
         Assert.Contains("include-hidden-files: true", workflow, StringComparison.Ordinal);
         Assert.Contains("overwrite: true", workflow, StringComparison.Ordinal);
@@ -110,11 +140,17 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
         Assert.Contains("dotnet build Maliev.Web.slnx --configuration Release --no-restore", workflow, StringComparison.Ordinal);
         Assert.Contains("dotnet test Maliev.Web.slnx --configuration Release --no-build", workflow, StringComparison.Ordinal);
-        Assert.Contains("/p:SharedLibraryVersion=\"1.0.81-alpha\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("SHARED_LIBRARY_VERSION: ${{ needs.dependency-packages.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("MESSAGING_CONTRACTS_VERSION: ${{ needs.dependency-packages.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("/p:SharedLibraryVersion=\"${SHARED_LIBRARY_VERSION}\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("/p:MessagingContractsVersion=\"${MESSAGING_CONTRACTS_VERSION}\"", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("1.0.81-alpha", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("1.0.*-alpha*", workflow, StringComparison.Ordinal);
         Assert.Contains("push: false", workflow, StringComparison.Ordinal);
         Assert.Contains("load: true", workflow, StringComparison.Ordinal);
         Assert.Contains("dependency_restore_stage=restore-local", workflow, StringComparison.Ordinal);
+        Assert.Contains("shared_library_version=${{ needs.dependency-packages.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("messaging_contracts_version=${{ needs.dependency-packages.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
         Assert.Contains("docker image inspect", workflow, StringComparison.Ordinal);
         Assert.Contains("docker run --detach", workflow, StringComparison.Ordinal);
         Assert.Contains("/web/liveness", workflow, StringComparison.Ordinal);

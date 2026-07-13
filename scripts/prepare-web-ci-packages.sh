@@ -57,3 +57,8 @@ dotnet pack "$service_defaults_project" \
 
 test -s "$output_dir/Maliev.MessagingContracts.$messaging_version.nupkg"
 test -s "$output_dir/Maliev.Aspire.ServiceDefaults.$service_defaults_version.nupkg"
+
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  echo "messaging-contracts-version=$messaging_version" >> "$GITHUB_OUTPUT"
+  echo "service-defaults-version=$service_defaults_version" >> "$GITHUB_OUTPUT"
+fi
