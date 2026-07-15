@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-dev --project=maliev-website --location=asia-southeast1 --format='value(immutableTags)')"
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-dev --project=maliev-website --location=asia-southeast1 --format='value(dockerConfig.immutableTags)')"
           test "$immutable_tags" = "True"
 
       - name: Archive credential-free dependency packages for the Git build context

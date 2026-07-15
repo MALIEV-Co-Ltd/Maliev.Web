@@ -59,7 +59,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("GCP_DEVELOPMENT_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
         Assert.Contains("maliev-web-artifact-dev/maliev-web", workflow, StringComparison.Ordinal);
         Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-dev", workflow, StringComparison.Ordinal);
-        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(dockerConfig.immutableTags)'", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
         Assert.Contains("outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true", workflow, StringComparison.Ordinal);
@@ -107,7 +107,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("maliev-web-artifact-dev/maliev-web", workflow, StringComparison.Ordinal);
         Assert.Contains("maliev-web-artifact-staging/maliev-web", workflow, StringComparison.Ordinal);
         Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-staging", workflow, StringComparison.Ordinal);
-        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(dockerConfig.immutableTags)'", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("version=${GITHUB_REF_NAME#release/v}", workflow, StringComparison.Ordinal);
         Assert.Contains("source_tag=dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
@@ -141,7 +141,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("maliev-web-artifact-staging/maliev-web", workflow, StringComparison.Ordinal);
         Assert.Contains("maliev-web-artifact-prod/maliev-web", workflow, StringComparison.Ordinal);
         Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-prod", workflow, StringComparison.Ordinal);
-        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(dockerConfig.immutableTags)'", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("staging_digest=", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$staging_digest\" = \"$APPROVED_DIGEST\"", workflow, StringComparison.Ordinal);
@@ -187,6 +187,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
     {
         var tagScript = ReadRepoFile("scripts", "ensure-web-image-tag.sh");
         var attestationScript = ReadRepoFile("scripts", "verify-web-image-attestations.sh");
+        var behavioralFixture = ReadRepoFile("scripts", "tests", "immutable-web-supply-chain.test.sh");
 
         Assert.Contains("MANIFEST_UNKNOWN", tagScript, StringComparison.Ordinal);
         Assert.Contains("already resolves to the requested digest", tagScript, StringComparison.Ordinal);
@@ -213,6 +214,8 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("invocationId", attestationScript, StringComparison.Ordinal);
         Assert.Contains("source_revision", attestationScript, StringComparison.Ordinal);
         Assert.Contains("expected_source_uri", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-dev/maliev-web", behavioralFixture, StringComparison.Ordinal);
+        Assert.DoesNotContain("maliev-website-artifact-dev/maliev-web", behavioralFixture, StringComparison.Ordinal);
     }
 
     /// <summary>

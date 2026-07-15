@@ -183,7 +183,7 @@ git -C "$gitops_root" config user.email test@example.com
 git -C "$gitops_root" config user.name Test
 git -C "$gitops_root" add .
 git -C "$gitops_root" commit -qm fixture
-bash "$repository_root/scripts/update-web-gitops-overlay.sh" "$gitops_root" development "asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-dev/maliev-web" "$expected_digest"
+bash "$repository_root/scripts/update-web-gitops-overlay.sh" "$gitops_root" development "asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-dev/maliev-web" "$expected_digest"
 test "$(grep -Ec '^[[:space:]]*-[[:space:]]*path:[[:space:]]*build-metadata-patch\.yaml[[:space:]]*$' "$overlay/kustomization.yaml")" -eq 1
 grep -q 'environment: development' "$overlay/kustomization.yaml"
 

@@ -69,7 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-prod --project=maliev-website --location=asia-southeast1 --format='value(immutableTags)')"
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-prod --project=maliev-website --location=asia-southeast1 --format='value(dockerConfig.immutableTags)')"
           test "$immutable_tags" = "True"
 
       - name: Install crane
