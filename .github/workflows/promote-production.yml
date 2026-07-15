@@ -1,0 +1,132 @@
+name: Promote Web to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Approved release version, for example 1.2.3
+        required: true
+        type: string
+      digest:
+        description: Explicitly approved staging sha256 digest
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-production-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote-production-image:
+    name: Promote approved staging digest
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-staging/maliev-web
+      PRODUCTION_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-prod/maliev-web
+      RELEASE_VERSION: ${{ inputs.version }}
+      APPROVED_DIGEST: ${{ inputs.digest }}
+    steps:
+      - name: Validate promotion inputs and production WIF configuration
+        env:
+          WIF_PROVIDER: ${{ vars.GCP_PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}
+          WIF_SERVICE_ACCOUNT: ${{ vars.GCP_PRODUCTION_SERVICE_ACCOUNT }}
+        shell: bash
+        run: |
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$APPROVED_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test -n "$WIF_PROVIDER"
+          test -n "$WIF_SERVICE_ACCOUNT"
+
+      - name: Checkout Web source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to Google Cloud with WIF
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_PRODUCTION_SERVICE_ACCOUNT }}
+
+      - name: Configure Artifact Registry authentication
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+        with:
+          project_id: maliev-website
+
+      - name: Configure Docker credential helper
+        run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+
+      - name: Install crane
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
+
+      - name: Verify and copy the exact approved staging digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          staging_digest="$(crane digest "${STAGING_IMAGE}:${RELEASE_VERSION}")"
+          test "$staging_digest" = "$APPROVED_DIGEST"
+          revision="$(crane config "${STAGING_IMAGE}@${APPROVED_DIGEST}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')"
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          mapfile -t attestations < <(
+            crane manifest "${STAGING_IMAGE}@${APPROVED_DIGEST}" \
+              | jq -er '.manifests[] | select(.annotations["vnd.docker.reference.type"] == "attestation-manifest") | .digest'
+          )
+          test "${#attestations[@]}" -gt 0
+          predicates="$(
+            for attestation in "${attestations[@]}"; do
+              crane manifest "${STAGING_IMAGE}@${attestation}" \
+                | jq -er '.layers[] | select(.mediaType == "application/vnd.in-toto+json") | .annotations["in-toto.io/predicate-type"]'
+            done
+          )"
+          grep -Fxq 'https://spdx.dev/Document' <<<"$predicates"
+          grep -Fxq 'https://slsa.dev/provenance/v1' <<<"$predicates"
+          crane copy "${STAGING_IMAGE}@${APPROVED_DIGEST}" "${PRODUCTION_IMAGE}:${RELEASE_VERSION}"
+          test "$(crane digest "${PRODUCTION_IMAGE}:${RELEASE_VERSION}")" = "$APPROVED_DIGEST"
+
+      - name: Checkout disabled GitOps definition
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: MALIEV-Co-Ltd/maliev-gitops
+          token: ${{ secrets.GITOPS_PAT }}
+          path: maliev-gitops
+
+      - name: Install Kustomize
+        uses: imranismail/setup-kustomize@2ba527d4d055ab63514ba50a99456fc35684947f # v2.1.0
+
+      - name: Update and verify production GitOps overlay
+        shell: bash
+        run: bash scripts/update-web-gitops-overlay.sh maliev-gitops production "$PRODUCTION_IMAGE" "$APPROVED_DIGEST"
+
+      - name: Open production GitOps pull request without enabling the application
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITOPS_PAT }}
+        run: |
+          set -euo pipefail
+          cd maliev-gitops
+          if [[ -z "$(git status --porcelain --untracked-files=all)" ]]; then
+            echo "Production overlay already points at ${APPROVED_DIGEST}."
+            exit 0
+          fi
+          branch="web/production-${RELEASE_VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git switch -C "$branch"
+          git add -- 3-apps/maliev-web/overlays/production/kustomization.yaml 3-apps/maliev-web/overlays/production/build-metadata-patch.yaml
+          git commit -m "chore(production): Promote Web ${RELEASE_VERSION}"
+          git push --force-with-lease origin "$branch"
+          if ! gh pr list --repo MALIEV-Co-Ltd/maliev-gitops --head "$branch" --state open --json number --jq 'length > 0' | grep -q true; then
+            gh pr create --repo MALIEV-Co-Ltd/maliev-gitops --base main --head "$branch" \
+              --title "chore(production): Promote Web ${RELEASE_VERSION}" \
+              --body "Promotes the exact explicitly approved staging digest ${APPROVED_DIGEST} without rebuilding after production environment approval; embedded SBOM, SLSA v1 provenance, revision, and BuildMetadata digest parity were verified. The ArgoCD Application remains disabled."
+          fi

@@ -2,13 +2,150 @@ name: CI - Staging
 
 on:
   push:
-    branches:
-      - staging
+    tags: [release/v*.*.*]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-staging-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     uses: ./.github/workflows/_build-and-test.yml
     with:
       solution_file: Maliev.Web.slnx
-    secrets:
-      gitops_pat: ${{ secrets.GITOPS_PAT }}
+
+  promote-staging-image:
+    name: Promote verified development digest
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DEVELOPMENT_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-dev/maliev-web
+      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-staging/maliev-web
+    steps:
+      - name: Validate release tag and staging WIF configuration
+        env:
+          WIF_PROVIDER: ${{ vars.GCP_STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+          WIF_SERVICE_ACCOUNT: ${{ vars.GCP_STAGING_SERVICE_ACCOUNT }}
+        shell: bash
+        run: |
+          [[ "$GITHUB_REF_NAME" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test -n "$WIF_PROVIDER"
+          test -n "$WIF_SERVICE_ACCOUNT"
+
+      - name: Checkout Web source and release ancestry
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release commit belongs to develop
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin develop
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/develop
+
+      - name: Resolve source tag and release version
+        id: release
+        shell: bash
+        run: |
+          echo "source_tag=dev-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME#release/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud with WIF
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_STAGING_SERVICE_ACCOUNT }}
+
+      - name: Configure Artifact Registry authentication
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+        with:
+          project_id: maliev-website
+
+      - name: Configure Docker credential helper
+        run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+
+      - name: Install crane
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
+
+      - name: Verify and copy exact development digest to staging
+        id: image
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          SOURCE_TAG: ${{ steps.release.outputs.source_tag }}
+        run: |
+          set -euo pipefail
+          source_digest="$(crane digest "${DEVELOPMENT_IMAGE}:${SOURCE_TAG}")"
+          revision="$(crane config "${DEVELOPMENT_IMAGE}@${source_digest}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')"
+          test "$revision" = "$GITHUB_SHA"
+          mapfile -t attestations < <(
+            crane manifest "${DEVELOPMENT_IMAGE}@${source_digest}" \
+              | jq -er '.manifests[] | select(.annotations["vnd.docker.reference.type"] == "attestation-manifest") | .digest'
+          )
+          test "${#attestations[@]}" -gt 0
+          predicates="$(
+            for attestation in "${attestations[@]}"; do
+              crane manifest "${DEVELOPMENT_IMAGE}@${attestation}" \
+                | jq -er '.layers[] | select(.mediaType == "application/vnd.in-toto+json") | .annotations["in-toto.io/predicate-type"]'
+            done
+          )"
+          grep -Fxq 'https://spdx.dev/Document' <<<"$predicates"
+          grep -Fxq 'https://slsa.dev/provenance/v1' <<<"$predicates"
+          crane copy "${DEVELOPMENT_IMAGE}@${source_digest}" "${STAGING_IMAGE}:${RELEASE_VERSION}"
+          promoted_digest="$(crane digest "${STAGING_IMAGE}:${RELEASE_VERSION}")"
+          test "$promoted_digest" = "$source_digest"
+          test "$(crane config "${STAGING_IMAGE}@${promoted_digest}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')" = "$GITHUB_SHA"
+          echo "digest=$promoted_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout disabled GitOps definition
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: MALIEV-Co-Ltd/maliev-gitops
+          token: ${{ secrets.GITOPS_PAT }}
+          path: maliev-gitops
+
+      - name: Install Kustomize
+        uses: imranismail/setup-kustomize@2ba527d4d055ab63514ba50a99456fc35684947f # v2.1.0
+
+      - name: Update and verify staging GitOps overlay
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: bash scripts/update-web-gitops-overlay.sh maliev-gitops staging "$STAGING_IMAGE" "$IMAGE_DIGEST"
+
+      - name: Open staging GitOps pull request without enabling the application
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITOPS_PAT }}
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd maliev-gitops
+          if [[ -z "$(git status --porcelain --untracked-files=all)" ]]; then
+            echo "Staging overlay already points at ${IMAGE_DIGEST}."
+            exit 0
+          fi
+          branch="web/staging-${RELEASE_VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git switch -C "$branch"
+          git add -- 3-apps/maliev-web/overlays/staging/kustomization.yaml 3-apps/maliev-web/overlays/staging/build-metadata-patch.yaml
+          git commit -m "chore(staging): Promote Web ${RELEASE_VERSION}"
+          git push --force-with-lease origin "$branch"
+          if ! gh pr list --repo MALIEV-Co-Ltd/maliev-gitops --head "$branch" --state open --json number --jq 'length > 0' | grep -q true; then
+            gh pr create --repo MALIEV-Co-Ltd/maliev-gitops --base main --head "$branch" \
+              --title "chore(staging): Promote Web ${RELEASE_VERSION}" \
+              --body "Promotes the exact verified development digest ${IMAGE_DIGEST} without rebuilding; embedded SBOM, SLSA v1 provenance, revision, and BuildMetadata digest parity were verified. The ArgoCD Application remains disabled."
+          fi
