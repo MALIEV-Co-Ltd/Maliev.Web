@@ -74,7 +74,7 @@ JSON
         [[ "${FAKE_ATTESTATION_MODE:-}" == "incomplete_slsa" ]] && slsa_predicate=$(printf '{"buildDefinition":{"buildType":"https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md","externalParameters":{},"resolvedDependencies":[]},"runDetails":{"builder":{"id":"%s"},"metadata":{}}}' "$builder")
         [[ "${FAKE_ATTESTATION_MODE:-}" == "missing_material" ]] && slsa_predicate=$(printf '{"buildDefinition":{"buildType":"https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md","externalParameters":{"configSource":{"uri":"https://github.com/MALIEV-Co-Ltd/Maliev.Web.git#refs/heads/develop","digest":{"sha1":"%s"},"path":"Maliev.Web.Bff/Dockerfile"},"request":{"frontend":"dockerfile.v0"}},"internalParameters":{"builderPlatform":"linux/amd64"},"resolvedDependencies":[{"uri":"pkg:docker/alpine@3.22","digest":{"sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]},"runDetails":{"builder":{"id":"%s"},"metadata":{"invocationId":"build-123","startedOn":"2026-07-15T00:00:00Z","finishedOn":"2026-07-15T00:01:00Z"}}}' "$revision" "$builder")
         [[ "${FAKE_ATTESTATION_MODE:-}" == "decoy_revision" ]] && slsa_predicate="${slsa_predicate%?},\"decoy\":{\"revision\":\"2222222222222222222222222222222222222222\"}}"
-        printf '{"_type":"https://in-toto.io/Statement/v1","subject":[{"name":"web","digest":{"sha256":"%s"}}],"predicateType":"https://slsa.dev/provenance/v1","predicate":%s}\n' "$subject" "$slsa_predicate"
+        printf '{"_type":"https://in-toto.io/Statement/v0.1","subject":[{"name":"web","digest":{"sha256":"%s"}}],"predicateType":"https://slsa.dev/provenance/v1","predicate":%s}\n' "$subject" "$slsa_predicate"
         ;;
       *) exit 1 ;;
     esac
