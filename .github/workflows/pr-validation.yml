@@ -138,6 +138,8 @@ jobs:
             dependency_restore_stage=restore-local
             shared_library_version=${{ needs.dependency-packages.outputs.service-defaults-version }}
             messaging_contracts_version=${{ needs.dependency-packages.outputs.messaging-contracts-version }}
+            app_version=0.0.0-pr.${{ github.run_number }}
+            commit_sha=${{ github.sha }}
 
       - name: Validate runtime image metadata
         shell: bash
