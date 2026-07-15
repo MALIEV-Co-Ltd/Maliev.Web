@@ -1,0 +1,40 @@
+name: Validate Production Promotion Controls
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/promote-production.yml
+      - .github/workflows/production-control-validation.yml
+      - scripts/ensure-web-image-tag.sh
+      - scripts/update-web-gitops-overlay.sh
+      - scripts/verify-web-image-attestations.sh
+      - scripts/tests/production-promotion-controls.test.sh
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-control-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-production-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Web source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Check production control shell syntax
+        shell: bash
+        run: |
+          bash -n scripts/ensure-web-image-tag.sh \
+            scripts/update-web-gitops-overlay.sh \
+            scripts/verify-web-image-attestations.sh \
+            scripts/tests/production-promotion-controls.test.sh
+
+      - name: Run production promotion control fixture
+        shell: bash
+        run: bash scripts/tests/production-promotion-controls.test.sh
