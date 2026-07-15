@@ -2,13 +2,186 @@ name: CI - Develop
 
 on:
   push:
-    branches:
-      - develop
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-development-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     uses: ./.github/workflows/_build-and-test.yml
     with:
       solution_file: Maliev.Web.slnx
-    secrets:
-      gitops_pat: ${{ secrets.GITOPS_PAT }}
+
+  publish-development-image:
+    name: Publish immutable development image
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-dev/maliev-web
+    steps:
+      - name: Require WIF publication configuration
+        env:
+          WIF_PROVIDER: ${{ vars.GCP_DEVELOPMENT_WORKLOAD_IDENTITY_PROVIDER }}
+          WIF_SERVICE_ACCOUNT: ${{ vars.GCP_DEVELOPMENT_SERVICE_ACCOUNT }}
+        run: |
+          test -n "$WIF_PROVIDER"
+          test -n "$WIF_SERVICE_ACCOUNT"
+
+      - name: Checkout Web source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download exact dependency packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: web-ci-packages
+          path: .ci-packages
+
+      - name: Resolve immutable tag
+        id: image
+        shell: bash
+        run: echo "tag=dev-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud with WIF
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_DEVELOPMENT_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEVELOPMENT_SERVICE_ACCOUNT }}
+
+      - name: Configure Artifact Registry authentication
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+        with:
+          project_id: maliev-website
+
+      - name: Configure Docker credential helper
+        run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+
+      - name: Assert development repository enforces immutable tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-dev --project=maliev-website --location=asia-southeast1 --format='value(dockerConfig.immutableTags)')"
+          test "$immutable_tags" = "True"
+
+      - name: Archive credential-free dependency packages for the Git build context
+        shell: bash
+        run: tar -cf "${RUNNER_TEMP}/web-ci-packages.tar" -C .ci-packages .
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build and publish image, SBOM, and provenance
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: https://github.com/MALIEV-Co-Ltd/Maliev.Web.git#${{ github.sha }}
+          file: ./Maliev.Web.Bff/Dockerfile
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max,version=v1,builder-id=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          sbom: true
+          build-args: |
+            dependency_restore_stage=restore-attested
+            shared_library_version=${{ needs.build-and-test.outputs.service-defaults-version }}
+            messaging_contracts_version=${{ needs.build-and-test.outputs.messaging-contracts-version }}
+            app_version=0.0.0-dev.${{ github.run_number }}
+            commit_sha=${{ github.sha }}
+          secret-files: |
+            ci_packages=${{ runner.temp }}/web-ci-packages.tar
+          secrets: |
+            GIT_AUTH_TOKEN=${{ github.token }}
+
+      - name: Install crane
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
+        with:
+          version: v0.20.6
+
+      - name: Scan the published digest for HIGH and CRITICAL vulnerabilities
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          access_token="$(gcloud auth print-access-token)"
+          echo "::add-mask::${access_token}"
+          TRIVY_USERNAME=oauth2accesstoken TRIVY_PASSWORD="$access_token" docker run --rm \
+            --env TRIVY_USERNAME \
+            --env TRIVY_PASSWORD \
+            aquasec/trivy@sha256:a8ca29078522f30393bdb34225e4c0994d38f37083be81a42da3a2a7e1488e9e \
+            image --exit-code 1 --severity CRITICAL,HIGH "${IMAGE}@${IMAGE_DIGEST}"
+
+      - name: Verify embedded SBOM and SLSA v1 provenance
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: bash scripts/verify-web-image-attestations.sh "${IMAGE}@${IMAGE_DIGEST}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
+
+      - name: Create or verify immutable development tag
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: bash scripts/ensure-web-image-tag.sh "${IMAGE}@${IMAGE_DIGEST}" "$IMAGE" "$IMAGE_TAG" "$IMAGE_DIGEST"
+
+      - name: Checkout disabled GitOps definition
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: MALIEV-Co-Ltd/maliev-gitops
+          token: ${{ secrets.GITOPS_PAT }}
+          path: maliev-gitops
+
+      - name: Install Kustomize
+        uses: imranismail/setup-kustomize@2ba527d4d055ab63514ba50a99456fc35684947f # v2.1.0
+        with:
+          kustomize-version: 5.7.1
+
+      - name: Update and verify development GitOps overlay
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: bash scripts/update-web-gitops-overlay.sh maliev-gitops development "$IMAGE" "$IMAGE_DIGEST"
+
+      - name: Open GitOps pull request without enabling the application
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITOPS_PAT }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd maliev-gitops
+          if [[ -z "$(git status --porcelain --untracked-files=all)" ]]; then
+            echo "Development overlay already points at ${IMAGE_DIGEST}."
+            exit 0
+          fi
+          branch="web/development-${GITHUB_SHA::12}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "+$branch:refs/remotes/origin/$branch" || true
+          git switch -C "$branch"
+          git add -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml
+          git commit -m "chore(development): Update Web image digest"
+          if ! git push --force-with-lease origin "$branch"; then
+            git fetch origin "+$branch:refs/remotes/origin/$branch"
+            if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml; then
+              echo "A concurrent GitOps update changed the development overlay differently." >&2
+              exit 1
+            fi
+            echo "Concurrent GitOps update already published the same overlay; continuing idempotently."
+          fi
+          if ! gh pr list --repo MALIEV-Co-Ltd/maliev-gitops --head "$branch" --state open --json number --jq 'length > 0' | grep -q true; then
+            gh pr create --repo MALIEV-Co-Ltd/maliev-gitops --base main --head "$branch" \
+              --title "chore(development): Update Web image" \
+              --body "Promotes Web ${IMAGE_TAG} at ${IMAGE_DIGEST}; the exact image digest and BuildMetadata digest were rendered and verified. The ArgoCD Application remains disabled. Source: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}."
+          fi
