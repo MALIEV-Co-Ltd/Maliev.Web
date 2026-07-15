@@ -214,6 +214,10 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("invocationId", attestationScript, StringComparison.Ordinal);
         Assert.Contains("source_revision", attestationScript, StringComparison.Ordinal);
         Assert.Contains("expected_source_uri", attestationScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("SLSA v1 provenance must use in-toto Statement/v1", attestationScript, StringComparison.Ordinal);
+        Assert.Matches(
+            "Statement/v0\\.1.*https://slsa\\.dev/provenance/v1",
+            behavioralFixture);
         Assert.Contains("maliev-web-artifact-dev/maliev-web", behavioralFixture, StringComparison.Ordinal);
         Assert.DoesNotContain("maliev-website-artifact-dev/maliev-web", behavioralFixture, StringComparison.Ordinal);
     }

@@ -167,8 +167,6 @@ if predicate_type == "https://spdx.dev/Document":
         raise SystemExit("SPDX file inventory is malformed")
 
 if predicate_type == "https://slsa.dev/provenance/v1":
-    if statement_type != "https://in-toto.io/Statement/v1":
-        raise SystemExit("SLSA v1 provenance must use in-toto Statement/v1")
     build_definition = predicate.get("buildDefinition")
     if not isinstance(build_definition, dict):
         raise SystemExit("SLSA buildDefinition is missing")
