@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: web-staging-${{ github.ref }}
+  group: web-staging-promotion
   cancel-in-progress: true
 
 jobs:
@@ -76,6 +76,8 @@ jobs:
 
       - name: Install crane
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
+        with:
+          version: v0.20.6
 
       - name: Verify and copy exact development digest to staging
         id: image
@@ -88,20 +90,8 @@ jobs:
           source_digest="$(crane digest "${DEVELOPMENT_IMAGE}:${SOURCE_TAG}")"
           revision="$(crane config "${DEVELOPMENT_IMAGE}@${source_digest}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')"
           test "$revision" = "$GITHUB_SHA"
-          mapfile -t attestations < <(
-            crane manifest "${DEVELOPMENT_IMAGE}@${source_digest}" \
-              | jq -er '.manifests[] | select(.annotations["vnd.docker.reference.type"] == "attestation-manifest") | .digest'
-          )
-          test "${#attestations[@]}" -gt 0
-          predicates="$(
-            for attestation in "${attestations[@]}"; do
-              crane manifest "${DEVELOPMENT_IMAGE}@${attestation}" \
-                | jq -er '.layers[] | select(.mediaType == "application/vnd.in-toto+json") | .annotations["in-toto.io/predicate-type"]'
-            done
-          )"
-          grep -Fxq 'https://spdx.dev/Document' <<<"$predicates"
-          grep -Fxq 'https://slsa.dev/provenance/v1' <<<"$predicates"
-          crane copy "${DEVELOPMENT_IMAGE}@${source_digest}" "${STAGING_IMAGE}:${RELEASE_VERSION}"
+          bash scripts/verify-web-image-attestations.sh "${DEVELOPMENT_IMAGE}@${source_digest}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
+          bash scripts/ensure-web-image-tag.sh "${DEVELOPMENT_IMAGE}@${source_digest}" "$STAGING_IMAGE" "$RELEASE_VERSION" "$source_digest"
           promoted_digest="$(crane digest "${STAGING_IMAGE}:${RELEASE_VERSION}")"
           test "$promoted_digest" = "$source_digest"
           test "$(crane config "${STAGING_IMAGE}@${promoted_digest}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')" = "$GITHUB_SHA"
@@ -116,6 +106,8 @@ jobs:
 
       - name: Install Kustomize
         uses: imranismail/setup-kustomize@2ba527d4d055ab63514ba50a99456fc35684947f # v2.1.0
+        with:
+          kustomize-version: 5.7.1
 
       - name: Update and verify staging GitOps overlay
         shell: bash
@@ -143,7 +135,14 @@ jobs:
           git switch -C "$branch"
           git add -- 3-apps/maliev-web/overlays/staging/kustomization.yaml 3-apps/maliev-web/overlays/staging/build-metadata-patch.yaml
           git commit -m "chore(staging): Promote Web ${RELEASE_VERSION}"
-          git push --force-with-lease origin "$branch"
+          if ! git push --force-with-lease origin "$branch"; then
+            git fetch origin "$branch:refs/remotes/origin/$branch"
+            if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/staging/kustomization.yaml 3-apps/maliev-web/overlays/staging/build-metadata-patch.yaml; then
+              echo "A concurrent GitOps update changed the staging overlay differently." >&2
+              exit 1
+            fi
+            echo "Concurrent GitOps update already published the same overlay; continuing idempotently."
+          fi
           if ! gh pr list --repo MALIEV-Co-Ltd/maliev-gitops --head "$branch" --state open --json number --jq 'length > 0' | grep -q true; then
             gh pr create --repo MALIEV-Co-Ltd/maliev-gitops --base main --head "$branch" \
               --title "chore(staging): Promote Web ${RELEASE_VERSION}" \

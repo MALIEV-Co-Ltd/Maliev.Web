@@ -75,11 +75,10 @@ jobs:
         with:
           context: .
           file: ./Maliev.Web.Bff/Dockerfile
-          push: true
-          tags: ${{ env.IMAGE }}:${{ steps.image.outputs.tag }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          provenance: mode=max,version=v1
+          provenance: mode=max,version=v1,builder-id=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           sbom: true
           build-args: |
             dependency_restore_stage=restore-local
@@ -90,13 +89,8 @@ jobs:
 
       - name: Install crane
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
-
-      - name: Verify published digest
-        shell: bash
-        env:
-          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
-          IMAGE_TAG: ${{ steps.image.outputs.tag }}
-        run: test "$(crane digest "${IMAGE}:${IMAGE_TAG}")" = "$IMAGE_DIGEST"
+        with:
+          version: v0.20.6
 
       - name: Scan the published digest for HIGH and CRITICAL vulnerabilities
         shell: bash
@@ -116,21 +110,14 @@ jobs:
         shell: bash
         env:
           IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
-        run: |
-          set -euo pipefail
-          mapfile -t attestations < <(
-            crane manifest "${IMAGE}@${IMAGE_DIGEST}" \
-              | jq -er '.manifests[] | select(.annotations["vnd.docker.reference.type"] == "attestation-manifest") | .digest'
-          )
-          test "${#attestations[@]}" -gt 0
-          predicates="$(
-            for attestation in "${attestations[@]}"; do
-              crane manifest "${IMAGE}@${attestation}" \
-                | jq -er '.layers[] | select(.mediaType == "application/vnd.in-toto+json") | .annotations["in-toto.io/predicate-type"]'
-            done
-          )"
-          grep -Fxq 'https://spdx.dev/Document' <<<"$predicates"
-          grep -Fxq 'https://slsa.dev/provenance/v1' <<<"$predicates"
+        run: bash scripts/verify-web-image-attestations.sh "${IMAGE}@${IMAGE_DIGEST}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
+
+      - name: Create or verify immutable development tag
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: bash scripts/ensure-web-image-tag.sh "${IMAGE}@${IMAGE_DIGEST}" "$IMAGE" "$IMAGE_TAG" "$IMAGE_DIGEST"
 
       - name: Checkout disabled GitOps definition
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -141,6 +128,8 @@ jobs:
 
       - name: Install Kustomize
         uses: imranismail/setup-kustomize@2ba527d4d055ab63514ba50a99456fc35684947f # v2.1.0
+        with:
+          kustomize-version: 5.7.1
 
       - name: Update and verify development GitOps overlay
         shell: bash
@@ -161,14 +150,21 @@ jobs:
             echo "Development overlay already points at ${IMAGE_DIGEST}."
             exit 0
           fi
-          branch="web/development"
+          branch="web/development-${GITHUB_SHA::12}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "$branch:refs/remotes/origin/$branch" || true
           git switch -C "$branch"
           git add -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml
           git commit -m "chore(development): Update Web image digest"
-          git push --force-with-lease origin "$branch"
+          if ! git push --force-with-lease origin "$branch"; then
+            git fetch origin "$branch:refs/remotes/origin/$branch"
+            if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml; then
+              echo "A concurrent GitOps update changed the development overlay differently." >&2
+              exit 1
+            fi
+            echo "Concurrent GitOps update already published the same overlay; continuing idempotently."
+          fi
           if ! gh pr list --repo MALIEV-Co-Ltd/maliev-gitops --head "$branch" --state open --json number --jq 'length > 0' | grep -q true; then
             gh pr create --repo MALIEV-Co-Ltd/maliev-gitops --base main --head "$branch" \
               --title "chore(development): Update Web image" \

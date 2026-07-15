@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Maliev.Web.Tests;
@@ -56,6 +57,8 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("GCP_DEVELOPMENT_WORKLOAD_IDENTITY_PROVIDER", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_DEVELOPMENT_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
         Assert.Contains("dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
+        Assert.Contains("outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("tags: ${{ env.IMAGE }}:${{ steps.image.outputs.tag }}", workflow, StringComparison.Ordinal);
         Assert.Contains("dependency_restore_stage=restore-local", workflow, StringComparison.Ordinal);
         Assert.Contains("shared_library_version=${{ needs.build-and-test.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
         Assert.Contains("messaging_contracts_version=${{ needs.build-and-test.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
@@ -63,11 +66,11 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("commit_sha=${{ github.sha }}", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("image_digest=", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("provenance: mode=max,version=v1", workflow, StringComparison.Ordinal);
+        Assert.Contains("builder-id=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", workflow, StringComparison.Ordinal);
         Assert.Contains("sbom: true", workflow, StringComparison.Ordinal);
         Assert.Contains("severity CRITICAL,HIGH", workflow, StringComparison.Ordinal);
-        Assert.Contains("https://spdx.dev/Document", workflow, StringComparison.Ordinal);
-        Assert.Contains("https://slsa.dev/provenance/v1", workflow, StringComparison.Ordinal);
-        Assert.Contains("crane digest", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("credentials_json", workflow, StringComparison.OrdinalIgnoreCase);
     }
@@ -81,16 +84,16 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         var workflow = ReadRepoFile(".github", "workflows", "ci-staging.yml");
 
         Assert.Contains("tags: [release/v*.*.*]", workflow, StringComparison.Ordinal);
+        Assert.Contains("group: web-staging-promotion", workflow, StringComparison.Ordinal);
+        Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
         Assert.Contains("environment: staging", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_STAGING_WORKLOAD_IDENTITY_PROVIDER", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_STAGING_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
         Assert.Contains("version=${GITHUB_REF_NAME#release/v}", workflow, StringComparison.Ordinal);
         Assert.Contains("source_tag=dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
         Assert.Contains("org.opencontainers.image.revision", workflow, StringComparison.Ordinal);
-        Assert.Contains("https://spdx.dev/Document", workflow, StringComparison.Ordinal);
-        Assert.Contains("https://slsa.dev/provenance/v1", workflow, StringComparison.Ordinal);
-        Assert.Contains("crane copy \"${DEVELOPMENT_IMAGE}@${source_digest}\"", workflow, StringComparison.Ordinal);
-        Assert.Contains("test \"$promoted_digest\" = \"$source_digest\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker/build-push-action", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker build", workflow, StringComparison.OrdinalIgnoreCase);
@@ -113,8 +116,8 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("GCP_PRODUCTION_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
         Assert.Contains("staging_digest=", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$staging_digest\" = \"$APPROVED_DIGEST\"", workflow, StringComparison.Ordinal);
-        Assert.Contains("crane copy \"${STAGING_IMAGE}@${APPROVED_DIGEST}\"", workflow, StringComparison.Ordinal);
-        Assert.Contains("test \"$(crane digest", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
+        Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker/build-push-action", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker build", workflow, StringComparison.OrdinalIgnoreCase);
@@ -137,7 +140,61 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("Refusing change outside", script, StringComparison.Ordinal);
         Assert.Contains("rendered image digest", script, StringComparison.Ordinal);
         Assert.Contains("rendered BuildMetadata__ImageDigest", script, StringComparison.Ordinal);
+        Assert.Contains("kustomize edit remove patch --path build-metadata-patch.yaml", script, StringComparison.Ordinal);
+        Assert.Contains("kustomize edit add patch --path build-metadata-patch.yaml", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("sed -i", script, StringComparison.Ordinal);
         Assert.DoesNotContain("argocd/environments", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Verifies immutable tag creation distinguishes absence from lookup failures and never overwrites conflicts.
+    /// </summary>
+    [Fact]
+    public void TagAndAttestationScriptsFailClosedAndVerifyAttestationPayloads()
+    {
+        var tagScript = ReadRepoFile("scripts", "ensure-web-image-tag.sh");
+        var attestationScript = ReadRepoFile("scripts", "verify-web-image-attestations.sh");
+
+        Assert.Contains("MANIFEST_UNKNOWN", tagScript, StringComparison.Ordinal);
+        Assert.Contains("already resolves to the requested digest", tagScript, StringComparison.Ordinal);
+        Assert.Contains("Refusing to overwrite immutable tag", tagScript, StringComparison.Ordinal);
+        Assert.Contains("crane copy", tagScript, StringComparison.Ordinal);
+        Assert.Contains("crane blob", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("vnd.docker.reference.digest", attestationScript, StringComparison.Ordinal);
+        Assert.Contains(".subject", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("https://spdx.dev/Document", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("https://slsa.dev/provenance/v1", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("predicate.runDetails.builder.id", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("source_revision", attestationScript, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Runs behavioral shell fixtures for immutable tags, attestation payloads, and Kustomize variants.
+    /// </summary>
+    [Fact]
+    public void SupplyChainShellContractsPassBehavioralFixtures()
+    {
+        var repoRoot = FindRepoRoot();
+        var scriptPath = Path.Combine(repoRoot, "scripts", "tests", "immutable-web-supply-chain.test.sh");
+        Assert.True(File.Exists(scriptPath), $"Expected shell contract test '{scriptPath}'.");
+
+        using var process = Process.Start(new ProcessStartInfo
+        {
+            FileName = "bash",
+            ArgumentList = { "scripts/tests/immutable-web-supply-chain.test.sh" },
+            WorkingDirectory = repoRoot,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        });
+        Assert.NotNull(process);
+        var standardOutput = process.StandardOutput.ReadToEnd();
+        var standardError = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        Assert.True(
+            process.ExitCode == 0,
+            $"Shell contract fixtures failed with exit code {process.ExitCode}.\nstdout:\n{standardOutput}\nstderr:\n{standardError}");
     }
 
     /// <summary>
@@ -166,6 +223,10 @@ public sealed class ImmutablePublicationWorkflowSourceTests
             var workflow = ReadRepoFile(".github", "workflows", workflowName);
             Assert.Contains("The ArgoCD Application remains disabled", workflow, StringComparison.Ordinal);
             Assert.Equal(2, Regex.Matches(workflow, "GITOPS_PAT", RegexOptions.CultureInvariant).Count);
+            Assert.Contains("version: v0.20.6", workflow, StringComparison.Ordinal);
+            Assert.Contains("kustomize-version: 5.7.1", workflow, StringComparison.Ordinal);
+            Assert.Contains("Concurrent GitOps update already published the same overlay", workflow, StringComparison.Ordinal);
+            Assert.Contains("git diff --quiet \"origin/$branch\" HEAD", workflow, StringComparison.Ordinal);
         }
     }
 

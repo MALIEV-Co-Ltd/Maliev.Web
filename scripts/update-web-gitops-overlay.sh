@@ -66,14 +66,11 @@ spec:
               value: "${image_digest}"
 EOF
 
-if ! grep -Eq '^patches:[[:space:]]*$' "$kustomization_path"; then
-  echo "Refusing Web overlay without a patches list: $overlay_relative" >&2
-  exit 1
-fi
-
-sed -i '/^[[:space:]]*-[[:space:]]*path:[[:space:]]*build-metadata-patch\.yaml[[:space:]]*$/d' "$kustomization_path"
-readonly patch_indent="$(sed -n 's/^\([[:space:]]*\)-[[:space:]]*path:.*/\1/p' "$kustomization_path" | head -n 1)"
-printf '%s- path: build-metadata-patch.yaml\n' "$patch_indent" >>"$kustomization_path"
+(
+  cd "$overlay_path"
+  kustomize edit remove patch --path build-metadata-patch.yaml >/dev/null 2>&1 || true
+  kustomize edit add patch --path build-metadata-patch.yaml
+)
 
 readonly patch_reference_count="$(grep -Ec '^[[:space:]]*-[[:space:]]*path:[[:space:]]*build-metadata-patch\.yaml[[:space:]]*$' "$kustomization_path")"
 if [[ "$patch_reference_count" -ne 1 ]]; then
