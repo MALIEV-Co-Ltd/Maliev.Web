@@ -34,9 +34,9 @@ case "$1" in
   manifest)
     case "$2" in
       *@sha256:1111111111111111111111111111111111111111111111111111111111111111)
-        cat <<'JSON'
-{"manifests":[{"digest":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","annotations":{"vnd.docker.reference.type":"attestation-manifest","vnd.docker.reference.digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}]}
-JSON
+        attestation_subject="sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "orphan_subject" ]] && attestation_subject="sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        printf '{"manifests":[{"mediaType":"application/vnd.oci.image.manifest.v1+json","digest":"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"mediaType":"application/vnd.oci.image.manifest.v1+json","digest":"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","annotations":{"vnd.docker.reference.type":"attestation-manifest","vnd.docker.reference.digest":"%s"}}]}\n' "$attestation_subject"
         ;;
       *@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
         cat <<'JSON'
@@ -50,16 +50,31 @@ JSON
     case "$2" in
       *@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc)
         subject="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        extra_subject=""
         [[ "${FAKE_ATTESTATION_MODE:-}" == "bad_subject" ]] && subject="eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-        printf '{"_type":"https://in-toto.io/Statement/v0.1","subject":[{"name":"web","digest":{"sha256":"%s"}}],"predicateType":"https://spdx.dev/Document","predicate":{}}\n' "$subject"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "orphan_subject" ]] && subject="eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "extra_orphan_statement_subject" ]] && extra_subject=',{"name":"orphan","digest":{"sha256":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"}}'
+        spdx_predicate='{"SPDXID":"SPDXRef-DOCUMENT","spdxVersion":"SPDX-2.3","dataLicense":"CC0-1.0","documentNamespace":"https://maliev.com/spdx/web/2222222222222222222222222222222222222222","name":"maliev-web","creationInfo":{"created":"2026-07-15T00:00:00Z","creators":["Tool: buildkit"]},"packages":[{"SPDXID":"SPDXRef-Package-web","name":"maliev-web","downloadLocation":"NOASSERTION"}]}'
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "empty_spdx" ]] && spdx_predicate='{}'
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "malformed_spdx" ]] && spdx_predicate='{"SPDXID":"SPDXRef-DOCUMENT","spdxVersion":"SPDX-2.3","dataLicense":"CC0-1.0","documentNamespace":"not-a-uri","packages":[]}'
+        printf '{"_type":"https://in-toto.io/Statement/v0.1","subject":[{"name":"web","digest":{"sha256":"%s"}}%s],"predicateType":"https://spdx.dev/Document","predicate":%s}\n' "$subject" "$extra_subject" "$spdx_predicate"
         ;;
       *@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd)
         subject="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         revision="2222222222222222222222222222222222222222"
         builder="https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/123456"
+        source_uri="https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "orphan_subject" ]] && subject="eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
         [[ "${FAKE_ATTESTATION_MODE:-}" == "bad_revision" ]] && revision="3333333333333333333333333333333333333333"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "decoy_revision" ]] && revision="3333333333333333333333333333333333333333"
         [[ "${FAKE_ATTESTATION_MODE:-}" == "bad_builder" ]] && builder="https://example.invalid/builder"
-        printf '{"_type":"https://in-toto.io/Statement/v1","subject":[{"name":"web","digest":{"sha256":"%s"}}],"predicateType":"https://slsa.dev/provenance/v1","predicate":{"buildDefinition":{"resolvedDependencies":[{"uri":"git+https://github.com/MALIEV-Co-Ltd/Maliev.Web","digest":{"gitCommit":"%s"}}]},"runDetails":{"builder":{"id":"%s"}}}}\n' "$subject" "$revision" "$builder"
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "wrong_source_uri" ]] && source_uri="https://example.invalid/Maliev.Web.git"
+        slsa_predicate=$(printf '{"buildDefinition":{"buildType":"https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md","externalParameters":{"configSource":{"uri":"%s#refs/heads/develop","digest":{"sha1":"%s"},"path":"Maliev.Web.Bff/Dockerfile"},"request":{"frontend":"dockerfile.v0"}},"internalParameters":{"builderPlatform":"linux/amd64"},"resolvedDependencies":[{"uri":"%s#refs/heads/develop","digest":{"sha1":"%s"}}]},"runDetails":{"builder":{"id":"%s"},"metadata":{"invocationId":"build-123","startedOn":"2026-07-15T00:00:00Z","finishedOn":"2026-07-15T00:01:00Z"}}}' "$source_uri" "$revision" "$source_uri" "$revision" "$builder")
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "empty_slsa" ]] && slsa_predicate='{}'
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "incomplete_slsa" ]] && slsa_predicate=$(printf '{"buildDefinition":{"buildType":"https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md","externalParameters":{},"resolvedDependencies":[]},"runDetails":{"builder":{"id":"%s"},"metadata":{}}}' "$builder")
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "missing_material" ]] && slsa_predicate=$(printf '{"buildDefinition":{"buildType":"https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md","externalParameters":{"configSource":{"uri":"https://github.com/MALIEV-Co-Ltd/Maliev.Web.git#refs/heads/develop","digest":{"sha1":"%s"},"path":"Maliev.Web.Bff/Dockerfile"},"request":{"frontend":"dockerfile.v0"}},"internalParameters":{"builderPlatform":"linux/amd64"},"resolvedDependencies":[{"uri":"pkg:docker/alpine@3.22","digest":{"sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]},"runDetails":{"builder":{"id":"%s"},"metadata":{"invocationId":"build-123","startedOn":"2026-07-15T00:00:00Z","finishedOn":"2026-07-15T00:01:00Z"}}}' "$revision" "$builder")
+        [[ "${FAKE_ATTESTATION_MODE:-}" == "decoy_revision" ]] && slsa_predicate="${slsa_predicate%?},\"decoy\":{\"revision\":\"2222222222222222222222222222222222222222\"}}"
+        printf '{"_type":"https://in-toto.io/Statement/v1","subject":[{"name":"web","digest":{"sha256":"%s"}}],"predicateType":"https://slsa.dev/provenance/v1","predicate":%s}\n' "$subject" "$slsa_predicate"
         ;;
       *) exit 1 ;;
     esac
@@ -93,9 +108,9 @@ test "$(wc -l <"$FAKE_CRANE_LOG")" -eq 1
 rm -f "$FAKE_TAG_STATE"
 readonly attested_image="registry.example/web@sha256:1111111111111111111111111111111111111111111111111111111111111111"
 readonly revision="2222222222222222222222222222222222222222"
-bash "$repository_root/scripts/verify-web-image-attestations.sh" "$attested_image" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
-for mode in bad_subject bad_revision bad_builder; do
-  if FAKE_ATTESTATION_MODE="$mode" bash "$repository_root/scripts/verify-web-image-attestations.sh" "$attested_image" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"; then
+bash "$repository_root/scripts/verify-web-image-attestations.sh" "$attested_image" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
+for mode in bad_subject bad_revision bad_builder orphan_subject extra_orphan_statement_subject empty_spdx malformed_spdx empty_slsa incomplete_slsa missing_material decoy_revision wrong_source_uri; do
+  if FAKE_ATTESTATION_MODE="$mode" bash "$repository_root/scripts/verify-web-image-attestations.sh" "$attested_image" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"; then
     echo "Expected attestation mode $mode to fail." >&2
     exit 1
   fi

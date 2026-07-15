@@ -26,7 +26,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-dev/maliev-web
+      IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-dev/maliev-web
     steps:
       - name: Require WIF publication configuration
         env:
@@ -66,6 +66,17 @@ jobs:
       - name: Configure Docker credential helper
         run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
 
+      - name: Assert development repository enforces immutable tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-dev --project=maliev-website --location=asia-southeast1 --format='value(immutableTags)')"
+          test "$immutable_tags" = "True"
+
+      - name: Archive credential-free dependency packages for the Git build context
+        shell: bash
+        run: tar -cf "${RUNNER_TEMP}/web-ci-packages.tar" -C .ci-packages .
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
@@ -73,7 +84,7 @@ jobs:
         id: build
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          context: .
+          context: https://github.com/MALIEV-Co-Ltd/Maliev.Web.git#${{ github.sha }}
           file: ./Maliev.Web.Bff/Dockerfile
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha
@@ -81,11 +92,15 @@ jobs:
           provenance: mode=max,version=v1,builder-id=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           sbom: true
           build-args: |
-            dependency_restore_stage=restore-local
+            dependency_restore_stage=restore-attested
             shared_library_version=${{ needs.build-and-test.outputs.service-defaults-version }}
             messaging_contracts_version=${{ needs.build-and-test.outputs.messaging-contracts-version }}
             app_version=0.0.0-dev.${{ github.run_number }}
             commit_sha=${{ github.sha }}
+          secret-files: |
+            ci_packages=${{ runner.temp }}/web-ci-packages.tar
+          secrets: |
+            GIT_AUTH_TOKEN=${{ github.token }}
 
       - name: Install crane
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
@@ -110,7 +125,7 @@ jobs:
         shell: bash
         env:
           IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
-        run: bash scripts/verify-web-image-attestations.sh "${IMAGE}@${IMAGE_DIGEST}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
+        run: bash scripts/verify-web-image-attestations.sh "${IMAGE}@${IMAGE_DIGEST}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
 
       - name: Create or verify immutable development tag
         shell: bash
@@ -153,12 +168,12 @@ jobs:
           branch="web/development-${GITHUB_SHA::12}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git fetch origin "+$branch:refs/remotes/origin/$branch" || true
           git switch -C "$branch"
           git add -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml
           git commit -m "chore(development): Update Web image digest"
           if ! git push --force-with-lease origin "$branch"; then
-            git fetch origin "$branch:refs/remotes/origin/$branch"
+            git fetch origin "+$branch:refs/remotes/origin/$branch"
             if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/development/kustomization.yaml 3-apps/maliev-web/overlays/development/build-metadata-patch.yaml; then
               echo "A concurrent GitOps update changed the development overlay differently." >&2
               exit 1

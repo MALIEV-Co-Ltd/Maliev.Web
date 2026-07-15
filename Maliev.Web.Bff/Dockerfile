@@ -23,7 +23,6 @@ COPY ["Directory.Build.props", "."]
 COPY ["Maliev.Web.Bff/Maliev.Web.Bff.csproj", "Maliev.Web.Bff/"]
 COPY ["Maliev.Web.Client/Maliev.Web.Client.csproj", "Maliev.Web.Client/"]
 COPY ["Maliev.Web.Shared/Maliev.Web.Shared.csproj", "Maliev.Web.Shared/"]
-COPY [".ci-packages/", ".ci-packages/"]
 
 FROM build-base AS restore-private
 RUN --mount=type=secret,id=nuget_username,required=true \
@@ -36,7 +35,18 @@ RUN --mount=type=secret,id=nuget_username,required=true \
       /p:MessagingContractsVersion="$messaging_contracts_version"
 
 FROM build-base AS restore-local
+COPY [".ci-packages/", ".ci-packages/"]
 RUN dotnet restore "Maliev.Web.Bff/Maliev.Web.Bff.csproj" \
+      --configfile "NuGet.PRValidation.Config" \
+      /p:GITHUB_ACTIONS=true \
+      /p:SharedLibraryVersion="$shared_library_version" \
+      /p:MessagingContractsVersion="$messaging_contracts_version"
+
+FROM build-base AS restore-attested
+RUN --mount=type=secret,id=ci_packages,required=true,target=/tmp/ci-packages.tar \
+    mkdir -p .ci-packages \
+    && tar -xf /tmp/ci-packages.tar -C .ci-packages \
+    && dotnet restore "Maliev.Web.Bff/Maliev.Web.Bff.csproj" \
       --configfile "NuGet.PRValidation.Config" \
       /p:GITHUB_ACTIONS=true \
       /p:SharedLibraryVersion="$shared_library_version" \

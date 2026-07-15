@@ -30,8 +30,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-staging/maliev-web
-      PRODUCTION_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-prod/maliev-web
+      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-staging/maliev-web
+      PRODUCTION_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-prod/maliev-web
       RELEASE_VERSION: ${{ inputs.version }}
       APPROVED_DIGEST: ${{ inputs.digest }}
     steps:
@@ -65,6 +65,13 @@ jobs:
       - name: Configure Docker credential helper
         run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
 
+      - name: Assert production repository enforces immutable tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-prod --project=maliev-website --location=asia-southeast1 --format='value(immutableTags)')"
+          test "$immutable_tags" = "True"
+
       - name: Install crane
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
         with:
@@ -78,7 +85,7 @@ jobs:
           test "$staging_digest" = "$APPROVED_DIGEST"
           revision="$(crane config "${STAGING_IMAGE}@${APPROVED_DIGEST}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')"
           [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
-          bash scripts/verify-web-image-attestations.sh "${STAGING_IMAGE}@${APPROVED_DIGEST}" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
+          bash scripts/verify-web-image-attestations.sh "${STAGING_IMAGE}@${APPROVED_DIGEST}" "$revision" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
           bash scripts/ensure-web-image-tag.sh "${STAGING_IMAGE}@${APPROVED_DIGEST}" "$PRODUCTION_IMAGE" "$RELEASE_VERSION" "$APPROVED_DIGEST"
           test "$(crane digest "${PRODUCTION_IMAGE}:${RELEASE_VERSION}")" = "$APPROVED_DIGEST"
 
@@ -112,12 +119,12 @@ jobs:
           branch="web/production-${RELEASE_VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git fetch origin "+$branch:refs/remotes/origin/$branch" || true
           git switch -C "$branch"
           git add -- 3-apps/maliev-web/overlays/production/kustomization.yaml 3-apps/maliev-web/overlays/production/build-metadata-patch.yaml
           git commit -m "chore(production): Promote Web ${RELEASE_VERSION}"
           if ! git push --force-with-lease origin "$branch"; then
-            git fetch origin "$branch:refs/remotes/origin/$branch"
+            git fetch origin "+$branch:refs/remotes/origin/$branch"
             if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/production/kustomization.yaml 3-apps/maliev-web/overlays/production/build-metadata-patch.yaml; then
               echo "A concurrent GitOps update changed the production overlay differently." >&2
               exit 1

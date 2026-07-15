@@ -49,6 +49,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
     public void DevelopPublishesDiagnosticSemVerAndVerifiesDigestScanSbomAndProvenance()
     {
         var workflow = ReadRepoFile(".github", "workflows", "ci-develop.yml");
+        var dockerfile = ReadRepoFile("Maliev.Web.Bff", "Dockerfile");
 
         Assert.Contains("branches: [develop]", workflow, StringComparison.Ordinal);
         Assert.Contains("cancel-in-progress: true", workflow, StringComparison.Ordinal);
@@ -56,10 +57,18 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("id-token: write", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_DEVELOPMENT_WORKLOAD_IDENTITY_PROVIDER", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_DEVELOPMENT_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-dev/maliev-web", workflow, StringComparison.Ordinal);
+        Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-dev", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
         Assert.Contains("outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true", workflow, StringComparison.Ordinal);
+        Assert.Contains("context: https://github.com/MALIEV-Co-Ltd/Maliev.Web.git#${{ github.sha }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("secret-files:", workflow, StringComparison.Ordinal);
+        Assert.Contains("ci_packages=", workflow, StringComparison.Ordinal);
+        Assert.Contains("GIT_AUTH_TOKEN=${{ github.token }}", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("tags: ${{ env.IMAGE }}:${{ steps.image.outputs.tag }}", workflow, StringComparison.Ordinal);
-        Assert.Contains("dependency_restore_stage=restore-local", workflow, StringComparison.Ordinal);
+        Assert.Contains("dependency_restore_stage=restore-attested", workflow, StringComparison.Ordinal);
         Assert.Contains("shared_library_version=${{ needs.build-and-test.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
         Assert.Contains("messaging_contracts_version=${{ needs.build-and-test.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
         Assert.Contains("app_version=0.0.0-dev.${{ github.run_number }}", workflow, StringComparison.Ordinal);
@@ -72,7 +81,13 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
+        Assert.True(
+            workflow.IndexOf("gcloud artifacts repositories describe maliev-web-artifact-dev", StringComparison.Ordinal) <
+            workflow.IndexOf("scripts/ensure-web-image-tag.sh", StringComparison.Ordinal));
+        Assert.DoesNotContain("maliev-website-artifact-dev", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("credentials_json", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("FROM build-base AS restore-attested", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("id=ci_packages,required=true", dockerfile, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -89,12 +104,21 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("environment: staging", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_STAGING_WORKLOAD_IDENTITY_PROVIDER", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_STAGING_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-dev/maliev-web", workflow, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-staging/maliev-web", workflow, StringComparison.Ordinal);
+        Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-staging", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("version=${GITHUB_REF_NAME#release/v}", workflow, StringComparison.Ordinal);
         Assert.Contains("source_tag=dev-${GITHUB_SHA::12}", workflow, StringComparison.Ordinal);
         Assert.Contains("org.opencontainers.image.revision", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
+        Assert.True(
+            workflow.IndexOf("gcloud artifacts repositories describe maliev-web-artifact-staging", StringComparison.Ordinal) <
+            workflow.IndexOf("scripts/ensure-web-image-tag.sh", StringComparison.Ordinal));
+        Assert.DoesNotContain("maliev-website-artifact-staging", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker/build-push-action", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker build", workflow, StringComparison.OrdinalIgnoreCase);
     }
@@ -114,11 +138,20 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("environment: production", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_PRODUCTION_WORKLOAD_IDENTITY_PROVIDER", workflow, StringComparison.Ordinal);
         Assert.Contains("GCP_PRODUCTION_SERVICE_ACCOUNT", workflow, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-staging/maliev-web", workflow, StringComparison.Ordinal);
+        Assert.Contains("maliev-web-artifact-prod/maliev-web", workflow, StringComparison.Ordinal);
+        Assert.Contains("gcloud artifacts repositories describe maliev-web-artifact-prod", workflow, StringComparison.Ordinal);
+        Assert.Contains("--format='value(immutableTags)'", workflow, StringComparison.Ordinal);
+        Assert.Contains("test \"$immutable_tags\" = \"True\"", workflow, StringComparison.Ordinal);
         Assert.Contains("staging_digest=", workflow, StringComparison.Ordinal);
         Assert.Contains("test \"$staging_digest\" = \"$APPROVED_DIGEST\"", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/verify-web-image-attestations.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/ensure-web-image-tag.sh", workflow, StringComparison.Ordinal);
         Assert.Contains("scripts/update-web-gitops-overlay.sh", workflow, StringComparison.Ordinal);
+        Assert.True(
+            workflow.IndexOf("gcloud artifacts repositories describe maliev-web-artifact-prod", StringComparison.Ordinal) <
+            workflow.IndexOf("scripts/ensure-web-image-tag.sh", StringComparison.Ordinal));
+        Assert.DoesNotContain("maliev-website-artifact-prod", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker/build-push-action", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("docker build", workflow, StringComparison.OrdinalIgnoreCase);
     }
@@ -161,11 +194,25 @@ public sealed class ImmutablePublicationWorkflowSourceTests
         Assert.Contains("crane copy", tagScript, StringComparison.Ordinal);
         Assert.Contains("crane blob", attestationScript, StringComparison.Ordinal);
         Assert.Contains("vnd.docker.reference.digest", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("non_attestation_subjects", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("orphan attestation subject", attestationScript, StringComparison.Ordinal);
         Assert.Contains(".subject", attestationScript, StringComparison.Ordinal);
         Assert.Contains("https://spdx.dev/Document", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("SPDXID", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("spdxVersion", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("dataLicense", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("documentNamespace", attestationScript, StringComparison.Ordinal);
         Assert.Contains("https://slsa.dev/provenance/v1", attestationScript, StringComparison.Ordinal);
-        Assert.Contains("predicate.runDetails.builder.id", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("buildDefinition", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("buildType", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("externalParameters", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("internalParameters", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("resolvedDependencies", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("sha1", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("runDetails", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("invocationId", attestationScript, StringComparison.Ordinal);
         Assert.Contains("source_revision", attestationScript, StringComparison.Ordinal);
+        Assert.Contains("expected_source_uri", attestationScript, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -227,6 +274,7 @@ public sealed class ImmutablePublicationWorkflowSourceTests
             Assert.Contains("kustomize-version: 5.7.1", workflow, StringComparison.Ordinal);
             Assert.Contains("Concurrent GitOps update already published the same overlay", workflow, StringComparison.Ordinal);
             Assert.Contains("git diff --quiet \"origin/$branch\" HEAD", workflow, StringComparison.Ordinal);
+            Assert.Contains("git fetch origin \"+$branch:refs/remotes/origin/$branch\"", workflow, StringComparison.Ordinal);
         }
     }
 

@@ -27,8 +27,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      DEVELOPMENT_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-dev/maliev-web
-      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-website-artifact-staging/maliev-web
+      DEVELOPMENT_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-dev/maliev-web
+      STAGING_IMAGE: asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-staging/maliev-web
     steps:
       - name: Validate release tag and staging WIF configuration
         env:
@@ -74,6 +74,13 @@ jobs:
       - name: Configure Docker credential helper
         run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
 
+      - name: Assert staging repository enforces immutable tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          immutable_tags="$(gcloud artifacts repositories describe maliev-web-artifact-staging --project=maliev-website --location=asia-southeast1 --format='value(immutableTags)')"
+          test "$immutable_tags" = "True"
+
       - name: Install crane
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
         with:
@@ -90,7 +97,7 @@ jobs:
           source_digest="$(crane digest "${DEVELOPMENT_IMAGE}:${SOURCE_TAG}")"
           revision="$(crane config "${DEVELOPMENT_IMAGE}@${source_digest}" | jq -r '.config.Labels["org.opencontainers.image.revision"]')"
           test "$revision" = "$GITHUB_SHA"
-          bash scripts/verify-web-image-attestations.sh "${DEVELOPMENT_IMAGE}@${source_digest}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/"
+          bash scripts/verify-web-image-attestations.sh "${DEVELOPMENT_IMAGE}@${source_digest}" "$GITHUB_SHA" "https://github.com/MALIEV-Co-Ltd/Maliev.Web/actions/runs/" "https://github.com/MALIEV-Co-Ltd/Maliev.Web.git"
           bash scripts/ensure-web-image-tag.sh "${DEVELOPMENT_IMAGE}@${source_digest}" "$STAGING_IMAGE" "$RELEASE_VERSION" "$source_digest"
           promoted_digest="$(crane digest "${STAGING_IMAGE}:${RELEASE_VERSION}")"
           test "$promoted_digest" = "$source_digest"
@@ -131,12 +138,12 @@ jobs:
           branch="web/staging-${RELEASE_VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git fetch origin "+$branch:refs/remotes/origin/$branch" || true
           git switch -C "$branch"
           git add -- 3-apps/maliev-web/overlays/staging/kustomization.yaml 3-apps/maliev-web/overlays/staging/build-metadata-patch.yaml
           git commit -m "chore(staging): Promote Web ${RELEASE_VERSION}"
           if ! git push --force-with-lease origin "$branch"; then
-            git fetch origin "$branch:refs/remotes/origin/$branch"
+            git fetch origin "+$branch:refs/remotes/origin/$branch"
             if ! git diff --quiet "origin/$branch" HEAD -- 3-apps/maliev-web/overlays/staging/kustomization.yaml 3-apps/maliev-web/overlays/staging/build-metadata-patch.yaml; then
               echo "A concurrent GitOps update changed the staging overlay differently." >&2
               exit 1
