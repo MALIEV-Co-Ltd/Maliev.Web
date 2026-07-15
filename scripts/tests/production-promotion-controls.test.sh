@@ -168,6 +168,14 @@ PY
   build)
     image="$(cat "$FAKE_KUSTOMIZE_STATE")"
     digest="$(awk '/value:/ {gsub(/"/, "", $2); print $2}' "$PWD/build-metadata-patch.yaml")"
+    case "${FAKE_KUSTOMIZE_MODE:-valid}" in
+      rendered_image_mismatch)
+        image="${image%@*}@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ;;
+      rendered_metadata_mismatch)
+        digest='sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+        ;;
+    esac
     cat <<YAML
 apiVersion: apps/v1
 kind: Deployment
@@ -190,10 +198,11 @@ EOF
 chmod +x "$temp_root/bin/kustomize"
 export FAKE_KUSTOMIZE_STATE="$temp_root/kustomize-image"
 
-readonly gitops_root="$temp_root/gitops"
-readonly production_overlay="$gitops_root/3-apps/maliev-web/overlays/production"
-mkdir -p "$production_overlay"
-cat >"$production_overlay/kustomization.yaml" <<'EOF'
+create_production_gitops_fixture() {
+  local fixture_root="$1"
+  local fixture_overlay="$fixture_root/3-apps/maliev-web/overlays/production"
+  mkdir -p "$fixture_overlay"
+  cat >"$fixture_overlay/kustomization.yaml" <<'EOF'
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -201,11 +210,16 @@ resources:
 patches:
   - path: health-patch.yaml
 EOF
-git -C "$gitops_root" init -q
-git -C "$gitops_root" config user.email test@example.com
-git -C "$gitops_root" config user.name Test
-git -C "$gitops_root" add .
-git -C "$gitops_root" commit -qm fixture
+  git -C "$fixture_root" init -q
+  git -C "$fixture_root" config user.email test@example.com
+  git -C "$fixture_root" config user.name Test
+  git -C "$fixture_root" add .
+  git -C "$fixture_root" commit -qm fixture
+}
+
+readonly gitops_root="$temp_root/gitops"
+readonly production_overlay="$gitops_root/3-apps/maliev-web/overlays/production"
+create_production_gitops_fixture "$gitops_root"
 
 readonly production_image='asia-southeast1-docker.pkg.dev/maliev-website/maliev-web-artifact-prod/maliev-web'
 bash "$gitops_updater" "$gitops_root" production "$production_image" "$expected_digest"
@@ -225,5 +239,15 @@ if bash "$gitops_updater" "$gitops_root" production "$production_image" "$expect
   echo "Cross-scope GitOps mutation must be rejected." >&2
   exit 1
 fi
+
+for mismatch_mode in rendered_image_mismatch rendered_metadata_mismatch; do
+  mismatch_root="$temp_root/gitops-$mismatch_mode"
+  create_production_gitops_fixture "$mismatch_root"
+  if FAKE_KUSTOMIZE_MODE="$mismatch_mode" bash "$gitops_updater" \
+    "$mismatch_root" production "$production_image" "$expected_digest"; then
+    echo "GitOps updater must reject $mismatch_mode." >&2
+    exit 1
+  fi
+done
 
 echo "Production promotion control fixture passed."
