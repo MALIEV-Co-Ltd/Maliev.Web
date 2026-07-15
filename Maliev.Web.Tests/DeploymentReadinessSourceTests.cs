@@ -33,6 +33,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("ARG dependency_restore_stage=restore-private", dockerfile, StringComparison.Ordinal);
         Assert.Contains("ARG shared_library_version", dockerfile, StringComparison.Ordinal);
         Assert.Contains("ARG messaging_contracts_version", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ARG app_version", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("ARG commit_sha", dockerfile, StringComparison.Ordinal);
         Assert.Contains(
             "${shared_library_version:?shared_library_version build argument is required}",
             dockerfile,
@@ -50,7 +52,17 @@ public sealed class DeploymentReadinessSourceTests
         Assert.DoesNotContain("ARG NUGET_", dockerfile, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("dotnet publish", dockerfile, StringComparison.Ordinal);
         Assert.Contains("--configuration Release", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:Version=\"$app_version\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:SourceRevisionId=\"$commit_sha\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("/p:ContinuousIntegrationBuild=true", dockerfile, StringComparison.Ordinal);
         Assert.Contains("COPY --chown=app:app --from=build /app/publish .", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("org.opencontainers.image.version=\"$app_version\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("org.opencontainers.image.revision=\"$commit_sha\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("org.opencontainers.image.source=\"https://github.com/MALIEV-Co-Ltd/Maliev.Web\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("BuildMetadata__Version=\"$app_version\"", dockerfile, StringComparison.Ordinal);
+        Assert.Contains("BuildMetadata__CommitSha=\"$commit_sha\"", dockerfile, StringComparison.Ordinal);
+        Assert.DoesNotContain("ARG image_digest", dockerfile, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("BuildMetadata__ImageDigest", dockerfile, StringComparison.Ordinal);
         Assert.Contains("USER app", dockerfile, StringComparison.Ordinal);
         Assert.Contains("EXPOSE 8080", dockerfile, StringComparison.Ordinal);
         Assert.Contains("ASPNETCORE_HTTP_PORTS=8080", dockerfile, StringComparison.Ordinal);
@@ -151,6 +163,8 @@ public sealed class DeploymentReadinessSourceTests
         Assert.Contains("dependency_restore_stage=restore-local", workflow, StringComparison.Ordinal);
         Assert.Contains("shared_library_version=${{ needs.dependency-packages.outputs.service-defaults-version }}", workflow, StringComparison.Ordinal);
         Assert.Contains("messaging_contracts_version=${{ needs.dependency-packages.outputs.messaging-contracts-version }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("app_version=0.0.0-pr.${{ github.run_number }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("commit_sha=${{ github.sha }}", workflow, StringComparison.Ordinal);
         Assert.Contains("docker image inspect", workflow, StringComparison.Ordinal);
         Assert.Contains("docker run --detach", workflow, StringComparison.Ordinal);
         Assert.Contains("/web/liveness", workflow, StringComparison.Ordinal);

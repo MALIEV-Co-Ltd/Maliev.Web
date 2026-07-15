@@ -4,6 +4,7 @@ using Maliev.Aspire.ServiceDefaults;
 using Maliev.Aspire.ServiceDefaults.IAM;
 using Maliev.Web.Bff.Clients;
 using Maliev.Web.Bff.Components;
+using Maliev.Web.Bff.Configuration;
 using Maliev.Web.Bff.Geometry;
 using Maliev.Web.Bff.Security;
 using Maliev.Web.Bff.Services;
@@ -33,6 +34,20 @@ if (builder.Environment.IsDevelopment())
 builder.WebHost.UseStaticWebAssets();
 builder.AddServiceDefaults();
 builder.AddDefaultApiVersioning();
+var buildMetadataOptions = builder.Services
+    .AddOptions<BuildMetadataOptions>()
+    .Bind(builder.Configuration.GetSection(BuildMetadataOptions.SectionName));
+if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
+{
+    buildMetadataOptions
+        .Validate(
+            BuildMetadataOptions.HasValidRequiredValues,
+            "BuildMetadata Version must be SemVer and CommitSha must be a full lowercase Git SHA.")
+        .Validate(
+            BuildMetadataOptions.HasValidOptionalImageDigest,
+            "BuildMetadata ImageDigest must be an sha256 digest when supplied.")
+        .ValidateOnStart();
+}
 builder.Services.AddSingleton<IGeometryAnalysisStore>(sp =>
 {
     var redis = sp.GetService<IConnectionMultiplexer>();
