@@ -17,7 +17,7 @@ grep -Fq 'permissions:' "$validation_workflow"
 grep -Fq 'contents: read' "$validation_workflow"
 grep -Fq 'group: production-control-validation-' "$validation_workflow"
 grep -Fq 'cancel-in-progress: true' "$validation_workflow"
-grep -Fq 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' "$validation_workflow"
+grep -Fq 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' "$validation_workflow"
 grep -Fq 'bash -n scripts/ensure-web-image-tag.sh' "$validation_workflow"
 grep -Fq 'bash scripts/tests/production-promotion-controls.test.sh' "$validation_workflow"
 for validated_path in \
